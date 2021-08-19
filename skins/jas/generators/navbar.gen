@@ -1,3 +1,6 @@
+##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
+##    See the file LICENSE.txt for your rights.
+
 <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
   <div class="container-fluid">
     <a class="navbar-brand" href="#">Fixed navbar</a>

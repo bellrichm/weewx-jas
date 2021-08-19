@@ -1,3 +1,6 @@
+##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
+##    See the file LICENSE.txt for your rights.
+
 #*
 Ideally this would be a routine that takes a parameter, interval. But, with Cheetah
 'scoping' I couldn't get it to work. So, I resorted to a global variable and a simple include.

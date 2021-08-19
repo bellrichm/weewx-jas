@@ -1,3 +1,6 @@
+//    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
+//    See the file LICENSE.txt for your rights.
+
 var client;
 var host="weather-data.local";
 var port=9001;
