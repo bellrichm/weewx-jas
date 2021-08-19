@@ -1,0 +1,6 @@
+#if $getVar("$Extras.pages.index", False)
+    #set interval = $getVar("$Extras.index_page_interval", "last24hours")
+    #set charts = $genCharts('index', interval)
+    $skinDebug($charts)
+    #include source=$charts
+#end if    

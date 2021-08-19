@@ -1,0 +1,5 @@
+#if $getVar("$Extras.pages.yesterday", False)
+    #set charts = $genCharts('yesterday', 'yesterday')
+    $skinDebug($charts)
+    #include source=$charts
+#end if    

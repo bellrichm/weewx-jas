@@ -1,0 +1,12 @@
+last31days = new Object();
+#for $observation in $observations
+    #set aggregate_type = 'avg'
+    #set aggregate_interval = 'day'
+    #if $observation == 'rain'
+        #set aggregate_type = 'sum'
+        #set aggregate_interval = 'day'
+    #end if
+    #set obs = "last31days." + $observation + " = $last31days." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms').round(2).json"
+    $skinDebug($obs)
+    #include source=$obs + ";\n"
+#end for

@@ -1,0 +1,5 @@
+#if $getVar("$Extras.pages.month", False)
+    #set charts = $genCharts('month', 'month')
+    $skinDebug($charts)
+    #include source=$charts
+#end if    

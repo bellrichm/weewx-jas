@@ -1,0 +1,22 @@
+day = new Object();
+#for $observation in $observations
+    #if $observation == 'rain'
+        #set obs = "day." + $observation + " = $day." + $observation + ".series(time_series='start', aggregate_type='sum', aggregate_interval='hour', time_unit='unix_epoch_ms').round(2).json"
+    #else
+        #set obs = "day." + $observation + " = $day." + $observation + ".series(time_series='start', time_unit='unix_epoch_ms').round(2).json"
+    #end if
+    $skinDebug($obs)
+    #include source=$obs + ";\n"
+#end for
+
+## todo - conditionally calculate only if windCompass is being chartted
+#set windCompassAverage, windCompassMaximum, windCompassRanges = $windCompass()
+day.windCompassAverage = $windCompassAverage
+day.windCompassMaximum = $windCompassMaximum
+day.windCompassRange0 = $windCompassRanges[0]
+day.windCompassRange1 = $windCompassRanges[1]
+day.windCompassRange2 = $windCompassRanges[2]
+day.windCompassRange3 = $windCompassRanges[3]
+day.windCompassRange4 = $windCompassRanges[4]
+day.windCompassRange5 = $windCompassRanges[5]
+day.windCompassRange6 = $windCompassRanges[6]

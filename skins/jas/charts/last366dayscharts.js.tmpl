@@ -1,0 +1,5 @@
+#if $getVar("$Extras.pages.last366days", False)
+    #set charts = $genCharts('last366days', 'last366days')
+    $skinDebug($charts)
+    #include source=$charts
+#end if   

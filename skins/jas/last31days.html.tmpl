@@ -1,0 +1,7 @@
+#set global interval = 'last31days'
+#set global page = 'last31days'
+#if $getVar("$Extras.pages." + $page, False)
+    #include 'generators/pages.gen'
+#end if    
+#set global interval = None
+#set global page = None

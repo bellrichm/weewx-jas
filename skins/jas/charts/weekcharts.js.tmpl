@@ -1,0 +1,5 @@
+#if $getVar("$Extras.pages.week", False)
+    #set charts = $genCharts('week', 'week')
+    $skinDebug($charts)
+    #include source=$charts
+#end if    

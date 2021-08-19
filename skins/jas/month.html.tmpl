@@ -1,0 +1,7 @@
+#set global interval = 'month'
+#set global page = 'month'
+#if $getVar("$Extras.pages." + $page, False)
+    #include 'generators/pages.gen'
+#end if    
+#set global interval = None
+#set global page = None

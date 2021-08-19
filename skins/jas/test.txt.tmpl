@@ -1,0 +1,10 @@
+foo
+## Example of logging and informational message
+## The #silent keeps from a blank line being output
+#silent $loginf('*** Example of logging and informational message')
+bar
+## Example of calling a method in the SLE and passing a parameter and getting output
+#set avg, max, temp = $windCompass()
+$avg
+$max
+$temp

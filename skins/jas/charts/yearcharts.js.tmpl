@@ -1,0 +1,5 @@
+#if $getVar("$Extras.pages.year", False)
+    #set charts = $genCharts('year', 'year')
+    $skinDebug($charts)
+    #include source=$charts
+#end if    
