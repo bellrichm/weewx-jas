@@ -28,6 +28,41 @@ EXTENSION_CONFIG = """
             client_id = REPLACE_ME
             client_secret = REPLACE_ME        
 
+            # configure the current observations to be displayed
+            [[[[current]]]]
+                observation = outTemp
+                [[[[[observations]]]]]
+                    [[[[[[heatindex]]]]]]
+                    [[[[[[windchill]]]]]]
+                    [[[[[[dewpoint]]]]]]
+                    [[[[[[outHumidity]]]]]]
+                    [[[[[[barometer]]]]]]
+                    [[[[[[windSpeed]]]]]]
+                    #[[[[[[windDir.ordinal_compass]]]]]]
+                    [[[[[[windDir]]]]]]
+                    [[[[[[rainRate]]]]]]
+                    #[[[[[[rain.sum]]]]]]
+                    [[[[[[UV]]]]]]
+                    [[[[[[ET]]]]]]
+                    [[[[[[radiation]]]]]]
+
+            # configure the min/max to display        
+            [[[[minmax]]]]
+                [[[[[observations]]]]]
+                    [[[[[[heatindex]]]]]]
+                    [[[[[[windchill]]]]]]
+                    [[[[[[dewpoint]]]]]]
+                    [[[[[[outHumidity]]]]]]
+                    [[[[[[barometer]]]]]]
+                    #[[[[[[windSpeed]]]]]]
+                    #[[[[[[windDir.ordinal_compass]]]]]]
+                    #[[[[[[windDir]]]]]]
+                    #[[[[[[rainRate]]]]]]
+                    #[[[[[[rain.sum]]]]]]
+                    [[[[[[UV]]]]]]
+                    [[[[[[ET]]]]]]
+                    [[[[[[radiation]]]]]]
+
             # Additional charts
             [[[[charts]]]]
                 [[[[[inTemp]]]]]
@@ -90,24 +125,42 @@ class JASInstaller(ExtensionInstaller):
             author_email="bellrichm@gmail.com",
             config=EXTENSION_DICT,
             files=[('bin/user', ['bin/user/jas.py']),
-                   ('skins/jas', ['skins/jas/forecast.inc',
+                   ('skins/jas', ['skins/jas/day.html.tmpl',
+                                  'skins/jas/forecast.inc',
                                   'skins/jas/index.html.tmpl',
+                                  'skins/jas/last7days.html.tmpl',
+                                  'skins/jas/last24hours.html.tmpl',
+                                  'skins/jas/last31days.html.tmpl',
+                                  'skins/jas/last366days.html.tmpl',
+                                  'skins/jas/minmax.inc',
                                   'skins/jas/month.html.tmpl',
                                   'skins/jas/observations.inc',
-                                  'skins/jasdar.inc',
+                                  'skins/jas/radar.inc',
                                   'skins/jas/skin.conf',
                                   'skins/jas/week.html.tmpl',
-                                  'skins/jas/year.html.tmpl'
+                                  'skins/jas/year.html.tmpl',
+                                  'skins/jas/yesterday.html.tmpl'
                                   ]),
                    ('skins/jas/charts', ['skins/jas/charts/daycharts.js.tmpl',
-                                         'skins/jasarts/monthcharts.js.tmpl',
+                                         'skins/jas/charts/indexcharts.js.tmpl',
+                                         'skins/jas/charts/last7dayscharts.js.tmpl',
+                                         'skins/jas/charts/last24hourscharts.js.tmpl',
+                                         'skins/jas/charts/last31dayscharts.js.tmpl',
+                                         'skins/jas/charts/last366dayscharts.js.tmpl',
+                                         'skins/jas/charts/monthcharts.js.tmpl',
                                          'skins/jas/charts/weekcharts.js.tmpl',
-                                         'skins/jas/charts/yearcharts.js.tmpl'
+                                         'skins/jas/charts/yearcharts.js.tmpl',
+                                         'skins/jas/charts/yesterdaycharts.js.tmpl'
                                          ]),
                    ('skins/jas/data', ['skins/jas/data/day-data.js.tmpl',
+                                       'skins/jas/data/last7days-data.js.tmpl',
+                                       'skins/jas/data/last24hours-data.js.tmpl',
+                                       'skins/jas/data/last31days-data.js.tmpl',
+                                       'skins/jas/data/last366days-data.js.tmpl',
                                        'skins/jas/data/month-data.js.tmpl',
                                        'skins/jas/data/week-data.js.tmpl',
-                                       'skins/jas/data/year-data.js.tmpl'
+                                       'skins/jas/data/year-data.js.tmpl',
+                                       'skins/jas/data/yesterday-data.js.tmpl'
                                       ]),
                    ('skins/jas/generators', ['skins/jas/generators/navbar.gen',
                                              'skins/jas/generators/pages.gen'
