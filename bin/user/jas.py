@@ -186,13 +186,13 @@ class JAS(SearchList):
 
     def _get_last24hours(self):
         start_timestamp = self.timespan.stop - 86400
-        self.last24hours = TimespanBinder(TimeSpan(start_timestamp, self.timespan.stop),
-                                        self.db_lookup,
-                                        context='last24hours',
-                                        formatter=self.generator.formatter,
-                                        converter=self.generator.converter)
+        last24hours = TimespanBinder(TimeSpan(start_timestamp, self.timespan.stop),
+                                     self.db_lookup,
+                                     context='last24hours',
+                                     formatter=self.generator.formatter,
+                                     converter=self.generator.converter)
 
-        return self.last24hours
+        return last24hours
 
     def _get_last_n_days(self, days):
         start_date = datetime.date.fromtimestamp(self.timespan.stop) - datetime.timedelta(days=days)

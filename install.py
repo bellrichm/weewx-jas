@@ -168,13 +168,13 @@ class JASInstaller(ExtensionInstaller):
                    ('skins/jas/javascript', ['skins/jas/javascript/mqtt.js']),
                    ('skins/jas/lang', ['skins/jas/lang/en.conf']),
                    ('skins/jas/weather-icons/css', ['skins/jas/weather-icons/css/weather-icons.min.css',
-                                                   'skins/jas/weather-icons/css/weather-icons-wind.min.css'
-                                                     ]),
+                                                    'skins/jas/weather-icons/css/weather-icons-wind.min.css'
+                                                   ]),
                    ('skins/jas/weather-icons/font', ['skins/jas/weather-icons/font/weathericons-regular-webfont.eot',
-                                                    'skins/jas/weather-icons/font/weathericons-regular-webfont.svg',
-                                                    'skins/jas/weather-icons/font/weathericons-regular-webfont.ttf',
-                                                    'skins/jas/weather-icons/font/weathericons-regular-webfont.woff',
-                                                    'skins/jas/weather-icons/font/weathericons-regular-webfont.woff2'
-                                                   ])
+                                                     'skins/jas/weather-icons/font/weathericons-regular-webfont.svg',
+                                                     'skins/jas/weather-icons/font/weathericons-regular-webfont.ttf',
+                                                     'skins/jas/weather-icons/font/weathericons-regular-webfont.woff',
+                                                     'skins/jas/weather-icons/font/weathericons-regular-webfont.woff2'
+                                                    ])
                    ]
         )
