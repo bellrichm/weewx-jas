@@ -1,0 +1,9 @@
+##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
+##    See the file LICENSE.txt for your rights.
+
+#if $getVar("$Extras.pages.archive-month", False)
+    #set interval = 'month' + $year.dateTime.format('%Y') + $month.dateTime.format('%m')
+    #set charts = $genCharts('archive-month', $interval)
+    $skinDebug($charts)
+    #include source=$charts
+#end if    

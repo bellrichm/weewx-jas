@@ -3,8 +3,10 @@
 
 #set global interval = 'day'
 #set global page = 'day'
-#if $getVar("$Extras.pages." + $page, False)
+#set global page_config = 'day'
+#if $getVar("$Extras.pages." + $page_config, False)
     #include 'generators/pages.gen'
 #end if    
 #set global interval = None
 #set global page = None
+#set global page_config = None

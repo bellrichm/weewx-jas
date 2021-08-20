@@ -103,11 +103,6 @@ class JAS(SearchList):
     def __init__(self, generator):
         SearchList.__init__(self, generator)
 
-        self.last24hours = None
-        self.last7days = None
-        self.last31days = None
-        self.last366days = None
-
         self.wind_observations = ['windCompassAverage', 'windCompassMaximum',
                                   'windCompassRange0', 'windCompassRange1', 'windCompassRange2',
                                   'windCompassRange3', 'windCompassRange4', 'windCompassRange5', 'windCompassRange6']
@@ -166,23 +161,14 @@ class JAS(SearchList):
         self.timespan = timespan
         self.db_lookup = db_lookup
 
-        if self.last7days is None:
-            self.last7days = self._get_last_n_days(7)
-
-        if self.last31days is None:
-            self.last31days = self._get_last_n_days(31)
-
-        if self.last366days is None:
-            self.last366days = self._get_last_n_days(366)
-
         search_list_extension = {'logdbg': logdbg,
                                  'loginf': loginf,
                                  'logerr': logerr,
                                  'skinDebug': self._skin_debug,
                                  'last24hours': self._get_last24hours(),
-                                 'last7days': self.last7days,
-                                 'last31days': self.last31days,
-                                 'last366days': self.last366days,
+                                 'last7days': self._get_last_n_days(7),
+                                 'last31days': self._get_last_n_days(31),
+                                 'last366days': self._get_last_n_days(366),
                                  'ordinateNames': self.ordinate_names,
                                  'observations': self.observations,
                                  'forecasts': self.data_forecast,
@@ -199,13 +185,12 @@ class JAS(SearchList):
             logdbg(msg)
 
     def _get_last24hours(self):
-        if self.last24hours is None:
-            start_timestamp = self.timespan.stop - 86400
-            self.last24hours = TimespanBinder(TimeSpan(start_timestamp, self.timespan.stop),
-                                              self.db_lookup,
-                                              context='last24hours',
-                                              formatter=self.generator.formatter,
-                                              converter=self.generator.converter)
+        start_timestamp = self.timespan.stop - 86400
+        self.last24hours = TimespanBinder(TimeSpan(start_timestamp, self.timespan.stop),
+                                        self.db_lookup,
+                                        context='last24hours',
+                                        formatter=self.generator.formatter,
+                                        converter=self.generator.converter)
 
         return self.last24hours
 
