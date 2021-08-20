@@ -60,6 +60,10 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
     #set charts = $getVar('Extras.charts')
     #set processing_grid = False
     #for $section in $getVar('Extras.pages.' + $page_config)
+      ## todo - cleanup to not use continue
+      #if not isinstance($Extras.pages[$page_config][$section],dict)
+        #continue
+      #end if
       #set layout = $getVar('Extras.pages.' + $page_config + '.' + $section + '.layout', 'grid')
       #if $layout == 'grid' 
         #if not $processing_grid

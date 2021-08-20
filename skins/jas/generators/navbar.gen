@@ -10,14 +10,18 @@
     <div class="collapse navbar-collapse" id="navbarCollapse">
       <ul class="navbar-nav me-auto mb-2 mb-md-0">
       #for $page_data in $getVar('Extras.pages')
-        <li class="nav-item">
-        #if $page_data == $page
-          #set navItem = '<a class="nav-link active" aria-current="page" href="' + $page_data + '.html">' + $gettext[$page_data + '.navbarText'] + '</a>'
-        #else
-          #set navItem = '<a class="nav-link" href="' + $page_data + '.html">' + $gettext[$page_data + '.navbarText'] + '</a>'
+        ## todo - cleanup so more robust check, because string cpould be 'true', etc
+        #set in_navbar = $getVar('Extras.pages.' + $page_data + '.in_navbar', 'True')
+        #if in_navbar == 'True'
+          <li class="nav-item">
+          #if $page_data == $page
+            #set navItem = '<a class="nav-link active" aria-current="page" href="' + $page_data + '.html">' + $gettext[$page_data + '.navbarText'] + '</a>'
+          #else
+            #set navItem = '<a class="nav-link" href="' + $page_data + '.html">' + $gettext[$page_data + '.navbarText'] + '</a>'
+          #end if
+            $navItem
+          </li>
         #end if
-          $navItem
-        </li>
       #end for
         <li class="nav-item">
           <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
