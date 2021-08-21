@@ -36,12 +36,12 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
         </script>
       #end if  
 
-      <title>$gettext[$page + '.title']</title>
+      <title>$title</title>
    </head>
 
     <body $radar_scripts> ## ToDo - should only add the javascript if the page has radar showing...
        #include "generators/navbar.gen"
-      <h1>$gettext[$page + '.h1']</h1>
+      <h1>$h1</h1>
 
       <!-- Optional JavaScript; choose one of the two! -->
 
