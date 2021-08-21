@@ -26,7 +26,7 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
 
       ## Should only add the javascript if the page has radar showing...
       #set radar_scripts = '' 
-      #if not $getVar("$Extras.pages." + $page_config + '.radar', True)
+      #if not $getVar("$Extras.pages." + $page + '.radar', True)
         #set radar_scripts = 'onresize="calcRadarHeight()" onload="calcRadarHeight()"'     
         <script>
           function calcRadarHeight(){
@@ -59,12 +59,12 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
     <div class="container">
     #set charts = $getVar('Extras.charts')
     #set processing_grid = False
-    #for $section in $getVar('Extras.pages.' + $page_config)
+    #for $section in $getVar('Extras.pages.' + $page)
       ## todo - cleanup to not use continue
-      #if not isinstance($Extras.pages[$page_config][$section],dict)
+      #if not isinstance($Extras.pages[$page][$section],dict)
         #continue
       #end if
-      #set layout = $getVar('Extras.pages.' + $page_config + '.' + $section + '.layout', 'grid')
+      #set layout = $getVar('Extras.pages.' + $page + '.' + $section + '.layout', 'grid')
       #if $layout == 'grid' 
         #if not $processing_grid
           #set processing_grid = True
@@ -100,6 +100,6 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
       </div>
     #end if
     </div>     
-    #set data = '<script src="charts/' + $page + 'charts.js"></script>'
+    #set data = '<script src="charts/' + $page_name + 'charts.js"></script>'
     $data
 </body> 

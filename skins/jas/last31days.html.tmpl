@@ -2,11 +2,11 @@
 ##    See the file LICENSE.txt for your rights.
 
 #set global interval = 'last31days'
-#set global page = 'last31days'
+#set global page_name = 'last31days'
 #set global page_config = 'last31days'
-#if $getVar("$Extras.pages." + $page_config, False)
+#if $getVar("$Extras.pages." + $page, False)
     #include 'generators/pages.gen'
 #end if    
 #set global interval = None
-#set global page = None
+#set global page_name = None
 #set global page_config = None

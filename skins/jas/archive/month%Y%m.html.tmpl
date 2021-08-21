@@ -2,11 +2,11 @@
 ##    See the file LICENSE.txt for your rights.
 
 #set global interval = 'month' + $year.dateTime.format('%Y') + $month.dateTime.format('%m')
-#set global page = 'month' + $year.dateTime.format('%Y') + $month.dateTime.format('%m')
+#set global page_name = 'month' + $year.dateTime.format('%Y') + $month.dateTime.format('%m')
 #set global page_config = 'archive-month'
-#if $getVar("$Extras.pages." + $page_config, False)
+#if $getVar("$Extras.pages." + $page, False)
     #include 'generators/pages.gen'
 #end if    
 #set global interval = None
-#set global page = None
+#set global page_name = None
 #set global page_config = None
