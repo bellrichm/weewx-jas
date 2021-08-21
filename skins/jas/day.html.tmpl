@@ -3,8 +3,12 @@
 
 #set global interval = 'day'
 #set global page_name = 'day'
+#set global title = $gettext[$page + '.title']
+#set global h1 = $gettext[$page + '.h1']
 #if $getVar("$Extras.pages." + $page, False)
     #include 'generators/pages.gen'
 #end if    
 #set global interval = None
 #set global page_name = None
+#set global title = None
+#set global h1 = None

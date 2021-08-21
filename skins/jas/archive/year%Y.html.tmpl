@@ -3,8 +3,12 @@
 
 #set global interval = 'year' + $year.dateTime.format('%Y')
 #set global page_name = 'year' + $year.dateTime.format('%Y')
+#set global title = $gettext['archive_year_title'] + ' ' + str($year_name)
+#set global h1 = $gettext['archive_year_title'] + ' ' + str($year_name)
 #if $getVar("$Extras.pages." + $page, False)
     #include 'generators/pages.gen'
 #end if    
 #set global interval = None
 #set global page_name = None
+#set global title = None
+#set global h1 = None
