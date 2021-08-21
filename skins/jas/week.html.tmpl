@@ -3,10 +3,8 @@
 
 #set global interval = 'week'
 #set global page_name = 'week'
-#set global page_config = 'week'
 #if $getVar("$Extras.pages." + $page, False)
     #include 'generators/pages.gen'
 #end if    
 #set global interval = None
 #set global page_name = None
-#set global page_config = None

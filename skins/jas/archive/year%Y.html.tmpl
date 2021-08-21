@@ -3,10 +3,8 @@
 
 #set global interval = 'year' + $year.dateTime.format('%Y')
 #set global page_name = 'year' + $year.dateTime.format('%Y')
-#set global page_config = 'archive-year'
 #if $getVar("$Extras.pages." + $page, False)
     #include 'generators/pages.gen'
 #end if    
 #set global interval = None
 #set global page_name = None
-#set global page_config = None

@@ -3,10 +3,8 @@
 
 #set global interval = 'month' + $year.dateTime.format('%Y') + $month.dateTime.format('%m')
 #set global page_name = 'month' + $year.dateTime.format('%Y') + $month.dateTime.format('%m')
-#set global page_config = 'archive-month'
 #if $getVar("$Extras.pages." + $page, False)
     #include 'generators/pages.gen'
 #end if    
 #set global interval = None
 #set global page_name = None
-#set global page_config = None
