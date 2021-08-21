@@ -73,10 +73,10 @@ EXTENSION_CONFIG = """
                     [[[[[[xaxis]]]]]]
                         type = "'datetime'"
                         [[[[[[[labels]]]]]]]
-                            formatter = "function(val, timestamp) {return moment.unix(timestamp/1000).format('MM/DD hh:mm');}"
+                            formatter = "function(val, timestamp) {return moment.unix(timestamp/1000).utcOffset($utcOffset).format('MM/DD hh:mm');}"
                     [[[[[[tooltip]]]]]]
                         [[[[[[[x]]]]]]]
-                            formatter = "function(timestamp) {return moment.unix(timestamp/1000).format('hh:mm');}"   
+                            formatter = "function(timestamp) {return moment.unix(timestamp/1000).utcOffset($utcOffset).format('hh:mm');}"   
                     [[[[[[series]]]]]]
                         [[[[[[[inTemp]]]]]]]
 

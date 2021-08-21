@@ -103,6 +103,10 @@ class JAS(SearchList):
     def __init__(self, generator):
         SearchList.__init__(self, generator)
 
+        now = time.time()
+        self.utc_offset = (datetime.datetime.fromtimestamp(now) -
+                           datetime.datetime.utcfromtimestamp(now)).total_seconds()/60
+
         self.wind_observations = ['windCompassAverage', 'windCompassMaximum',
                                   'windCompassRange0', 'windCompassRange1', 'windCompassRange2',
                                   'windCompassRange3', 'windCompassRange4', 'windCompassRange5', 'windCompassRange6']
@@ -165,6 +169,7 @@ class JAS(SearchList):
                                  'loginf': loginf,
                                  'logerr': logerr,
                                  'skinDebug': self._skin_debug,
+                                 'utcOffset': self.utc_offset,
                                  'last24hours': self._get_last24hours(),
                                  'last7days': self._get_last_n_days(7),
                                  'last31days': self._get_last_n_days(31),
