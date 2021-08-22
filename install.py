@@ -104,6 +104,12 @@ EXTENSION_CONFIG = """
                     [[[[[[rain]]]]]]
                 [[[[[yesterday]]]]]
                     [[[[[[outTemp]]]]]]
+                [[[[[archive-month]]]]]
+                    in_navbar = false
+                    [[[[[[outTemp]]]]]]     
+                [[[[[archive-year]]]]]   
+                    in_navbar = false
+                    [[[[[[outTemp]]]]]]
 
 """
 
