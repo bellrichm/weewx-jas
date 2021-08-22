@@ -2,7 +2,7 @@
 ##    See the file LICENSE.txt for your rights.
 
 #set global interval = 'year' + $year.dateTime.format('%Y')
-#set global page_name = 'year' + $year.dateTime.format('%Y')
+#set global page_name = $year.dateTime.format('%Y')
 #set global title = $gettext['archive_year_title'] + ' ' + str($year_name)
 #set global h1 = $gettext['archive_year_title'] + ' ' + str($year_name)
 #if $getVar("$Extras.pages." + $page, False)
