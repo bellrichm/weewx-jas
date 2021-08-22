@@ -24,6 +24,17 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
 
       <script src="data/$interval-data.js"></script>
 
+      <script>
+          var current = new Date();
+          var future = new Date();
+          future.setTime(future.getTime() + 360000); //360000 = 6 minutes
+          // future.setMinutes(0);
+          future.setSeconds(0);
+
+          var timeout = (future.getTime() - current.getTime());
+          setTimeout(function() { window.location.reload(true); }, timeout);
+      </script>
+
       ## Should only add the javascript if the page has radar showing...
       #set radar_scripts = '' 
       #if not $getVar("$Extras.pages." + $page + '.radar', True)
