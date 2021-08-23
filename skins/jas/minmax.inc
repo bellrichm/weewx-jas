@@ -11,10 +11,10 @@
                   <tbody>
                     #for observation in $Extras.minmax.observations
                         #set label = '$obs.label.' + $observation 
-                        #set min_value = '$day.' + $observation + '.min'
-                        #set min_value_time = '$day.' + $observation + '.mintime'
-                        #set max_value = '$day.' + $observation + '.max'                
-                        #set max_value_time = '$day.' + $observation + '.maxtime'
+                        #set min_value = '$' + $interval + '.' + $observation + '.min'
+                        #set min_value_time = '$' + $interval + '.' + $observation + '.mintime'
+                        #set max_value = '$' + $interval + '.' + $observation + '.max'                
+                        #set max_value_time = '$' + $interval + '.' + $observation + '.maxtime'
                         <tr>
                             <th scope="row">#include source=$label #</th>
                             <td>#include source=$min_value #
