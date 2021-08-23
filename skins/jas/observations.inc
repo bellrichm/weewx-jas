@@ -14,11 +14,13 @@
                     #for observation in $Extras.current.observations
                         #set i += 1
                         #set type = $getVar("$Extras.current.observations" + "." + $observation + ".type", "")
+                        #set suffix = $getVar("$Extras.current.observations" + "." + $observation + ".suffix", "")
                         #if $type == 'sum'
                             #set observation_value = '$' + $interval + '.' + $observation + "." + $type
                         #else
                             #set observation_value = '$current.' + $observation
                         #end if
+                        #set $observation_value += " " + $suffix
                         #set label = '$obs.label.' + $observation + $type
                         #if $i % 2 # <tr> #end if
                             <th scope="row">#include source=$label #</th>

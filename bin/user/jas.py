@@ -36,6 +36,7 @@ This search list extension provides the following tags:
       The version of this skin.
 """
 
+import copy
 import datetime
 import errno
 import os
@@ -117,7 +118,7 @@ class JAS(SearchList):
         current_filename = 'current.json'
         current_endpoint = 'https://api.aerisapi.com/observations/'
 
-        self.ordinate_names = self.generator.formatter.ordinate_names
+        self.ordinate_names = copy.deepcopy(self.generator.formatter.ordinate_names)
         del self.ordinate_names[-1]
 
         self.skin_dict = generator.skin_dict
