@@ -2,6 +2,7 @@
 ##    See the file LICENSE.txt for your rights.
 
 #set global interval = $getVar("$Extras.index_page_interval", "last24hours")
+#set global interval_name = $getVar("$Extras.index_page_interval", "last24hours")
 #set global page_name = 'index'
 #set global title = $gettext[$page + '.title']
 #set global h1 = $gettext[$page + '.h1']
@@ -9,6 +10,7 @@
     #include 'generators/pages.gen'
 #end if
 #set global interval = None
+#set global interval_name = None
 #set global page_name = None
 #set global title = None
 #set global h1 = None

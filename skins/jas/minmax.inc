@@ -30,7 +30,6 @@
                     #end for
                 </tbody>
             </table>
-            $current.dateTime
         </div>
     </div>
 </div>

@@ -1,7 +1,8 @@
 ##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
-#set global interval = 'year' + $year.dateTime.format('%Y')
+#set global interval = 'year'
+#set global interval_name = 'year' + $year.dateTime.format('%Y')
 #set global page_name = $year.dateTime.format('%Y')
 #set global title = $gettext['archive_year_title'] + ' ' + str($year_name)
 #set global h1 = $gettext['archive_year_title'] + ' ' + str($year_name)
@@ -9,6 +10,7 @@
     #include 'generators/pages.gen'
 #end if    
 #set global interval = None
+#set global interval_name = None
 #set global page_name = None
 #set global title = None
 #set global h1 = None
