@@ -1,8 +1,8 @@
 ##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
-#set interval = 'year' + $year.dateTime.format('%Y')
-$interval = new Object();
+#set interval_name = 'year' + $year.dateTime.format('%Y')
+$interval_name = new Object();
 #for $observation in $observations
     #set aggregate_type = 'avg'
     #set aggregate_interval = 'day'
@@ -10,7 +10,7 @@ $interval = new Object();
         #set aggregate_type = 'sum'
         #set aggregate_interval = 'day'
     #end if
-    #set obs = $interval + "." + $observation + " = $year." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms').round(2).json"
+    #set obs = $interval_name + "." + $observation + " = $year." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms').round(2).json"
     $skinDebug($obs)
     #include source=$obs + ";\n"
 #end for
