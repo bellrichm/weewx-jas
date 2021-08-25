@@ -124,12 +124,9 @@ class JAS(SearchList):
         self.skin_dict = generator.skin_dict
         report_dict = self.generator.config_dict.get('StdReport', {})
 
-        # todo - generalize?
         self.chart_defaults = {}
-        self.chart_defaults["'area'"] = self.skin_dict['Extras'].get('default_area_chart_options', {})
-        self.chart_defaults["'bar'"] = self.skin_dict['Extras'].get('default_bar_chart_options', {})
-        self.chart_defaults["'line'"] = self.skin_dict['Extras'].get('default_line_chart_options', {})
-        self.chart_defaults["'radar'"] = self.skin_dict['Extras'].get('default_radar_chart_options', {})
+        for chart_type in self.skin_dict['Extras']['default_chart_options'].sections:
+            self.chart_defaults[chart_type] = self.skin_dict['Extras']['default_chart_options'][chart_type]
 
         html_root = self.skin_dict.get('HTML_ROOT',
                                        report_dict.get('HTML_ROOT', 'public_html'))
@@ -477,7 +474,8 @@ class JAS(SearchList):
             if chart in self.skin_dict['Extras']['charts'].sections:
                 chart_config = configobj.ConfigObj(StringIO("[%s]" % (chart)))
                 chart_type = self.skin_dict['Extras']['charts'][chart]['chart']['type']
-                chart_config[chart].merge(self.chart_defaults[chart_type])
+                chart_default = self.chart_defaults.get(chart_type, {})
+                chart_config[chart].merge(chart_default)
                 chart_config[chart].merge(self.skin_dict['Extras']['charts'][chart])
                 # for now, do not support overriding chart options by page
                 #chart_config[chart].merge(self.skin_dict['Extras']['pages'][page][chart])
