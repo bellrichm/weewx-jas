@@ -3,8 +3,11 @@
 
 day = new Object();
 #for $observation in $observations
-    #if $observation == 'rain'
-        #set obs = "day." + $observation + " = $day." + $observation + ".series(time_series='start', aggregate_type='sum', aggregate_interval='hour', time_unit='unix_epoch_ms').round(2).json"
+    ## todo, currently only supporting a single aggregate_type  
+    #set aggregate_type = list($observations[$observation]['aggregate_types'])[0]
+    #set aggregate_interval = $getVar('Extras.page_definition.day.aggregate_interval.' + $aggregate_type, None)
+    #if $aggregate_interval is not None
+        #set obs = "day." + $observation + " = $day." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms').round(2).json"
     #else
         #set obs = "day." + $observation + " = $day." + $observation + ".series(time_series='start', time_unit='unix_epoch_ms').round(2).json"
     #end if

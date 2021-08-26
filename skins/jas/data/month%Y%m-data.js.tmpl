@@ -4,13 +4,14 @@
 #set interval_name = 'month' + $year.dateTime.format('%Y') + $month.dateTime.format('%m')
 $interval_name = new Object();
 #for $observation in $observations
-    #set aggregate_type = 'avg'
-    #set aggregate_interval = 'day'
-    #if $observation == 'rain'
-        #set aggregate_type = 'sum'
-        #set aggregate_interval = 'day'
+    ## todo, currently only supporting a single aggregate_type  
+    #set aggregate_type = list($observations[$observation]['aggregate_types'])[0]
+    #set aggregate_interval = $getVar('Extras.page_definition.archive-month.aggregate_interval.' + $aggregate_type, None)
+    #if $aggregate_interval is not None
+        #set obs = $interval_name + "." + $observation + " = $month." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms').round(2).json"
+    #else
+        #set obs = $interval_name + "." + $observation + " = $month." + $observation + ".series(time_series='start', time_unit='unix_epoch_ms').round(2).json"
     #end if
-    #set obs = $interval_name + "." + $observation + " = $month." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms').round(2).json"
     $skinDebug($obs)
     #include source=$obs + ";\n"
 #end for
