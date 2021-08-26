@@ -155,7 +155,7 @@ class JAS(SearchList):
         self.current_url = "%s%s,%s?&format=json&filter=allstations&limit=1&client_id=%s&client_secret=%s" \
                            % (current_endpoint, latitude, longitude, client_id, client_secret)
 
-        self.observations = self._get_observations()
+        self.observations, self.aggregate_types = self._get_observations()
 
         self.data_forecast = None
         if self._check_forecast():
@@ -181,6 +181,7 @@ class JAS(SearchList):
                                  'last366days': self._get_last_n_days(366),
                                  'ordinateNames': self.ordinate_names,
                                  'observations': self.observations,
+                                 'aggregate_types': self.aggregate_types,
                                  'forecasts': self.data_forecast,
                                  'current_observation': self.data_current,
                                  'windCompass': self._get_wind_compass,
@@ -439,7 +440,9 @@ class JAS(SearchList):
         return False
 
     def _get_observations(self):
+        # todo - rename now has 'side effect' of returning aggregate_types
         observations = {}
+        aggregate_types = {}
         charts = self.skin_dict.get('Extras', {}).get('charts', {})
 
         for chart in charts:
@@ -452,22 +455,24 @@ class JAS(SearchList):
 
                     aggregate_type = series[observation].get('aggregate_type', 'avg')
                     observations[observation]['aggregate_types'][aggregate_type] = {}
+                    aggregate_types[aggregate_type] = {}
 
-        return observations
+        return observations, aggregate_types
 
-    def _iterdict(self, indent, chart_js, interval, dictionary):
+    def _iterdict(self, indent, chart, chart_js, interval, dictionary):
         chart2 = chart_js
         for key, value in dictionary.items():
             if isinstance(value, dict):
                 if key == 'series':
                     chart2 += indent + "series: [\n"
                     for obs in value:
+                        aggregate_type = self.skin_dict['Extras']['charts'][chart]['series'][obs].get('aggregate_type', 'avg')
                         chart2 += indent + "  {name: '$obs.label." + obs + "',\n"
-                        chart2 += indent + "  data: " + interval + "." + obs + "},\n"
+                        chart2 += indent + "  data: " + interval + "_" + aggregate_type + "." + obs + "},\n"
                     chart2 += indent +"]\n"
                 else:
                     chart2 += indent + key + ":" + " {\n"
-                    chart2 = self._iterdict(indent + '  ', chart2, interval, value)
+                    chart2 = self._iterdict(indent + '  ', chart, chart2, interval, value)
                     chart2 += indent + "},\n"
             else:
                 chart2 += indent + key + ": " + value + ",\n"
@@ -486,7 +491,7 @@ class JAS(SearchList):
                 #chart_config[chart].merge(self.skin_dict['Extras']['pages'][page][chart])
 
                 chart_js = "new ApexCharts(document.querySelector('#" + chart + interval + "'), {\n"
-                chart2 = self._iterdict('  ', chart_js, interval, chart_config[chart])
+                chart2 = self._iterdict('  ', chart, chart_js, interval, chart_config[chart])
                 chart2 += "}).render();\n"
 
                 chart_final += chart2

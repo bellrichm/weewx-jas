@@ -1,28 +1,23 @@
 ##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
-day = new Object();
-#for $observation in $observations
-    ## todo, currently only supporting a single aggregate_type  
-    #set aggregate_type = list($observations[$observation]['aggregate_types'])[0]
-    #set aggregate_interval = $getVar('Extras.page_definition.day.aggregate_interval.' + $aggregate_type, None)
-    #if $aggregate_interval is not None
-        #set obs = "day." + $observation + " = $day." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms').round(2).json"
-    #else
-        #set obs = "day." + $observation + " = $day." + $observation + ".series(time_series='start', time_unit='unix_epoch_ms').round(2).json"
-    #end if
-    $skinDebug($obs)
-    #include source=$obs + ";\n"
+#for aggregate_type in $aggregate_types
+    #set interval_name = 'day_' + $aggregate_type
+    $interval_name = new Object();
 #end for
 
-## todo - conditionally calculate only if windCompass is being chartted
-#set windCompassAverage, windCompassMaximum, windCompassRanges = $windCompass()
-day.windCompassAverage = $windCompassAverage
-day.windCompassMaximum = $windCompassMaximum
-day.windCompassRange0 = $windCompassRanges[0]
-day.windCompassRange1 = $windCompassRanges[1]
-day.windCompassRange2 = $windCompassRanges[2]
-day.windCompassRange3 = $windCompassRanges[3]
-day.windCompassRange4 = $windCompassRanges[4]
-day.windCompassRange5 = $windCompassRanges[5]
-day.windCompassRange6 = $windCompassRanges[6]
+#for $observation in $observations
+    #for aggregate_type in $observations[$observation]['aggregate_types']
+        #set aggregate_interval = $getVar('Extras.page_definition.day.aggregate_interval.' + $aggregate_type, None)
+        #set interval_name = 'day_' + $aggregate_type
+        
+        #if $aggregate_interval is not None
+            #set obs = $interval_name + "." + $observation + " = $day." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms').round(2).json"
+        #else
+            #set obs = $interval_name + "." + $observation + " = $day." + $observation + ".series(time_series='start', time_unit='unix_epoch_ms').round(2).json"
+        #end if
+        $skinDebug($obs)
+        #include source=$obs + ";\n"
+    #end for
+#end for
+
