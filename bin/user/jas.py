@@ -459,7 +459,7 @@ class JAS(SearchList):
 
         return observations, aggregate_types
 
-    def _iterdict(self, indent, chart, chart_js, interval, dictionary):
+    def _iterdict(self, indent, page, chart, chart_js, interval, dictionary):
         chart2 = chart_js
         for key, value in dictionary.items():
             if isinstance(value, dict):
@@ -467,12 +467,17 @@ class JAS(SearchList):
                     chart2 += indent + "series: [\n"
                     for obs in value:
                         aggregate_type = self.skin_dict['Extras']['charts'][chart]['series'][obs].get('aggregate_type', 'avg')
+                        aggregate_interval = self.skin_dict['Extras']['page_definition'][page]['aggregate_interval'].get(aggregate_type, 'none')
+                        # set the aggregate_interval at the beginning of the chart definition, somit can be used in the chart
+                        # Note, this means the last observation's aggregate type will be used to determine the aggregate interval
+                        chart2 = "#set global aggregate_interval = 'aggregate_interval_" + aggregate_interval + "'\n" + chart2
+                        
                         chart2 += indent + "  {name: '$obs.label." + obs + "',\n"
                         chart2 += indent + "  data: " + interval + "_" + aggregate_type + "." + obs + "},\n"
                     chart2 += indent +"]\n"
                 else:
                     chart2 += indent + key + ":" + " {\n"
-                    chart2 = self._iterdict(indent + '  ', chart, chart2, interval, value)
+                    chart2 = self._iterdict(indent + '  ', page, chart, chart2, interval, value)
                     chart2 += indent + "},\n"
             else:
                 chart2 += indent + key + ": " + value + ",\n"
@@ -491,7 +496,7 @@ class JAS(SearchList):
                 #chart_config[chart].merge(self.skin_dict['Extras']['pages'][page][chart])
 
                 chart_js = "new ApexCharts(document.querySelector('#" + chart + interval + "'), {\n"
-                chart2 = self._iterdict('  ', chart, chart_js, interval, chart_config[chart])
+                chart2 = self._iterdict('  ', page, chart, chart_js, interval, chart_config[chart])
                 chart2 += "}).render();\n"
 
                 chart_final += chart2
