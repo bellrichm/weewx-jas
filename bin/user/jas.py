@@ -446,7 +446,12 @@ class JAS(SearchList):
             series = charts[chart].get('series', {})
             for observation in series:
                 if observation not in self.wind_observations:
-                    observations[observation] = True
+                    if observation not in observations:
+                        observations[observation] = {}
+                        observations[observation]['aggregate_types'] = {}
+
+                    aggregate_type = series[observation].get('aggregate_type', 'avg')
+                    observations[observation]['aggregate_types'][aggregate_type] = {}
 
         return observations
 
