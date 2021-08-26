@@ -468,11 +468,12 @@ class JAS(SearchList):
                     for obs in value:
                         aggregate_type = self.skin_dict['Extras']['charts'][chart]['series'][obs].get('aggregate_type', 'avg')
                         aggregate_interval = self.skin_dict['Extras']['page_definition'][page]['aggregate_interval'].get(aggregate_type, 'none')
+                        text_string = aggregate_type + "_aggregation"
                         # set the aggregate_interval at the beginning of the chart definition, somit can be used in the chart
                         # Note, this means the last observation's aggregate type will be used to determine the aggregate interval
                         chart2 = "#set global aggregate_interval = 'aggregate_interval_" + aggregate_interval + "'\n" + chart2
-                        
-                        chart2 += indent + "  {name: '$obs.label." + obs + "',\n"
+
+                        chart2 += indent + "  {name: '$gettext['" + text_string + "'] $obs.label." + obs + "',\n"
                         chart2 += indent + "  data: " + interval + "_" + aggregate_type + "." + obs + "},\n"
                     chart2 += indent +"]\n"
                 else:
