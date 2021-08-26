@@ -8,7 +8,9 @@
 
 #for $observation in $observations
     #for aggregate_type in $observations[$observation]['aggregate_types']
-        #set aggregate_interval = $getVar('Extras.page_definition.year.aggregate_interval.' + $aggregate_type, None)
+        #set aggregate_interval = $getVar('Extras.page_definition.archive-year.aggregate_interval.' + $aggregate_type, None)
+        $logdbg($aggregate_type)
+        $logdbg($aggregate_interval)
         #set interval_name = 'year' + $year.dateTime.format('%Y') + "_" + $aggregate_type
 
         #if $aggregate_interval is not None

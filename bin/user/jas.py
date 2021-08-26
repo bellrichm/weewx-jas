@@ -447,13 +447,14 @@ class JAS(SearchList):
 
         for chart in charts:
             series = charts[chart].get('series', {})
-            for observation in series:
+            for obs in series:
+                observation = aggregate_type = self.skin_dict['Extras']['charts'][chart]['series'][obs].get('observation', obs)
                 if observation not in self.wind_observations:
                     if observation not in observations:
                         observations[observation] = {}
                         observations[observation]['aggregate_types'] = {}
 
-                    aggregate_type = series[observation].get('aggregate_type', 'avg')
+                    aggregate_type = series[obs].get('aggregate_type', 'avg')
                     observations[observation]['aggregate_types'][aggregate_type] = {}
                     aggregate_types[aggregate_type] = {}
 
@@ -466,6 +467,7 @@ class JAS(SearchList):
                 if key == 'series':
                     chart2 += indent + "series: [\n"
                     for obs in value:
+                        observation = aggregate_type = self.skin_dict['Extras']['charts'][chart]['series'][obs].get('observation', obs)
                         aggregate_type = self.skin_dict['Extras']['charts'][chart]['series'][obs].get('aggregate_type', 'avg')
                         aggregate_interval = self.skin_dict['Extras']['page_definition'][page]['aggregate_interval'].get(aggregate_type, 'none')
                         text_string = aggregate_type + "_aggregation"
@@ -473,8 +475,8 @@ class JAS(SearchList):
                         # Note, this means the last observation's aggregate type will be used to determine the aggregate interval
                         chart2 = "#set global aggregate_interval = 'aggregate_interval_" + aggregate_interval + "'\n" + chart2
 
-                        chart2 += indent + "  {name: '$gettext['" + text_string + "'] $obs.label." + obs + "',\n"
-                        chart2 += indent + "  data: " + interval + "_" + aggregate_type + "." + obs + "},\n"
+                        chart2 += indent + "  {name: '$gettext['" + text_string + "'] $obs.label." + observation + "',\n"
+                        chart2 += indent + "  data: " + interval + "_" + aggregate_type + "." + observation + "},\n"
                     chart2 += indent +"]\n"
                 else:
                     chart2 += indent + key + ":" + " {\n"

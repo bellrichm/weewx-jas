@@ -8,7 +8,7 @@
 
 #for $observation in $observations
     #for aggregate_type in $observations[$observation]['aggregate_types']
-        #set aggregate_interval = $getVar('Extras.page_definition.month.aggregate_interval.' + $aggregate_type, None)
+        #set aggregate_interval = $getVar('Extras.page_definition.archive-month.aggregate_interval.' + $aggregate_type, None)
         #set interval_name = 'month' + $year.dateTime.format('%Y') + $month.dateTime.format('%m') + "_" + $aggregate_type
 
         #if $aggregate_interval is not None
