@@ -7,14 +7,15 @@
                 <h5 class="h5-responsive indigo-text">
                   $gettext["minmax.title"]
                 </h5>        
-                <table class="table">
+                ## todo move to style shhedt, resize observation table to match?
+                <table class="table table-sm" style="font-size:80%"">
                   <tbody>
                     #for observation in $Extras.minmax.observations
                         #set label = '$obs.label.' + $observation 
                         #set min_value = '$' + $interval + '.' + $observation + '.min'
-                        #set min_value_time = '$' + $interval + '.' + $observation + '.mintime'
+                        #set min_value_time = '$' + $interval + '.' + $observation + '.mintime.format'
                         #set max_value = '$' + $interval + '.' + $observation + '.max'                
-                        #set max_value_time = '$' + $interval + '.' + $observation + '.maxtime'
+                        #set max_value_time = '$' + $interval + '.' + $observation + '.maxtime.format'
                         <tr>
                             <th scope="row">#include source=$label #</th>
                             <td>#include source=$min_value #
@@ -26,7 +27,6 @@
                             #include source=$max_value_time #                            
                             </td>
                         </tr>
-           
                     #end for
                 </tbody>
             </table>
