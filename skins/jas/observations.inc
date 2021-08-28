@@ -16,7 +16,7 @@
                         #set type = $getVar("$Extras.current.observations" + "." + $observation + ".type", "")
                         #set suffix = $getVar("$Extras.current.observations" + "." + $observation + ".suffix", "")
                         #if $type == 'sum'
-                            #set observation_value = '$' + $interval + '.' + $observation + "." + $type
+                            #set observation_value = '$' + $interval_global + '.' + $observation + "." + $type
                         #else
                             #set observation_value = '$current.' + $observation
                         #end if

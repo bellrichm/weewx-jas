@@ -473,7 +473,7 @@ class JAS(SearchList):
                         text_string = aggregate_type + "_aggregation"
                         # set the aggregate_interval at the beginning of the chart definition, somit can be used in the chart
                         # Note, this means the last observation's aggregate type will be used to determine the aggregate interval
-                        chart2 = "#set global aggregate_interval = 'aggregate_interval_" + aggregate_interval + "'\n" + chart2
+                        chart2 = "#set global aggregate_interval_global = 'aggregate_interval_" + aggregate_interval + "'\n" + chart2
 
                         chart2 += indent + "  {name: '$gettext['" + text_string + "'] $obs.label." + observation + "',\n"
                         chart2 += indent + "  data: " + interval + "_" + aggregate_type + "." + observation + "},\n"

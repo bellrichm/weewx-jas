@@ -22,7 +22,7 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
 
       <link href="weather-icons/css/weather-icons.min.css" rel="stylesheet" />
 
-      <script src="data/$interval_name-data.js"></script>
+      <script src="data/$interval_name_global-data.js"></script>
 
       <script>
           var current = new Date();
@@ -47,12 +47,12 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
         </script>
       #end if  
 
-      <title>$title</title>
+      <title>$title_global</title>
    </head>
 
     <body $radar_scripts> ## ToDo - should only add the javascript if the page has radar showing...
        #include "generators/navbar.gen"
-      <h1>$h1</h1>
+      <h1>$h1_global</h1>
 
       <!-- Optional JavaScript; choose one of the two! -->
 
@@ -89,7 +89,7 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
         #end if
       #end if
       #if $section in $charts
-        #set id = $section + $interval_name
+        #set id = $section + $interval_name_global
         <div class="col-12 col-xl-6 mb-4">
           <div class="card">
             <div class="card-body text-center">
@@ -111,6 +111,6 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
       </div>
     #end if
     </div>     
-    #set data = '<script src="charts/' + $page_name + 'charts.js"></script>'
+    #set data = '<script src="charts/' + $page_name_global + 'charts.js"></script>'
     $data
 </body> 
