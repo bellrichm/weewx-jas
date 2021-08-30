@@ -3,6 +3,8 @@
 
 var startDate = moment("$month.dateTime.format('%Y-%m-%dT%H:%M:%S')").utcOffset($utcOffset);
 var endDate = moment("$current.dateTime.format('%Y-%m-%dT%H:%M:%S')").utcOffset($utcOffset);
+var startTimestamp = $month.dateTime.raw * 1000
+var endTimestamp = $current.dateTime.raw * 1000
 
 #for aggregate_type in $aggregate_types
     #set interval_name = 'month_' + $aggregate_type

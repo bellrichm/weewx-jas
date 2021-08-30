@@ -3,6 +3,8 @@
 
 var startDate = moment("$last31days.dateTime.format('%Y-%m-%d %H:%M:%S')").utcOffset($utcOffset);
 var endDate = moment("$current.dateTime.format('%Y-%m-%d %H:%M:%S')").utcOffset($utcOffset);
+var startTimestamp = $last31days.dateTime.raw * 1000
+var endTimestamp = $current.dateTime.raw * 1000
 
 #for aggregate_type in $aggregate_types
     #set interval_name = 'last31days_' + $aggregate_type
