@@ -498,9 +498,10 @@ class JAS(SearchList):
                 # for now, do not support overriding chart options by page
                 #chart_config[chart].merge(self.skin_dict['Extras']['pages'][page][chart])
 
-                chart_js = "new ApexCharts(document.querySelector('#" + chart + interval + "'), {\n"
+                chart_js = chart + "chart = new ApexCharts(document.querySelector('#" + chart + interval + "'), {\n"
                 chart2 = self._iterdict('  ', page, chart, chart_js, interval, chart_config[chart])
-                chart2 += "}).render();\n"
+                chart2 += "});\n"
+                chart2 += chart + "chart.render();\n"
 
                 chart_final += chart2
 
