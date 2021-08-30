@@ -1,6 +1,9 @@
 ##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
+var startDate = moment("$month.dateTime.format('%Y-%m-%dT%H:%M:%S')").utcOffset($utcOffset);
+var endDate = moment("$current.dateTime.format('%Y-%m-%dT%H:%M:%S')").utcOffset($utcOffset);
+
 #for aggregate_type in $aggregate_types
     #set interval_name = 'month' + $year.dateTime.format('%Y') + $month.dateTime.format('%m') + "_" + $aggregate_type
     $interval_name = new Object();
