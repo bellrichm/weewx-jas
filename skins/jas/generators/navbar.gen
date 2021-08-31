@@ -35,5 +35,6 @@
       </div>
     </div>
   </nav>
-  ##include "zoomControl.inc"
+  ## todo - make configurable by page
+  #include "zoomControl.inc"
 </div>

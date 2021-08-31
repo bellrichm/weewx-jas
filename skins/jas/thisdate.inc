@@ -68,8 +68,7 @@
                         var observation=document.getElementById("$id")
                         observation.innerHTML = obs
                     #end if
-                #end for
-                console.log(obs)        
+                #end for  
             }            
             window.addEventListener("load", function (event) {
                 var dateRangePicker = new DateRangePicker('datetimerange-input1',
