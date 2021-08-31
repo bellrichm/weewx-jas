@@ -1,10 +1,10 @@
 ##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
-var startDate = moment("$last7days.dateTime.format('%Y-%m-%dT%H:%M:%S')").utcOffset($utcOffset);
-var endDate = moment("$current.dateTime.format('%Y-%m-%dT%H:%M:%S')").utcOffset($utcOffset);
-var startTimestamp = $last7days.dateTime.raw * 1000
-var endTimestamp = $current.dateTime.raw * 1000
+var startDate = moment("$last7days.start.format('%Y-%m-%dT%H:%M:%S')").utcOffset($utcOffset);
+var endDate = moment("$last7days.end.format('%Y-%m-%dT%H:%M:%S')").utcOffset($utcOffset);
+var startTimestamp = $last7days.start.raw * 1000
+var endTimestamp = $last7days.end.raw * 1000
 
 #for aggregate_type in $aggregate_types
     #set interval_name = 'last7days_' + $aggregate_type

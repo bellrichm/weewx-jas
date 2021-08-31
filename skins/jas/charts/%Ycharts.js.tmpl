@@ -2,7 +2,7 @@
 ##    See the file LICENSE.txt for your rights.
 
 #if $getVar("$Extras.pages.archive-year", False)
-    #set interval_name = 'year' + $year.dateTime.format('%Y')
+    #set interval_name = 'year' + $year.start.format('%Y')
     #set charts = $genCharts('archive-year', $interval_name)
     $skinDebug($charts)
     #include source=$charts
