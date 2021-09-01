@@ -22,13 +22,22 @@ EXTENSION_CONFIG = """
         enable = true 
         [[[Extras]]]
             # display_aeris_observation = True
-            #index_page_interval = last24hours
 
             # The client id abd secret for Aeris APIs
             client_id = REPLACE_ME
             client_secret = REPLACE_ME        
 
-            # configure the current observations to be displayed
+            # Create an additional chart.
+            [[[[charts]]]]
+                [[[[[inTemp]]]]]
+                    [[[[[[chart]]]]]]
+                        type = "'line'"            
+                    [[[[[[dataLabels]]]]]]
+                        enabled = false
+                    [[[[[[series]]]]]]
+                        [[[[[[[inTemp]]]]]]]
+
+            # The '$current' value of these observations will be displayed.
             [[[[current]]]]
                 observation = outTemp
                 [[[[[observations]]]]]
@@ -37,80 +46,83 @@ EXTENSION_CONFIG = """
                     [[[[[[dewpoint]]]]]]
                     [[[[[[outHumidity]]]]]]
                     [[[[[[barometer]]]]]]
+                        suffix = ($trend.barometer.formatted)
                     [[[[[[windSpeed]]]]]]
-                    #[[[[[[windDir.ordinal_compass]]]]]]
-                    [[[[[[windDir]]]]]]
+                        suffix = $current.windDir.ordinal_compass ($current.windDir)
                     [[[[[[rainRate]]]]]]
-                    #[[[[[[rain.sum]]]]]]
-                    [[[[[[UV]]]]]]
-                    [[[[[[ET]]]]]]
-                    [[[[[[radiation]]]]]]
-
-            # configure the min/max to display        
+                    [[[[[[rain]]]]]]
+                        type = sum
+            
+            # The minimum and maximum values of these observations will be displayed. 
             [[[[minmax]]]]
                 [[[[[observations]]]]]
+                    [[[[[[outTemp]]]]]]
                     [[[[[[heatindex]]]]]]
                     [[[[[[windchill]]]]]]
                     [[[[[[dewpoint]]]]]]
                     [[[[[[outHumidity]]]]]]
                     [[[[[[barometer]]]]]]
-                    #[[[[[[windSpeed]]]]]]
-                    #[[[[[[windDir.ordinal_compass]]]]]]
-                    #[[[[[[windDir]]]]]]
-                    #[[[[[[rainRate]]]]]]
-                    #[[[[[[rain.sum]]]]]]
-                    [[[[[[UV]]]]]]
-                    [[[[[[ET]]]]]]
-                    [[[[[[radiation]]]]]]
+            
+            # For the selected date, values of these observations will be displayed.
+            [[[[thisdate]]]]
+                [[[[[observations]]]]]
+                    [[[[[[outTemp]]]]]]
+                    [[[[[[barometer]]]]]]
+                        type = avg                    
+                    [[[[[[rain]]]]]]
+                        type = sum
 
-            # Additional charts
-            [[[[charts]]]]
-                [[[[[inTemp]]]]]
-                    [[[[[[chart]]]]]]
-                        type = "'line'"            
-                    [[[[[[dataLabels]]]]]]
-                        enabled = false
-                    [[[[[[xaxis]]]]]]
-                        type = "'datetime'"
-                        [[[[[[[labels]]]]]]]
-                            formatter = "function(val, timestamp) {return moment.unix(timestamp/1000).utcOffset($utcOffset).format('MM/DD hh:mm');}"
-                    [[[[[[tooltip]]]]]]
-                        [[[[[[[x]]]]]]]
-                            formatter = "function(timestamp) {return moment.unix(timestamp/1000).utcOffset($utcOffset).format('hh:mm');}"   
-                    [[[[[[series]]]]]]
-                        [[[[[[[inTemp]]]]]]]
-
-            # The pages to display
+            # The pages and the content on the pages to display.
             [[[[pages]]]]
                 [[[[[index]]]]]
-                    #[[[[[[observations]]]]]]
-                    [[[[[[avgMax]]]]]]
-                    [[[[[[windRange]]]]]]
+                    [[[[[[observations]]]]]]
+                    [[[[[[minmax]]]]]]
+                    [[[[[[forecast]]]]]]
+                        layout = row                                             
                     [[[[[[outTemp]]]]]]
-                        layout = grid
-                    [[[[[[barometer]]]]]]
-                    #[[[[[[forecast]]]]]]
-                    #    layout = row
-                    [[[[[[rain]]]]]]
-                    [[[[[[radar]]]]]]
-                    [[[[[[inTemp]]]]]]
-                [[[[[week]]]]]
+                    [[[[[[barometer]]]]]]  
+                    [[[[[[outHumidity]]]]]]  
+                    [[[[[[wind]]]]]]  
+                    [[[[[[rain]]]]]]                      
+                    [[[[[[radar]]]]]]              
+                [[[[[last7days]]]]]
+                    [[[[[[minmax]]]]]]
                     [[[[[[outTemp]]]]]]
-                [[[[[month]]]]]
+                    [[[[[[barometer]]]]]]  
+                    [[[[[[outHumidity]]]]]]  
+                    [[[[[[wind]]]]]]  
+                    [[[[[[rain]]]]]]                                           
+                [[[[[last31days]]]]]
+                    zoomControl = True
+                    [[[[[[minmax]]]]]]
+                    [[[[[[thisdate]]]]]]
                     [[[[[[outTemp]]]]]]
-                    [[[[[[barometer]]]]]]
-                [[[[[year]]]]]
+                    [[[[[[barometer]]]]]]  
+                    [[[[[[outHumidity]]]]]]  
+                    [[[[[[wind]]]]]]  
+                    [[[[[[rain]]]]]]                                      
+                [[[[[last366days]]]]]   
+                    zoomControl = True   
+                    [[[[[[minmax]]]]]]       
+                    [[[[[[thisdate]]]]]]                        
                     [[[[[[outTemp]]]]]]
-                    [[[[[[rain]]]]]]
-                [[[[[yesterday]]]]]
-                    [[[[[[outTemp]]]]]]
-                [[[[[archive-month]]]]]
+                    [[[[[[barometer]]]]]]  
+                    [[[[[[outHumidity]]]]]]  
+                    [[[[[[wind]]]]]]  
+                    [[[[[[rain]]]]]]                        
+               [[[[[archive-month]]]]]
                     in_navbar = false
-                    [[[[[[outTemp]]]]]]     
+                    zoomControl = True
+                    [[[[[[minmax]]]]]]
+                    [[[[[[thisdate]]]]]]                        
+                    [[[[[[outTempMinMax]]]]]]    
+                    [[[[[[rain]]]]]]      
                 [[[[[archive-year]]]]]   
                     in_navbar = false
-                    [[[[[[outTemp]]]]]]
-
+                    zoomControl = True
+                    [[[[[[minmax]]]]]]
+                    [[[[[[outTempMinMax]]]]]]
+                    [[[[[[rain]]]]]]     
 """
 
 EXTENSION_DICT = configobj.ConfigObj(StringIO(EXTENSION_CONFIG))
@@ -131,7 +143,8 @@ class JASInstaller(ExtensionInstaller):
             author_email="bellrichm@gmail.com",
             config=EXTENSION_DICT,
             files=[('bin/user', ['bin/user/jas.py']),
-                   ('skins/jas', ['skins/jas/day.html.tmpl',
+                   ('skins/jas', ['skins/jas/archive.html.tmpl',
+                                  'skins/jas/day.html.tmpl',
                                   'skins/jas/forecast.inc',
                                   'skins/jas/index.html.tmpl',
                                   'skins/jas/last7days.html.tmpl',
@@ -143,9 +156,13 @@ class JASInstaller(ExtensionInstaller):
                                   'skins/jas/observations.inc',
                                   'skins/jas/radar.inc',
                                   'skins/jas/skin.conf',
+                                  'skins/jas/thisdate.inc',
                                   'skins/jas/week.html.tmpl',
                                   'skins/jas/year.html.tmpl',
-                                  'skins/jas/yesterday.html.tmpl'
+                                  'skins/jas/yesterday.html.tmpl',
+                                  'skins/jas/zoomControl.inc',
+                                  'skins/jas/%Y.html.tmpl',
+                                  'skins/jas/%Y-%m.html.tmpl'
                                   ]),
                    ('skins/jas/charts', ['skins/jas/charts/daycharts.js.tmpl',
                                          'skins/jas/charts/indexcharts.js.tmpl',
@@ -156,7 +173,9 @@ class JASInstaller(ExtensionInstaller):
                                          'skins/jas/charts/monthcharts.js.tmpl',
                                          'skins/jas/charts/weekcharts.js.tmpl',
                                          'skins/jas/charts/yearcharts.js.tmpl',
-                                         'skins/jas/charts/yesterdaycharts.js.tmpl'
+                                         'skins/jas/charts/yesterdaycharts.js.tmpl',
+                                         'skins/jas/charts/%Ycharts.js.tmpl',
+                                         'skins/jas/charts/%Y-%mcharts.js.tmpl'
                                          ]),
                    ('skins/jas/data', ['skins/jas/data/day-data.js.tmpl',
                                        'skins/jas/data/last7days-data.js.tmpl',
@@ -166,7 +185,9 @@ class JASInstaller(ExtensionInstaller):
                                        'skins/jas/data/month-data.js.tmpl',
                                        'skins/jas/data/week-data.js.tmpl',
                                        'skins/jas/data/year-data.js.tmpl',
-                                       'skins/jas/data/yesterday-data.js.tmpl'
+                                       'skins/jas/data/yesterday-data.js.tmpl',
+                                       'skins/jas/data/year%Y-data.js.tmpl',
+                                       'skins/jas/data/month%Y%m-data.js.tmpl'
                                       ]),
                    ('skins/jas/generators', ['skins/jas/generators/navbar.gen',
                                              'skins/jas/generators/pages.gen'
