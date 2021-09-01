@@ -1,5 +1,6 @@
 ##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
+#set interval_id = "year_"
 
 var startDate = moment("$year.start.format('%Y-%m-%dT%H:%M:%S')").utcOffset($utcOffset);
 var endDate = moment("$year.end.format('%Y-%m-%dT%H:%M:%S')").utcOffset($utcOffset);
@@ -7,22 +8,27 @@ var startTimestamp = $year.start.raw * 1000
 var endTimestamp = $year.end.raw * 1000
 
 #for aggregate_type in $aggregate_types
-    #set interval_name = 'year_' + $aggregate_type
+    #set interval_name = $interval_id + $aggregate_type
     $interval_name = new Object();
 #end for
 
 #for $observation in $observations
     #for aggregate_type in $observations[$observation]['aggregate_types']
         #set aggregate_interval = $getVar('Extras.page_definition.year.aggregate_interval.' + $aggregate_type, None)
-        #set interval_name = 'year_' + $aggregate_type
+        #set interval_name = $interval_id + $aggregate_type
+        #set array_name = $interval_name + "." + $observation
+        #set dateTime_name = $interval_id + $observation + "_" + $aggregate_type + "_dateTime"
+        #set data_name = $interval_id + $observation + "_" + $aggregate_type + "_data"
         
         #if $aggregate_interval is not None
-            #set obs = $interval_name + "." + $observation + " = $year." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms').round(2).json"
+            #set obs = $array_name + " = $year." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms').round(2).json"
         #else
-            #set obs = $interval_name + "." + $observation + " = $year." + $observation + ".series(time_series='start', time_unit='unix_epoch_ms').round(2).json"
+            #set obs = $array_name + " = $year." + $observation + ".series(time_series='start', time_unit='unix_epoch_ms').round(2).json"
         #end if
         $skinDebug($obs)
         #include source=$obs + ";\n"
+        #echo $dateTime_name + " = [].concat(" + $array_name + ".map(arr => arr[0]));\n"
+        #echo $data_name + " = [].concat(" + $array_name + ".map(arr => arr[1]));\n"
     #end for
 #end for
 
