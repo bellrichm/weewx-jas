@@ -67,9 +67,12 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
       <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
       -->
     
-    ## todo move to style sheet
-    ## todo - padding only needed when graph rangevis displayed
-    <div class="container"  style="padding-top: 50px;">
+    ## todo move to style sheet?
+    #set zoom_padding = ''
+    #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
+      #set zoom_padding = 'style="padding-top: 50px;"'
+    #end if
+    <div class="container"  $zoom_padding>
     #set charts = $getVar('Extras.charts')
     #set processing_grid = False
     #for $section in $getVar('Extras.pages.' + $page)

@@ -35,6 +35,7 @@
       </div>
     </div>
   </nav>
-  ## todo - make configurable by page
-  #include "zoomControl.inc"
+  #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
+    #include "zoomControl.inc"
+  #end if
 </div>
