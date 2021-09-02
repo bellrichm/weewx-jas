@@ -17,8 +17,8 @@ var endTimestamp = $month.end.raw * 1000
         #set aggregate_interval = $getVar('Extras.page_definition.month.aggregate_interval.' + $aggregate_type, None)
         #set interval_name = $interval_id + $aggregate_type
         #set array_name = $interval_name + "." + $observation
-        #set dateTime_name = $interval_id + $observation + "_" + $aggregate_type + "_dateTime"
-        #set data_name = $interval_id + $observation + "_" + $aggregate_type + "_data"
+        #set dateTime_name = $interval_name + "_" + $observation + "_dateTime"
+        #set data_name = $interval_name + "_" + $observation + "_data"
         
         #if $aggregate_interval is not None
             #set obs = $interval_name + "." + $observation + " = $month." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms').round(2).json"
