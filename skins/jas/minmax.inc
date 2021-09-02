@@ -7,7 +7,7 @@
                 <h5 class="h5-responsive indigo-text">
                   $gettext["minmax.title"]
                 </h5>        
-                ## todo move to style shhedt, resize observation table to match?
+                ## todo move to style sheet, resize observation table to match?
                 <table class="table table-sm" style="font-size:80%"">
                   <tbody>
                     #for observation in $Extras.minmax.observations
@@ -16,13 +16,15 @@
                         #set min_value_time = '$' + $interval_global + '.' + $observation + '.mintime.format'
                         #set max_value = '$' + $interval_global + '.' + $observation + '.max'                
                         #set max_value_time = '$' + $interval_global + '.' + $observation + '.maxtime.format'
+                        #set min_id = $observation + "_minmax_min"
+                        #set max_id = $observation + "_minmax_max"
                         <tr>
                             <th scope="row">#include source=$label #</th>
-                            <td>#include source=$min_value #
+                            <td id="$min_id">#include source=$min_value #
                             <br>
                             #include source=$min_value_time #
                             </td>
-                            <td>#include source=$max_value #
+                            <td id="$max_id">#include source=$max_value #
                             <br>
                             #include source=$max_value_time #                            
                             </td>
