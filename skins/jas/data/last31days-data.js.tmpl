@@ -30,18 +30,6 @@ var endTimestamp = $last31days.end.raw * 1000
         #include source=$obs + ";\n"
         #echo $dateTime_name + " = [].concat(" + $array_name + ".map(arr => arr[0]));\n"
         #echo $data_name + " = [].concat(" + $array_name + ".map(arr => arr[1]));\n"
-
-        
-        ##todo, remove - min max testin
-        console.log("$array_name")
-        array = $data_name
-        var [min1, max1] = array.slice(0,5).reduce(([prevMin,prevMax], curr)=>
-            [Math.min(prevMin, curr), Math.max(prevMax, curr)], [Infinity, -Infinity]);
-        console.log(array.slice(0,5))
-        console.log("Min:", min1);
-        console.log("Max:", max1);
-        
-
     #end for
 #end for
 
