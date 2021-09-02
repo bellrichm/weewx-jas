@@ -458,6 +458,19 @@ class JAS(SearchList):
                     observations[observation]['aggregate_types'][aggregate_type] = {}
                     aggregate_types[aggregate_type] = {}
 
+        minmax_observations = self.skin_dict.get('Extras', {}).get('minmax', {}).get('observations', {})
+        logdbg(minmax_observations)
+        for observation in minmax_observations:
+            if observation not in self.wind_observations:
+                if observation not in observations:
+                    observations[observation] = {}
+                    observations[observation]['aggregate_types'] = {}
+
+                observations[observation]['aggregate_types']['min'] = {}
+                aggregate_types['min'] = {}
+                observations[observation]['aggregate_types']['max'] = {}
+                aggregate_types['max'] = {}
+
         return observations, aggregate_types
 
     def _iterdict(self, indent, page, chart, chart_js, interval, dictionary):
