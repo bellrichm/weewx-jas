@@ -17,14 +17,14 @@
                         <tr>
                         <th scope="row">#include source=$label #</th>
                         #if $aggregation_type is None
-                            #set $id = $observation + "min"
+                            #set $id = $observation + "_thisdate_min"
                             <td id="$id">
                             </td>               
-                            #set $id = $observation + "max"
+                            #set $id = $observation + "_thisdate_max"
                             <td id="$id">
                             </td>                                                          
                         #else
-                            #set $id = $observation + $aggregation_type
+                            #set $id = $observation + "_thisdate_" + $aggregation_type
                             <td id="$id">
                             </td>
                             <td></td>
@@ -50,20 +50,20 @@
                     #if $aggregation_type is None
                         #set value = $interval_name_global + '_min.' + $observation
                         #set line = "var obs = getObservation(timeStamp, " + $value + ")"
-                        #set id = $observation + "min"
+                        #set id = $observation + "_thisdate_min"
                         $line
                         var observation=document.getElementById("$id")
                         observation.innerHTML = obs                   
                         #set value = $interval_name_global + '_max.' + $observation
                         #set line = "var obs = getObservation(timeStamp, " + $value + ")"
-                        #set id = $observation + "max"
+                        #set id = $observation + "_thisdate_max"
                         $line
                         var observation=document.getElementById("$id")
                         observation.innerHTML = obs                             
                     #else
                         #set value = $interval_name_global + '_' + $aggregation_type + '.' + $observation
                         #set line = "var obs = getObservation(timeStamp, " + $value + ")"
-                        #set id = $observation + $aggregation_type
+                        #set id = $observation + "_thisdate_" + $aggregation_type
                         $line
                         var observation=document.getElementById("$id")
                         observation.innerHTML = obs
