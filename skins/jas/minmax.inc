@@ -16,7 +16,7 @@
             #echo "endIndex = " + $min_datetime_array + ".findIndex(element => element == endTimestamp);\n"
             #echo "var minIndex =" + $min_data_array + ".indexOf(Math.min(..." + $min_data_array + ".slice(startIndex, endIndex)));\n"
             #echo "var maxIndex =" + $max_data_array + ".indexOf(Math.max(..." + $max_data_array + ".slice(startIndex, endIndex)));\n"
-            ## todo - format datetime, labels, etc.
+            ## todo - format labels, etc.
             #echo "var min = " + $min_data_array + "[minIndex];\n"
             #echo "var max = " + $max_data_array + "[maxIndex];\n"
             #set aggregate_interval = "aggregate_interval_" + $getVar('Extras.page_definition.' + $page + '.aggregate_interval.min', 'none')
