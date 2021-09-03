@@ -6,6 +6,22 @@ var startDate = moment("$year.start.format('%Y-%m-%dT%H:%M:%S')").utcOffset($utc
 var endDate = moment("$year.end.format('%Y-%m-%dT%H:%M:%S')").utcOffset($utcOffset);
 var startTimestamp = $year.start.raw * 1000
 var endTimestamp = $year.end.raw * 1000
+#for $aggregate_type in $getVar('Extras.page_definition.year.aggregate_interval')
+    #set aggregate_interval = $getVar('Extras.page_definition.year.aggregate_interval.' + $aggregate_type)
+    #if $aggregate_interval == 'day'
+        #set source = "#set global $endTimestamp = ((($year.end.raw // 86400) * 86400)  - ($utcOffset * 60)) * 1000;\n"
+        #set $source += "var endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
+        #include source=$source
+    #else if $aggregate_interval == 'hour'
+        #set source = "#set global $endTimestamp = ((($year.end.raw // 3600) * 3600)  - ($utcOffset * 60)) * 1000;\n"
+        #set $source += "var endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
+        #include source=$source    
+    #else
+        #set source = "#set global $endTimestamp = ((($year.end.raw // 60) * 60)  - ($utcOffset * 60)) * 1000;\n"
+        #set $source += "var endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
+        #include source=$source        
+    #end if
+#end for
 
 #for aggregate_type in $aggregate_types
     #set interval_name = $interval_id + $aggregate_type
