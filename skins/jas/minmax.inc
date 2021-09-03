@@ -19,8 +19,9 @@
             ## todo - format datetime, labels, etc.
             #echo "var min = " + $min_data_array + "[minIndex];\n"
             #echo "var max = " + $max_data_array + "[maxIndex];\n"
-            #echo "var minDate = " + $min_datetime_array + "[minIndex];\n"
-            #echo "var maxDate = " + $max_datetime_array + "[maxIndex];\n"
+            #set aggregate_interval = "aggregate_interval_" + $getVar('Extras.page_definition.' + $page + '.aggregate_interval.min', 'none')
+            #echo "var minDate = moment.unix(" + $min_datetime_array + "[minIndex]/1000).utcOffset(" + str($utcOffset) + ").format('" + $gettext[$aggregate_interval]['label'] + "');\n"
+            #echo "var maxDate = moment.unix(" + $max_datetime_array + "[maxIndex]/1000).utcOffset(" + str($utcOffset) + ").format('" + $gettext[$aggregate_interval]['label'] + "');\n"
             
             var observation_element=document.getElementById("$min_id")
             observation_element.innerHTML = min + '<br>' + minDate
