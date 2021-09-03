@@ -459,7 +459,6 @@ class JAS(SearchList):
                     aggregate_types[aggregate_type] = {}
 
         minmax_observations = self.skin_dict.get('Extras', {}).get('minmax', {}).get('observations', {})
-        logdbg(minmax_observations)
         for observation in minmax_observations:
             if observation not in self.wind_observations:
                 if observation not in observations:
