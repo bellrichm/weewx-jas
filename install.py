@@ -178,7 +178,7 @@ class JASInstaller(ExtensionInstaller):
                                          'skins/jas/charts/%Y-%mcharts.js.tmpl'
                                          ]),
                    ('skins/jas/data', ['skins/jas/data/alltime-data.js.tmpl',
-                                       skins/jas/data/day-data.js.tmpl',
+                                       'skins/jas/data/day-data.js.tmpl',
                                        'skins/jas/data/last7days-data.js.tmpl',
                                        'skins/jas/data/last24hours-data.js.tmpl',
                                        'skins/jas/data/last31days-data.js.tmpl',
