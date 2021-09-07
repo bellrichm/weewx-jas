@@ -4,6 +4,8 @@
 #set global interval_global = 'month'
 #set global interval_name_global = 'month' + $year.start.format('%Y') + $month.start.format('%m')
 #set global page_name_global = $year.start.format('%Y') + '-' + $month.start.format('%m')
+#set global year_global = $year_name
+#set global month_global = $month.start.format('%m')
 #set global title_global = $month_name + ' ' + str($year_name)
 #set global h1_global = $month_name +' ' + str($year_name)
 #if $getVar("$Extras.pages." + $page, False)
@@ -12,5 +14,7 @@
 #set global interval_global = None
 #set global interval_name_global = None
 #set global page_name_global = None
+#set global year_global = None
+#set global month_global = None
 #set global title_global = None
 #set global h1_global = None
