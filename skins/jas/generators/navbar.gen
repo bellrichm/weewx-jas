@@ -69,43 +69,36 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav me-auto mb-2 mb-md-0">
-        #for $page_data in $getVar('Extras.pages')
-          ## todo - cleanup so more robust check, because string cpould be 'true', etc
-          #set in_navbar = $getVar('Extras.pages.' + $page_data + '.in_navbar', 'True')
-          #if in_navbar == 'True'
-            <li class="nav-item">
-            #if $page_data == $page
-              #set navItem = '<a class="nav-link active" aria-current="page" href="' + $page_data + '.html">' + $gettext[$page_data + '.navbarText'] + '</a>'
-            #else
-              #set navItem = '<a class="nav-link" href="' + $page_data + '.html">' + $gettext[$page_data + '.navbarText'] + '</a>'
+          #for $page_data in $getVar('Extras.pages')
+            ## todo - cleanup so more robust check, because string cpould be 'true', etc
+            #set in_navbar = $getVar('Extras.pages.' + $page_data + '.in_navbar', 'True')
+            #if in_navbar == 'True'
+              <li class="nav-item">
+              #if $page_data == $page
+                #set navItem = '<a class="nav-link active" aria-current="page" href="' + $page_data + '.html">' + $gettext[$page_data + '.navbarText'] + '</a>'
+              #else
+                #set navItem = '<a class="nav-link" href="' + $page_data + '.html">' + $gettext[$page_data + '.navbarText'] + '</a>'
+              #end if
+                $navItem
+              </li>
             #end if
-              $navItem
-            </li>
-          #end if
-        #end for
-          <li class="nav-item">
-            <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-          </li>
+          #end for
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="dropdownYear" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              Dropdown
+              $gettext['year_dropdown-label']
             </a>
             <div class="dropdown-menu" aria-labelledby="dropdownYear" id="dropdownYearMenu">
           </li>
           <li class="nav-item dropdown">
             <div class="dropdown">
               <a class="nav-link dropdown-toggle" href="#" role="button" id="dropdownYearMonth" data-bs-toggle="dropdown" aria-expanded="false">
-                Dropdown link
+              $gettext['yearMonth_dropdown-label']
               </a>
               <ul class="dropdown-menu pre-scrollable" aria-labelledby="dropdownYearMonth" id="dropdownYearMonthMenu">
               </ul>
             </div>
           </li>
         </ul>
-        <form class="d-flex">
-          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-          <button class="btn btn-outline-success" type="submit">Search</button>
-        </form>
       </div>
     </div>
   </nav>
