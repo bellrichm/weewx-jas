@@ -19,8 +19,11 @@
           var li = document.createElement("li");
           var link = document.createElement("a"); 
           link.classList.add("dropdown-item") 
+
           var text = document.createTextNode(year);
           link.onclick = function() { 
+                            this.classList.add("active") 
+                            this.ariaCurrent = "page"
                             setYear(this.innerHTML)
                          };
           link.appendChild(text);
@@ -41,6 +44,10 @@
       var li = document.createElement("li");
       var link = document.createElement("a"); 
       link.classList.add("dropdown-item")            
+      link.onclick = function() { 
+                        this.classList.add("active") 
+                        this.ariaCurrent = "page"
+                      };      
       var text = document.createTextNode(yearMonth[year][i]);
       link.appendChild(text);
       link.href = yearMonth[year][i] + ".html"
@@ -54,7 +61,11 @@
 
     var li = document.createElement("li");
     var link = document.createElement("a"); 
-    link.classList.add("dropdown-item")            
+    link.classList.add("dropdown-item")           
+    link.onclick = function() { 
+                      this.classList.add("active") 
+                      this.ariaCurrent = "page"
+                    };           
     var text = document.createTextNode(year);
     link.appendChild(text);
     link.href = year + ".html"
