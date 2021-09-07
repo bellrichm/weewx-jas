@@ -1,0 +1,10 @@
+  var yearMonth = {}
+  #for $year in $SummaryByYear
+    yearMonth["$year"] = []
+    #for $monthYear in $SummaryByMonth
+      #set $year_sum, $month_sum= $monthYear.split("-")
+        #if $year_sum == $year
+          yearMonth["$year"].push("$monthYear")
+        #end if
+    #end for
+  #end for

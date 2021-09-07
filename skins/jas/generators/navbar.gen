@@ -1,6 +1,65 @@
 ##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
+## todo move?
+<style>
+.pre-scrollable {
+  max-height: 340px;
+  overflow-y: scroll;
+}
+</style>
+
+<script src="data/alltime-data.js"> </script>
+<script>
+    window.addEventListener("load", function (event) {
+        var list = document.getElementById("dropdownYearMenu");
+        list.innerHTML = ""
+
+        for (year in yearMonth){
+          var li = document.createElement("li");
+          var link = document.createElement("a"); 
+          link.classList.add("dropdown-item") 
+          var text = document.createTextNode(year);
+          link.onclick = function() { 
+                            setYear(this.innerHTML)
+                         };
+          link.appendChild(text);
+          link.href = "#"
+          li.appendChild(link);
+          list.appendChild(li);
+        }
+    });
+
+  function setYear(year) {
+    var list = document.getElementById("dropdownYearMonthMenu");
+    list.innerHTML = ""
+
+    for (var i = 0; i < yearMonth[year].length; i++) {
+      var li = document.createElement("li");
+      var link = document.createElement("a"); 
+      link.classList.add("dropdown-item")            
+      var text = document.createTextNode(yearMonth[year][i]);
+      link.appendChild(text);
+      link.href = yearMonth[year][i] + ".html"
+      li.appendChild(link);
+      list.appendChild(li);
+    }
+
+    var divider = document.createElement("div")
+    divider.classList.add("dropdown-divider")
+    list.appendChild(divider)
+
+    var li = document.createElement("li");
+    var link = document.createElement("a"); 
+    link.classList.add("dropdown-item")            
+    var text = document.createTextNode(year);
+    link.appendChild(text);
+    link.href = year + ".html"
+    li.appendChild(link);
+    list.appendChild(li);
+  }
+</script>
+
 <div class="fixed-top">
   <nav class="navbar navbar-expand-md navbar-dark bg-dark">
     <div class="container-fluid">
@@ -26,6 +85,21 @@
         #end for
           <li class="nav-item">
             <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="dropdownYear" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Dropdown
+            </a>
+            <div class="dropdown-menu" aria-labelledby="dropdownYear" id="dropdownYearMenu">
+          </li>
+          <li class="nav-item dropdown">
+            <div class="dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" id="dropdownYearMonth" data-bs-toggle="dropdown" aria-expanded="false">
+                Dropdown link
+              </a>
+              <ul class="dropdown-menu pre-scrollable" aria-labelledby="dropdownYearMonth" id="dropdownYearMonthMenu">
+              </ul>
+            </div>
           </li>
         </ul>
         <form class="d-flex">
