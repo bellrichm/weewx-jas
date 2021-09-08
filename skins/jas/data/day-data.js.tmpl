@@ -1,5 +1,10 @@
 ##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
+
+#if $getVar('Extras.pages.day', None) is None and $getVar("$Extras.index_page_interval", "last24hours") != "day"
+    #stop
+#end if 
+
 #set interval_id = "day_"
 
 var startDate = moment("$day.start.format('%Y-%m-%dT%H:%M:%S')").utcOffset($utcOffset);
