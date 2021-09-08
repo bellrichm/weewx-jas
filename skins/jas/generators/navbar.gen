@@ -19,6 +19,7 @@
           var li = document.createElement("li");
           var link = document.createElement("a"); 
           link.classList.add("dropdown-item") 
+          ## todo, year check and add active class
 
           var text = document.createTextNode(year);
           link.onclick = function() { 
@@ -32,18 +33,22 @@
           list.appendChild(li);
         }
         #if $year_global is not None
-          setYear($year_global)
+          setYear($year_global, "$month_global")
         #end if
     });
 
-  function setYear(year) {
+  function setYear(year, month) {
     var list = document.getElementById("dropdownYearMonthMenu");
     list.innerHTML = ""
 
     for (var i = 0; i < yearMonth[year].length; i++) {
       var li = document.createElement("li");
       var link = document.createElement("a"); 
-      link.classList.add("dropdown-item")            
+      link.classList.add("dropdown-item")  
+      if (yearMonth[year][i] == year + "-" + month) {
+        link.classList.add("active") 
+        link.ariaCurrent = "page"        
+      }
       link.onclick = function() { 
                         this.classList.add("active") 
                         this.ariaCurrent = "page"
