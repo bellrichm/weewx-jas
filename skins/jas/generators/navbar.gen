@@ -19,7 +19,12 @@
           var li = document.createElement("li");
           var link = document.createElement("a"); 
           link.classList.add("dropdown-item") 
-          ## todo, year check and add active class
+          #if $year_global is not None
+            if (year == $year_global){
+              link.classList.add("active") 
+              link.ariaCurrent = "page"              
+            }
+          #end if
 
           var text = document.createTextNode(year);
           link.onclick = function() { 
