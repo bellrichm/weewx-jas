@@ -46,6 +46,23 @@
     var list = document.getElementById("dropdownYearMonthMenu");
     list.innerHTML = ""
 
+    var li = document.createElement("li");
+    var link = document.createElement("a"); 
+    link.classList.add("dropdown-item")           
+    link.onclick = function() { 
+                      this.classList.add("active") 
+                      this.ariaCurrent = "page"
+                    };           
+    var text = document.createTextNode(year);
+    link.appendChild(text);
+    link.href = year + ".html"
+    li.appendChild(link);
+    list.appendChild(li);
+
+    var divider = document.createElement("div")
+    divider.classList.add("dropdown-divider")
+    list.appendChild(divider)
+
     for (var i = 0; i < yearMonth[year].length; i++) {
       var li = document.createElement("li");
       var link = document.createElement("a"); 
@@ -64,23 +81,6 @@
       li.appendChild(link);
       list.appendChild(li);
     }
-
-    var divider = document.createElement("div")
-    divider.classList.add("dropdown-divider")
-    list.appendChild(divider)
-
-    var li = document.createElement("li");
-    var link = document.createElement("a"); 
-    link.classList.add("dropdown-item")           
-    link.onclick = function() { 
-                      this.classList.add("active") 
-                      this.ariaCurrent = "page"
-                    };           
-    var text = document.createTextNode(year);
-    link.appendChild(text);
-    link.href = year + ".html"
-    li.appendChild(link);
-    list.appendChild(li);
   }
 </script>
 
