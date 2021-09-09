@@ -1,16 +1,25 @@
 ##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
+#import datetime
+#import weeutil
+
 #if $getVar('Extras.pages.archive-month', None) is None and $getVar("$Extras.index_page_interval", "last24hours") != "archive-month"
     #stop
 #end if 
 
 #set interval_id = "month"
 
-var startDate = moment("$month.start.format('%Y-%m-%dT%H:%M:%S')").utcOffset($utcOffset);
-var endDate = moment("$month.end.format('%Y-%m-%dT%H:%M:%S')").utcOffset($utcOffset);
-var startTimestamp = $month.start.raw * 1000
-var endTimestamp = $month.end.raw * 1000
+#set startTimestamp = weeutil.weeutil.startOfDay($month.usUnits.firsttime.raw)
+#set startDate = datetime.datetime.fromtimestamp($startTimestamp).strftime('%Y-%m-%dT%H:%M:%S')
+#set endTimestamp = weeutil.weeutil.startOfDay($month.usUnits.lasttime.raw)
+#set endDate = datetime.datetime.fromtimestamp($endTimestamp).strftime('%Y-%m-%dT%H:%M:%S')
+
+var startTimestamp = $startTimestamp * 1000;
+var startDate = moment("$startDate").utcOffset($utcOffset);
+var endTimestamp = $endTimestamp * 1000;
+var endDate = moment("$endDate").utcOffset($utcOffset);
+
 #for $aggregate_type in $getVar('Extras.page_definition.month.aggregate_interval')
     #set aggregate_interval = $getVar('Extras.page_definition.month.aggregate_interval.' + $aggregate_type)
     #if $aggregate_interval == 'day'

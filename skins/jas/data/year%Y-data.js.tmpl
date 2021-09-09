@@ -5,12 +5,21 @@
     #stop
 #end if 
 
+#import datetime
+#import weeutil
+
 #set interval_id = "year"
 
-var startDate = moment("$year.start.format('%Y-%m-%dT%H:%M:%S')").utcOffset($utcOffset);
-var endDate = moment("$year.end.format('%Y-%m-%dT%H:%M:%S')").utcOffset($utcOffset);
-var startTimestamp = $year.start.raw * 1000
-var endTimestamp = $year.end.raw * 1000
+#set startTimestamp = weeutil.weeutil.startOfDay($year.usUnits.firsttime.raw)
+#set startDate = datetime.datetime.fromtimestamp($startTimestamp).strftime('%Y-%m-%dT%H:%M:%S')
+#set endTimestamp = weeutil.weeutil.startOfDay($year.usUnits.lasttime.raw)
+#set endDate = datetime.datetime.fromtimestamp($endTimestamp).strftime('%Y-%m-%dT%H:%M:%S')
+
+var startTimestamp = $startTimestamp * 1000;
+var startDate = moment("$startDate").utcOffset($utcOffset);
+var endTimestamp = $endTimestamp * 1000;
+var endDate = moment("$endDate").utcOffset($utcOffset);
+
 #for $aggregate_type in $getVar('Extras.page_definition.year.aggregate_interval')
     #set aggregate_interval = $getVar('Extras.page_definition.year.aggregate_interval.' + $aggregate_type)
     #if $aggregate_interval == 'day'
