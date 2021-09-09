@@ -126,7 +126,8 @@ class JAS(SearchList):
 
         self.chart_defaults = {}
         for chart_type in self.skin_dict['Extras']['default_chart_options'].sections:
-            self.chart_defaults[chart_type] = self.skin_dict['Extras']['default_chart_options'][chart_type]
+            self.chart_defaults[chart_type] = self.skin_dict['Extras']['default_chart_options'].get('defaults', {})
+            self.chart_defaults[chart_type].merge(self.skin_dict['Extras']['default_chart_options'][chart_type])
 
         html_root = self.skin_dict.get('HTML_ROOT',
                                        report_dict.get('HTML_ROOT', 'public_html'))
