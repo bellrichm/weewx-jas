@@ -1,3 +1,8 @@
+##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
+##    See the file LICENSE.txt for your rights.
+
+#import datetime
+
 <link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/alumuko/vanilla-datetimerange-picker@latest/dist/vanilla-datetimerange-picker.css">
 
 <script src="https://cdn.jsdelivr.net/gh/alumuko/vanilla-datetimerange-picker@latest/dist/vanilla-datetimerange-picker.js"></script>
@@ -41,8 +46,12 @@
         <script src="https://cdn.jsdelivr.net/gh/alumuko/vanilla-datetimerange-picker@latest/dist/vanilla-datetimerange-picker.js"></script>
         <script>
             function getObservation(timeStamp, observations) {
-                var result = observations.filter(function(v,i) { return v[0] === timeStamp; })[0][1];               
-               return result
+                var array_result = observations.filter(function(v,i) { return v[0] === timeStamp; });    
+                if (array_result.length > 0)     {
+                    return array_result[0][1]
+                }
+
+               return observations[0][1]
             }
             function updateThisDate(timeStamp) {
                 #for observation in $Extras.thisdate.observations
@@ -80,8 +89,29 @@
                                          updateThisDate(start.unix() * 1000)
                                     }
                 );
-                dateRangePicker.setStartDate(startDate);
-                updateThisDate(startDate.unix() * 1000)
+                #set today = datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+                #set selected_year = $today.year
+                #if $year_global is not None
+                    #set selected_year = $year_global
+                #end if
+                #set selected_month = $today.month
+                #if $month_global is not None
+                    #set selected_month = $month_global
+                #end if
+
+                #set extra_days = 0
+                #while True:
+                    #try:
+                        #set selected_date = $today.replace(year=int($selected_year), month=int($selected_month), day=$today.day - $extra_days)
+                        #break
+                    #except ValueError:
+                        $set extra_days += 1
+                    #end try
+                #end while
+
+                dateRangePicker.setStartDate(moment.unix($selected_date.timestamp()).utcOffset($utcOffset));
+                dateRangePicker.setEndDate(moment.unix($selected_date.timestamp()).utcOffset($utcOffset));
+                updateThisDate($selected_date.timestamp() * 1000)
             });
         </script>
 
