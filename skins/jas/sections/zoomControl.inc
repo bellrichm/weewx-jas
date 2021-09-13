@@ -1,3 +1,6 @@
+##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
+##    See the file LICENSE.txt for your rights.
+
 <link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/alumuko/vanilla-datetimerange-picker@latest/dist/vanilla-datetimerange-picker.css">
 <nav class="navbar navbar-expand-md navbar-light bg-light justify-content-center">
     <div class="navbar-text">
