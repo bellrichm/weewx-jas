@@ -2,7 +2,7 @@
 ##    See the file LICENSE.txt for your rights.
 
     <div class="col">
-      $gettext["forecast.title"]
+      $gettext("forecast.title")
     </div>
   </div>
   <div class="row gx-0 justify-content-center">

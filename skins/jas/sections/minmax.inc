@@ -20,8 +20,8 @@
             #echo "var min = " + $min_data_array + "[minIndex] + '" + $label + "';\n"
             #echo "var max = " + $max_data_array + "[maxIndex] + '" + $label + "';\n"
             #set aggregate_interval = "aggregate_interval_" + $getVar('Extras.page_definition.' + $page + '.aggregate_interval.min', 'none')
-            #echo "var minDate = moment.unix(" + $min_datetime_array + "[minIndex]/1000).utcOffset(" + str($utcOffset) + ").format('" + $gettext[$aggregate_interval]['label'] + "');\n"
-            #echo "var maxDate = moment.unix(" + $max_datetime_array + "[maxIndex]/1000).utcOffset(" + str($utcOffset) + ").format('" + $gettext[$aggregate_interval]['label'] + "');\n"
+            #echo "var minDate = moment.unix(" + $min_datetime_array + "[minIndex]/1000).utcOffset(" + str($utcOffset) + ").format('" + $pgettext($aggregate_interval, 'label') + "');\n"
+            #echo "var maxDate = moment.unix(" + $max_datetime_array + "[maxIndex]/1000).utcOffset(" + str($utcOffset) + ").format('" + $pgettext($aggregate_interval, 'label') + "');\n"
             
             var observation_element=document.getElementById("$min_id")
             observation_element.innerHTML = min + '<br>' + minDate
@@ -43,7 +43,7 @@
     <div class="card">
         <div class="card-body text-center">
                 <h5 class="h5-responsive indigo-text">
-                  $gettext["minmax.title"]
+                  $gettext("minmax.title")
                 </h5>        
                 ## todo move to style sheet, resize observation table to match?
                 <table class="table table-sm" style="font-size:80%"">

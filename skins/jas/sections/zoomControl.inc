@@ -1,9 +1,9 @@
 <link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/alumuko/vanilla-datetimerange-picker@latest/dist/vanilla-datetimerange-picker.css">
 <nav class="navbar navbar-expand-md navbar-light bg-light justify-content-center">
     <div class="navbar-text">
-        $gettext['zoomControl_label']
+        $gettext('zoomControl_label')
         <input type="text" id="datetimerange-input2" style="text-align:center">   
-        <input TYPE="button" name="resetRange" value="$gettext['resetRange_label']" onclick="resetRange()">
+        <input TYPE="button" name="resetRange" value="$gettext('resetRange_label')" onclick="resetRange()">
     </div>
 </nav>
     <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js" type="text/javascript"></script>

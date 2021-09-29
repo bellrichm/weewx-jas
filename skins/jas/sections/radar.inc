@@ -5,7 +5,7 @@
             <div class="card">
               <div class="card-body text-center">
                 <h5 class="h5-responsive indigo-text">
-                  $gettext["radar.title"]
+                  $gettext("radar.title")
                 </h5>
                 <div id="radar">
                   <iframe width=100% height=100%

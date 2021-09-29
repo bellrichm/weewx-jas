@@ -99,9 +99,9 @@
             #if in_navbar == 'True'
               <li class="nav-item">
               #if $page_data == $page
-                #set navItem = '<a class="nav-link active" aria-current="page" href="' + $page_data + '.html">' + $gettext[$page_data + '.navbarText'] + '</a>'
+                #set navItem = '<a class="nav-link active" aria-current="page" href="' + $page_data + '.html">' + $gettext($page_data + '.navbarText') + '</a>'
               #else
-                #set navItem = '<a class="nav-link" href="' + $page_data + '.html">' + $gettext[$page_data + '.navbarText'] + '</a>'
+                #set navItem = '<a class="nav-link" href="' + $page_data + '.html">' + $gettext($page_data + '.navbarText') + '</a>'
               #end if
                 $navItem
               </li>
@@ -113,7 +113,7 @@
           #else
             <a class="nav-link dropdown-toggle" href="#" id="dropdownYear" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           #end if
-              $gettext['year_dropdown-label']
+              $gettext('year_dropdown-label')
             </a>
             <div class="dropdown-menu" aria-labelledby="dropdownYear" id="dropdownYearMenu">
           </li>
@@ -124,7 +124,7 @@
             #else
               <a class="nav-link dropdown-toggle" href="#" role="button" id="dropdownYearMonth" data-bs-toggle="dropdown" aria-expanded="false">
              #end if
-              $gettext['yearMonth_dropdown-label']
+              $gettext('yearMonth_dropdown-label')
               </a>
               <ul class="dropdown-menu pre-scrollable" aria-labelledby="dropdownYearMonth" id="dropdownYearMonthMenu">
               </ul>

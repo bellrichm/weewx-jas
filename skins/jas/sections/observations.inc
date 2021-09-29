@@ -15,13 +15,18 @@
                         #set i += 1
                         #set type = $getVar("$Extras.current.observations" + "." + $observation + ".type", "")
                         #set suffix = $getVar("$Extras.current.observations" + "." + $observation + ".suffix", "")
-                        #if $type == 'sum'
+                        #if $type == 'rise'    
+                            #set observation_value = '$' + 'almanac.' + $observation + 'rise'
+                            #set label = 'foo'
+                        #else if $type == 'sum'
                             #set observation_value = '$' + $interval_global + '.' + $observation + "." + $type
+                            #set label = '$obs.label.' + $observation + $type
                         #else
                             #set observation_value = '$current.' + $observation
+                            #set label = '$obs.label.' + $observation + $type
                         #end if
+
                         #set $observation_value += " " + $suffix
-                        #set label = '$obs.label.' + $observation + $type
                         #if $i % 2 # <tr> #end if
                             <th scope="row">#include source=$label #</th>
                             <td>#include source=$observation_value #</td>

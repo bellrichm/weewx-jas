@@ -488,7 +488,7 @@ class JAS(SearchList):
                         # Note, this means the last observation's aggregate type will be used to determine the aggregate interval
                         chart2 = "#set global aggregate_interval_global = 'aggregate_interval_" + aggregate_interval + "'\n" + chart2
 
-                        chart2 += indent + "  {name: '$gettext['" + text_string + "'] $obs.label." + observation + "',\n"
+                        chart2 += indent + "  {name: '$gettext('" + text_string + "') $obs.label." + observation + "',\n"
                         chart2 += indent + "  data: " + interval + "_" + aggregate_type + "." + observation + "},\n"
                     chart2 += indent +"]\n"
                 else:

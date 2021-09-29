@@ -1,0 +1,88 @@
+application/7/device/a8404117b18312e9/rx 
+{
+    "applicationID": "7",
+    "applicationName": "LHT65",
+    "deviceName": "LHT65x",
+    "devEUI": "a8404117b18312e9",
+    "txInfo": {
+        "frequency": 905100000,
+        "dr": 0
+    },
+    "adr": true,
+    "fCnt": 1376,
+    "fPort": 2,
+    "data": "y+wJUAHgAQlHf/8=",
+    "object": {
+        "BatV": 3.052,
+        "Ext_sensor": "Temperature Sensor LHT65",
+        "Hum_SHT": "48.0",
+        "TempF_DS": "74.75",
+        "TempF_SHT": "74.91"
+    }
+} 
+
+application/7/device/a84041468182b4da/rx
+{
+    "applicationID": "7",
+    "applicationName": "LHT65",
+    "deviceName": "LHT65x",
+    "devEUI": "a8404117b18312e9",
+    "txInfo": {
+        "frequency": 905100000,
+        "dr": 0
+    },
+    "adr": true,
+    "fCnt": 1376,
+    "fPort": 2,
+    "data": "y+wJUAHgAQlHf/8=",
+    "object": {
+        "BatV": 3.052,
+        "Ext_sensor": "Temperature Sensor LHT65",
+        "Hum_SHT": "48.0",
+        "TempF_DS": "74.75",
+        "TempF_SHT": "74.91"
+    }
+}
+
+{
+    "applicationID": "7",
+    "applicationName": "LHT65",
+    "deviceName": "LHT65-1",
+    "devEUI": "a84041468182b4da",
+    "txInfo": {
+        "frequency": 904300000,
+        "dr": 0
+    },
+    "adr": true,
+    "fCnt": 1367,
+    "fPort": 2,
+    "data": "y9ELFQGRAQr2f/8=",
+    "object": {
+        "BatV": 3.025,
+        "Ext_sensor": "Temperature Sensor LHT65",
+        "Hum_SHT": "40.1",
+        "TempF_DS": "82.51",
+        "TempF_SHT": "83.07"
+    }
+} 
+{
+    "applicationID": "7",
+    "applicationName": "LHT65",
+    "deviceName": "LHT65-1",
+    "devEUI": "a84041468182b4da",
+    "txInfo": {
+        "frequency": 904300000,
+        "dr": 0
+    },
+    "adr": true,
+    "fCnt": 1367,
+    "fPort": 2,
+    "data": "y9ELFQGRAQr2f/8=",
+    "object": {
+        "BatV": 3.025,
+        "Ext_sensor": "Temperature Sensor LHT65",
+        "Hum_SHT": "40.1",
+        "TempF_DS": "82.51",
+        "TempF_SHT": "83.07"
+    }
+}

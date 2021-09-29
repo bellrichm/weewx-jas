@@ -6,8 +6,8 @@
 #set global page_name_global = 'week'
 #set global year_global = None
 #set global month_global = None
-#set global title_global = $gettext[$page + '.title']
-#set global h1_global = $gettext[$page + '.h1']
+#set global title_global = $gettext($page + '.title')
+#set global h1_global = $gettext($page + '.h1')
 #if $getVar("$Extras.pages." + $page, False)
     #include 'generators/pages.gen'
 #end if    

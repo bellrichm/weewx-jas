@@ -7,7 +7,7 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
 *#
 #from weeutil.weeutil import to_bool
 <!doctype html>
-<html lang="$gettext["lang"]">
+<html lang="$gettext("lang")">
    <head>
       <!-- Required meta tags -->
       <meta charset="utf-8">
@@ -93,7 +93,7 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
           <div class="card">
             <div class="card-body text-center">
               <h5 class="h5-responsive indigo-text">
-                $gettext[$section + '.title']
+                $gettext($section + '.title')
               </h5>
               <div id="$id"></div>
             </div>
