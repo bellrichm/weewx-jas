@@ -483,13 +483,20 @@ class JAS(SearchList):
                         observation = aggregate_type = self.skin_dict['Extras']['charts'][chart]['series'][obs].get('observation', obs)
                         aggregate_type = self.skin_dict['Extras']['charts'][chart]['series'][obs].get('aggregate_type', 'avg')
                         aggregate_interval = self.skin_dict['Extras']['page_definition'][page]['aggregate_interval'].get(aggregate_type, 'none')
-                        text_string = aggregate_type + "_aggregation"
+    
                         # set the aggregate_interval at the beginning of the chart definition, somit can be used in the chart
                         # Note, this means the last observation's aggregate type will be used to determine the aggregate interval
                         chart2 = "#set global aggregate_interval_global = 'aggregate_interval_" + aggregate_interval + "'\n" + chart2
 
-                        chart2 += indent + "  {name: '$gettext('" + text_string + "') $obs.label." + observation + "',\n"
-                        chart2 += indent + "  data: " + interval + "_" + aggregate_type + "." + observation + "},\n"
+                        chart_engine = "apexcharts"
+                        chart2 += indent + " {\n"
+                        if chart_engine == "apexcharts":
+                            text_string = aggregate_type + "_aggregation"
+                            chart2 += indent + "  name: '$gettext('" + text_string + "') $obs.label." + observation + "',\n"       
+                        else:
+                            chart2 = self._iterdict(indent + '  ', page, chart, chart2, interval, value[obs])
+                        chart2 += indent + "  data: " + interval + "_" + aggregate_type + "." + observation + ",\n"
+                        chart2 += indent + "},\n"
                     chart2 += indent +"]\n"
                 else:
                     chart2 += indent + key + ":" + " {\n"
@@ -511,10 +518,19 @@ class JAS(SearchList):
                 # for now, do not support overriding chart options by page
                 #chart_config[chart].merge(self.skin_dict['Extras']['pages'][page][chart])
 
-                chart_js = chart + "chart = new ApexCharts(document.querySelector('#" + chart + interval + "'), {\n"
-                chart2 = self._iterdict('  ', page, chart, chart_js, interval, chart_config[chart])
-                chart2 += "});\n"
-                chart2 += chart + "chart.render();\n"
+                chart_engine = "apexcharts"
+                if chart_engine == "apexcharts":
+                    chart_js = chart + "chart = new ApexCharts(document.querySelector('#" + chart + interval + "'), {\n"
+                    chart2 = self._iterdict('  ', page, chart, chart_js, interval, chart_config[chart])
+                    chart2 += "});\n"
+                    chart2 += chart + "chart.render();\n"
+                else:
+                    chart_js = "var option = {\n"
+                    chart2 = self._iterdict('  ', page, chart, chart_js, interval, chart_config[chart])
+                    chart2 += "};\n"
+                    chart2 += "var telem = document.getElementById('" + chart + interval + "');\n"
+                    chart2 += "var " + chart + "chart = echarts.init(document.getElementById('" + chart + interval + "'));\n"
+                    chart2 += chart + "chart.setOption(option);\n"
 
                 chart_final += chart2
 

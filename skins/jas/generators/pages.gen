@@ -18,7 +18,9 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
       <script src="https://cdn.jsdelivr.net/npm/paho-mqtt@1.0.4/paho-mqtt.min.js"></script>
+      ## ToDo - configure based on chart_engine
       <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.27.2/dist/apexcharts.min.js"></script>  
+      <script src="https://cdn.jsdelivr.net/npm/echarts@5.2.0/dist/echarts.min.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
 
       <link href="weather-icons/css/weather-icons.min.css" rel="stylesheet" />
