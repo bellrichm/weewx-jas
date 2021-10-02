@@ -17,7 +17,7 @@
         dateRangePicker2.setEndDate(endDate)
         #for $section in $getVar('Extras.pages.' + $page)
             ## todo - cleanup to not use continue
-            #if $section not in $getVar('$Extras.charts')
+            #if $section not in $getVar('$Extras.' + $chartEngine)
                 #continue
             #end if
             #set line = $section + 'chart'  + '.zoomX(startTimestamp, endTimestamp)'
@@ -37,7 +37,7 @@
                                 #for $section in $getVar('Extras.pages.' + $page)
                                     ## todo - cleanup to not use continue
                                     ##if not isinstance($Extras.pages[$page][$section],dict)
-                                    #if $section not in $getVar('$Extras.charts')
+                                    #if $section not in $getVar('$Extras.' + $chartEngine)
                                         #continue
                                     #end if
                                     #set line = $section + 'chart'  + '.zoomX(start.unix() * 1000, end.unix() * 1000)'

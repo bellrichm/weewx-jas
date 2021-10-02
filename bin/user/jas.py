@@ -124,10 +124,13 @@ class JAS(SearchList):
         self.skin_dict = generator.skin_dict
         report_dict = self.generator.config_dict.get('StdReport', {})
 
+        self.skin_debug = to_bool(self.skin_dict['Extras'].get('debug', False))
+        self.chart_engine = self.skin_dict['Extras'].get('chart_engine', 'echarts').lower()
+
         self.chart_defaults = {}
-        for chart_type in self.skin_dict['Extras']['default_chart_options'].sections:
-            self.chart_defaults[chart_type] = self.skin_dict['Extras']['default_chart_options'].get('defaults', {})
-            self.chart_defaults[chart_type].merge(self.skin_dict['Extras']['default_chart_options'][chart_type])
+        for chart_type in self.skin_dict['Extras']['apexcharts_defaults'].sections:
+            self.chart_defaults[chart_type] = self.skin_dict['Extras']['apexcharts_defaults'].get('defaults', {})
+            self.chart_defaults[chart_type].merge(self.skin_dict['Extras']['apexcharts_defaults'][chart_type])
 
         html_root = self.skin_dict.get('HTML_ROOT',
                                        report_dict.get('HTML_ROOT', 'public_html'))
@@ -137,7 +140,6 @@ class JAS(SearchList):
         self.html_root = html_root
         self.mkdir_p(os.path.join(self.html_root, 'data'))
 
-        self.skin_debug = to_bool(self.skin_dict['Extras'].get('debug', False))
         client_id = self.skin_dict['Extras']['client_id']
         client_secret = self.skin_dict['Extras']['client_secret']
 
@@ -175,6 +177,7 @@ class JAS(SearchList):
                                  'loginf': loginf,
                                  'logerr': logerr,
                                  'skinDebug': self._skin_debug,
+                                 'chartEngine': self.chart_engine,
                                  'utcOffset': self.utc_offset,
                                  'last24hours': self._get_last24hours(),
                                  'last7days': self._get_last_n_days(7),
@@ -444,12 +447,12 @@ class JAS(SearchList):
         # todo - rename now has 'side effect' of returning aggregate_types
         observations = {}
         aggregate_types = {}
-        charts = self.skin_dict.get('Extras', {}).get('charts', {})
+        charts = self.skin_dict.get('Extras', {}).get(self.chart_engine, {})
 
         for chart in charts:
             series = charts[chart].get('series', {})
             for obs in series:
-                observation = aggregate_type = self.skin_dict['Extras']['charts'][chart]['series'][obs].get('observation', obs)
+                observation = aggregate_type = self.skin_dict['Extras'][self.chart_engine][chart]['series'][obs].get('observation', obs)
                 if observation not in self.wind_observations:
                     if observation not in observations:
                         observations[observation] = {}
@@ -480,19 +483,18 @@ class JAS(SearchList):
                 if key == 'series':
                     chart2 += indent + "series: [\n"
                     for obs in value:
-                        observation = aggregate_type = self.skin_dict['Extras']['charts'][chart]['series'][obs].get('observation', obs)
-                        aggregate_type = self.skin_dict['Extras']['charts'][chart]['series'][obs].get('aggregate_type', 'avg')
+                        observation = self.skin_dict['Extras'][self.chart_engine][chart]['series'][obs].get('observation', obs)
+                        aggregate_type = self.skin_dict['Extras'][self.chart_engine][chart]['series'][obs].get('aggregate_type', 'avg')
                         aggregate_interval = self.skin_dict['Extras']['page_definition'][page]['aggregate_interval'].get(aggregate_type, 'none')
-    
+
                         # set the aggregate_interval at the beginning of the chart definition, somit can be used in the chart
                         # Note, this means the last observation's aggregate type will be used to determine the aggregate interval
                         chart2 = "#set global aggregate_interval_global = 'aggregate_interval_" + aggregate_interval + "'\n" + chart2
 
-                        chart_engine = "apexcharts"
                         chart2 += indent + " {\n"
-                        if chart_engine == "apexcharts":
+                        if self.chart_engine == "apexcharts":
                             text_string = aggregate_type + "_aggregation"
-                            chart2 += indent + "  name: '$gettext('" + text_string + "') $obs.label." + observation + "',\n"       
+                            chart2 += indent + "  name: '$gettext('" + text_string + "') $obs.label." + observation + "',\n"
                         else:
                             chart2 = self._iterdict(indent + '  ', page, chart, chart2, interval, value[obs])
                         chart2 += indent + "  data: " + interval + "_" + aggregate_type + "." + observation + ",\n"
@@ -509,17 +511,16 @@ class JAS(SearchList):
     def _gen_charts(self, page, interval):
         chart_final = ''
         for chart in self.skin_dict['Extras']['pages'][page]:
-            if chart in self.skin_dict['Extras']['charts'].sections:
+            if chart in self.skin_dict['Extras'][self.chart_engine].sections:
                 chart_config = configobj.ConfigObj(StringIO("[%s]" % (chart)))
-                chart_type = self.skin_dict['Extras']['charts'][chart]['chart']['type']
+                chart_type = self.skin_dict['Extras'][self.chart_engine][chart]['chart']['type']
                 chart_default = self.chart_defaults.get(chart_type, {})
                 chart_config[chart].merge(chart_default)
-                chart_config[chart].merge(self.skin_dict['Extras']['charts'][chart])
+                chart_config[chart].merge(self.skin_dict['Extras'][self.chart_engine][chart])
                 # for now, do not support overriding chart options by page
                 #chart_config[chart].merge(self.skin_dict['Extras']['pages'][page][chart])
 
-                chart_engine = "apexcharts"
-                if chart_engine == "apexcharts":
+                if self.chart_engine == "apexcharts":
                     chart_js = chart + "chart = new ApexCharts(document.querySelector('#" + chart + interval + "'), {\n"
                     chart2 = self._iterdict('  ', page, chart, chart_js, interval, chart_config[chart])
                     chart2 += "});\n"
