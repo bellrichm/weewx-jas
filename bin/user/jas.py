@@ -127,10 +127,14 @@ class JAS(SearchList):
         self.skin_debug = to_bool(self.skin_dict['Extras'].get('debug', False))
         self.chart_engine = self.skin_dict['Extras'].get('chart_engine', 'echarts').lower()
 
+        if self.chart_engine == 'apexcharts':
+            chart_type_defaults = 'apexcharts_defaults'
+        else:
+            chart_type_defaults = 'echarts_defaults'
         self.chart_defaults = {}
-        for chart_type in self.skin_dict['Extras']['apexcharts_defaults'].sections:
-            self.chart_defaults[chart_type] = self.skin_dict['Extras']['apexcharts_defaults'].get('defaults', {})
-            self.chart_defaults[chart_type].merge(self.skin_dict['Extras']['apexcharts_defaults'][chart_type])
+        for chart_type in self.skin_dict['Extras'][chart_type_defaults].sections:
+            self.chart_defaults[chart_type] = self.skin_dict['Extras'][chart_type_defaults].get('defaults', {})
+            self.chart_defaults[chart_type].merge(self.skin_dict['Extras'][chart_type_defaults][chart_type])
 
         html_root = self.skin_dict.get('HTML_ROOT',
                                        report_dict.get('HTML_ROOT', 'public_html'))

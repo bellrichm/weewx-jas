@@ -33,22 +33,25 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
         #include "sections/reload.inc"
       #end if
 
-      ## Should only add the javascript if the page has radar showing...
-      #set radar_scripts = '' 
-      #if not $getVar("$Extras.pages." + $page + '.radar', True)
-        #set radar_scripts = 'onresize="calcRadarHeight()" onload="calcRadarHeight()"'     
-        <script>
-          function calcRadarHeight(){
-            tmp = document.getElementById("radar")
-            tmp.style.height = tmp.offsetWidth / 1.618 + 17  +"px" // adding is a hack
-          }
-        </script>
-      #end if  
+      <script>
+        function refreshSizes(){
+          #if not $getVar("$Extras.pages." + $page + '.radar', True)
+            radarElem = document.getElementById("radar")
+            radarElem.style.height = radarElem.offsetWidth / 1.618 + 17  +"px" // adding is a hack
+          #end if
+
+          #if $chartEngine == "echarts"
+            chartElem = foochart.getDom()
+            height = chartElem.offsetWidth / 1.618 + 17  +"px" // adding is a hack
+            foochart.resize({width: null, height: height})
+          #end if
+        }
+      </script>
 
       <title>$title_global</title>
    </head>
 
-    <body $radar_scripts> ## ToDo - should only add the javascript if the page has radar showing...
+    <body onresize="refreshSizes()" onload="refreshSizes()">
        #include "generators/navbar.gen"
       <h1>$h1_global</h1>
 
