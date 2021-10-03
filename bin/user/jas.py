@@ -511,7 +511,7 @@ class JAS(SearchList):
         return chart2
 
     def _gen_charts(self, page, interval):
-        chart_final = ''
+        chart_final = 'var pageCharts = [];\n'
         for chart in self.skin_dict['Extras']['pages'][page]:
             if chart in self.skin_dict['Extras'][self.chart_engine].sections:
                 chart_config = configobj.ConfigObj(StringIO("[%s]" % (chart)))
@@ -535,6 +535,8 @@ class JAS(SearchList):
                     chart2 += "var telem = document.getElementById('" + chart + interval + "');\n"
                     chart2 += "var " + chart + "chart = echarts.init(document.getElementById('" + chart + interval + "'));\n"
                     chart2 += chart + "chart.setOption(option);\n"
+
+                chart2 += "pageCharts.push(" + chart + "chart)\n"
 
                 chart_final += chart2
 

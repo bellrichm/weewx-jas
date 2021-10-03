@@ -39,11 +39,12 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
             radarElem = document.getElementById("radar")
             radarElem.style.height = radarElem.offsetWidth / 1.618 + 17  +"px" // adding is a hack
           #end if
-
           #if $chartEngine == "echarts"
-            chartElem = foochart.getDom()
-            height = chartElem.offsetWidth / 1.618 + 17  +"px" // adding is a hack
-            foochart.resize({width: null, height: height})
+            for (index in pageCharts) {
+              chartElem = pageCharts[index].getDom()
+              height = chartElem.offsetWidth / 1.618 + 17  +"px" // adding is a hack
+              pageCharts[index].resize({width: null, height: height})
+            }
           #end if
         }
       </script>
