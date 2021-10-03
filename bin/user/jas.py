@@ -507,6 +507,9 @@ class JAS(SearchList):
                     chart2 = self._iterdict(indent + '  ', page, chart, chart2, interval, value)
                     chart2 += indent + "},\n"
             else:
+                # ToDo - cleanup
+                if key == 'aggregate_type':
+                    continue
                 chart2 += indent + key + ": " + value + ",\n"
         return chart2
 
