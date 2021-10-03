@@ -129,12 +129,10 @@ class JAS(SearchList):
 
         if self.chart_engine == 'apexcharts':
             chart_type_defaults = 'apexcharts_defaults'
-        else:
-            chart_type_defaults = 'echarts_defaults'
-        self.chart_defaults = {}
-        for chart_type in self.skin_dict['Extras'][chart_type_defaults].sections:
-            self.chart_defaults[chart_type] = self.skin_dict['Extras'][chart_type_defaults].get('defaults', {})
-            self.chart_defaults[chart_type].merge(self.skin_dict['Extras'][chart_type_defaults][chart_type])
+            self.chart_defaults = {}
+            for chart_type in self.skin_dict['Extras'][chart_type_defaults].sections:
+                self.chart_defaults[chart_type] = self.skin_dict['Extras'][chart_type_defaults].get('defaults', {})
+                self.chart_defaults[chart_type].merge(self.skin_dict['Extras'][chart_type_defaults][chart_type])
 
         html_root = self.skin_dict.get('HTML_ROOT',
                                        report_dict.get('HTML_ROOT', 'public_html'))
@@ -517,9 +515,10 @@ class JAS(SearchList):
         for chart in self.skin_dict['Extras']['pages'][page]:
             if chart in self.skin_dict['Extras'][self.chart_engine].sections:
                 chart_config = configobj.ConfigObj(StringIO("[%s]" % (chart)))
-                chart_type = self.skin_dict['Extras'][self.chart_engine][chart]['chart']['type']
-                chart_default = self.chart_defaults.get(chart_type, {})
-                chart_config[chart].merge(chart_default)
+                if self.chart_engine == 'apexcharts':
+                    chart_type = self.skin_dict['Extras'][self.chart_engine][chart]['chart']['type']
+                    chart_default = self.chart_defaults.get(chart_type, {})
+                    chart_config[chart].merge(chart_default)
                 chart_config[chart].merge(self.skin_dict['Extras'][self.chart_engine][chart])
                 # for now, do not support overriding chart options by page
                 #chart_config[chart].merge(self.skin_dict['Extras']['pages'][page][chart])
