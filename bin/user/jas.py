@@ -454,13 +454,13 @@ class JAS(SearchList):
         for chart in charts:
             series = charts[chart].get('series', {})
             for obs in series:
-                observation = aggregate_type = self.skin_dict['Extras'][self.chart_engine][chart]['series'][obs].get('observation', obs)
+                weewx_options = series[obs].get('weewx', {})
+                observation = weewx_options.get('observation', obs)
                 if observation not in self.wind_observations:
                     if observation not in observations:
                         observations[observation] = {}
                         observations[observation]['aggregate_types'] = {}
 
-                    weewx_options = series[obs].get('weewx', {})
                     aggregate_type = weewx_options.get('aggregate_type', 'avg')
                     observations[observation]['aggregate_types'][aggregate_type] = {}
                     aggregate_types[aggregate_type] = {}
@@ -489,9 +489,8 @@ class JAS(SearchList):
                 if key == 'series':
                     chart2 += indent + "series: [\n"
                     for obs in value:
-                        # ToDo - move observation under weewx
-                        observation = self.skin_dict['Extras'][self.chart_engine][chart]['series'][obs].get('observation', obs)
                         weewx_options = self.skin_dict['Extras'][self.chart_engine][chart]['series'][obs].get('weewx', {})
+                        observation = weewx_options.get('observation', obs)
                         aggregate_type = weewx_options.get('aggregate_type', 'avg')
                         aggregate_interval = self.skin_dict['Extras']['page_definition'][page]['aggregate_interval'].get(aggregate_type, 'none')
 
