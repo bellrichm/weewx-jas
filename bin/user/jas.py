@@ -460,7 +460,8 @@ class JAS(SearchList):
                         observations[observation] = {}
                         observations[observation]['aggregate_types'] = {}
 
-                    aggregate_type = series[obs].get('aggregate_type', 'avg')
+                    weewx_options = series[obs].get('weewx', {})
+                    aggregate_type = weewx_options.get('aggregate_type', 'avg')
                     observations[observation]['aggregate_types'][aggregate_type] = {}
                     aggregate_types[aggregate_type] = {}
 
@@ -482,11 +483,16 @@ class JAS(SearchList):
         chart2 = chart_js
         for key, value in dictionary.items():
             if isinstance(value, dict):
+                if key == 'weewx':
+                    logdbg(value)
+                    continue
                 if key == 'series':
                     chart2 += indent + "series: [\n"
                     for obs in value:
+                        # ToDo - move observation under weewx
                         observation = self.skin_dict['Extras'][self.chart_engine][chart]['series'][obs].get('observation', obs)
-                        aggregate_type = self.skin_dict['Extras'][self.chart_engine][chart]['series'][obs].get('aggregate_type', 'avg')
+                        weewx_options = self.skin_dict['Extras'][self.chart_engine][chart]['series'][obs].get('weewx', {})
+                        aggregate_type = weewx_options.get('aggregate_type', 'avg')
                         aggregate_interval = self.skin_dict['Extras']['page_definition'][page]['aggregate_interval'].get(aggregate_type, 'none')
 
                         # set the aggregate_interval at the beginning of the chart definition, somit can be used in the chart
@@ -507,9 +513,6 @@ class JAS(SearchList):
                     chart2 = self._iterdict(indent + '  ', page, chart, chart2, interval, value)
                     chart2 += indent + "},\n"
             else:
-                # ToDo - cleanup
-                if key == 'aggregate_type':
-                    continue
                 chart2 += indent + key + ": " + value + ",\n"
         return chart2
 
