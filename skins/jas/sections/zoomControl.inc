@@ -20,7 +20,11 @@
             #if $section not in $getVar('$Extras.' + $chartEngine)
                 #continue
             #end if
-            #set line = $section + 'chart'  + '.zoomX(startTimestamp, endTimestamp)'
+            #if $chartEngine == 'apexcharts'
+                #set line = $section + 'chart'  + '.zoomX(startTimestamp, endTimestamp)'
+            #else
+                #set line = $section + "chart" + ".dispatchAction({type: 'dataZoom', startValue: startTimestamp, endValue: endTimestamp})"
+            #end if
             $line
         #end for
         updateMinMax(startTimestamp, endTimestamp_min)
@@ -40,7 +44,11 @@
                                     #if $section not in $getVar('$Extras.' + $chartEngine)
                                         #continue
                                     #end if
-                                    #set line = $section + 'chart'  + '.zoomX(start.unix() * 1000, end.unix() * 1000)'
+                                    #if $chartEngine == 'apexcharts'
+                                        #set line = $section + 'chart'  + '.zoomX(start.unix() * 1000, end.unix() * 1000)'
+                                    #else
+                                        #set line = $section + "chart" + ".dispatchAction({type: 'dataZoom', startValue: start.unix() * 1000, endValue: end.unix() * 1000})"
+                                    #end if
                                     $line
                                 #end for
                                 updateMinMax(start.unix() * 1000, end.startOf('day').unix() * 1000)
