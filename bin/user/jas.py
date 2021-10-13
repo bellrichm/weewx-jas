@@ -134,10 +134,12 @@ class JAS(SearchList):
                 self.chart_defaults[chart_type] = self.skin_dict['Extras'][chart_type_defaults].get('defaults', {})
                 self.chart_defaults[chart_type].merge(self.skin_dict['Extras'][chart_type_defaults][chart_type])
         else:
-            self.chart_defaults = self.skin_dict['Extras']['echarts_defaults'].get('defaults', {})
+            self.chart_defaults = self.skin_dict['Extras']['echarts_defaults']
             self.chart_series_defaults = {}
-            for series_type in self.skin_dict['Extras']['echarts_defaults'].get('series', {}):
-                self.chart_series_defaults[series_type] = self.skin_dict["Extras"]['echarts_defaults']['series'][series_type]
+            for coordinate_type in self.skin_dict['Extras']['echarts_defaults']:
+                self.chart_series_defaults[coordinate_type] = {}
+                for series_type in self.skin_dict['Extras']['echarts_defaults'].get(coordinate_type, {}).get('series', {}):
+                    self.chart_series_defaults[coordinate_type][series_type] = self.skin_dict["Extras"][coordinate_type]['series'][series_type]
 
         html_root = self.skin_dict.get('HTML_ROOT',
                                        report_dict.get('HTML_ROOT', 'public_html'))
@@ -509,8 +511,14 @@ class JAS(SearchList):
                             text_string = aggregate_type + "_aggregation"
                             chart2 += indent + "  name: '$gettext('" + text_string + "') $obs.label." + observation + "',\n"
                         else:
-                            if value[obs]['type'] in self.chart_series_defaults:
-                                chart_series_defaults = copy.deepcopy(self.chart_series_defaults[value[obs]['type']])
+                            if 'polar' in self.skin_dict['Extras'][self.chart_engine][chart]:
+                                coordinate_type = 'polar'
+                            elif 'grid' in self.skin_dict['Extras'][self.chart_engine][chart]:
+                                coordinate_type = 'grid'
+                            else:
+                                coordinate_type = 'grid'
+                            if value[obs]['type'] in self.chart_series_defaults.get(coordinate_type, {}):
+                                chart_series_defaults = copy.deepcopy(self.chart_series_defaults[coordinate_type][value[obs]['type']])
                             else:
                                 chart_series_defaults = {}
                             chart2 = self._iterdict(indent + '  ', page, chart, chart2, interval, chart_series_defaults, value[obs])
@@ -537,7 +545,13 @@ class JAS(SearchList):
                     chart_default = self.chart_defaults.get(chart_type, {})
                     chart_config[chart].merge(chart_default)
                 else:
-                    chart_config[chart].merge(self.chart_defaults)
+                    if 'polar' in self.skin_dict['Extras'][self.chart_engine][chart]:
+                        coordinate_type = 'polar'
+                    elif 'grid' in self.skin_dict['Extras'][self.chart_engine][chart]:
+                        coordinate_type = 'grid'
+                    else:
+                        coordinate_type = 'grid'
+                    chart_config[chart].merge(self.chart_defaults.get(coordinate_type, {}))
 
                 chart_config[chart].merge(self.skin_dict['Extras'][self.chart_engine][chart])
                 # for now, do not support overriding chart options by page
@@ -549,6 +563,18 @@ class JAS(SearchList):
                     chart2 += "});\n"
                     chart2 += chart + "chart.render();\n"
                 else:
+                    # ToDo - wind rose proof of concept
+                    if coordinate_type == 'polar':
+                        chart_final += 'var legendName = ["0.1-2.3 m/s", "2.3-4.5 m/s", "4.5-6.7 m/s", "6.7-8.9 m/s", "8.9-11.0 m/s", "11.0-13.2 m/s", "13.2-15.4 m/s",];\n'
+                        #chart_final += "last24hours_avg = new Object();\n"
+                        chart_final += "last24hours_avg.windCompassRange0 = [17, 4, 4, 6, 2, 6, 3, 3, 1, 4, 4, 7, 1, 1, 2, 2, ];\n"
+                        chart_final += "last24hours_avg.windCompassRange1 = [7, 2, 4, 2, 2, 6, 3, 3, 1, 4, 4, 3, 1, 4, 5, 2, ];\n"
+                        chart_final += "last24hours_avg.windCompassRange2 = [10, 4, 14, 12, 12, 32, 23, 23, 21, 4, 4, 13, 11, 14, 24, 2, ];\n"
+                        chart_final += "last24hours_avg.windCompassRange3 = [10, 2, 4, 2, 2, 6, 3, 3, 1, 4, 4, 3, 1, 4, 3, 3, ];\n"
+                        chart_final += "last24hours_avg.windCompassRange4 = [10, 4, 4, 2, 1, 1, 4, 2, 2, 6, 3, 3, 2, 6, 3, 3, ];\n"
+                        chart_final += "last24hours_avg.windCompassRange5 = [10, 2, 4, 2, 1, 1, 4, 2, 2, 6, 3, 3, 3, 1, 4, 5, ];\n"
+                        chart_final += "last24hours_avg.windCompassRange6 = [10, 4, 4, 2, 2, 2, 3, 3, 1, 4, 3, 3, 2, 6, 3, 3, ];\n"
+
                     chart_js = "var option = {\n"
                     chart2 = self._iterdict('  ', page, chart, chart_js, interval, {}, chart_config[chart])
                     chart2 += "};\n"
@@ -556,7 +582,7 @@ class JAS(SearchList):
                     chart2 += "var " + chart + "chart = echarts.init(document.getElementById('" + chart + interval + "'));\n"
                     chart2 += chart + "chart.setOption(option);\n"
 
-                chart2 += "pageCharts.push(" + chart + "chart)\n"
+                chart2 += "pageCharts.push(" + chart + "chart);\n"
 
                 chart_final += chart2
 
