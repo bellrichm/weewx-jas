@@ -565,7 +565,7 @@ class JAS(SearchList):
                 else:
                     # ToDo - wind rose proof of concept
                     if coordinate_type == 'polar':
-                        chart_final += 'var legendName = ["0.1-2.3 m/s", "2.3-4.5 m/s", "4.5-6.7 m/s", "6.7-8.9 m/s", "8.9-11.0 m/s", "11.0-13.2 m/s", "13.2-15.4 m/s",];\n'
+                        chart_final += 'var legendName = ["<1 mi/hr", "1-3 mi/hr", "4-7 mi/hr", "8-12 mi/hr", "13-18 mi/hr", "19-24 mi/hr", ">25 mi/hr",];\n'
 
                     chart_js = "var option = {\n"
                     chart2 = self._iterdict('  ', page, chart, chart_js, interval, {}, chart_config[chart])
