@@ -53,3 +53,11 @@ var endTimestamp = $last24hours.end.raw * 1000
     #end for
 #end for
 
+## ToDo - wind rose proof of concept
+#set avg, max, wind_directions = $windCompass()
+#set i = 0
+#for $wind in $wind_directions
+    #set line = "last24hours_avg.windCompassRange"  + str($i) + " = "  + str($wind) +  ";"
+    $line
+    #set $i += 1
+#end for

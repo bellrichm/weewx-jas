@@ -566,14 +566,6 @@ class JAS(SearchList):
                     # ToDo - wind rose proof of concept
                     if coordinate_type == 'polar':
                         chart_final += 'var legendName = ["0.1-2.3 m/s", "2.3-4.5 m/s", "4.5-6.7 m/s", "6.7-8.9 m/s", "8.9-11.0 m/s", "11.0-13.2 m/s", "13.2-15.4 m/s",];\n'
-                        #chart_final += "last24hours_avg = new Object();\n"
-                        chart_final += "last24hours_avg.windCompassRange0 = [17, 4, 4, 6, 2, 6, 3, 3, 1, 4, 4, 7, 1, 1, 2, 2, ];\n"
-                        chart_final += "last24hours_avg.windCompassRange1 = [7, 2, 4, 2, 2, 6, 3, 3, 1, 4, 4, 3, 1, 4, 5, 2, ];\n"
-                        chart_final += "last24hours_avg.windCompassRange2 = [10, 4, 14, 12, 12, 32, 23, 23, 21, 4, 4, 13, 11, 14, 24, 2, ];\n"
-                        chart_final += "last24hours_avg.windCompassRange3 = [10, 2, 4, 2, 2, 6, 3, 3, 1, 4, 4, 3, 1, 4, 3, 3, ];\n"
-                        chart_final += "last24hours_avg.windCompassRange4 = [10, 4, 4, 2, 1, 1, 4, 2, 2, 6, 3, 3, 2, 6, 3, 3, ];\n"
-                        chart_final += "last24hours_avg.windCompassRange5 = [10, 2, 4, 2, 1, 1, 4, 2, 2, 6, 3, 3, 3, 1, 4, 5, ];\n"
-                        chart_final += "last24hours_avg.windCompassRange6 = [10, 4, 4, 2, 2, 2, 3, 3, 1, 4, 3, 3, 2, 6, 3, 3, ];\n"
 
                     chart_js = "var option = {\n"
                     chart2 = self._iterdict('  ', page, chart, chart_js, interval, {}, chart_config[chart])
