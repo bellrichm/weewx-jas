@@ -319,8 +319,17 @@ class JAS(SearchList):
             for wind_x in wind_data[wind_ordinal_data]['speed_data']:
                 wind_compass_speeds[i].append(wind_x)
                 i += 1
+                
+        wind_speed_unit = self.skin_dict["Units"]["Groups"]["group_speed"]
+        wind_speed_unit_label = self.skin_dict["Units"]["Labels"][wind_speed_unit]
+        low_range = wind_ranges[wind_speed_unit][0]
+        wind_range_legend = "['<%s %s', " % (low_range, wind_speed_unit_label)
+        for high_range in wind_ranges[wind_speed_unit][1:]:
+            wind_range_legend += "'%s-%s %s', " % (low_range, high_range, wind_speed_unit_label)
+            low_range = high_range
+        wind_range_legend += "'>%s %s']" % (high_range, wind_speed_unit_label)
 
-        return wind_compass_avg, wind_compass_max, wind_compass_speeds
+        return wind_compass_avg, wind_compass_max, wind_compass_speeds, wind_range_legend
 
     def _get_observation_text(self, coded_weather):
         cloud_codes = ["CL", "FW", "SC", "BK", "OV",]
@@ -563,10 +572,6 @@ class JAS(SearchList):
                     chart2 += "});\n"
                     chart2 += chart + "chart.render();\n"
                 else:
-                    # ToDo - wind rose proof of concept
-                    if coordinate_type == 'polar':
-                        chart_final += 'var legendName = ["<1 mi/hr", "1-3 mi/hr", "4-7 mi/hr", "8-12 mi/hr", "13-18 mi/hr", "19-24 mi/hr", ">25 mi/hr",];\n'
-
                     chart_js = "var option = {\n"
                     chart2 = self._iterdict('  ', page, chart, chart_js, interval, {}, chart_config[chart])
                     chart2 += "};\n"
