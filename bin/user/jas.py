@@ -134,12 +134,8 @@ class JAS(SearchList):
                 self.chart_defaults[chart_type] = self.skin_dict['Extras'][chart_type_defaults].get('defaults', {})
                 self.chart_defaults[chart_type].merge(self.skin_dict['Extras'][chart_type_defaults][chart_type])
         else:
-            self.chart_defaults = self.skin_dict['Extras']['echarts_defaults']
-            self.chart_series_defaults = {}
-            for coordinate_type in self.skin_dict['Extras']['echarts_defaults']:
-                self.chart_series_defaults[coordinate_type] = {}
-                for series_type in self.skin_dict['Extras']['echarts_defaults'].get(coordinate_type, {}).get('series', {}):
-                    self.chart_series_defaults[coordinate_type][series_type] = self.skin_dict["Extras"][coordinate_type]['series'][series_type]
+            self.chart_defaults = self.skin_dict['Extras']['echarts_defaults'].get('defaults', {})
+            self.chart_series_defaults = self.skin_dict['Extras']['echarts_defaults'].get('series', {})
 
         html_root = self.skin_dict.get('HTML_ROOT',
                                        report_dict.get('HTML_ROOT', 'public_html'))
@@ -319,7 +315,7 @@ class JAS(SearchList):
             for wind_x in wind_data[wind_ordinal_data]['speed_data']:
                 wind_compass_speeds[i].append(wind_x)
                 i += 1
-                
+
         wind_speed_unit = self.skin_dict["Units"]["Groups"]["group_speed"]
         wind_speed_unit_label = self.skin_dict["Units"]["Labels"][wind_speed_unit]
         low_range = wind_ranges[wind_speed_unit][0]
