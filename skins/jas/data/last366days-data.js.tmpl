@@ -53,3 +53,13 @@ var endTimestamp = $last366days.end.raw * 1000
     #end for
 #end for
 
+## ToDo - wind rose proof of concept
+#set avg, max, wind_directions, wind_range_legend = $windCompass(31622400, 0)
+#set line = "var windRangeLegend = " + $wind_range_legend
+$line;
+#set i = 0
+#for $wind in $wind_directions
+    #set line = "last366days_avg.windCompassRange"  + str($i) + " = "  + str($wind) +  ";"
+    $line
+    #set $i += 1
+#end for
