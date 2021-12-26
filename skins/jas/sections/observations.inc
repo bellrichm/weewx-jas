@@ -1,10 +1,34 @@
 ##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
+<script src="data/current.js"> </script>
+<script>
+    window.addEventListener("load", function (event) {
+        console.log("foo")
+        if(sessionStorage.getItem("clicked") === null){
+            console.log('foobar');
+            sessionStorage.setItem("clicked", "clicked") 
+        }
+
+    document.getElementById("$Extras.current.observation").innerHTML = current.header.value + current.header.unit
+
+    for ([observation, data] of current.observations) {
+        suffix = current.suffixes.get(data.suffix)
+        if (!suffix){
+            suffixText = ""
+        }
+        else {
+            suffixText = " " + suffix.value
+        }
+        document.getElementById(observation + "_label").innerHTML = data.label;
+        document.getElementById(observation + "_value").innerHTML = data.value + data.unit + suffixText
+    }   
+    })
+</script>
 <div class="col-12 col-xl-6 mb-4">
     <div class="card">
         <div class="card-body text-center">
-            <h1 class="display-2 indigo-text"> #include source='$current.' + $getVar('Extras.current.observation') # </h1>
+            <h1 id="$Extras.current.observation" class="display-2 indigo-text"></h1>
             #if $getVar("$Extras.display_aeris_observation", False)
                 $current_observation['observation']
             #end if
@@ -13,23 +37,11 @@
                   <tbody>
                     #for observation in $Extras.current.observations
                         #set i += 1
-                        #set type = $getVar("$Extras.current.observations" + "." + $observation + ".type", "")
-                        #set suffix = $getVar("$Extras.current.observations" + "." + $observation + ".suffix", "")
-                        #if $type == 'rise'    
-                            #set observation_value = '$' + 'almanac.' + $observation + 'rise'
-                            #set label = 'foo'
-                        #else if $type == 'sum'
-                            #set observation_value = '$' + $interval_global + '.' + $observation + "." + $type
-                            #set label = '$obs.label.' + $observation + $type
-                        #else
-                            #set observation_value = '$current.' + $observation
-                            #set label = '$obs.label.' + $observation + $type
-                        #end if
-
-                        #set $observation_value += " " + $suffix
+                        #set labelId = $observation + '_label'
+                        #set valueId = $observation + '_value'
                         #if $i % 2 # <tr> #end if
-                            <th scope="row">#include source=$label #</th>
-                            <td>#include source=$observation_value #</td>
+                            <th id="$labelId" scope="row"></th>
+                            <td id="$valueId"></td>
                         #if not $i % 2 # </tr> #end if
                     #end for
                 </tbody>
