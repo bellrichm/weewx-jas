@@ -14,10 +14,12 @@ function onConnect() {
 
 function onConnected(reconn ,url){
 	console.log(" in onConnected " + reconn);
+    sessionStorage.setItem("MQTTConnected", true);
 }
 
 function onConnectionLost(responseObject) {
     console.log("onConnectionLost: Connection Lost");
+    sessionStorage.removeItem("MQTTConnected");
     if (responseObject.errorCode !== 0) {
         console.log("onConnectionLost: " + responseObject.errorMessage);
     }
@@ -28,9 +30,21 @@ function onFailure(message) {
 }
 
 function onMessageArrived(message) {
-    console.log("onMessageArrived: " + message.payloadString);
+    //console.log("onMessageArrived: " + message.payloadString);
+    //console.log("  onMessageArrived: " + (Date.now()/1000));
+    console.log("  onMessageArrived: ");
     var test_obj = JSON.parse(message.payloadString);
-    document.getElementById("dateTime").innerHTML = test_obj.dateTime;
+    header = JSON.parse(sessionStorage.getItem("header"));
+    if (test_obj[header.name]) {
+        header.value = test_obj[header.name];
+        if (test_obj[header.unit]) {
+            header.unit = test_obj[header.unit];
+        }
+        sessionStorage.setItem("header", JSON.stringify(header));
+        document.getElementById(header.name).innerHTML = header.value + header.unit;
+    }
+    
+    //console.log("done")
 }
 
 function MQTTConnect() {

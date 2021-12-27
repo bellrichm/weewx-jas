@@ -3,14 +3,28 @@
 
 <script src="data/current.js"> </script>
 <script>
+    window.addEventListener("beforeunload", function (event) {
+        console.log("before unload")
+        if(sessionStorage.getItem("MQTTConnected")){
+            MQTTDisconnect()
+        }
+        alert("before unload")
+    })
     window.addEventListener("load", function (event) {
         console.log("foo")
-        if(sessionStorage.getItem("clicked") === null){
-            console.log('foobar');
-            sessionStorage.setItem("clicked", "clicked") 
-        }
 
-    document.getElementById("$Extras.current.observation").innerHTML = current.header.value + current.header.unit
+        // ToDo
+        MQTTConfig = true;
+
+    if(sessionStorage.getItem("header") === null || !MQTTConfig){
+        console.log("updating header")
+        sessionStorage.setItem("header", JSON.stringify(current.header));
+        document.getElementById("$Extras.current.observation").innerHTML = current.header.value + current.header.unit
+    }
+    else {
+        header = JSON.parse(sessionStorage.getItem("header"));
+        document.getElementById("$Extras.current.observation").innerHTML = header.value + header.unit
+    }
 
     for ([observation, data] of current.observations) {
         suffix = current.suffixes.get(data.suffix)
@@ -20,9 +34,14 @@
         else {
             suffixText = " " + suffix.value
         }
+
+        console.log("updating table")
         document.getElementById(observation + "_label").innerHTML = data.label;
         document.getElementById(observation + "_value").innerHTML = data.value + data.unit + suffixText
     }   
+
+    // ToDo put here for now
+    MQTTConnect();
     })
 </script>
 <div class="col-12 col-xl-6 mb-4">
