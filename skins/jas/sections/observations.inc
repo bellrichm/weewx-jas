@@ -14,34 +14,47 @@
         console.log("foo");
 
         // ToDo
-        MQTTConfig = true;
+        MQTTConfig = false;
 
         if(sessionStorage.getItem("header") === null || !MQTTConfig){
             console.log("updating header")
             sessionStorage.setItem("header", JSON.stringify(current.header));
-            document.getElementById("$Extras.current.observation").innerHTML = current.header.value + current.header.unit;
         }
-        else {
-            header = JSON.parse(sessionStorage.getItem("header"));
-            document.getElementById("$Extras.current.observation").innerHTML = header.value + header.unit;
+        header = JSON.parse(sessionStorage.getItem("header"));
+        document.getElementById("$Extras.current.observation").innerHTML = header.value + header.unit;
+
+        for ([suffix, data] of current.suffixes) {
+            if (sessionStorage.getItem(suffix) === null || !MQTTConfig){
+                console.log("updating suffixes")
+                sessionStorage.setItem(suffix, JSON.stringify(data));
+            }
         }
 
         for ([observation, data] of current.observations) {
-            suffix = current.suffixes.get(data.suffix);
-            if (!suffix){
+            if (sessionStorage.getItem(observation) === null || !MQTTConfig){
+                console.log("updating table");
+                sessionStorage.setItem(observation, JSON.stringify(data));
+            }
+            obs = JSON.parse(sessionStorage.getItem(observation));
+           
+            suffix = JSON.parse(sessionStorage.getItem(data.suffix));
+            if ( suffix=== null) {
                 suffixText = "";
             }
             else {
                 suffixText = " " + suffix.value;
             }
 
-            console.log("updating table");
-            document.getElementById(observation + "_label").innerHTML = data.label;
-            document.getElementById(observation + "_value").innerHTML = data.value + data.unit + suffixText;
+            document.getElementById(obs.name + "_label").innerHTML = obs.label;
+            document.getElementById(obs.name + "_value").innerHTML = obs.value + obs.unit + suffixText;
         }   
 
+        // ToDo, update DateTime dynamically
+
         // ToDo put here for now
-        MQTTConnect();
+        if (MQTTConfig) {
+            MQTTConnect();
+        }
     })
 </script>
 <div class="col-12 col-xl-6 mb-4">
