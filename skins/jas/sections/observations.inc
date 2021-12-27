@@ -11,37 +11,37 @@
         alert("before unload")
     })
     window.addEventListener("load", function (event) {
-        console.log("foo")
+        console.log("foo");
 
         // ToDo
         MQTTConfig = true;
 
-    if(sessionStorage.getItem("header") === null || !MQTTConfig){
-        console.log("updating header")
-        sessionStorage.setItem("header", JSON.stringify(current.header));
-        document.getElementById("$Extras.current.observation").innerHTML = current.header.value + current.header.unit
-    }
-    else {
-        header = JSON.parse(sessionStorage.getItem("header"));
-        document.getElementById("$Extras.current.observation").innerHTML = header.value + header.unit
-    }
-
-    for ([observation, data] of current.observations) {
-        suffix = current.suffixes.get(data.suffix)
-        if (!suffix){
-            suffixText = ""
+        if(sessionStorage.getItem("header") === null || !MQTTConfig){
+            console.log("updating header")
+            sessionStorage.setItem("header", JSON.stringify(current.header));
+            document.getElementById("$Extras.current.observation").innerHTML = current.header.value + current.header.unit;
         }
         else {
-            suffixText = " " + suffix.value
+            header = JSON.parse(sessionStorage.getItem("header"));
+            document.getElementById("$Extras.current.observation").innerHTML = header.value + header.unit;
         }
 
-        console.log("updating table")
-        document.getElementById(observation + "_label").innerHTML = data.label;
-        document.getElementById(observation + "_value").innerHTML = data.value + data.unit + suffixText
-    }   
+        for ([observation, data] of current.observations) {
+            suffix = current.suffixes.get(data.suffix);
+            if (!suffix){
+                suffixText = "";
+            }
+            else {
+                suffixText = " " + suffix.value;
+            }
 
-    // ToDo put here for now
-    MQTTConnect();
+            console.log("updating table");
+            document.getElementById(observation + "_label").innerHTML = data.label;
+            document.getElementById(observation + "_value").innerHTML = data.value + data.unit + suffixText;
+        }   
+
+        // ToDo put here for now
+        MQTTConnect();
     })
 </script>
 <div class="col-12 col-xl-6 mb-4">
