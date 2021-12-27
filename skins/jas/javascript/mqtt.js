@@ -44,6 +44,37 @@ function onMessageArrived(message) {
         document.getElementById(header.name).innerHTML = header.value + header.unit;
     }
     
+    suffixes = sessionStorage.getItem("suffixes").split(",");
+    suffixes.forEach(function(suffix) {
+        //console.log(suffix);
+        if (test_obj[suffix]) {
+            data = JSON.parse(sessionStorage.getItem(suffix));
+            data.value = test_obj[suffix];
+            sessionStorage.setItem(suffix, JSON.stringify(data));
+        }    
+    });
+
+    observations = sessionStorage.getItem("observations").split(",");
+    observations.forEach(function(observation) {
+        //console.log(observation);
+        if (test_obj[observation]) {
+            data = JSON.parse(sessionStorage.getItem(observation));
+            data.value = test_obj[observation];
+            sessionStorage.setItem(observation, JSON.stringify(data));
+
+            suffix = JSON.parse(sessionStorage.getItem(data.suffix));
+            if ( suffix=== null) {
+                suffixText = "";
+            }
+            else {
+                suffixText = " " + suffix.value;
+            }
+
+            document.getElementById(observation + "_label").innerHTML = data.label;
+            document.getElementById(data.name + "_value").innerHTML = data.value + data.unit + suffixText;
+        }
+    });    
+    
     //console.log("done")
 }
 

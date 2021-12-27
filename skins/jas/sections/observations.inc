@@ -14,7 +14,7 @@
         console.log("foo");
 
         // ToDo
-        MQTTConfig = false;
+        MQTTConfig = true;
 
         if(sessionStorage.getItem("header") === null || !MQTTConfig){
             console.log("updating header")
@@ -23,14 +23,23 @@
         header = JSON.parse(sessionStorage.getItem("header"));
         document.getElementById("$Extras.current.observation").innerHTML = header.value + header.unit;
 
+        // ToDo - cleanup, perhaps put suffix data into an array and store that
+        // ToDo - do a bit more in cheetah?
+        suffixes = [];
         for ([suffix, data] of current.suffixes) {
+            suffixes.push(suffix)
             if (sessionStorage.getItem(suffix) === null || !MQTTConfig){
                 console.log("updating suffixes")
                 sessionStorage.setItem(suffix, JSON.stringify(data));
             }
         }
+        sessionStorage.setItem("suffixes", suffixes.join(","));
 
+        // ToDo - cleanup, perhaps put observation data into an array and store that
+        // ToDo - do a bit more in cheetah?
+        observations = [];
         for ([observation, data] of current.observations) {
+            observations.push(observation);
             if (sessionStorage.getItem(observation) === null || !MQTTConfig){
                 console.log("updating table");
                 sessionStorage.setItem(observation, JSON.stringify(data));
@@ -47,7 +56,8 @@
 
             document.getElementById(obs.name + "_label").innerHTML = obs.label;
             document.getElementById(obs.name + "_value").innerHTML = obs.value + obs.unit + suffixText;
-        }   
+        }
+        sessionStorage.setItem("observations", observations.join(","));
 
         // ToDo, update DateTime dynamically
 
