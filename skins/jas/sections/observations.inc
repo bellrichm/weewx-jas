@@ -59,7 +59,12 @@
         }
         sessionStorage.setItem("observations", observations.join(","));
 
-        // ToDo, update DateTime dynamically
+        if(sessionStorage.getItem("updateDate") === null || !MQTTConfig){
+            console.log("updating dateTime")
+            sessionStorage.setItem("updateDate", JSON.stringify(updateDate));
+        }
+        updateDate = sessionStorage.getItem("updateDate");
+        document.getElementById("updateDate").innerHTML = updateDate;        
 
         // ToDo put here for now
         if (MQTTConfig) {
@@ -88,7 +93,7 @@
                     #end for
                 </tbody>
             </table>
-            $current.dateTime
+            <div id="updateDate"></div>
         </div>
     </div>
 </div>

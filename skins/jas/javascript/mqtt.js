@@ -75,7 +75,14 @@ function onMessageArrived(message) {
         }
     });    
     
-    //console.log("done")
+    if (test_obj.dateTime) {
+        sessionStorage.setItem("updateDate", test_obj.dateTime*1000);
+        var dateTime = new Date(test_obj.dateTime*1000);
+        // ToDo, use server locale not the browser so have correct timezone? 
+        document.getElementById("updateDate").innerHTML = dateTime.toLocaleString();
+    }    
+
+    //console.log("done");
 }
 
 function MQTTConnect() {
