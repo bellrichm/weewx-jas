@@ -14,7 +14,7 @@
         console.log("foo");
 
         // ToDo
-        MQTTConfig = true;
+        MQTTConfig = $Extras.mqtt.enable.lower();
 
         if(sessionStorage.getItem("header") === null || !MQTTConfig){
             console.log("updating header")
