@@ -30,6 +30,9 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
 
       <script src="data/$interval_name_global-data.js"></script>
 
+      ## ToDo - put here for now
+      <script src="javascript/mqtt.js"></script>
+
       #if to_bool($getVar('$Extras.pages.' + $page + '.reload', False))
         #include "sections/reload.inc"
       #end if
