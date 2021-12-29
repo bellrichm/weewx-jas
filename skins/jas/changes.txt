@@ -1,0 +1,14 @@
+V0.1.0-rc01
+- Initial Release
+  Charting using ApexCharts
+
+V0.2.0-rc01  
+Fixes:
+Enhancements:
+- Add support for ECharts as the charting 'engine'.
+- Initial support for updating current values via MQTT.
+- Improved handling of historical charts.
+- Ability to zoom charts.
+- Add to homescreen "as an application".
+- Auto page reload.
+
