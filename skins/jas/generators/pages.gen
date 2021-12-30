@@ -37,21 +37,8 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
         #include "sections/reload.inc"
       #end if
 
-      <script>
-        function refreshSizes(){
-          #if not $getVar("$Extras.pages." + $page + '.radar', True)
-            radarElem = document.getElementById("radar")
-            radarElem.style.height = radarElem.offsetWidth / 1.618 + 17  +"px" // adding is a hack
-          #end if
-          #if $chartEngine == "echarts"
-            for (index in pageCharts) {
-              chartElem = pageCharts[index].getDom()
-              height = chartElem.offsetWidth / 1.618 + 17  +"px" // adding is a hack
-              pageCharts[index].resize({width: null, height: height})
-            }
-          #end if
-        }
-      </script>
+    #set data = '<script src="javascript/' + $page_name_global + '.js"></script>'
+    $data
 
       <title>$title_global</title>
    </head>
