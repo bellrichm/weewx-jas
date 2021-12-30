@@ -105,7 +105,7 @@
                         #set selected_date = $today.replace(year=int($selected_year), month=int($selected_month), day=$today.day - $extra_days)
                         #break
                     #except ValueError:
-                        $set extra_days += 1
+                        #set extra_days += 1
                     #end try
                 #end while
 
