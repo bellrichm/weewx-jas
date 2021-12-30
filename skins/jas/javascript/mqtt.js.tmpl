@@ -84,8 +84,8 @@ function onMessageArrived(message) {
 
 function MQTTConnect() {
     console.log(" in MQTTConnect");
-    #set client_id = $getVar('Extras.mqtt.client_id', "weewx-jas-" + str(random.randint(1000, 9999)))
-    client = new Paho.MQTT.Client("$Extras.mqtt.host", $Extras.mqtt.port, "$client_id");
+    var clientID = "clientID-" + parseInt(Math.random() * 100);
+    client = new Paho.MQTT.Client("$Extras.mqtt.host", $Extras.mqtt.port, clientID);
 
     client.onConnectionLost = onConnectionLost;
     client.onMessageArrived = onMessageArrived;
