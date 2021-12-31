@@ -99,6 +99,7 @@
                     #set selected_month = $month_global
                 #end if
 
+                ## ToDo - fix this. It is using the date the page is generated, not the date the page is visited
                 #set extra_days = 0
                 #while True:
                     #try:
