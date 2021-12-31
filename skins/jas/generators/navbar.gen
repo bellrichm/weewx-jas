@@ -9,7 +9,7 @@
 }
 </style>
 
-<script src="data/alltime-data.js"> </script>
+<script src="data/alltime.js"> </script>
 <script src="javascript/common.js"> </script>
 
 <div class="fixed-top">
