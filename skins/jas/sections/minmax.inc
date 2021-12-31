@@ -1,44 +1,6 @@
 ##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
-<script>
-    function updateMinMax(startTimestamp, endTimestamp) {
-        ## todo - optimize to only get index once for all observations?
-        #for $observation in $getVar('Extras.minmax.observations')
-            #set min_datetime_array = $interval_name_global + "_min_" + $observation + "_dateTime"
-            #set min_data_array = $interval_name_global + "_min_" + $observation + "_data"
-            #set max_datetime_array = $interval_name_global + "_max_" + $observation + "_dateTime"
-            #set max_data_array = $interval_name_global + "_max_" + $observation + "_data"            
-            #set min_id = $observation + "_minmax_min"
-            #set max_id = $observation + "_minmax_max"
-            #set label = $getVar('unit.label.' + $observation)
-
-            #echo "startIndex = " + $min_datetime_array + ".findIndex(element => element == startTimestamp);\n"
-            #echo "endIndex = " + $min_datetime_array + ".findIndex(element => element == endTimestamp);\n"
-            #echo "var minIndex =" + $min_data_array + ".indexOf(Math.min(..." + $min_data_array + ".slice(startIndex, endIndex)));\n"
-            #echo "var maxIndex =" + $max_data_array + ".indexOf(Math.max(..." + $max_data_array + ".slice(startIndex, endIndex)));\n"
-            #echo "var min = " + $min_data_array + "[minIndex] + '" + $label + "';\n"
-            #echo "var max = " + $max_data_array + "[maxIndex] + '" + $label + "';\n"
-            #set aggregate_interval = "aggregate_interval_" + $getVar('Extras.page_definition.' + $page + '.aggregate_interval.min', 'none')
-            #echo "var minDate = moment.unix(" + $min_datetime_array + "[minIndex]/1000).utcOffset(" + str($utcOffset) + ").format('" + $pgettext($aggregate_interval, 'label') + "');\n"
-            #echo "var maxDate = moment.unix(" + $max_datetime_array + "[maxIndex]/1000).utcOffset(" + str($utcOffset) + ").format('" + $pgettext($aggregate_interval, 'label') + "');\n"
-            
-            var observation_element=document.getElementById("$min_id")
-            observation_element.innerHTML = min + '<br>' + minDate
-            var observation_element=document.getElementById("$max_id")
-            observation_element.innerHTML = max + '<br>' + maxDate
-        #end for
-    }
-    #if $getVar('Extras.page_definition.' + $page + '.aggregate_interval.min', None) is not None
-        #set $endTimestamp = "endTimestamp_min"
-    #else
-        #set $endTimestamp = "endTimestamp"
-    #end if
-    window.addEventListener("load", function (event) {
-        updateMinMax(startTimestamp, $endTimestamp)
-    });
-</script>
-
 <div class="col-12 col-xl-6 mb-4">
     <div class="card">
         <div class="card-body text-center">
