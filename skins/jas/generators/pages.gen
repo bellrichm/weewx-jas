@@ -105,6 +105,6 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
       </div>
     #end if
     </div>     
-    #set data = '<script src="charts/' + $page_name_global + 'charts.js"></script>'
+    #set data = '<script src="charts/' + $page_name_global + '.js"></script>'
     $data
 </body> 
