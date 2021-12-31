@@ -1,13 +1,23 @@
-        function refreshSizes(){
-          #if not $getVar("$Extras.pages." + $page + '.radar', True)
-            radarElem = document.getElementById("radar")
-            radarElem.style.height = radarElem.offsetWidth / 1.618 + 17  +"px" // adding is a hack
-          #end if
-          #if $chartEngine == "echarts"
-            for (index in pageCharts) {
-              chartElem = pageCharts[index].getDom()
-              height = chartElem.offsetWidth / 1.618 + 17  +"px" // adding is a hack
-              pageCharts[index].resize({width: null, height: height})
-            }
-          #end if
-        }
+##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
+##    See the file LICENSE.txt for your rights.
+
+#from weeutil.weeutil import to_bool
+
+#if to_bool($getVar('$Extras.pages.' + $page + '.reload', False))
+  #include "sections/reload.inc"
+#end if
+
+function refreshSizes(){
+  #if not $getVar("$Extras.pages." + $page + '.radar', True)
+    radarElem = document.getElementById("radar")
+    radarElem.style.height = radarElem.offsetWidth / 1.618 + 17  +"px" // adding is a hack
+  #end if
+
+  #if $chartEngine == "echarts"
+    for (index in pageCharts) {
+      chartElem = pageCharts[index].getDom()
+      height = chartElem.offsetWidth / 1.618 + 17  +"px" // adding is a hack
+      pageCharts[index].resize({width: null, height: height})
+    }
+  #end if
+}

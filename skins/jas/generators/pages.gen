@@ -5,7 +5,6 @@
 Ideally this would be a routine that takes a parameter, interval. But, with Cheetah
 'scoping' I couldn't get it to work. So, I resorted to a global variable and a simple include.
 *#
-#from weeutil.weeutil import to_bool
 <!doctype html>
 <html lang="$gettext("lang")">
    <head>
@@ -32,10 +31,6 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
 
       ## ToDo - put here for now
       <script src="javascript/mqtt.js"></script>
-
-      #if to_bool($getVar('$Extras.pages.' + $page + '.reload', False))
-        #include "sections/reload.inc"
-      #end if
 
     #set data = '<script src="javascript/' + $page_name_global + '.js"></script>'
     $data
