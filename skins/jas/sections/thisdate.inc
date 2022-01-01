@@ -98,21 +98,19 @@
                 #if $month_global is not None
                     #set selected_month = $month_global
                 #end if
+                #set offset_seconds = - $utcOffset * 60
 
-                ## ToDo - fix this. It is using the date the page is generated, not the date the page is visited
-                #set extra_days = 0
-                #while True:
-                    #try:
-                        #set selected_date = $today.replace(year=int($selected_year), month=int($selected_month), day=$today.day - $extra_days)
-                        #break
-                    #except ValueError:
-                        #set extra_days += 1
-                    #end try
-                #end while
-
-                dateRangePicker.setStartDate(moment.unix($selected_date.timestamp()).utcOffset($utcOffset));
-                dateRangePicker.setEndDate(moment.unix($selected_date.timestamp()).utcOffset($utcOffset));
-                updateThisDate($selected_date.timestamp() * 1000)
+                var lastDay = new Date($selected_year, $selected_month, 0).getDate();
+                var selectedDay = new Date().getDate();
+                if (selectedDay > lastDay) {
+                    selectedDay = lastDay
+                }
+                
+                var selectedDate = Date.UTC($selected_year, $selected_month - 1, selectedDay) / 1000 + $offset_seconds
+                
+                dateRangePicker.setStartDate(moment.unix(selectedDate).utcOffset($utcOffset));
+                dateRangePicker.setEndDate(moment.unix(selectedDate).utcOffset($utcOffset));
+                updateThisDate(selectedDate * 1000)
             });
         </script>
 
