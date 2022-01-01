@@ -1,8 +1,6 @@
 ##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
-#import datetime
-
 <link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/alumuko/vanilla-datetimerange-picker@latest/dist/vanilla-datetimerange-picker.css">
 
 <script src="https://cdn.jsdelivr.net/gh/alumuko/vanilla-datetimerange-picker@latest/dist/vanilla-datetimerange-picker.js"></script>
@@ -44,75 +42,7 @@
         ## ToDo - move the cdn urls
         <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js" type="text/javascript"></script>
         <script src="https://cdn.jsdelivr.net/gh/alumuko/vanilla-datetimerange-picker@latest/dist/vanilla-datetimerange-picker.js"></script>
-        <script>
-            function getObservation(timeStamp, observations) {
-                var array_result = observations.filter(function(v,i) { return v[0] === timeStamp; });    
-                if (array_result.length > 0)     {
-                    return array_result[0][1]
-                }
 
-               return observations[0][1]
-            }
-            function updateThisDate(timeStamp) {
-                #for observation in $Extras.thisdate.observations
-                    #set aggregation_type = $getVar("$Extras.thisdate.observations." + $observation + ".type", None)
-                    #if $aggregation_type is None
-                        #set value = $interval_name_global + '_min.' + $observation
-                        #set line = "var obs = getObservation(timeStamp, " + $value + ")"
-                        #set id = $observation + "_thisdate_min"
-                        $line
-                        var observation=document.getElementById("$id")
-                        observation.innerHTML = obs                   
-                        #set value = $interval_name_global + '_max.' + $observation
-                        #set line = "var obs = getObservation(timeStamp, " + $value + ")"
-                        #set id = $observation + "_thisdate_max"
-                        $line
-                        var observation=document.getElementById("$id")
-                        observation.innerHTML = obs                             
-                    #else
-                        #set value = $interval_name_global + '_' + $aggregation_type + '.' + $observation
-                        #set line = "var obs = getObservation(timeStamp, " + $value + ")"
-                        #set id = $observation + "_thisdate_" + $aggregation_type
-                        $line
-                        var observation=document.getElementById("$id")
-                        observation.innerHTML = obs
-                    #end if
-                #end for  
-            }            
-            window.addEventListener("load", function (event) {
-                var dateRangePicker = new DateRangePicker('datetimerange-input1',
-                                    {singleDatePicker: true,
-                                     minDate: startDate,
-                                     maxDate: endDate
-                                    },
-                                     function(start, end, label) {
-                                         updateThisDate(start.unix() * 1000)
-                                    }
-                );
-                #set today = datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
-                #set selected_year = $today.year
-                #if $year_global is not None
-                    #set selected_year = $year_global
-                #end if
-                #set selected_month = $today.month
-                #if $month_global is not None
-                    #set selected_month = $month_global
-                #end if
-                #set offset_seconds = - $utcOffset * 60
-
-                var lastDay = new Date($selected_year, $selected_month, 0).getDate();
-                var selectedDay = new Date().getDate();
-                if (selectedDay > lastDay) {
-                    selectedDay = lastDay
-                }
-                
-                var selectedDate = Date.UTC($selected_year, $selected_month - 1, selectedDay) / 1000 + $offset_seconds
-                
-                dateRangePicker.setStartDate(moment.unix(selectedDate).utcOffset($utcOffset));
-                dateRangePicker.setEndDate(moment.unix(selectedDate).utcOffset($utcOffset));
-                updateThisDate(selectedDate * 1000)
-            });
-        </script>
 
 
 
