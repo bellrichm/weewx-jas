@@ -238,10 +238,11 @@ function refreshSizes(){
 
         if(sessionStorage.getItem("updateDate") === null || !MQTTConfig){
             console.log("updating dateTime")
-            sessionStorage.setItem("updateDate", JSON.stringify(updateDate));
+            sessionStorage.setItem("updateDate", updateDate);
         }
-        updateDate = sessionStorage.getItem("updateDate");
-        document.getElementById("updateDate").innerHTML = updateDate;        
+        var dateTime = new Date(sessionStorage.getItem("updateDate") * 1000)
+        // ToDo, use server locale not the browser so have correct timezone? 
+        document.getElementById("updateDate").innerHTML = dateTime.toLocaleString();        
 
         // ToDo put here for now
         if (MQTTConfig) {
