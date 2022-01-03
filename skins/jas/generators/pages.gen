@@ -27,8 +27,12 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
 
       <link href="weather-icons/css/weather-icons.min.css" rel="stylesheet" />
 
-      #set data = $interval_name_global + ".js"
-      <script src="data/$data"></script>
+      <script src="javascript/common.js"></script>
+
+      #if $interval_name_global
+        #set data = $interval_name_global + ".js"
+        <script src="data/$data"></script>
+      #end if
 
       ## ToDo - put here for now
       <script src="javascript/mqtt.js"></script>
