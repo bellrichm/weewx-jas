@@ -17,3 +17,10 @@ function refreshSizes(){
     }
   #end if
 }
+
+function addConsole(text){
+    var jasLog = document.getElementById("jasLog")
+    if (jasLog) {
+        jasLog.innerHTML = text + "\n<br>" + jasLog.innerHTML;
+    }
+}

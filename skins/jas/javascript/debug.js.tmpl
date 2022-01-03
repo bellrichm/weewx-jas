@@ -12,3 +12,13 @@
 #set global interval_name_global = None
 #set global year_global = None
 #set global month_global = None
+
+function copyLog() {
+  var log = document.getElementById("jasLog").textContent;
+  navigator.clipboard.writeText(log);
+}
+
+function clearLog() {
+    var jasLog = document.getElementById("jasLog")
+        jasLog.innerHTML = ""
+}

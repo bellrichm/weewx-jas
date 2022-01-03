@@ -27,6 +27,9 @@ function onFailure(message) {
 }
 
 function onMessageArrived(message) {
+    #if $getVar("$Extras.pages.debug", False)
+      addConsole(message.payloadString)
+    #end if
     //console.log("onMessageArrived: " + message.payloadString);
     //console.log("  onMessageArrived: " + (Date.now()/1000));
     console.log("  onMessageArrived: ");
