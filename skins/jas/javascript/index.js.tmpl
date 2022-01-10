@@ -35,6 +35,16 @@
         #if $year_global is not None
           setYear($year_global, "$month_global")
         #end if
+
+	let iframe = document.querySelector("#child-iframe");
+
+	window.addEventListener('message', function(e) {
+		// message that was passed from iframe page
+		let message = e.data;
+
+		iframe.style.height = message.height + 'px';
+		//iframe.style.width = message.width + 'px';
+	} , false);        
     });
 
   function setYear(year, month) {
