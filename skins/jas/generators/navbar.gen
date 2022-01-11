@@ -62,7 +62,4 @@
       </div>
     </div>
   </nav>
-  #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
-    #include "sections/zoomControl.inc"
-  #end if
 </div>
