@@ -29,7 +29,7 @@
               #if $page_data == $page
                 #set navItem = '<a class="nav-link active" aria-current="page" href="' + $page_data + '.html">' + $gettext($page_data + '.navbarText') + '</a>'
               #else
-                #set navItem = '<a class="nav-link" href="' + $page_data + '.html">' + $gettext($page_data + '.navbarText') + '</a>'
+                #set navItem = '<a class="nav-link" onclick="setIframeSrc(\'child-iframe\', \'' + $page_data + '.html\')">' + $gettext($page_data + '.navbarText') + '</a>'
               #end if
                 $navItem
               </li>

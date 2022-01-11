@@ -54,13 +54,18 @@
     var li = document.createElement("li");
     var link = document.createElement("a"); 
     link.classList.add("dropdown-item")           
-    link.onclick = function() { 
-                      this.classList.add("active") 
-                      this.ariaCurrent = "page"
-                    };           
+      var url = year + ".html"
+      makeonClickHandler = function(url) {
+          return function onClickHandler() {
+                this.classList.add("active") 
+                this.ariaCurrent = "page"
+                setIframeSrc("child-iframe", url)
+          }
+      } 
+      link.onclick = makeonClickHandler(url)
+
     var text = document.createTextNode(year);
     link.appendChild(text);
-    link.href = year + ".html"
     li.appendChild(link);
     list.appendChild(li);
 
@@ -76,13 +81,18 @@
         link.classList.add("active") 
         link.ariaCurrent = "page"        
       }
-      link.onclick = function() { 
-                        this.classList.add("active") 
-                        this.ariaCurrent = "page"
-                      };      
+      var url = yearMonth[year][i] + ".html"
+      makeonClickHandler = function(url) {
+          return function onClickHandler() {
+                this.classList.add("active") 
+                this.ariaCurrent = "page"
+                setIframeSrc("child-iframe", url)
+          }
+      } 
+      link.onclick = makeonClickHandler(url)
+   
       var text = document.createTextNode(yearMonth[year][i]);
       link.appendChild(text);
-      link.href = yearMonth[year][i] + ".html"
       li.appendChild(link);
       list.appendChild(li);
     }
