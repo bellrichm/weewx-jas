@@ -112,8 +112,10 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
 	window.top.postMessage(message, "*");
 
 	window.addEventListener('message', function(e) {
-    console.log(e)
-    console.log(window.location)
+    // Running directly from the file system has some strangeness
+    if (window.location.origin != "file://" && e.origin !== window.location.origin)
+      return;
+
     console.log(sessionStorage)
     console.log("bar")
 	} , false);        

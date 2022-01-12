@@ -90,12 +90,15 @@ function onMessageArrived(message) {
         // ToDo, use server locale not the browser so have correct timezone? 
         //document.getElementById("updateDate").innerHTML = dateTime.toLocaleString();
     }    
-    // ToDo - fix security risk
-    //console.log(window.frames)
-    //console.log(window.frames[0])
-    window.frames[0].postMessage("foo", window.location)
-    //console.log(window.location)
-    //console.log("bar")
+
+    // When running without a webserver, there is a lot of 'strangeness'
+    if (window.location.protocol == "file:") {
+        targetOrigin = "*"
+    }
+    else {
+        targetOrigin = window.location.origin
+    }
+    document.getElementById('child-iframe').contentWindow.postMessage("foo", targetOrigin)
 }
 
 function MQTTConnect() {
