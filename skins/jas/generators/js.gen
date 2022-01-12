@@ -152,10 +152,6 @@
         // ToDo, use server locale not the browser so have correct timezone? 
         document.getElementById("updateDate").innerHTML = dateTime.toLocaleString();        
 
-        // ToDo put here for now
-        if (MQTTConfig) {
-            MQTTConnect();
-        }
     })
 #end if
 

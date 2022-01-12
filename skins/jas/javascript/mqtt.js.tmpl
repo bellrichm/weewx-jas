@@ -52,7 +52,7 @@ function onMessageArrived(message) {
             header.unit = test_obj[header.unit];
         }
         sessionStorage.setItem("header", JSON.stringify(header));
-        document.getElementById(header.name).innerHTML = header.value + header.unit;
+        //document.getElementById(header.name).innerHTML = header.value + header.unit;
     }
     
     suffixes = sessionStorage.getItem("suffixes").split(",");
@@ -79,8 +79,8 @@ function onMessageArrived(message) {
                 suffixText = " " + suffix.value;
             }
 
-            document.getElementById(observation + "_label").innerHTML = data.label;
-            document.getElementById(data.name + "_value").innerHTML = data.value + data.unit + suffixText;
+            //document.getElementById(observation + "_label").innerHTML = data.label;
+            //document.getElementById(data.name + "_value").innerHTML = data.value + data.unit + suffixText;
         }
     });    
     
@@ -88,8 +88,14 @@ function onMessageArrived(message) {
         sessionStorage.setItem("updateDate", test_obj.dateTime*1000);
         var dateTime = new Date(test_obj.dateTime*1000);
         // ToDo, use server locale not the browser so have correct timezone? 
-        document.getElementById("updateDate").innerHTML = dateTime.toLocaleString();
+        //document.getElementById("updateDate").innerHTML = dateTime.toLocaleString();
     }    
+    // ToDo - fix security risk
+    //console.log(window.frames)
+    //console.log(window.frames[0])
+    window.frames[0].postMessage("foo", window.location)
+    //console.log(window.location)
+    //console.log("bar")
 }
 
 function MQTTConnect() {
