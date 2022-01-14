@@ -43,54 +43,7 @@ function onMessageArrived(message) {
         addConsole("onMessageArrived: ");
         addConsole(message.payloadString);
     #end if
-    
-    var test_obj = JSON.parse(message.payloadString);
-    header = JSON.parse(sessionStorage.getItem("header"));
-    if (test_obj[header.name]) {
-        header.value = test_obj[header.name];
-        if (test_obj[header.unit]) {
-            header.unit = test_obj[header.unit];
-        }
-        sessionStorage.setItem("header", JSON.stringify(header));
-        //document.getElementById(header.name).innerHTML = header.value + header.unit;
-    }
-    
-    suffixes = sessionStorage.getItem("suffixes").split(",");
-    suffixes.forEach(function(suffix) {
-        if (test_obj[suffix]) {
-            data = JSON.parse(sessionStorage.getItem(suffix));
-            data.value = test_obj[suffix];
-            sessionStorage.setItem(suffix, JSON.stringify(data));
-        }    
-    });
-
-    observations = sessionStorage.getItem("observations").split(",");
-    observations.forEach(function(observation) {
-        if (test_obj[observation]) {
-            data = JSON.parse(sessionStorage.getItem(observation));
-            data.value = test_obj[observation];
-            sessionStorage.setItem(observation, JSON.stringify(data));
-
-/*
-            suffix = JSON.parse(sessionStorage.getItem(data.suffix));
-            if ( suffix=== null) {
-                suffixText = "";
-            }
-            else {
-                suffixText = " " + suffix.value;
-            }
-*/
-            //document.getElementById(observation + "_label").innerHTML = data.label;
-            //document.getElementById(data.name + "_value").innerHTML = data.value + data.unit + suffixText;
-        }
-    });    
-    
-    if (test_obj.dateTime) {
-        sessionStorage.setItem("updateDate", test_obj.dateTime*1000);
-        var dateTime = new Date(test_obj.dateTime*1000);
-        // ToDo, use server locale not the browser so have correct timezone? 
-        //document.getElementById("updateDate").innerHTML = dateTime.toLocaleString();
-    }    
+   
 
     // When running without a webserver, there is a lot of 'strangeness'
     if (window.location.protocol == "file:") {
