@@ -6,15 +6,15 @@ var client;
 
 function onConnect() {
     #if $getVar("$Extras.pages.debug", False)
-        addConsole("In onConnect");
+        logIt("In onConnect");
     #end if    
     client.subscribe("$Extras.mqtt.topic");
 }
 
 function onConnected(reconn ,url){
     #if $getVar("$Extras.pages.debug", False)
-        addConsole("onConnected: " + reconn);
-        addConsole("onConnected: " + url);
+        logIt("onConnected: " + reconn);
+        logIt("onConnected: " + url);
     #end if       
 	
     sessionStorage.setItem("MQTTConnected", true);
@@ -26,7 +26,7 @@ function onConnectionLost(responseObject) {
         message = responseObject.errorMessage;
     }
     #if $getVar("$Extras.pages.debug", False)
-        addConsole("onConnectionLost: " + message);
+        logIt("onConnectionLost: " + message);
     #end if        
 
     sessionStorage.removeItem("MQTTConnected");
@@ -34,14 +34,14 @@ function onConnectionLost(responseObject) {
 
 function onFailure(message) {
     #if $getVar("$Extras.pages.debug", False)
-        addConsole("Failed: " + message);
+        logIt("Failed: " + message);
     #end if    
 }
 
 function onMessageArrived(message) {
     #if $getVar("$Extras.pages.debug", False)
-        addConsole("onMessageArrived: ");
-        addConsole(message.payloadString);
+        logIt("onMessageArrived: ");
+        logIt(message.payloadString);
     #end if
    
 
@@ -71,15 +71,15 @@ function MQTTConnect() {
     client.onConnected = onConnected;
 
     #if $getVar("$Extras.pages.debug", False)
-        addConsole("Attempting to connect");
-        addConsole("host: $Extras.mqtt.host");
-        addConsole("port: $Extras.mqtt.port");
-        addConsole("clientID: " + clientID);
-        addConsole("timeout: $Extras.mqtt.timeout");
-        addConsole("keepAliveInterval: $Extras.mqtt.keepAliveInterval");
-        addConsole("cleanSession: $Extras.mqtt.cleanSession");
-        addConsole("useSSL: $Extras.mqtt.useSSL");
-        addConsole("reconnect: $Extras.mqtt.reconnect");
+        logIt("Attempting to connect");
+        logIt("host: $Extras.mqtt.host");
+        logIt("port: $Extras.mqtt.port");
+        logIt("clientID: " + clientID);
+        logIt("timeout: $Extras.mqtt.timeout");
+        logIt("keepAliveInterval: $Extras.mqtt.keepAliveInterval");
+        logIt("cleanSession: $Extras.mqtt.cleanSession");
+        logIt("useSSL: $Extras.mqtt.useSSL");
+        logIt("reconnect: $Extras.mqtt.reconnect");
     #end if    
 
     client.connect({ 

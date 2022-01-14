@@ -17,25 +17,3 @@ function refreshSizes(){
     }
   #end if
 }
-
-function addConsole(text){
-    var jasLog = document.getElementById("jasLog")
-    if (jasLog) {
-        jasLog.innerHTML = text + "\n<br>" + jasLog.innerHTML;
-    }
-}
-
-  ## ToDo thiscould be cleaned up
-  function setIframeSrc(id, url) {
-    currentPage = sessionStorage.getItem('currentPage');
-    if (currentPage != url) {
-      currentPageId = document.getElementById(currentPage)
-      if (currentPageId) {
-        currentPageId.classList.remove("active");
-      }
-      sessionStorage.setItem('currentPage', url)
-    }
-
-    document.getElementById(url).classList.add("active");
-    document.getElementById(id).src = url;
-}

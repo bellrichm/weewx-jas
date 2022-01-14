@@ -5,6 +5,24 @@
 #set global year_global = None
 #set global month_global = None
 
+    function logIt(message) {
+      console.log(message)
+    }
+  
+  ## ToDo thiscould be cleaned up
+  function setIframeSrc(id, url) {
+    currentPage = sessionStorage.getItem('currentPage');
+    if (currentPage != url) {
+      currentPageId = document.getElementById(currentPage)
+      if (currentPageId) {
+        currentPageId.classList.remove("active");
+      }
+      sessionStorage.setItem('currentPage', url)
+    }
+
+    document.getElementById(url).classList.add("active");
+    document.getElementById(id).src = url;
+}
 
     window.addEventListener("load", function (event) {
         if (sessionStorage.getItem('currentPage') === null) {

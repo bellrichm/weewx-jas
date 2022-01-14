@@ -10,7 +10,6 @@
 </style>
 
 <script src="data/alltime.js"> </script>
-<script src="javascript/common.js"> </script>
 
 <div class="fixed-top">
   <nav class="navbar navbar-expand-md navbar-dark bg-dark">
