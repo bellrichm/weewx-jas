@@ -104,6 +104,11 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
 </body> 
 <script>
 // ToDo - find a home for this Javascript 
+  function handleMQTT(message) {
+    console.log(message)
+    console.log('done');
+  }
+
   window.addEventListener('load', function() {
   console.log("foofoo")
 	let message = { height: document.body.scrollHeight, width: document.body.scrollWidth };	
@@ -115,6 +120,18 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
     // Running directly from the file system has some strangeness
     if (window.location.origin != "file://" && e.origin !== window.location.origin)
       return;
+
+    message = e.data
+    if (message.kind == undefined) {
+      return;
+    }
+
+    if (message.kind == 'mqtt')
+    {
+      handleMQTT(message.message);
+    }
+
+    console.log("test")
 
 	} , false);        
 

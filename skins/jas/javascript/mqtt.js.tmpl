@@ -99,7 +99,14 @@ function onMessageArrived(message) {
     else {
         targetOrigin = window.location.origin
     }
-    document.getElementById('child-iframe').contentWindow.postMessage("foo", targetOrigin)
+    forwardedMessage = {};
+    forwardedMessage['kind'] = 'mqtt';
+    forwardedMessage['message'] = {}
+    forwardedMessage['message']['topic'] = message.topic;
+    forwardedMessage['message']['payload'] = message.payloadString;
+    forwardedMessage['message']['qos'] = message.qos;
+    forwardedMessage['message']['retain'] = message.retain;
+    document.getElementById('child-iframe').contentWindow.postMessage(forwardedMessage, targetOrigin)
 }
 
 function MQTTConnect() {
