@@ -7,24 +7,37 @@
 
 
     window.addEventListener("load", function (event) {
+        if (sessionStorage.getItem('currentPage') === null) {
+            sessionStorage.setItem('currentPage', '')
+            ## ToDo - configure landing page
+            setIframeSrc('child-iframe', 'day.html')
+        }
+        else
+        {
+            setIframeSrc('child-iframe', sessionStorage.getItem('currentPage'))   
+        }
         var list = document.getElementById("dropdownYearMenu");
         list.innerHTML = ""
+        list.currentSelection = null
 
         for (year in yearMonth){
           var li = document.createElement("li");
           var link = document.createElement("a"); 
           link.classList.add("dropdown-item") 
-          #if $year_global is not None
-            if (year == $year_global){
-              link.classList.add("active") 
-              link.ariaCurrent = "page"              
-            }
-          #end if
+          # ToDo - better id?          
+          link.id = year  
 
           var text = document.createTextNode(year);
-          link.onclick = function() { 
-                            this.classList.add("active") 
-                            this.ariaCurrent = "page"
+          link.onclick = function() {
+                            var list = document.getElementById("dropdownYearMenu");
+                            var currentSelection = list.currentSelection
+                            if (this.id != currentSelection) {
+                                if (currentSelection) {
+                                    document.getElementById(currentSelection).classList.remove("active")
+                                }
+                                this.classList.add("active")
+                                list.currentSelection = this.id
+                            }
                             setYear(this.innerHTML)
                          };
           link.appendChild(text);
@@ -57,8 +70,7 @@
       var url = year + ".html"
       makeonClickHandler = function(url) {
           return function onClickHandler() {
-                this.classList.add("active") 
-                this.ariaCurrent = "page"
+                this.id = url
                 setIframeSrc("child-iframe", url)
           }
       } 
@@ -77,15 +89,12 @@
       var li = document.createElement("li");
       var link = document.createElement("a"); 
       link.classList.add("dropdown-item")  
-      if (yearMonth[year][i] == year + "-" + month) {
-        link.classList.add("active") 
-        link.ariaCurrent = "page"        
+      if (yearMonth[year][i] == year + "-" + month) {   
       }
       var url = yearMonth[year][i] + ".html"
       makeonClickHandler = function(url) {
           return function onClickHandler() {
-                this.classList.add("active") 
-                this.ariaCurrent = "page"
+                this.id = url
                 setIframeSrc("child-iframe", url)
           }
       } 

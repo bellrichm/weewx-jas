@@ -71,6 +71,7 @@ function onMessageArrived(message) {
             data.value = test_obj[observation];
             sessionStorage.setItem(observation, JSON.stringify(data));
 
+/*
             suffix = JSON.parse(sessionStorage.getItem(data.suffix));
             if ( suffix=== null) {
                 suffixText = "";
@@ -78,7 +79,7 @@ function onMessageArrived(message) {
             else {
                 suffixText = " " + suffix.value;
             }
-
+*/
             //document.getElementById(observation + "_label").innerHTML = data.label;
             //document.getElementById(data.name + "_value").innerHTML = data.value + data.unit + suffixText;
         }
