@@ -54,6 +54,9 @@
             </div>
           </li>
         </ul>
+        <button class="btn btn-outline-success d-none" type="button">Connect</button>
+        <button class="btn btn-outline-success d-none" type="button">Disconnect</button>
+        <button class="btn btn-outline-success" type="button" onclick="setIframeSrc('child-iframe', sessionStorage.getItem('currentPage'))">Refresh</button>
       </div>
     </div>
   </nav>
