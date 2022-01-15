@@ -34,6 +34,16 @@
 
     document.getElementById(url).classList.add("active");
     document.getElementById(id).src = url;
+
+    ## ToDo - better way/location?
+    if (url == 'debug.html') {
+      document.getElementById('connectButton').classList.remove("d-none");
+      document.getElementById('disconnectButton').classList.remove("d-none");
+    }
+    else {
+      document.getElementById('connectButton').classList.add("d-none");
+      document.getElementById('disconnectButton').classList.add("d-none");      
+    }
 }
 
     window.addEventListener("load", function (event) {

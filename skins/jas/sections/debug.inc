@@ -1,5 +1,3 @@
-<input TYPE="button" name="connect" value="Connect" onclick="MQTTConnect()">
-<input TYPE="button" name="disconnect" value="Disconnect" onclick="MQTTDisconnect()">
 <input TYPE="button" name="copyLog" value="Copy Log" onclick="copyLog()">
 <input TYPE="button" name="clearLog" value="Clear Log" onclick="clearLog()">
 
