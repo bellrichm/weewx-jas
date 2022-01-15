@@ -529,7 +529,8 @@ class JAS(SearchList):
                             chart2 = self._iterdict(indent + '  ', page, chart, chart2, interval, chart_series_defaults, value[obs])
                             for default in chart_series_defaults:
                                 chart2 += indent + "  " + default + ": " + chart_series_defaults[default] + ",\n"
-                        chart2 += indent + "  data: " + interval + "_" + aggregate_type + "." + observation + ",\n"
+                        if interval != 'live':
+                            chart2 += indent + "  data: " + interval + "_" + aggregate_type + "." + observation + ",\n"
                         chart2 += indent + "},\n"
                     chart2 += indent +"]\n"
                 else:
@@ -542,7 +543,7 @@ class JAS(SearchList):
 
     def _gen_charts(self, page, interval):
         #chart_final = 'var pageCharts = [];\n'
-        chart_final = '## charts'
+        chart_final = '## charts\n'
         for chart in self.skin_dict['Extras']['pages'][page]:
             if chart in self.skin_dict['Extras'][self.chart_engine].sections:
                 chart_config = configobj.ConfigObj(StringIO("[%s]" % (chart)))

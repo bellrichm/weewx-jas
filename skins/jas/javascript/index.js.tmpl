@@ -47,6 +47,9 @@
 }
 
     window.addEventListener("load", function (event) {
+        ## ToDo - proof of concept
+        sessionStorage.setItem('mqttData', JSON.stringify([]))
+
         if (sessionStorage.getItem('currentPage') === null) {
             sessionStorage.setItem('currentPage', '')
             ## ToDo - configure landing page

@@ -24,7 +24,7 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
       <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
       <script src="javascript/common.js"></script>
 
-      #if $interval_name_global
+      #if $interval_name_global and $interval_name_global != 'live'
         #set data = $interval_name_global + ".js"
         <script src="data/$data"></script>
       #end if
@@ -173,6 +173,24 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
           }  
       }    
     ##end if
+
+    ## ToDo - proof of concept
+        mqttData = JSON.parse(sessionStorage.getItem('mqttData'))
+        if (mqttData.length >= 1800) {
+            mqttData.shift();
+        }
+        mqttData.push([parseInt(test_obj.dateTime) * 1000, parseFloat(test_obj.outTemp)])
+        sessionStorage.setItem('mqttData', JSON.stringify(mqttData))
+
+    if (typeof outTempMQTTchart !== 'undefined') {
+        outTempMQTTchart.setOption({
+            series: [
+            {
+                data: mqttData
+            }
+            ]
+        });
+    }    
 
     // console.log('done');
   }
