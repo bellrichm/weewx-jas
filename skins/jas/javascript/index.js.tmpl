@@ -6,8 +6,20 @@
 #set global month_global = None
 
     function logIt(message) {
-      console.log(message)
-    }
+      //console.log(message)
+      // When running without a webserver, there is a lot of 'strangeness'
+      if (window.location.protocol == "file:") {
+          targetOrigin = "*"
+      }
+      else {
+          targetOrigin = window.location.origin
+      }      
+  
+      forwardedMessage = {};
+      forwardedMessage['kind'] = 'log';
+      forwardedMessage['message'] = message
+      document.getElementById('child-iframe').contentWindow.postMessage(forwardedMessage, targetOrigin)
+    }  
   
   ## ToDo thiscould be cleaned up
   function setIframeSrc(id, url) {
@@ -28,7 +40,7 @@
         if (sessionStorage.getItem('currentPage') === null) {
             sessionStorage.setItem('currentPage', '')
             ## ToDo - configure landing page
-            setIframeSrc('child-iframe', 'day.html')
+            setIframeSrc('child-iframe', 'last24hours.html')
         }
         else
         {
@@ -75,7 +87,10 @@
 
 		iframe.style.height = message.height + 'px';
 		//iframe.style.width = message.width + 'px';
-	} , false);        
+	} , false);       
+
+## ToDo - put here for now, only include if necessary
+  MQTTConnect(); 
     });
 
   function setYear(year, month) {

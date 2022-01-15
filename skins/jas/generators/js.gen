@@ -96,11 +96,13 @@
 #end if
 
 #if 'observations' in $getVar('$Extras.pages.' + $page)
+    #* ToDo move
     window.addEventListener("beforeunload", function (event) {
         if(sessionStorage.getItem("MQTTConnected")){
             MQTTDisconnect()
         }
     })
+    *#
     window.addEventListener("load", function (event) {
         // ToDo
         MQTTConfig = $Extras.mqtt.enable.lower();
