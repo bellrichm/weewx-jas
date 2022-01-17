@@ -5,86 +5,143 @@
 #set global year_global = None
 #set global month_global = None
 
-    function logIt(message) {
-      //console.log(message)
-      // When running without a webserver, there is a lot of 'strangeness'
-      if (window.location.protocol == "file:") {
-          targetOrigin = "*"
-      }
-      else {
-          targetOrigin = window.location.origin
-      }      
-  
-      forwardedMessage = {};
-      forwardedMessage['kind'] = 'log';
-      forwardedMessage['message'] = message
-      document.getElementById('child-iframe').contentWindow.postMessage(forwardedMessage, targetOrigin)
-    }  
-  
-  ## ToDo thiscould be cleaned up
-  function setIframeSrc(id, url) {
-    currentPage = sessionStorage.getItem('currentPage');
-    if (currentPage != url) {
-      currentPageId = document.getElementById(currentPage)
-      if (currentPageId) {
-        currentPageId.classList.remove("active");
-      }
-      sessionStorage.setItem('currentPage', url)
-    }
+function logIt(message) {
+  //console.log(message)
+  // When running without a webserver, there is a lot of 'strangeness'
+  if (window.location.protocol == "file:") {
+      targetOrigin = "*"
+  }
+  else {
+      targetOrigin = window.location.origin
+  }      
 
-    document.getElementById(url).classList.add("active");
-    document.getElementById(id).src = url;
+  forwardedMessage = {};
+  forwardedMessage['kind'] = 'log';
+  forwardedMessage['message'] = message
+  document.getElementById('child-iframe').contentWindow.postMessage(forwardedMessage, targetOrigin)
+}  
+  
+## ToDo thiscould be cleaned up
+function setIframeSrc(id, url) {
+  currentPage = sessionStorage.getItem('currentPage');
+  if (currentPage != url) {
+    currentPageId = document.getElementById(currentPage)
+    if (currentPageId) {
+      currentPageId.classList.remove("active");
+    }
+    sessionStorage.setItem('currentPage', url)
+  }
 
-    ## ToDo - better way/location?
-    if (url == 'debug.html') {
-      document.getElementById('connectButton').classList.remove("d-none");
-      document.getElementById('disconnectButton').classList.remove("d-none");
-    }
-    else {
-      document.getElementById('connectButton').classList.add("d-none");
-      document.getElementById('disconnectButton').classList.add("d-none");      
-    }
+  document.getElementById(url).classList.add("active");
+  document.getElementById(id).src = url;
+
+  ## ToDo - better way/location?
+  if (url == 'debug.html') {
+    document.getElementById('connectButton').classList.remove("d-none");
+    document.getElementById('disconnectButton').classList.remove("d-none");
+  }
+  else {
+    document.getElementById('connectButton').classList.add("d-none");
+    document.getElementById('disconnectButton').classList.add("d-none");      
+  }
 }
 
-    window.addEventListener("load", function (event) {
-        ## ToDo - proof of concept
-        sessionStorage.setItem('mqttData', JSON.stringify([]))
 
-        var list = document.getElementById("dropdownYearMenu");
-        list.innerHTML = ""
-        list.currentSelection = null
+function setYear(year, month) {
+  var list = document.getElementById("dropdownYearMonthMenu");
+  list.innerHTML = ""
 
-        for (year in yearMonth){
-          var li = document.createElement("li");
-          var link = document.createElement("a"); 
-          link.classList.add("dropdown-item") 
-          ## ToDo - better id?          
-          link.id = year  
-
-          var text = document.createTextNode(year);
-          link.onclick = function() {
-                            var list = document.getElementById("dropdownYearMenu");
-                            var currentSelection = sessionStorage.getItem('currentSelection')
-                            if (this.id != currentSelection) {
-                                if (currentSelection) {
-                                    document.getElementById(currentSelection).classList.remove("active")
-                                }
-                                this.classList.add("active")
-                                sessionStorage.setItem('currentSelection', this.id)
-                            }
-                            setYear(this.innerHTML)
-                         };
-          link.appendChild(text);
-          link.href = "#"
-          li.appendChild(link);
-          list.appendChild(li);
-          var currentSelection = sessionStorage.getItem('currentSelection')
-          if (currentSelection && currentSelection == year) {
-            link.classList.add("active")
-            sessionStorage.setItem('currentSelection', link.id)
-            setYear(link.innerHTML)
-          }
+  var li = document.createElement("li");
+  var link = document.createElement("a"); 
+  link.classList.add("dropdown-item")           
+    var url = year + ".html"
+    link.id = url
+    makeonClickHandler = function(url) {
+        return function onClickHandler() {
+              setIframeSrc("child-iframe", url)
         }
+    } 
+    link.onclick = makeonClickHandler(url)
+
+  var text = document.createTextNode(year);
+  link.appendChild(text);
+  li.appendChild(link);
+  list.appendChild(li);
+
+  var divider = document.createElement("div")
+  divider.classList.add("dropdown-divider")
+  list.appendChild(divider)
+
+  for (var i = 0; i < yearMonth[year].length; i++) {
+    var li = document.createElement("li");
+    var link = document.createElement("a"); 
+    link.classList.add("dropdown-item")  
+    var url = yearMonth[year][i] + ".html"
+    link.id = url
+    makeonClickHandler = function(url) {
+        return function onClickHandler() {
+              setIframeSrc("child-iframe", url)
+        }
+    } 
+    link.onclick = makeonClickHandler(url)
+
+    var currentPage = sessionStorage.getItem('currentPage')
+    if (currentPage && currentPage == url) {
+      link.id = url
+    }
+  
+    var text = document.createTextNode(yearMonth[year][i]);
+    link.appendChild(text);
+    li.appendChild(link);
+    list.appendChild(li);
+  }
+}
+
+window.addEventListener("load", function (event) {
+  ## ToDo - proof of concept
+  sessionStorage.setItem('mqttData', JSON.stringify([]))
+
+  var list = document.getElementById("dropdownYearMenu");
+  list.innerHTML = ""
+  list.currentSelection = null
+
+  for (year in yearMonth){
+    var li = document.createElement("li");
+    var link = document.createElement("a"); 
+    link.classList.add("dropdown-item") 
+    ## ToDo - better id?          
+    link.id = year  
+
+    var text = document.createTextNode(year);
+    link.onclick = function() {
+                      var list = document.getElementById("dropdownYearMenu");
+                      var currentSelection = sessionStorage.getItem('currentSelection')
+                      if (this.id != currentSelection) {
+                          if (currentSelection) {
+                              document.getElementById(currentSelection).classList.remove("active")
+                          }
+                          this.classList.add("active")
+                          sessionStorage.setItem('currentSelection', this.id)
+                      }
+                      setYear(this.innerHTML)
+                    };
+    link.appendChild(text);
+    link.href = "#"
+    li.appendChild(link);
+    list.appendChild(li);
+    var currentSelection = sessionStorage.getItem('currentSelection')
+    if (currentSelection && currentSelection == year) {
+      link.classList.add("active")
+      sessionStorage.setItem('currentSelection', link.id)
+      setYear(link.innerHTML)
+    }
+  }
+
+  window.addEventListener("beforeunload", function (event) {
+      if(sessionStorage.getItem("MQTTConnected")){
+          MQTTDisconnect()
+      }
+  })
 
 	let iframe = document.querySelector("#child-iframe");
 
@@ -107,59 +164,9 @@
       setIframeSrc('child-iframe', sessionStorage.getItem('currentPage'))   
   }
 
-## ToDo - put here for now, only include if necessary
+  ## ToDo - put here for now, only include if necessary
   MQTTConnect(); 
-    });
-
-  function setYear(year, month) {
-    var list = document.getElementById("dropdownYearMonthMenu");
-    list.innerHTML = ""
-
-    var li = document.createElement("li");
-    var link = document.createElement("a"); 
-    link.classList.add("dropdown-item")           
-      var url = year + ".html"
-      link.id = url
-      makeonClickHandler = function(url) {
-          return function onClickHandler() {
-                setIframeSrc("child-iframe", url)
-          }
-      } 
-      link.onclick = makeonClickHandler(url)
-
-    var text = document.createTextNode(year);
-    link.appendChild(text);
-    li.appendChild(link);
-    list.appendChild(li);
-
-    var divider = document.createElement("div")
-    divider.classList.add("dropdown-divider")
-    list.appendChild(divider)
-
-    for (var i = 0; i < yearMonth[year].length; i++) {
-      var li = document.createElement("li");
-      var link = document.createElement("a"); 
-      link.classList.add("dropdown-item")  
-      var url = yearMonth[year][i] + ".html"
-      link.id = url
-      makeonClickHandler = function(url) {
-          return function onClickHandler() {
-                setIframeSrc("child-iframe", url)
-          }
-      } 
-      link.onclick = makeonClickHandler(url)
-
-      var currentPage = sessionStorage.getItem('currentPage')
-      if (currentPage && currentPage == url) {
-        link.id = url
-      }
-   
-      var text = document.createTextNode(yearMonth[year][i]);
-      link.appendChild(text);
-      li.appendChild(link);
-      list.appendChild(li);
-    }
-  }
+});
 
 #if $getVar("$Extras.pages." + $page, False)
     #include 'generators/js.gen'
