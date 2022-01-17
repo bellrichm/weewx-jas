@@ -4,6 +4,97 @@
 #import datetime
 #from weeutil.weeutil import to_bool
 
+function handleLog(message) {
+    //console.log(message)
+    var jasLog = document.getElementById("jasLog")
+    if (jasLog) {
+        jasLog.innerHTML = message + "\n<br>" + jasLog.innerHTML;
+    }
+    //console.log('done');
+}
+
+function handleMQTT(message) {
+    //console.log(message)
+
+    var test_obj = JSON.parse(message.payload);
+    header = JSON.parse(sessionStorage.getItem("header"));
+    if (test_obj[header.name]) {
+        header.value = test_obj[header.name];
+        if (test_obj[header.unit]) {
+            header.unit = test_obj[header.unit];
+        }
+        sessionStorage.setItem("header", JSON.stringify(header));
+        headerElem = document.getElementById(header.name)
+        if (headerElem) {
+            headerElem.innerHTML = header.value + header.unit;
+        }  
+    }
+      
+    suffixes = sessionStorage.getItem("suffixes").split(",");
+    suffixes.forEach(function(suffix) {
+        if (test_obj[suffix]) {
+            data = JSON.parse(sessionStorage.getItem(suffix));
+            data.value = test_obj[suffix];
+            sessionStorage.setItem(suffix, JSON.stringify(data));
+        }    
+    });
+
+    observations = sessionStorage.getItem("observations").split(",");
+    observations.forEach(function(observation) {
+        if (test_obj[observation]) {
+            data = JSON.parse(sessionStorage.getItem(observation));
+            data.value = test_obj[observation];
+            sessionStorage.setItem(observation, JSON.stringify(data));
+
+            suffix = JSON.parse(sessionStorage.getItem(data.suffix));
+            if ( suffix=== null) {
+                suffixText = "";
+            }
+            else {
+                suffixText = " " + suffix.value;
+            }
+
+            labelElem = document.getElementById(observation + "_label")
+            if (labelElem) {
+                labelElem.innerHTML = data.label;
+            } 
+            dataElem = document.getElementById(data.name + "_value")
+            if (dataElem) {
+                dataElem.innerHTML = data.value + data.unit + suffixText;
+            }  
+        }
+    });    
+      
+    if (test_obj.dateTime) {
+        sessionStorage.setItem("updateDate", test_obj.dateTime*1000);
+        var dateTime = new Date(test_obj.dateTime*1000);
+        // ToDo, use server locale not the browser so have correct timezone? 
+        timeElem = document.getElementById("updateDate")
+        if (timeElem) {
+            timeElem.innerHTML = dateTime.toLocaleString();
+        }  
+    }    
+
+    ## ToDo - proof of concept, charting MQTT data
+    mqttData = JSON.parse(sessionStorage.getItem('mqttData'))
+    if (mqttData.length >= 1800) {
+        mqttData.shift();
+    }
+    mqttData.push([parseInt(test_obj.dateTime) * 1000, parseFloat(test_obj.outTemp)])
+    sessionStorage.setItem('mqttData', JSON.stringify(mqttData))
+    if (typeof outTempMQTTchart !== 'undefined') {
+        outTempMQTTchart.setOption({
+            series: [
+            {
+                data: mqttData
+            }
+            ]
+        });
+    }    
+
+    // console.log('done');
+}
+
 #if to_bool($getVar('$Extras.pages.' + $page + '.reload', False))
   #include "sections/reload.inc"
 #end if
@@ -95,9 +186,21 @@
     }      
 #end if   
 
-##
-
 window.addEventListener("load", function (event) {
+    let message = { height: document.body.scrollHeight, width: document.body.scrollWidth };	
+    // window.top refers to parent window
+    window.top.postMessage(message, "*");
+
+    const myObserver = new ResizeObserver(entries => {
+        entries.forEach(entry => {
+        let message = { height: document.body.scrollHeight, width: document.body.scrollWidth };	
+        // window.top refers to parent window
+        window.top.postMessage(message, "*");    
+        });
+    });
+
+    myObserver.observe(document.body)
+
     #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
         dateRangePicker2 = new DateRangePicker('datetimerange-input2',
                             {
@@ -221,3 +324,29 @@ window.addEventListener("load", function (event) {
 
     #end if
 });
+
+window.addEventListener('onresize', function() {
+	let message = { height: document.body.scrollHeight, width: document.body.scrollWidth };	
+
+	// window.top refers to parent window
+	window.top.postMessage(message, "*");
+});
+
+window.addEventListener('message', function(e) {
+    // Running directly from the file system has some strangeness
+    if (window.location.origin != "file://" && e.origin !== window.location.origin)
+    return;
+
+    message = e.data
+    if (message.kind == undefined) {
+        return;
+    }
+    if (message.kind == 'mqtt')
+    {
+        handleMQTT(message.message);
+    }
+    if (message.kind == 'log')
+    {
+        handleLog(message.message);
+    }    
+} , false);        
