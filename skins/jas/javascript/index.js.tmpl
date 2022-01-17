@@ -50,15 +50,6 @@
         ## ToDo - proof of concept
         sessionStorage.setItem('mqttData', JSON.stringify([]))
 
-        if (sessionStorage.getItem('currentPage') === null) {
-            sessionStorage.setItem('currentPage', '')
-            ## ToDo - configure landing page
-            setIframeSrc('child-iframe', 'last24hours.html')
-        }
-        else
-        {
-            setIframeSrc('child-iframe', sessionStorage.getItem('currentPage'))   
-        }
         var list = document.getElementById("dropdownYearMenu");
         list.innerHTML = ""
         list.currentSelection = null
@@ -73,13 +64,13 @@
           var text = document.createTextNode(year);
           link.onclick = function() {
                             var list = document.getElementById("dropdownYearMenu");
-                            var currentSelection = list.currentSelection
+                            var currentSelection = sessionStorage.getItem('currentSelection')
                             if (this.id != currentSelection) {
                                 if (currentSelection) {
                                     document.getElementById(currentSelection).classList.remove("active")
                                 }
                                 this.classList.add("active")
-                                list.currentSelection = this.id
+                                sessionStorage.setItem('currentSelection', this.id)
                             }
                             setYear(this.innerHTML)
                          };
@@ -87,10 +78,13 @@
           link.href = "#"
           li.appendChild(link);
           list.appendChild(li);
+          var currentSelection = sessionStorage.getItem('currentSelection')
+          if (currentSelection && currentSelection == year) {
+            link.classList.add("active")
+            sessionStorage.setItem('currentSelection', link.id)
+            setYear(link.innerHTML)
+          }
         }
-        #if $year_global is not None
-          setYear($year_global, "$month_global")
-        #end if
 
 	let iframe = document.querySelector("#child-iframe");
 
@@ -101,6 +95,17 @@
 		iframe.style.height = message.height + 'px';
 		//iframe.style.width = message.width + 'px';
 	} , false);       
+
+
+  if (sessionStorage.getItem('currentPage') === null) {
+      sessionStorage.setItem('currentPage', '')
+      ## ToDo - configure landing page
+      setIframeSrc('child-iframe', 'last24hours.html')
+  }
+  else
+  {
+      setIframeSrc('child-iframe', sessionStorage.getItem('currentPage'))   
+  }
 
 ## ToDo - put here for now, only include if necessary
   MQTTConnect(); 
@@ -114,9 +119,9 @@
     var link = document.createElement("a"); 
     link.classList.add("dropdown-item")           
       var url = year + ".html"
+      link.id = url
       makeonClickHandler = function(url) {
           return function onClickHandler() {
-                this.id = url
                 setIframeSrc("child-iframe", url)
           }
       } 
@@ -135,16 +140,19 @@
       var li = document.createElement("li");
       var link = document.createElement("a"); 
       link.classList.add("dropdown-item")  
-      if (yearMonth[year][i] == year + "-" + month) {   
-      }
       var url = yearMonth[year][i] + ".html"
+      link.id = url
       makeonClickHandler = function(url) {
           return function onClickHandler() {
-                this.id = url
                 setIframeSrc("child-iframe", url)
           }
       } 
       link.onclick = makeonClickHandler(url)
+
+      var currentPage = sessionStorage.getItem('currentPage')
+      if (currentPage && currentPage == url) {
+        link.id = url
+      }
    
       var text = document.createTextNode(yearMonth[year][i]);
       link.appendChild(text);
