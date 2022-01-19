@@ -529,7 +529,7 @@ class JAS(SearchList):
                             chart2 = self._iterdict(indent + '  ', page, chart, chart2, interval, chart_series_defaults, value[obs])
                             for default in chart_series_defaults:
                                 chart2 += indent + "  " + default + ": " + chart_series_defaults[default] + ",\n"
-                        if interval != 'live':
+                        if interval != 'mqtt':
                             chart2 += indent + "  data: " + interval + "_" + aggregate_type + "." + observation + ",\n"
                         chart2 += indent + "},\n"
                     chart2 += indent +"]\n"

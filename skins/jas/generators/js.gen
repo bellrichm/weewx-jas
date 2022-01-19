@@ -76,22 +76,51 @@ function handleMQTT(message) {
     }    
 
     ## ToDo - proof of concept, charting MQTT data
-    mqttData = JSON.parse(sessionStorage.getItem('mqttData'))
-    if (mqttData.length >= 1800) {
-        mqttData.shift();
-    }
-    mqttData.push([parseInt(test_obj.dateTime) * 1000, parseFloat(test_obj.outTemp)])
-    sessionStorage.setItem('mqttData', JSON.stringify(mqttData))
-    if (typeof outTempMQTTchart !== 'undefined') {
-        outTempMQTTchart.setOption({
-            series: [
-            {
-                data: mqttData
-            }
-            ]
-        });
-    }    
+    #if $chartEngine == 'apexcharts'
+        #ToDo - not supported
+    #else
+        #for $chart in $getVar('$Extras.' + $chartEngine)
+            #for $data in $getVar('$Extras.' + $chartEngine + '.' + $chart + '.series')
+                    #set weewx_options = $getVar('$Extras.' + $chartEngine + '.' + $chart + '.series.' + $data + '.weewx', None)
+                    #if $weewx_options
+                        #set aggregation_type = $getVar('$Extras.' + $chartEngine + '.' + $chart + '.series.' + $data + '.weewx.aggregate_type', None)
+                        #if $aggregation_type == 'mqtt'
+                            #set $data_name = $data + 'MQTT'
+                            $data_name = JSON.parse(sessionStorage.getItem('$data_name'));
+                            #set $line = "if (" + $data_name + ".length >= 1800) {" + $data_name + ".shift();}"
+                            $line
+                            #set $line = $data_name +".push([parseInt(test_obj.dateTime) * 1000, parseFloat(test_obj." + $data + ")]);"
+                            $line
+                            sessionStorage.setItem('$data_name', JSON.stringify($data_name))
+                        #end if
+                    #end if
+            #end for
+        #end for
+    #end if
 
+    #if $interval_name_global == "mqtt"
+        #for $section in $getVar('Extras.pages.' + $page)
+            #set $observations = []
+            ## todo - cleanup to not use continue
+            #if $section not in $getVar('$Extras.' + $chartEngine)
+                #continue
+            #end if
+            #if $chartEngine == 'apexcharts'
+                ## ToDo - not supported
+                #continue
+            #else
+                #set $line = $section + 'chart.setOption({'
+                $line
+                    series: [
+                #for $data in $getVar('$Extras.' + $chartEngine + '.' + $section + '.series')
+                    #set $data_name = $data + "MQTT"
+                        {data: $data_name},
+                    $observations.append($data_name)
+                #end for
+                    ]});
+            #end if
+        #end for
+    #end if
     // console.log('done');
 }
 
