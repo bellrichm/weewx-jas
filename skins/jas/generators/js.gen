@@ -364,7 +364,7 @@ window.addEventListener("load", function (event) {
         if(sessionStorage.getItem("updateDate") === null || !MQTTConfig){
             sessionStorage.setItem("updateDate", updateDate);
         }
-        var dateTime = new Date(sessionStorage.getItem("updateDate") * 1000)
+        var dateTime = new Date(parseInt(sessionStorage.getItem("updateDate")))
         // ToDo, use server locale not the browser so have correct timezone? 
         document.getElementById("updateDate").innerHTML = dateTime.toLocaleString();        
 
