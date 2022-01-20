@@ -6,7 +6,7 @@
 #set global interval_global = $getVar("$Extras.index_page_interval", "last24hours")
 
 var mqtt_enabled = false;
-var updateDate = $current.dateTime.raw;
+var updateDate = $current.dateTime.raw * 1000;
 var current = {};
 current.header = {};
 current.header.name = "$getVar('Extras.current.observation')";
