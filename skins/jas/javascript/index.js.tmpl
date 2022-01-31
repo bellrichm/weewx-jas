@@ -1,14 +1,173 @@
 ##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
-#set global interval_name_global = $getVar("$Extras.index_page_interval", "last24hours")
-#set global year_global = None
-#set global month_global = None
+function logIt(message) {
+  //console.log(message)
+  // When running without a webserver, there is a lot of 'strangeness'
+  if (window.location.protocol == "file:") {
+      targetOrigin = "*"
+  }
+  else {
+      targetOrigin = window.location.origin
+  }      
 
-#if $getVar("$Extras.pages." + $page, False)
-    #include 'generators/js.gen'
-#end if        
+  forwardedMessage = {};
+  forwardedMessage['kind'] = 'log';
+  forwardedMessage['message'] = message
+  document.getElementById('child-iframe').contentWindow.postMessage(forwardedMessage, targetOrigin)
+}  
+  
+## ToDo thiscould be cleaned up
+function setIframeSrc(id, url) {
+  currentPage = sessionStorage.getItem('currentPage');
+  if (currentPage != url) {
+    currentPageId = document.getElementById(currentPage)
+    if (currentPageId) {
+      currentPageId.classList.remove("active");
+    }
+    sessionStorage.setItem('currentPage', url)
+  }
 
-#set global interval_name_global = None
-#set global year_global = None
-#set global month_global = None
+  document.getElementById(url).classList.add("active");
+  document.getElementById(id).src = url;
+
+  ## ToDo - better way/location?
+  if (url == 'debug.html') {
+    document.getElementById('connectButton').classList.remove("d-none");
+    document.getElementById('disconnectButton').classList.remove("d-none");
+  }
+  else {
+    document.getElementById('connectButton').classList.add("d-none");
+    document.getElementById('disconnectButton').classList.add("d-none");      
+  }
+}
+
+
+function setYear(year, month) {
+  var list = document.getElementById("dropdownYearMonthMenu");
+  list.innerHTML = ""
+
+  var li = document.createElement("li");
+  var link = document.createElement("a"); 
+  link.classList.add("dropdown-item")           
+    var url = year + ".html"
+    link.id = url
+    makeonClickHandler = function(url) {
+        return function onClickHandler() {
+              setIframeSrc("child-iframe", url)
+        }
+    } 
+    link.onclick = makeonClickHandler(url)
+
+  var text = document.createTextNode(year);
+  link.appendChild(text);
+  li.appendChild(link);
+  list.appendChild(li);
+
+  var divider = document.createElement("div")
+  divider.classList.add("dropdown-divider")
+  list.appendChild(divider)
+
+  for (var i = 0; i < yearMonth[year].length; i++) {
+    var li = document.createElement("li");
+    var link = document.createElement("a"); 
+    link.classList.add("dropdown-item")  
+    var url = yearMonth[year][i] + ".html"
+    link.id = url
+    makeonClickHandler = function(url) {
+        return function onClickHandler() {
+              setIframeSrc("child-iframe", url)
+        }
+    } 
+    link.onclick = makeonClickHandler(url)
+
+    var currentPage = sessionStorage.getItem('currentPage')
+    if (currentPage && currentPage == url) {
+      link.id = url
+    }
+  
+    var text = document.createTextNode(yearMonth[year][i]);
+    link.appendChild(text);
+    li.appendChild(link);
+    list.appendChild(li);
+  }
+}
+
+window.addEventListener("load", function (event) {
+  ## ToDo - proof of concept, charting MQTT data
+  #for observation in $observations
+    #if "mqtt" in $observations[$observation]["aggregate_types"]
+      #set mqtt_data = $observation + "MQTT"
+      sessionStorage.setItem('$mqtt_data', JSON.stringify([]))
+    #end if
+  #end for
+
+  var list = document.getElementById("dropdownYearMenu");
+  list.innerHTML = ""
+  list.currentSelection = null
+
+  for (year in yearMonth){
+    var li = document.createElement("li");
+    var link = document.createElement("a"); 
+    link.classList.add("dropdown-item") 
+    ## ToDo - better id?          
+    link.id = year  
+
+    var text = document.createTextNode(year);
+    link.onclick = function() {
+                      var list = document.getElementById("dropdownYearMenu");
+                      var currentSelection = sessionStorage.getItem('currentSelection')
+                      if (this.id != currentSelection) {
+                          if (currentSelection) {
+                              document.getElementById(currentSelection).classList.remove("active")
+                          }
+                          this.classList.add("active")
+                          sessionStorage.setItem('currentSelection', this.id)
+                      }
+                      setYear(this.innerHTML)
+                    };
+    link.appendChild(text);
+    link.href = "#"
+    li.appendChild(link);
+    list.appendChild(li);
+    var currentSelection = sessionStorage.getItem('currentSelection')
+    if (currentSelection && currentSelection == year) {
+      link.classList.add("active")
+      sessionStorage.setItem('currentSelection', link.id)
+      setYear(link.innerHTML)
+    }
+  }
+
+  window.addEventListener("beforeunload", function (event) {
+      if(sessionStorage.getItem("MQTTConnected")){
+          MQTTDisconnect()
+      }
+  })
+
+	let iframe = document.querySelector("#child-iframe");
+
+	window.addEventListener('message', function(e) {
+		// message that was passed from iframe page
+		let message = e.data;
+
+		iframe.style.height = message.height + 'px';
+		//iframe.style.width = message.width + 'px';
+	} , false);       
+
+
+  if (sessionStorage.getItem('currentPage') === null) {
+      sessionStorage.setItem('currentPage', '')
+      ## ToDo - configure landing page
+      setIframeSrc('child-iframe', 'last24hours.html')
+  }
+  else
+  {
+      setIframeSrc('child-iframe', sessionStorage.getItem('currentPage'))   
+  }
+
+  ## ToDo - put here for now, only include if necessary
+  ## ToDo - convert to boolean
+  #if $Extras.mqtt.enable.lower() == 'true'
+    MQTTConnect(); 
+  #end if
+});

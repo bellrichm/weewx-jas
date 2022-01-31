@@ -1,20 +1,48 @@
 ##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
-#set global interval_global = $getVar("$Extras.index_page_interval", "last24hours")
-#set global interval_name_global = $getVar("$Extras.index_page_interval", "last24hours")
-#set global page_name_global = 'index'
 #set global year_global = None
 #set global month_global = None
-#set global title_global = $gettext($page + '.title')
-#set global h1_global = $gettext($page + '.h1')
-#if $getVar("$Extras.pages." + $page, False)
-    #include 'generators/pages.gen'
-#end if
-#set global interval_global = None
-#set global interval_name_global = None
-#set global page_name_global = None
+
+<!doctype html>
+<html lang="$gettext("lang")">
+   <head>
+      <!-- Required meta tags -->
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <link rel="manifest" href="manifest.json">
+
+      <!-- Bootstrap CSS -->
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+         integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+      <script src="https://cdn.jsdelivr.net/npm/paho-mqtt@1.0.4/paho-mqtt.min.js"></script>
+
+      <link href="weather-icons/css/weather-icons.min.css" rel="stylesheet" />
+
+      <script src="javascript/index.js"></script>
+      ## ToDo - put here for now, only include if necessary
+      <script src="javascript/mqtt.js"></script>
+
+
+      <!-- Optional JavaScript; choose one of the two! -->
+
+      <!-- Option 1: Bootstrap Bundle with Popper -->
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+         integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous">
+      </script>
+
+      <!-- Option 2: Separate Popper and Bootstrap JS -->
+      <!--
+      <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+      -->
+    </head>      
+    <body>
+      #include "generators/navbar.gen"
+      <iframe id="child-iframe" id="child-iframe" scrolling="no" width="100%"></iframe>
+   </body>
+</html>
+
 #set global year_global = None
 #set global month_global = None
-#set global title_global = None
-#set global h1_global = None

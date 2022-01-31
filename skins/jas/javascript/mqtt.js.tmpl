@@ -6,15 +6,15 @@ var client;
 
 function onConnect() {
     #if $getVar("$Extras.pages.debug", False)
-        addConsole("In onConnect");
+        logIt("In onConnect");
     #end if    
     client.subscribe("$Extras.mqtt.topic");
 }
 
 function onConnected(reconn ,url){
     #if $getVar("$Extras.pages.debug", False)
-        addConsole("onConnected: " + reconn);
-        addConsole("onConnected: " + url);
+        logIt("onConnected: " + reconn);
+        logIt("onConnected: " + url);
     #end if       
 	
     sessionStorage.setItem("MQTTConnected", true);
@@ -26,7 +26,7 @@ function onConnectionLost(responseObject) {
         message = responseObject.errorMessage;
     }
     #if $getVar("$Extras.pages.debug", False)
-        addConsole("onConnectionLost: " + message);
+        logIt("onConnectionLost: " + message);
     #end if        
 
     sessionStorage.removeItem("MQTTConnected");
@@ -34,66 +34,36 @@ function onConnectionLost(responseObject) {
 
 function onFailure(message) {
     #if $getVar("$Extras.pages.debug", False)
-        addConsole("Failed: " + message);
+        logIt("Failed: " + message);
     #end if    
 }
 
 function onMessageArrived(message) {
     #if $getVar("$Extras.pages.debug", False)
-        addConsole("onMessageArrived: ");
-        addConsole(message.payloadString);
+        logIt("onMessageArrived: ");
+        logIt(message.payloadString);
     #end if
-    
-    var test_obj = JSON.parse(message.payloadString);
-    header = JSON.parse(sessionStorage.getItem("header"));
-    if (test_obj[header.name]) {
-        header.value = test_obj[header.name];
-        if (test_obj[header.unit]) {
-            header.unit = test_obj[header.unit];
-        }
-        sessionStorage.setItem("header", JSON.stringify(header));
-        document.getElementById(header.name).innerHTML = header.value + header.unit;
+   
+
+    // When running without a webserver, there is a lot of 'strangeness'
+    if (window.location.protocol == "file:") {
+        targetOrigin = "*"
     }
-    
-    suffixes = sessionStorage.getItem("suffixes").split(",");
-    suffixes.forEach(function(suffix) {
-        if (test_obj[suffix]) {
-            data = JSON.parse(sessionStorage.getItem(suffix));
-            data.value = test_obj[suffix];
-            sessionStorage.setItem(suffix, JSON.stringify(data));
-        }    
-    });
-
-    observations = sessionStorage.getItem("observations").split(",");
-    observations.forEach(function(observation) {
-        if (test_obj[observation]) {
-            data = JSON.parse(sessionStorage.getItem(observation));
-            data.value = test_obj[observation];
-            sessionStorage.setItem(observation, JSON.stringify(data));
-
-            suffix = JSON.parse(sessionStorage.getItem(data.suffix));
-            if ( suffix=== null) {
-                suffixText = "";
-            }
-            else {
-                suffixText = " " + suffix.value;
-            }
-
-            document.getElementById(observation + "_label").innerHTML = data.label;
-            document.getElementById(data.name + "_value").innerHTML = data.value + data.unit + suffixText;
-        }
-    });    
-    
-    if (test_obj.dateTime) {
-        sessionStorage.setItem("updateDate", test_obj.dateTime*1000);
-        var dateTime = new Date(test_obj.dateTime*1000);
-        // ToDo, use server locale not the browser so have correct timezone? 
-        document.getElementById("updateDate").innerHTML = dateTime.toLocaleString();
-    }    
+    else {
+        targetOrigin = window.location.origin
+    }
+    forwardedMessage = {};
+    forwardedMessage['kind'] = 'mqtt';
+    forwardedMessage['message'] = {}
+    forwardedMessage['message']['topic'] = message.topic;
+    forwardedMessage['message']['payload'] = message.payloadString;
+    forwardedMessage['message']['qos'] = message.qos;
+    forwardedMessage['message']['retain'] = message.retain;
+    document.getElementById('child-iframe').contentWindow.postMessage(forwardedMessage, targetOrigin)
 }
 
 function MQTTConnect() {
-    var clientID = "clientID-" + parseInt(Math.random() * 100);
+    var clientID = "jasClientID-" + parseInt(Math.random() * 100);
     client = new Paho.MQTT.Client("$Extras.mqtt.host", $Extras.mqtt.port, clientID);
 
     client.onConnectionLost = onConnectionLost;
@@ -101,15 +71,15 @@ function MQTTConnect() {
     client.onConnected = onConnected;
 
     #if $getVar("$Extras.pages.debug", False)
-        addConsole("Attempting to connect");
-        addConsole("host: $Extras.mqtt.host");
-        addConsole("port: $Extras.mqtt.port");
-        addConsole("clientID: " + clientID);
-        addConsole("timeout: $Extras.mqtt.timeout");
-        addConsole("keepAliveInterval: $Extras.mqtt.keepAliveInterval");
-        addConsole("cleanSession: $Extras.mqtt.cleanSession");
-        addConsole("useSSL: $Extras.mqtt.useSSL");
-        addConsole("reconnect: $Extras.mqtt.reconnect");
+        logIt("Attempting to connect");
+        logIt("host: $Extras.mqtt.host");
+        logIt("port: $Extras.mqtt.port");
+        logIt("clientID: " + clientID);
+        logIt("timeout: $Extras.mqtt.timeout");
+        logIt("keepAliveInterval: $Extras.mqtt.keepAliveInterval");
+        logIt("cleanSession: $Extras.mqtt.cleanSession");
+        logIt("useSSL: $Extras.mqtt.useSSL");
+        logIt("reconnect: $Extras.mqtt.reconnect");
     #end if    
 
     client.connect({ 
