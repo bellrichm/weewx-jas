@@ -63,7 +63,7 @@ function onMessageArrived(message) {
 }
 
 function MQTTConnect() {
-    var clientID = "clientID-" + parseInt(Math.random() * 100);
+    var clientID = "jasClientID-" + parseInt(Math.random() * 100);
     client = new Paho.MQTT.Client("$Extras.mqtt.host", $Extras.mqtt.port, clientID);
 
     client.onConnectionLost = onConnectionLost;
