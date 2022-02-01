@@ -12,3 +12,15 @@ Enhancements:
 - Add to homescreen "as an application".
 - Auto page reload.
 
+V0.2.1
+Fixes:
+- Correctly handle months that are shorter than current month.
+- Display current date, not date that html was generated.
+- Fix formstting of current date. 
+- Internal cleanup.
+Enhancements:
+- Use iframes instead of separate pages.
+  This will allow the MQTT connection to persist across 'page' loads.
+- Improve y-axis range.
+- Start of a debug page.
+- Update charts with MQTT data - proof of concept.
