@@ -89,8 +89,8 @@ function MQTTConnect() {
         useSSL: $Extras.mqtt.useSSL,
         reconnect: $Extras.mqtt.reconnect,
         // end defaults
-        //userName: "",
-        //password: "",
+        userName: "$getVar('$Extras.mqtt.username', '')",
+        password: "$getVar('$Extras.mqtt.password', '')",
 		onSuccess: onConnect,
 		onFailure: onFailure,        
     });
