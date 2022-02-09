@@ -12,13 +12,11 @@ function refreshSizes(){
     radarElem.style.height = radarElem.offsetWidth / 1.618 + 17  +"px" // adding is a hack
   #end if
 
-  #if $chartEngine == "echarts"
     for (index in pageCharts) {
       chartElem = pageCharts[index].getDom()
       height = chartElem.offsetWidth / 1.618 + 17  +"px" // adding is a hack
       pageCharts[index].resize({width: null, height: height})
     }
-  #end if
 }
 
 function handleLog(message) {
@@ -93,11 +91,11 @@ function handleMQTT(message) {
     }    
 
     ## ToDo - proof of concept, charting MQTT data
-    #for $chart in $getVar('$Extras.' + $chartEngine)
-        #for $data in $getVar('$Extras.' + $chartEngine + '.' + $chart + '.series')
-                #set weewx_options = $getVar('$Extras.' + $chartEngine + '.' + $chart + '.series.' + $data + '.weewx', None)
+    #for $chart in $getVar('$Extras.echarts')
+        #for $data in $getVar('$Extras.echarts.' + $chart + '.series')
+                #set weewx_options = $getVar('$Extras.echarts.' + $chart + '.series.' + $data + '.weewx', None)
                 #if $weewx_options
-                    #set aggregation_type = $getVar('$Extras.' + $chartEngine + '.' + $chart + '.series.' + $data + '.weewx.aggregate_type', None)
+                    #set aggregation_type = $getVar('$Extras.echarts.' + $chart + '.series.' + $data + '.weewx.aggregate_type', None)
                     #if $aggregation_type == 'mqtt'
                         #set $data_name = $data + 'MQTT'
                         $data_name = JSON.parse(sessionStorage.getItem('$data_name'));
@@ -116,13 +114,13 @@ function handleMQTT(message) {
         #for $section in $getVar('Extras.pages.' + $page)
             #set $observations = []
             ## todo - cleanup to not use continue
-            #if $section not in $getVar('$Extras.' + $chartEngine)
+            #if $section not in $getVar('$Extras.echarts')
                 #continue
             #end if
             #set $line = $section + 'chart.setOption({'
             $line
                 series: [
-            #for $data in $getVar('$Extras.' + $chartEngine + '.' + $section + '.series')
+            #for $data in $getVar('$Extras.echarts.' + $section + '.series')
                 #set $data_name = $data + "MQTT"
                     {data: $data_name},
                 $observations.append($data_name)
@@ -143,7 +141,7 @@ function handleMQTT(message) {
         dateRangePicker2.setEndDate(endDate)
         #for $section in $getVar('Extras.pages.' + $page)
             ## todo - cleanup to not use continue
-            #if $section not in $getVar('$Extras.' + $chartEngine)
+            #if $section not in $getVar('$Extras.echarts')
                 #continue
             #end if
             #set line = $section + "chart" + ".dispatchAction({type: 'dataZoom', startValue: startTimestamp, endValue: endTimestamp})"
@@ -247,7 +245,7 @@ window.addEventListener("load", function (event) {
                                 #for $section in $getVar('Extras.pages.' + $page)
                                     ## todo - cleanup to not use continue
                                     ##if not isinstance($Extras.pages[$page][$section],dict)
-                                    #if $section not in $getVar('$Extras.' + $chartEngine)
+                                    #if $section not in $getVar('$Extras.echarts')
                                         #continue
                                     #end if
                                     #set line = $section + "chart" + ".dispatchAction({type: 'dataZoom', startValue: start.unix() * 1000, endValue: end.unix() * 1000})"

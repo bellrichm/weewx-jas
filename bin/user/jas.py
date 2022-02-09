@@ -125,7 +125,6 @@ class JAS(SearchList):
         report_dict = self.generator.config_dict.get('StdReport', {})
 
         self.skin_debug = to_bool(self.skin_dict['Extras'].get('debug', False))
-        self.chart_engine = self.skin_dict['Extras'].get('chart_engine', 'echarts').lower()
 
         self.chart_defaults = self.skin_dict['Extras']['echarts_defaults'].get('defaults', {})
         self.chart_series_defaults = self.skin_dict['Extras']['echarts_defaults'].get('series', {})
@@ -175,7 +174,6 @@ class JAS(SearchList):
                                  'loginf': loginf,
                                  'logerr': logerr,
                                  'skinDebug': self._skin_debug,
-                                 'chartEngine': self.chart_engine,
                                  'utcOffset': self.utc_offset,
                                  'last24hours': self._get_last24hours(),
                                  'last7days': self._get_last_n_days(7),
@@ -454,7 +452,7 @@ class JAS(SearchList):
         # todo - rename now has 'side effect' of returning aggregate_types
         observations = {}
         aggregate_types = {}
-        charts = self.skin_dict.get('Extras', {}).get(self.chart_engine, {})
+        charts = self.skin_dict.get('Extras', {}).get('echarts', {})
 
         for chart in charts:
             series = charts[chart].get('series', {})
@@ -495,7 +493,7 @@ class JAS(SearchList):
                 if key == 'series':
                     chart2 += indent + "series: [\n"
                     for obs in value:
-                        weewx_options = self.skin_dict['Extras'][self.chart_engine][chart]['series'][obs].get('weewx', {})
+                        weewx_options = self.skin_dict['Extras']['echarts'][chart]['series'][obs].get('weewx', {})
                         observation = weewx_options.get('observation', obs)
                         aggregate_type = weewx_options.get('aggregate_type', 'avg')
                         aggregate_interval = self.skin_dict['Extras']['page_definition'][page]['aggregate_interval'].get(aggregate_type, 'none')
@@ -505,9 +503,9 @@ class JAS(SearchList):
                         chart2 = "#set global aggregate_interval_global = 'aggregate_interval_" + aggregate_interval + "'\n" + chart2
 
                         chart2 += indent + " {\n"
-                        if 'polar' in self.skin_dict['Extras'][self.chart_engine][chart]:
+                        if 'polar' in self.skin_dict['Extras']['echarts'][chart]:
                             coordinate_type = 'polar'
-                        elif 'grid' in self.skin_dict['Extras'][self.chart_engine][chart]:
+                        elif 'grid' in self.skin_dict['Extras']['echarts'][chart]:
                             coordinate_type = 'grid'
                         else:
                             coordinate_type = 'grid'
@@ -535,17 +533,17 @@ class JAS(SearchList):
         #chart_final = 'var pageCharts = [];\n'
         chart_final = '## charts\n'
         for chart in self.skin_dict['Extras']['pages'][page]:
-            if chart in self.skin_dict['Extras'][self.chart_engine].sections:
+            if chart in self.skin_dict['Extras']['echarts'].sections:
                 chart_config = configobj.ConfigObj(StringIO("[%s]" % (chart)))
-                if 'polar' in self.skin_dict['Extras'][self.chart_engine][chart]:
+                if 'polar' in self.skin_dict['Extras']['echarts'][chart]:
                     coordinate_type = 'polar'
-                elif 'grid' in self.skin_dict['Extras'][self.chart_engine][chart]:
+                elif 'grid' in self.skin_dict['Extras']['echarts'][chart]:
                     coordinate_type = 'grid'
                 else:
                     coordinate_type = 'grid'
                 chart_config[chart].merge(self.chart_defaults.get(coordinate_type, {}))
 
-                chart_config[chart].merge(self.skin_dict['Extras'][self.chart_engine][chart])
+                chart_config[chart].merge(self.skin_dict['Extras']['echarts'][chart])
                 # for now, do not support overriding chart options by page
                 #chart_config[chart].merge(self.skin_dict['Extras']['pages'][page][chart])
 
@@ -553,7 +551,7 @@ class JAS(SearchList):
                 chart2 = self._iterdict('  ', page, chart, chart_js, interval, {}, chart_config[chart])
                 chart2 += "};\n"
                 chart2 += "var telem = document.getElementById('" + chart + interval + "');\n"
-                chart2 += "var " + chart + "chart = echarts.init(document.getElementById('" + chart + interval + "'));\n"
+                chart2 += "var " + chart + "chart = .init(document.getElementById('" + chart + interval + "'));\n"
                 chart2 += chart + "chart.setOption(option);\n"
 
                 chart2 += "pageCharts.push(" + chart + "chart);\n"
