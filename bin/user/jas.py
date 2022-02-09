@@ -551,7 +551,7 @@ class JAS(SearchList):
                 chart2 = self._iterdict('  ', page, chart, chart_js, interval, {}, chart_config[chart])
                 chart2 += "};\n"
                 chart2 += "var telem = document.getElementById('" + chart + interval + "');\n"
-                chart2 += "var " + chart + "chart = .init(document.getElementById('" + chart + interval + "'));\n"
+                chart2 += "var " + chart + "chart = echarts.init(document.getElementById('" + chart + interval + "'));\n"
                 chart2 += chart + "chart.setOption(option);\n"
 
                 chart2 += "pageCharts.push(" + chart + "chart);\n"
