@@ -127,7 +127,7 @@ class JAS(SearchList):
         self.skin_debug = to_bool(self.skin_dict['Extras'].get('debug', False))
 
         self.chart_defaults = self.skin_dict['Extras']['chart_defaults'].get('global', {})
-        self.chart_series_defaults = self.skin_dict['Extras']['chart_defaults'].get('series', {})
+        self.chart_series_defaults = self.skin_dict['Extras']['chart_defaults'].get('chart_type', {}).get('series', {})
 
         html_root = self.skin_dict.get('HTML_ROOT',
                                        report_dict.get('HTML_ROOT', 'public_html'))
