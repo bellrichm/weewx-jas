@@ -17,11 +17,8 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
-      #if $chartEngine == 'apexcharts'
-        <script src="https://cdn.jsdelivr.net/npm/apexcharts@3.27.2/dist/apexcharts.min.js"></script> 
-      #else 
-        <script src="https://cdn.jsdelivr.net/npm/echarts@5.2.2/dist/echarts.min.js"></script>
-      #end if
+
+      <script src="https://cdn.jsdelivr.net/npm/echarts@5.2.2/dist/echarts.min.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
       <script src="javascript/common.js"></script>
 
@@ -57,7 +54,7 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
       #include "sections/zoomControl.inc"
     #end if
     <div class="container">
-    #set charts = $getVar('Extras.' +  $chartEngine)
+    #set charts = $getVar('Extras.chart_definitions')
     #set processing_grid = False
     #for $section in $getVar('Extras.pages.' + $page)
       ## todo - cleanup to not use continue

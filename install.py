@@ -138,7 +138,7 @@ class JASInstaller(ExtensionInstaller):
         super(JASInstaller, self).__init__(
             version=VERSION,
             name='jas',
-            description='Interactive charts using ApexCharts and Bootstrap.',
+            description='Interactive charts using ECharts and Bootstrap.',
             author="Rich Bell",
             author_email="bellrichm@gmail.com",
             config=EXTENSION_DICT,
