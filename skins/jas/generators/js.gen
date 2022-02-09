@@ -82,11 +82,9 @@ function handleMQTT(message) {
       
     if (test_obj.dateTime) {
         sessionStorage.setItem("updateDate", test_obj.dateTime*1000);
-        var dateTime = new Date(test_obj.dateTime*1000);
-        // ToDo, use server locale not the browser so have correct timezone? 
         timeElem = document.getElementById("updateDate")
         if (timeElem) {
-            timeElem.innerHTML = dateTime.toLocaleString();
+            timeElem.innerHTML = moment.unix(test_obj.dateTime).utcOffset($utcOffset).format('$gettext("current_date_time")');
         }  
     }    
 
@@ -346,9 +344,7 @@ window.addEventListener("load", function (event) {
         if(sessionStorage.getItem("updateDate") === null || !MQTTConfig){
             sessionStorage.setItem("updateDate", updateDate);
         }
-        var dateTime = new Date(parseInt(sessionStorage.getItem("updateDate")))
-        // ToDo, use server locale not the browser so have correct timezone? 
-        document.getElementById("updateDate").innerHTML = dateTime.toLocaleString();        
+        document.getElementById("updateDate").innerHTML = moment.unix(sessionStorage.getItem("updateDate")/1000).utcOffset($utcOffset).format('$gettext("current_date_time")');   
 
     #end if
 });
