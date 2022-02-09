@@ -452,7 +452,7 @@ class JAS(SearchList):
         # todo - rename now has 'side effect' of returning aggregate_types
         observations = {}
         aggregate_types = {}
-        charts = self.skin_dict.get('Extras', {}).get('echarts', {})
+        charts = self.skin_dict.get('Extras', {}).get('chart_definitions', {})
 
         for chart in charts:
             series = charts[chart].get('series', {})
@@ -493,7 +493,7 @@ class JAS(SearchList):
                 if key == 'series':
                     chart2 += indent + "series: [\n"
                     for obs in value:
-                        weewx_options = self.skin_dict['Extras']['echarts'][chart]['series'][obs].get('weewx', {})
+                        weewx_options = self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs].get('weewx', {})
                         observation = weewx_options.get('observation', obs)
                         aggregate_type = weewx_options.get('aggregate_type', 'avg')
                         aggregate_interval = self.skin_dict['Extras']['page_definition'][page]['aggregate_interval'].get(aggregate_type, 'none')
@@ -503,9 +503,9 @@ class JAS(SearchList):
                         chart2 = "#set global aggregate_interval_global = 'aggregate_interval_" + aggregate_interval + "'\n" + chart2
 
                         chart2 += indent + " {\n"
-                        if 'polar' in self.skin_dict['Extras']['echarts'][chart]:
+                        if 'polar' in self.skin_dict['Extras']['chart_definitions'][chart]:
                             coordinate_type = 'polar'
-                        elif 'grid' in self.skin_dict['Extras']['echarts'][chart]:
+                        elif 'grid' in self.skin_dict['Extras']['chart_definitions'][chart]:
                             coordinate_type = 'grid'
                         else:
                             coordinate_type = 'grid'
@@ -533,17 +533,17 @@ class JAS(SearchList):
         #chart_final = 'var pageCharts = [];\n'
         chart_final = '## charts\n'
         for chart in self.skin_dict['Extras']['pages'][page]:
-            if chart in self.skin_dict['Extras']['echarts'].sections:
+            if chart in self.skin_dict['Extras']['chart_definitions'].sections:
                 chart_config = configobj.ConfigObj(StringIO("[%s]" % (chart)))
-                if 'polar' in self.skin_dict['Extras']['echarts'][chart]:
+                if 'polar' in self.skin_dict['Extras']['chart_definitions'][chart]:
                     coordinate_type = 'polar'
-                elif 'grid' in self.skin_dict['Extras']['echarts'][chart]:
+                elif 'grid' in self.skin_dict['Extras']['chart_definitions'][chart]:
                     coordinate_type = 'grid'
                 else:
                     coordinate_type = 'grid'
                 chart_config[chart].merge(self.chart_defaults.get(coordinate_type, {}))
 
-                chart_config[chart].merge(self.skin_dict['Extras']['echarts'][chart])
+                chart_config[chart].merge(self.skin_dict['Extras']['chart_definitions'][chart])
                 # for now, do not support overriding chart options by page
                 #chart_config[chart].merge(self.skin_dict['Extras']['pages'][page][chart])
 
