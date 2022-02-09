@@ -93,27 +93,24 @@ function handleMQTT(message) {
     }    
 
     ## ToDo - proof of concept, charting MQTT data
-    #if $chartEngine == 'apexcharts'
-        #ToDo - not supported
-    #else
-        #for $chart in $getVar('$Extras.' + $chartEngine)
-            #for $data in $getVar('$Extras.' + $chartEngine + '.' + $chart + '.series')
-                    #set weewx_options = $getVar('$Extras.' + $chartEngine + '.' + $chart + '.series.' + $data + '.weewx', None)
-                    #if $weewx_options
-                        #set aggregation_type = $getVar('$Extras.' + $chartEngine + '.' + $chart + '.series.' + $data + '.weewx.aggregate_type', None)
-                        #if $aggregation_type == 'mqtt'
-                            #set $data_name = $data + 'MQTT'
-                            $data_name = JSON.parse(sessionStorage.getItem('$data_name'));
-                            #set $line = "if (" + $data_name + ".length >= 1800) {" + $data_name + ".shift();}"
-                            $line
-                            #set $line = $data_name +".push([parseInt(test_obj.dateTime) * 1000, parseFloat(test_obj." + $data + ")]);"
-                            $line
-                            sessionStorage.setItem('$data_name', JSON.stringify($data_name))
-                        #end if
+    #for $chart in $getVar('$Extras.' + $chartEngine)
+        #for $data in $getVar('$Extras.' + $chartEngine + '.' + $chart + '.series')
+                #set weewx_options = $getVar('$Extras.' + $chartEngine + '.' + $chart + '.series.' + $data + '.weewx', None)
+                #if $weewx_options
+                    #set aggregation_type = $getVar('$Extras.' + $chartEngine + '.' + $chart + '.series.' + $data + '.weewx.aggregate_type', None)
+                    #if $aggregation_type == 'mqtt'
+                        #set $data_name = $data + 'MQTT'
+                        $data_name = JSON.parse(sessionStorage.getItem('$data_name'));
+                        #set $line = "if (" + $data_name + ".length >= 1800) {" + $data_name + ".shift();}"
+                        $line
+                        #set $line = $data_name +".push([parseInt(test_obj.dateTime) * 1000, parseFloat(test_obj." + $data + ")]);"
+                        $line
+                        sessionStorage.setItem('$data_name', JSON.stringify($data_name))
                     #end if
-            #end for
+                #end if
         #end for
-    #end if
+    #end for
+
 
     #if $interval_name_global == "mqtt"
         #for $section in $getVar('Extras.pages.' + $page)
@@ -122,20 +119,15 @@ function handleMQTT(message) {
             #if $section not in $getVar('$Extras.' + $chartEngine)
                 #continue
             #end if
-            #if $chartEngine == 'apexcharts'
-                ## ToDo - not supported
-                #continue
-            #else
-                #set $line = $section + 'chart.setOption({'
-                $line
-                    series: [
-                #for $data in $getVar('$Extras.' + $chartEngine + '.' + $section + '.series')
-                    #set $data_name = $data + "MQTT"
-                        {data: $data_name},
-                    $observations.append($data_name)
-                #end for
-                    ]});
-            #end if
+            #set $line = $section + 'chart.setOption({'
+            $line
+                series: [
+            #for $data in $getVar('$Extras.' + $chartEngine + '.' + $section + '.series')
+                #set $data_name = $data + "MQTT"
+                    {data: $data_name},
+                $observations.append($data_name)
+            #end for
+                ]});
         #end for
     #end if
     // console.log('done');
@@ -154,11 +146,7 @@ function handleMQTT(message) {
             #if $section not in $getVar('$Extras.' + $chartEngine)
                 #continue
             #end if
-            #if $chartEngine == 'apexcharts'
-                #set line = $section + 'chart'  + '.zoomX(startTimestamp, endTimestamp)'
-            #else
-                #set line = $section + "chart" + ".dispatchAction({type: 'dataZoom', startValue: startTimestamp, endValue: endTimestamp})"
-            #end if
+            #set line = $section + "chart" + ".dispatchAction({type: 'dataZoom', startValue: startTimestamp, endValue: endTimestamp})"
             $line
         #end for
         updateMinMax(startTimestamp, endTimestamp_min)
@@ -262,11 +250,7 @@ window.addEventListener("load", function (event) {
                                     #if $section not in $getVar('$Extras.' + $chartEngine)
                                         #continue
                                     #end if
-                                    #if $chartEngine == 'apexcharts'
-                                        #set line = $section + 'chart'  + '.zoomX(start.unix() * 1000, end.unix() * 1000)'
-                                    #else
-                                        #set line = $section + "chart" + ".dispatchAction({type: 'dataZoom', startValue: start.unix() * 1000, endValue: end.unix() * 1000})"
-                                    #end if
+                                    #set line = $section + "chart" + ".dispatchAction({type: 'dataZoom', startValue: start.unix() * 1000, endValue: end.unix() * 1000})"
                                     $line
                                 #end for
                                 updateMinMax(start.unix() * 1000, end.startOf('day').unix() * 1000)

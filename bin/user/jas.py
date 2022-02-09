@@ -127,15 +127,8 @@ class JAS(SearchList):
         self.skin_debug = to_bool(self.skin_dict['Extras'].get('debug', False))
         self.chart_engine = self.skin_dict['Extras'].get('chart_engine', 'echarts').lower()
 
-        if self.chart_engine == 'apexcharts':
-            chart_type_defaults = 'apexcharts_defaults'
-            self.chart_defaults = {}
-            for chart_type in self.skin_dict['Extras'][chart_type_defaults].sections:
-                self.chart_defaults[chart_type] = self.skin_dict['Extras'][chart_type_defaults].get('defaults', {})
-                self.chart_defaults[chart_type].merge(self.skin_dict['Extras'][chart_type_defaults][chart_type])
-        else:
-            self.chart_defaults = self.skin_dict['Extras']['echarts_defaults'].get('defaults', {})
-            self.chart_series_defaults = self.skin_dict['Extras']['echarts_defaults'].get('series', {})
+        self.chart_defaults = self.skin_dict['Extras']['echarts_defaults'].get('defaults', {})
+        self.chart_series_defaults = self.skin_dict['Extras']['echarts_defaults'].get('series', {})
 
         html_root = self.skin_dict.get('HTML_ROOT',
                                        report_dict.get('HTML_ROOT', 'public_html'))
@@ -512,23 +505,20 @@ class JAS(SearchList):
                         chart2 = "#set global aggregate_interval_global = 'aggregate_interval_" + aggregate_interval + "'\n" + chart2
 
                         chart2 += indent + " {\n"
-                        if self.chart_engine == "apexcharts":
-                            text_string = aggregate_type + "_aggregation"
-                            chart2 += indent + "  name: '$gettext('" + text_string + "') $obs.label." + observation + "',\n"
+                        if 'polar' in self.skin_dict['Extras'][self.chart_engine][chart]:
+                            coordinate_type = 'polar'
+                        elif 'grid' in self.skin_dict['Extras'][self.chart_engine][chart]:
+                            coordinate_type = 'grid'
                         else:
-                            if 'polar' in self.skin_dict['Extras'][self.chart_engine][chart]:
-                                coordinate_type = 'polar'
-                            elif 'grid' in self.skin_dict['Extras'][self.chart_engine][chart]:
-                                coordinate_type = 'grid'
-                            else:
-                                coordinate_type = 'grid'
-                            if value[obs]['type'] in self.chart_series_defaults.get(coordinate_type, {}):
-                                chart_series_defaults = copy.deepcopy(self.chart_series_defaults[coordinate_type][value[obs]['type']])
-                            else:
-                                chart_series_defaults = {}
-                            chart2 = self._iterdict(indent + '  ', page, chart, chart2, interval, chart_series_defaults, value[obs])
-                            for default in chart_series_defaults:
-                                chart2 += indent + "  " + default + ": " + chart_series_defaults[default] + ",\n"
+                            coordinate_type = 'grid'
+                        if value[obs]['type'] in self.chart_series_defaults.get(coordinate_type, {}):
+                            chart_series_defaults = copy.deepcopy(self.chart_series_defaults[coordinate_type][value[obs]['type']])
+                        else:
+                            chart_series_defaults = {}
+                        chart2 = self._iterdict(indent + '  ', page, chart, chart2, interval, chart_series_defaults, value[obs])
+                        for default in chart_series_defaults:
+                            chart2 += indent + "  " + default + ": " + chart_series_defaults[default] + ",\n"
+
                         if interval != 'mqtt':
                             chart2 += indent + "  data: " + interval + "_" + aggregate_type + "." + observation + ",\n"
                         chart2 += indent + "},\n"
@@ -547,35 +537,24 @@ class JAS(SearchList):
         for chart in self.skin_dict['Extras']['pages'][page]:
             if chart in self.skin_dict['Extras'][self.chart_engine].sections:
                 chart_config = configobj.ConfigObj(StringIO("[%s]" % (chart)))
-                if self.chart_engine == 'apexcharts':
-                    chart_type = self.skin_dict['Extras'][self.chart_engine][chart]['chart']['type']
-                    chart_default = self.chart_defaults.get(chart_type, {})
-                    chart_config[chart].merge(chart_default)
+                if 'polar' in self.skin_dict['Extras'][self.chart_engine][chart]:
+                    coordinate_type = 'polar'
+                elif 'grid' in self.skin_dict['Extras'][self.chart_engine][chart]:
+                    coordinate_type = 'grid'
                 else:
-                    if 'polar' in self.skin_dict['Extras'][self.chart_engine][chart]:
-                        coordinate_type = 'polar'
-                    elif 'grid' in self.skin_dict['Extras'][self.chart_engine][chart]:
-                        coordinate_type = 'grid'
-                    else:
-                        coordinate_type = 'grid'
-                    chart_config[chart].merge(self.chart_defaults.get(coordinate_type, {}))
+                    coordinate_type = 'grid'
+                chart_config[chart].merge(self.chart_defaults.get(coordinate_type, {}))
 
                 chart_config[chart].merge(self.skin_dict['Extras'][self.chart_engine][chart])
                 # for now, do not support overriding chart options by page
                 #chart_config[chart].merge(self.skin_dict['Extras']['pages'][page][chart])
 
-                if self.chart_engine == "apexcharts":
-                    chart_js = chart + "chart = new ApexCharts(document.querySelector('#" + chart + interval + "'), {\n"
-                    chart2 = self._iterdict('  ', page, chart, chart_js, interval, {}, chart_config[chart])
-                    chart2 += "});\n"
-                    chart2 += chart + "chart.render();\n"
-                else:
-                    chart_js = "var option = {\n"
-                    chart2 = self._iterdict('  ', page, chart, chart_js, interval, {}, chart_config[chart])
-                    chart2 += "};\n"
-                    chart2 += "var telem = document.getElementById('" + chart + interval + "');\n"
-                    chart2 += "var " + chart + "chart = echarts.init(document.getElementById('" + chart + interval + "'));\n"
-                    chart2 += chart + "chart.setOption(option);\n"
+                chart_js = "var option = {\n"
+                chart2 = self._iterdict('  ', page, chart, chart_js, interval, {}, chart_config[chart])
+                chart2 += "};\n"
+                chart2 += "var telem = document.getElementById('" + chart + interval + "');\n"
+                chart2 += "var " + chart + "chart = echarts.init(document.getElementById('" + chart + interval + "'));\n"
+                chart2 += chart + "chart.setOption(option);\n"
 
                 chart2 += "pageCharts.push(" + chart + "chart);\n"
 
