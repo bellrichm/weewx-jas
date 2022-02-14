@@ -1,0 +1,7 @@
+Global variables
+# ToDo - set it to $last24hours instead of last24hours
+$interval_global - used to dynamically create the WeeWx timespanBinder.
+$interval_name_global - used to generate unique javascript names.
+$page_name_global = used to name the javascript and chart files.
+$year_global - used to populate the year dropdown.
+$month_global - used to populate the month dropdown.
