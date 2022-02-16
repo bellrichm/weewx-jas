@@ -1,12 +1,8 @@
 ##    Copyright (c) 2022 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
-#include source='var startDate = moment("$' + $interval_name_global  + '.start.format(\'%Y-%m-%dT%H:%M:%S\')").utcOffset($utcOffset);\n'
-#include source='var endDate = moment("$' + $interval_name_global + '.end.format(\'%Y-%m-%dT%H:%M:%S\')").utcOffset($utcOffset);\n'
-#include source = 'var startTimestamp = $' + $interval_name_global + '.start.raw * 1000;\n'
-#include source = 'var endTimestamp = $' + $interval_name_global + '.end.raw * 1000;\n'
 #for $aggregate_type in $getVar('Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval')
-    #set aggregate_interval = $getVar('Extras.page_definition.' + $interval_name_global + '.aggregate_interval.' + $aggregate_type)
+    #set aggregate_interval = $getVar('Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval.' + $aggregate_type)
     #if $aggregate_interval == 'day'
         #set source = "#set global $endTimestamp = ((($" + $interval_name_global + ".end.raw // 86400) * 86400)  - ($utcOffset * 60)) * 1000;\n"
         #set $source += "var endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
@@ -23,18 +19,18 @@
 #end for
 
 #for aggregate_type in $aggregate_types
-    #set interval_name = $interval_name_global + "_" + $aggregate_type
+    #set interval_name = $interval_long_name_global + $aggregate_type
     $interval_name = new Object();
 #end for
 
 #for $observation in $observations
     #for aggregate_type in $observations[$observation]['aggregate_types']
-        #set aggregate_interval = $getVar('Extras.page_definition.' + $interval_name_global + '.aggregate_interval.' + $aggregate_type, None)
-        #set interval_name = $interval_name_global + "_" + $aggregate_type
+        #set aggregate_interval = $getVar('Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval.' + $aggregate_type, None)
+        #set interval_name = $interval_long_name_global + $aggregate_type
         #set array_name = $interval_name + "." + $observation
         #set dateTime_name = $interval_name + "_" + $observation + "_dateTime"
         #set data_name = $interval_name + "_" + $observation + "_data"
-        
+
         #if $aggregate_interval is not None
             #set obs = $array_name + " = $" + $interval_name_global + "." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms').round(2).json"
         #else

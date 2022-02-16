@@ -1,0 +1,13 @@
+#set source = "#import datetime\n"
+#set source += "#import weeutil\n"
+#set source += "#set startTimestamp = weeutil.weeutil.startOfDay($" + $interval_name_global + ".usUnits.firsttime.raw)\n"
+#set source += "#set endTimestamp = weeutil.weeutil.startOfDay($" + $interval_name_global + ".usUnits.lasttime.raw )\n"
+#set source += "#set startDate = datetime.datetime.fromtimestamp($startTimestamp).strftime('%Y-%m-%dT%H:%M:%S')\n"
+#set source += "#set endDate = datetime.datetime.fromtimestamp($endTimestamp).strftime('%Y-%m-%dT%H:%M:%S')\n"
+
+#set source += "var startTimestamp = $startTimestamp * 1000;\n"
+#set source += "var startDate = moment('$startDate').utcOffset($utcOffset);\n"
+#set source += "var endTimestamp = $endTimestamp * 1000;\n"
+#set source += "var endDate = moment('$endDate').utcOffset($utcOffset);\n"
+
+#include source = $source
