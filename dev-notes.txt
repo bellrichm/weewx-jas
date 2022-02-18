@@ -1,5 +1,23 @@
+Architectural/Design Points
+- Do not use ajax calls. This will allow the 'site' to be hosted without a web server.
+- Site should work directly from the file system (file://index.html).
+- Each 'page' is an iframe. The MQTT connection is established on the main page. 
+  This allows the MQTT connection to stay connected when changing pages/iframes.
+- The MQTT data is passed from the main window to the iframes via a posrMessage.
+- The size of the iframe is passed to the main page via a postMessage.
+
+The use of '#include source=$some_var'
+The variable $some_var is processed through the cheetah template interpreter. This enables somethinf like the following
+#set observation = 'outTemp'
+#set some_var = "$year." + $observation + ".series(time_series='start', aggregate_type='avg', aggregate_interval='day', time_unit='unix_epoch_ms').round(2).json"
+#include source=$some_var
+
+The #include statement interprets $some_var and returns
+$year.outTemp.series(time_series='start', aggregate_type='avg', aggregate_interval='day', time_unit='unix_epoch_ms').round(2).json
+This is then interpreted and returns the desired json.
+This allows one to dynamically build the necessary staments to generate the json and is the basis for making this skin highly configurable.
+
 Global variables
-# ToDo - set it to $last24hours instead of last24hours
 $interval_global - used to dynamically create the WeeWx timespanBinder.
 $interval_name_global - used to generate unique javascript names.
 $interval_long_name_global - used to generate unique javascript names.
