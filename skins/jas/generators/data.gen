@@ -44,12 +44,15 @@
 #end for
 
 ## ToDo - wind rose proof of concept
-#set avg, max, wind_directions, wind_range_legend = $windCompass()
-#set line = "var windRangeLegend = " + $wind_range_legend
-$line;
-#set i = 0
-#for $wind in $wind_directions
-    #set line = $interval_name_global + "_avg.windCompassRange"  + str($i) + " = "  + str($wind) +  ";"
-    $line
-    #set $i += 1
-#end for
+$logdbg($page_definition_name_global)
+#if $getVar('Extras.pages.' + $page_definition_name_global + '.windRose',None) is not None
+    #set avg, max, wind_directions, wind_range_legend = $windCompass()
+    #set line = "var windRangeLegend = " + $wind_range_legend
+    $line;
+    #set i = 0
+    #for $wind in $wind_directions
+        #set line = $interval_name_global + "_avg.windCompassRange"  + str($i) + " = "  + str($wind) +  ";"
+        $line
+        #set $i += 1
+    #end for
+#end if
