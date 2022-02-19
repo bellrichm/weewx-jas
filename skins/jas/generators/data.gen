@@ -20,7 +20,7 @@
 
 #for aggregate_type in $aggregate_types
     #set interval_name = $interval_long_name_global + $aggregate_type
-    $interval_name = new Object();
+    $interval_name = {};
 #end for
 
 #for $observation in $observations
@@ -44,7 +44,6 @@
 #end for
 
 ## ToDo - wind rose proof of concept
-$logdbg($page_definition_name_global)
 #if $getVar('Extras.pages.' + $page_definition_name_global + '.windRose',None) is not None
     #set avg, max, wind_directions, wind_range_legend = $windCompass()
     #set line = "var windRangeLegend = " + $wind_range_legend

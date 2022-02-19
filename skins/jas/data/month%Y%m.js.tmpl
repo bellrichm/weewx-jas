@@ -5,6 +5,7 @@
 #set global page_definition_name_global = 'archive-month'
 #set global interval_long_name_global = $interval_name_global + $year.start.format('%Y') + $month.start.format('%m') + "_" 
 #if $getVar("$Extras.pages." + $page, False)
+    /* jshint esversion: 6 */
     #include 'generators/startEndHistorical.gen'
     #include 'generators/data.gen'
 #end if    
