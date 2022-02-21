@@ -1,4 +1,4 @@
-##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
+##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
 // Send log messages from the parent page to the child iframe.
@@ -46,7 +46,9 @@ function setIframeSrc(id, url) {
 }
 
 
-function setYear(year, month) {
+// Handle a year being selected
+function setYear(year) {
+  // Handle 'year' and 'month' click/selections
   var makeonClickHandler = function(url) {
           return function onClickHandler() {
                 setIframeSrc("child-iframe", url);
@@ -60,9 +62,9 @@ function setYear(year, month) {
   var li = document.createElement("li");
   var link = document.createElement("a"); 
   link.classList.add("dropdown-item");           
-    var url = year + ".html";
-    link.id = url;
-    link.onclick = makeonClickHandler(url);
+  var url = year + ".html";
+  link.id = url;
+  link.onclick = makeonClickHandler(url);
 
   var text = document.createTextNode(year);
   link.appendChild(text);
@@ -108,7 +110,8 @@ window.addEventListener("load", function (event) {
   list.innerHTML = "";
   list.currentSelection = null;
 
-  var testFunc = function() {
+  // Handle year selected/click
+  var setActiveYear = function() {
     var list = document.getElementById("dropdownYearMenu");
     var currentSelection = sessionStorage.getItem('currentSelection');
     if (this.id != currentSelection) {
@@ -121,6 +124,7 @@ window.addEventListener("load", function (event) {
     setYear(this.innerHTML);
   };
 
+  // build year drop down
   for (var year in yearMonth){
     var li = document.createElement("li");
     var link = document.createElement("a"); 
@@ -129,7 +133,7 @@ window.addEventListener("load", function (event) {
     link.id = year;
 
     var text = document.createTextNode(year);
-    link.onclick = testFunc;
+    link.onclick = setActiveYear;
     link.appendChild(text);
     link.href = "#";
     li.appendChild(link);
@@ -141,23 +145,6 @@ window.addEventListener("load", function (event) {
       setYear(link.innerHTML);
     }
   }
-
-  window.addEventListener("beforeunload", function (event) {
-      if(sessionStorage.getItem("MQTTConnected")){
-          MQTTDisconnect();
-      }
-  });
-
-	var iframe = document.querySelector("#child-iframe");
-
-	window.addEventListener('message', function(e) {
-		// message that was passed from iframe page
-		var message = e.data;
-
-		iframe.style.height = message.height + 'px';
-		//iframe.style.width = message.width + 'px';
-	} , false);       
-
 
   if (sessionStorage.getItem('currentPage') === null) {
       sessionStorage.setItem('currentPage', '');
@@ -175,3 +162,20 @@ window.addEventListener("load", function (event) {
     MQTTConnect(); 
   #end if
 });
+
+window.addEventListener("beforeunload", function (event) {
+  if(sessionStorage.getItem("MQTTConnected")){
+    MQTTDisconnect();
+  }
+});
+
+window.addEventListener('message', 
+                        function(e) {
+                          // message that was passed from iframe page
+                          var message = e.data;
+
+                          var iframe = document.querySelector("#child-iframe");
+                          iframe.style.height = message.height + 'px';
+                          //iframe.style.width = message.width + 'px';}, 
+                        false);       
+
