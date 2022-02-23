@@ -1,4 +1,4 @@
-##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
+##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
 ## todo move?
@@ -20,6 +20,7 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav me-auto mb-2 mb-md-0">
+          ## Navigation for the congigured 'pages'
           #for $page_data in $getVar('Extras.pages')
             ## todo - cleanup so more robust check, because string cpould be 'true', etc
             #set in_navbar = $getVar('Extras.pages.' + $page_data + '.in_navbar', 'True')
@@ -30,6 +31,7 @@
               </li>
             #end if
           #end for
+          ## Year dropdown
           <li class="nav-item dropdown">
           #if $year_global is not None
             <a class="nav-link dropdown-toggle active" aria-current="page" href="#" id="dropdownYear" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -40,6 +42,7 @@
             </a>
             <div class="dropdown-menu" aria-labelledby="dropdownYear" id="dropdownYearMenu">
           </li>
+          ## Month dropdown
           <li class="nav-item dropdown">
             <div class="dropdown">
             #if $month_global is not None

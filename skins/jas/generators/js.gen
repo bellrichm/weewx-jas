@@ -1,4 +1,4 @@
-##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
+##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
 #import datetime
@@ -232,6 +232,7 @@ function handleMQTT(message) {
 #end if   
 
 window.addEventListener("load", function (event) {
+    ## Todo - create functions for code in the if statements
     // Tell the parent page the iframe size
     let message = { height: document.body.scrollHeight, width: document.body.scrollWidth };	
     // window.top refers to parent window
