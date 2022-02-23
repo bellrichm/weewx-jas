@@ -1,37 +1,43 @@
-##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
+##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
 #import datetime
 #from weeutil.weeutil import to_bool
+ /* jshint esversion: 6 */
 
 var pageCharts = [];
 
+// Ensure that the height of charts is consistent ratio of the width.
 function refreshSizes(){
   #if not $getVar("$Extras.pages." + $page + '.radar', True)
-    radarElem = document.getElementById("radar")
-    radarElem.style.height = radarElem.offsetWidth / 1.618 + 17  +"px" // adding is a hack
+    radarElem = document.getElementById("radar");
+    radarElem.style.height = radarElem.offsetWidth / 1.618 + 17  +"px"; // adding is a hack
   #end if
 
-    for (index in pageCharts) {
-      chartElem = pageCharts[index].getDom()
-      height = chartElem.offsetWidth / 1.618 + 17  +"px" // adding is a hack
-      pageCharts[index].resize({width: null, height: height})
+    for (var index in pageCharts) {
+      chartElem = pageCharts[index].getDom();
+      height = chartElem.offsetWidth / 1.618 + 17  +"px"; // adding is a hack
+      pageCharts[index].resize({width: null, height: height});
     }
 }
 
+// Handle event messages of type 'log'.
 function handleLog(message) {
-    //console.log(message)
-    var jasLog = document.getElementById("jasLog")
+    //console.log(message);
+    var jasLog = document.getElementById("jasLog");
     if (jasLog) {
         jasLog.innerHTML = message + "\n<br>" + jasLog.innerHTML;
     }
     //console.log('done');
 }
 
+// Handle event messages of type 'mqtt'.
 function handleMQTT(message) {
-    //console.log(message)
+    //console.log(message);
 
     var test_obj = JSON.parse(message.payload);
+
+    // Handle the 'header' section of current observations.
     header = JSON.parse(sessionStorage.getItem("header"));
     if (test_obj[header.name]) {
         header.value = test_obj[header.name];
@@ -39,12 +45,13 @@ function handleMQTT(message) {
             header.unit = test_obj[header.unit];
         }
         sessionStorage.setItem("header", JSON.stringify(header));
-        headerElem = document.getElementById(header.name)
+        headerElem = document.getElementById(header.name);
         if (headerElem) {
             headerElem.innerHTML = header.value + header.unit;
         }  
     }
       
+    // Handle information that will be appended to the observation's value.
     suffixes = sessionStorage.getItem("suffixes").split(",");
     suffixes.forEach(function(suffix) {
         if (test_obj[suffix]) {
@@ -54,6 +61,7 @@ function handleMQTT(message) {
         }    
     });
 
+    // Process each observation in the 'current' section.
     observations = sessionStorage.getItem("observations").split(",");
     observations.forEach(function(observation) {
         if (test_obj[observation]) {
@@ -69,20 +77,21 @@ function handleMQTT(message) {
                 suffixText = " " + suffix.value;
             }
 
-            labelElem = document.getElementById(observation + "_label")
+            labelElem = document.getElementById(observation + "_label");
             if (labelElem) {
                 labelElem.innerHTML = data.label;
             } 
-            dataElem = document.getElementById(data.name + "_value")
+            dataElem = document.getElementById(data.name + "_value");
             if (dataElem) {
                 dataElem.innerHTML = data.value + data.unit + suffixText;
             }  
         }
     });    
       
+    // And the 'current' section's date/time.
     if (test_obj.dateTime) {
         sessionStorage.setItem("updateDate", test_obj.dateTime*1000);
-        timeElem = document.getElementById("updateDate")
+        timeElem = document.getElementById("updateDate");
         if (timeElem) {
             timeElem.innerHTML = moment.unix(test_obj.dateTime).utcOffset($utcOffset).format('$gettext("current_date_time")');
         }  
@@ -95,13 +104,14 @@ function handleMQTT(message) {
                 #if $weewx_options
                     #set aggregation_type = $getVar('$Extras.chart_definitions.' + $chart + '.series.' + $data + '.weewx.aggregate_type', None)
                     #if $aggregation_type == 'mqtt'
+                        // update any charts that get updated with MQTT data.
                         #set $data_name = $data + 'MQTT'
                         $data_name = JSON.parse(sessionStorage.getItem('$data_name'));
                         #set $line = "if (" + $data_name + ".length >= 1800) {" + $data_name + ".shift();}"
                         $line
                         #set $line = $data_name +".push([parseInt(test_obj.dateTime) * 1000, parseFloat(test_obj." + $data + ")]);"
                         $line
-                        sessionStorage.setItem('$data_name', JSON.stringify($data_name))
+                        sessionStorage.setItem('$data_name', JSON.stringify($data_name));
                     #end if
                 #end if
         #end for
@@ -134,93 +144,101 @@ function handleMQTT(message) {
 #end if
 
 #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
+    // Handle reset button
     function resetRange() {
-        dateRangePicker2.setStartDate(startDate)
-        dateRangePicker2.setEndDate(endDate)
+        dateRangePicker2.setStartDate(startDate);
+        dateRangePicker2.setEndDate(endDate);
         #for $section in $getVar('Extras.pages.' + $page)
             ## todo - cleanup to not use continue
             #if $section not in $getVar('$Extras.chart_definitions')
                 #continue
             #end if
-            #set line = $section + "chart" + ".dispatchAction({type: 'dataZoom', startValue: startTimestamp, endValue: endTimestamp})"
+            #set line = $section + "chart" + ".dispatchAction({type: 'dataZoom', startValue: startTimestamp, endValue: endTimestamp});"
             $line
         #end for
-        updateMinMax(startTimestamp, endTimestamp_min)
+        updateMinMax(startTimestamp, endTimestamp_min);
     }
 #end if
 
 #if 'minmax' in $getVar('$Extras.pages.' + $page)
+    // Update the min/max observations
     function updateMinMax(startTimestamp, endTimestamp) {
         ## todo - optimize to only get index once for all observations?
         #for $observation in $getVar('Extras.minmax.observations')
-            #set min_datetime_array = $interval_name_global + "_min_" + $observation + "_dateTime"
-            #set min_data_array = $interval_name_global + "_min_" + $observation + "_data"
-            #set max_datetime_array = $interval_name_global + "_max_" + $observation + "_dateTime"
-            #set max_data_array = $interval_name_global + "_max_" + $observation + "_data"            
-            #set min_id = $observation + "_minmax_min"
-            #set max_id = $observation + "_minmax_max"
-            #set label = $getVar('unit.label.' + $observation)
+            #set min_datetime_array = $interval_name_global + "_min_" + $observation + "_dateTime";
+            #set min_data_array = $interval_name_global + "_min_" + $observation + "_data";
+            #set max_datetime_array = $interval_name_global + "_max_" + $observation + "_dateTime";
+            #set max_data_array = $interval_name_global + "_max_" + $observation + "_data";           
+            #set min_id = $observation + "_minmax_min";
+            #set max_id = $observation + "_minmax_max";
+            #set label = $getVar('unit.label.' + $observation);
 
-            #echo "startIndex = " + $min_datetime_array + ".findIndex(element => element == startTimestamp);\n"
-            #echo "endIndex = " + $min_datetime_array + ".findIndex(element => element == endTimestamp);\n"
-            #echo "var minIndex =" + $min_data_array + ".indexOf(Math.min(..." + $min_data_array + ".slice(startIndex, endIndex)));\n"
-            #echo "var maxIndex =" + $max_data_array + ".indexOf(Math.max(..." + $max_data_array + ".slice(startIndex, endIndex)));\n"
-            #echo "var min = " + $min_data_array + "[minIndex] + '" + $label + "';\n"
-            #echo "var max = " + $max_data_array + "[maxIndex] + '" + $label + "';\n"
+            #echo "        startIndex = " + $min_datetime_array + ".findIndex(element => element == startTimestamp);\n"
+            #echo "        endIndex = " + $min_datetime_array + ".findIndex(element => element == endTimestamp);\n"
+            #echo "        minIndex =" + $min_data_array + ".indexOf(Math.min(..." + $min_data_array + ".slice(startIndex, endIndex)));\n"
+            #echo "        maxIndex =" + $max_data_array + ".indexOf(Math.max(..." + $max_data_array + ".slice(startIndex, endIndex)));\n"
+            #echo "        min = " + $min_data_array + "[minIndex] + '" + $label + "';\n"
+            #echo "        max = " + $max_data_array + "[maxIndex] + '" + $label + "';\n"
             #set aggregate_interval = "aggregate_interval_" + $getVar('Extras.page_definition.' + $page + '.aggregate_interval.min', 'none')
-            #echo "var minDate = moment.unix(" + $min_datetime_array + "[minIndex]/1000).utcOffset(" + str($utcOffset) + ").format('" + $pgettext($aggregate_interval, 'label') + "');\n"
-            #echo "var maxDate = moment.unix(" + $max_datetime_array + "[maxIndex]/1000).utcOffset(" + str($utcOffset) + ").format('" + $pgettext($aggregate_interval, 'label') + "');\n"
+            #echo "        minDate = moment.unix(" + $min_datetime_array + "[minIndex]/1000).utcOffset(" + str($utcOffset) + ").format('" + $pgettext($aggregate_interval, 'label') + "');\n"
+            #echo "        maxDate = moment.unix(" + $max_datetime_array + "[maxIndex]/1000).utcOffset(" + str($utcOffset) + ").format('" + $pgettext($aggregate_interval, 'label') + "');\n"
             
-            var observation_element=document.getElementById("$min_id")
-            observation_element.innerHTML = min + '<br>' + minDate
-            var observation_element=document.getElementById("$max_id")
-            observation_element.innerHTML = max + '<br>' + maxDate
+            observation_element=document.getElementById("$min_id");
+            observation_element.innerHTML = min + '<br>' + minDate;
+            observation_element=document.getElementById("$max_id");
+            observation_element.innerHTML = max + '<br>' + maxDate;
         #end for
     }
 #end if
 
 #if 'thisdate' in $getVar('$Extras.pages.' + $page)
+    // Get the observation for timeSramp
     function getObservation(timeStamp, observations) {
         var array_result = observations.filter(function(v,i) { return v[0] === timeStamp; });    
         if (array_result.length > 0)     {
-            return array_result[0][1]
+            return array_result[0][1];
         }
 
-        return observations[0][1]
+        return observations[0][1];
     }
+
+    // Update the 'on this date' observations with observations at timeStamp
     function updateThisDate(timeStamp) {
         #for observation in $Extras.thisdate.observations
             #set aggregation_type = $getVar("$Extras.thisdate.observations." + $observation + ".type", None)
             #if $aggregation_type is None
                 #set value = $interval_name_global + '_min.' + $observation
-                #set line = "var obs = getObservation(timeStamp, " + $value + ")"
+                #set line = "obs = getObservation(timeStamp, " + $value + ");"
                 #set id = $observation + "_thisdate_min"
                 $line
-                var observation=document.getElementById("$id")
-                observation.innerHTML = obs                   
+                observation=document.getElementById("$id");
+                observation.innerHTML = obs;        
                 #set value = $interval_name_global + '_max.' + $observation
-                #set line = "var obs = getObservation(timeStamp, " + $value + ")"
+                #set line = "obs = getObservation(timeStamp, " + $value + ");"
                 #set id = $observation + "_thisdate_max"
                 $line
-                var observation=document.getElementById("$id")
-                observation.innerHTML = obs                             
+                observation=document.getElementById("$id");
+                observation.innerHTML = obs;      
             #else
                 #set value = $interval_name_global + '_' + $aggregation_type + '.' + $observation
-                #set line = "var obs = getObservation(timeStamp, " + $value + ")"
+                #set line = "obs = getObservation(timeStamp, " + $value + ");"
                 #set id = $observation + "_thisdate_" + $aggregation_type
                 $line
-                var observation=document.getElementById("$id")
-                observation.innerHTML = obs
+                observation=document.getElementById("$id");
+                observation.innerHTML = obs;
             #end if
         #end for  
     }      
 #end if   
 
 window.addEventListener("load", function (event) {
+    ## Todo - create functions for code in the if statements
+    // Tell the parent page the iframe size
     let message = { height: document.body.scrollHeight, width: document.body.scrollWidth };	
     // window.top refers to parent window
     window.top.postMessage(message, "*");
 
+    // When the iframe size changes, let the parent page know
     const myObserver = new ResizeObserver(entries => {
         entries.forEach(entry => {
         let message = { height: document.body.scrollHeight, width: document.body.scrollWidth };	
@@ -228,10 +246,10 @@ window.addEventListener("load", function (event) {
         window.top.postMessage(message, "*");    
         });
     });
-
-    myObserver.observe(document.body)
+    myObserver.observe(document.body);
 
     #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
+        // Set up the date/time picker
         dateRangePicker2 = new DateRangePicker('datetimerange-input2',
                             {
                                 minDate: startDate,
@@ -240,16 +258,17 @@ window.addEventListener("load", function (event) {
                                 endDate: endDate,                                     
                             },
                             function(start, end, label) {
+                                // Update all charts with selected date/time and min/max values
                                 #for $section in $getVar('Extras.pages.' + $page)
                                     ## todo - cleanup to not use continue
                                     ##if not isinstance($Extras.pages[$page][$section],dict)
                                     #if $section not in $getVar('$Extras.chart_definitions')
                                         #continue
                                     #end if
-                                    #set line = $section + "chart" + ".dispatchAction({type: 'dataZoom', startValue: start.unix() * 1000, endValue: end.unix() * 1000})"
+                                    #set line = $section + "chart" + ".dispatchAction({type: 'dataZoom', startValue: start.unix() * 1000, endValue: end.unix() * 1000});"
                                     $line
                                 #end for
-                                updateMinMax(start.unix() * 1000, end.startOf('day').unix() * 1000)
+                                updateMinMax(start.unix() * 1000, end.startOf('day').unix() * 1000);
                         }
         );
     #end if
@@ -260,7 +279,7 @@ window.addEventListener("load", function (event) {
         #else
             #set $endTimestamp = "endTimestamp"
         #end if
-        updateMinMax(startTimestamp, $endTimestamp)
+        updateMinMax(startTimestamp, $endTimestamp);
     #end if
 
     #if 'thisdate' in $getVar('$Extras.pages.' + $page)              
@@ -270,7 +289,7 @@ window.addEventListener("load", function (event) {
                                 maxDate: endDate
                             },
                                 function(start, end, label) {
-                                    updateThisDate(start.unix() * 1000)
+                                    updateThisDate(start.unix() * 1000);
                             }
         );
         #set today = datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
@@ -287,14 +306,14 @@ window.addEventListener("load", function (event) {
         var lastDay = new Date($selected_year, $selected_month, 0).getDate();
         var selectedDay = new Date().getDate();
         if (selectedDay > lastDay) {
-            selectedDay = lastDay
+            selectedDay = lastDay;
         }
         
-        var selectedDate = Date.UTC($selected_year, $selected_month - 1, selectedDay) / 1000 + $offset_seconds
+        var selectedDate = Date.UTC($selected_year, $selected_month - 1, selectedDay) / 1000 + $offset_seconds;
         
         dateRangePicker.setStartDate(moment.unix(selectedDate).utcOffset($utcOffset));
         dateRangePicker.setEndDate(moment.unix(selectedDate).utcOffset($utcOffset));
-        updateThisDate(selectedDate * 1000) 
+        updateThisDate(selectedDate * 1000);
     #end if
 
     #if 'observations' in $getVar('$Extras.pages.' + $page)
@@ -310,8 +329,8 @@ window.addEventListener("load", function (event) {
         // ToDo - cleanup, perhaps put suffix data into an array and store that
         // ToDo - do a bit more in cheetah?
         suffixes = [];
-        for ([suffix, data] of current.suffixes) {
-            suffixes.push(suffix)
+        for (var [suffix, data] of current.suffixes) {
+            suffixes.push(suffix);
             if (sessionStorage.getItem(suffix) === null || !MQTTConfig){
                 sessionStorage.setItem(suffix, JSON.stringify(data));
             }
@@ -321,7 +340,7 @@ window.addEventListener("load", function (event) {
         // ToDo - cleanup, perhaps put observation data into an array and store that
         // ToDo - do a bit more in cheetah?
         observations = [];
-        for ([observation, data] of current.observations) {
+        for (var [observation, data] of current.observations) {
             observations.push(observation);
             if (sessionStorage.getItem(observation) === null || !MQTTConfig){
                 sessionStorage.setItem(observation, JSON.stringify(data));
@@ -356,21 +375,23 @@ window.addEventListener('onresize', function() {
 	window.top.postMessage(message, "*");
 });
 
-window.addEventListener('message', function(e) {
-    // Running directly from the file system has some strangeness
-    if (window.location.origin != "file://" && e.origin !== window.location.origin)
-    return;
+window.addEventListener('message', 
+                        function(e) {
+                        // Running directly from the file system has some strangeness
+                        if (window.location.origin != "file://" && e.origin !== window.location.origin)
+                        return;
 
-    message = e.data
-    if (message.kind == undefined) {
-        return;
-    }
-    if (message.kind == 'mqtt')
-    {
-        handleMQTT(message.message);
-    }
-    if (message.kind == 'log')
-    {
-        handleLog(message.message);
-    }    
-} , false);        
+                        message = e.data;
+                        if (message.kind == undefined) {
+                            return;
+                        }
+                        if (message.kind == 'mqtt')
+                        {
+                            handleMQTT(message.message);
+                        }
+                        if (message.kind == 'log')
+                        {
+                            handleLog(message.message);
+                        }}, 
+                        false
+                       );        

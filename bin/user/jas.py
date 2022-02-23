@@ -3,6 +3,34 @@
 
 """
 This search list extension provides the following tags:
+  aggregate_types
+    Returns:
+      A dictionary of all aggregate types (avg, max, min, sum, etc.) used.
+
+  $forecasts
+    Returns:
+      A list of dictionaries containing forecastdata.
+      ToDo - determine and document what forecast data is returned.
+
+  $genCharts
+    Arguments:
+      page: The page to generate the charts for
+      interval: The time interval to generate the chart for (day, yesterday, 2000, 200001, etc)
+    Returns:
+      The charts for the page.
+
+  $last24hours
+    A WeeWX timespanBinder for the last 24 hours.
+
+  $last7days
+     A WeeWX timespanBinder for the last 7 days.
+
+  $last31days
+    A WeeWX timespanBinder for the last 31 days.
+
+  $last366days
+    A WeeWX timespanBinder for the last 366 days.
+
   $logdbg(message)
     A method to log debug messages.
 
@@ -15,11 +43,19 @@ This search list extension provides the following tags:
   $observations
     A dictionary of all the observations that will be chartted.
 
-  $forecasts
-    Returns:
-      A list of dictionaries containing forecastdata.
-      ToDo - determine and document what forecast data is returned.
+  $ordinateNames
+    The names of the compass ordinates.
 
+  $skinDebug
+    The skin debug option.
+
+  $utcOffset
+    The UTC offset in minutes.
+
+  $version
+    Returns:
+      The version of this skin.
+      
   $windCompass(start_offset, end_offset)
     Arguments:
       start_offset: The starting time offset from the current time. Default is 86400, 24 hours.
@@ -31,9 +67,6 @@ This search list extension provides the following tags:
         speed_ranges: A list of lists. Each primary list is a speed range that contains a list
           of the counts of that speed for each compass ordinal.
 
-  $version
-    Returns:
-      The version of this skin.
 """
 
 import copy
@@ -170,23 +203,23 @@ class JAS(SearchList):
         self.timespan = timespan
         self.db_lookup = db_lookup
 
-        search_list_extension = {'logdbg': logdbg,
-                                 'loginf': loginf,
-                                 'logerr': logerr,
-                                 'skinDebug': self._skin_debug,
-                                 'utcOffset': self.utc_offset,
+        search_list_extension = {'aggregate_types': self.aggregate_types,   
+                                 'current_observation': self.data_current,
+                                 'forecasts': self.data_forecast,
+                                 'genCharts': self._gen_charts,
                                  'last24hours': self._get_last24hours(),
                                  'last7days': self._get_last_n_days(7),
                                  'last31days': self._get_last_n_days(31),
                                  'last366days': self._get_last_n_days(366),
-                                 'ordinateNames': self.ordinate_names,
+                                 'logdbg': logdbg,
+                                 'loginf': loginf,
+                                 'logerr': logerr,
                                  'observations': self.observations,
-                                 'aggregate_types': self.aggregate_types,
-                                 'forecasts': self.data_forecast,
-                                 'current_observation': self.data_current,
-                                 'windCompass': self._get_wind_compass,
-                                 'genCharts': self._gen_charts,
+                                 'ordinateNames': self.ordinate_names,
+                                 'skinDebug': self._skin_debug,
+                                 'utcOffset': self.utc_offset,
                                  'version': VERSION,
+                                 'windCompass': self._get_wind_compass,
                                  }
 
         return [search_list_extension]

@@ -29,16 +29,21 @@ EXTENSION_CONFIG = """
 
             # Create an additional chart.
             [[[[charts]]]]
+                # The name of this chart is inTemp. It could be anything.
+                # The name is used to add it to a page.
                 [[[[[inTemp]]]]]
                     [[[[[[chart]]]]]]
+                        # The chart type is line.
                         type = "'line'"            
                     [[[[[[dataLabels]]]]]]
                         enabled = false
                     [[[[[[series]]]]]]
+                        # Chart one observation, inTemp
                         [[[[[[[inTemp]]]]]]]
 
             # The '$current' value of these observations will be displayed.
             [[[[current]]]]
+                # The header observation is outTemp
                 observation = outTemp
                 [[[[[observations]]]]]
                     [[[[[[heatindex]]]]]]

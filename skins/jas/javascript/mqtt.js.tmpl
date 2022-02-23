@@ -21,7 +21,7 @@ function onConnected(reconn ,url){
 }
 
 function onConnectionLost(responseObject) {
-    message = ""
+    message = "";
     if (responseObject.errorCode !== 0) {
         message = responseObject.errorMessage;
     }
@@ -47,19 +47,19 @@ function onMessageArrived(message) {
 
     // When running without a webserver, there is a lot of 'strangeness'
     if (window.location.protocol == "file:") {
-        targetOrigin = "*"
+        targetOrigin = "*";
     }
     else {
-        targetOrigin = window.location.origin
+        targetOrigin = window.location.origin;
     }
     forwardedMessage = {};
-    forwardedMessage['kind'] = 'mqtt';
-    forwardedMessage['message'] = {}
-    forwardedMessage['message']['topic'] = message.topic;
-    forwardedMessage['message']['payload'] = message.payloadString;
-    forwardedMessage['message']['qos'] = message.qos;
-    forwardedMessage['message']['retain'] = message.retain;
-    document.getElementById('child-iframe').contentWindow.postMessage(forwardedMessage, targetOrigin)
+    forwardedMessage.kind = 'mqtt';
+    forwardedMessage.message = {};
+    forwardedMessage.message.topic = message.topic;
+    forwardedMessage.message.payload = message.payloadString;
+    forwardedMessage.message.qos = message.qos;
+    forwardedMessage.message.retain = message.retain;
+    document.getElementById('child-iframe').contentWindow.postMessage(forwardedMessage, targetOrigin);
 }
 
 function MQTTConnect() {

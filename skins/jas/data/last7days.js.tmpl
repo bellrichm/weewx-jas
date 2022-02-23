@@ -1,65 +1,14 @@
-##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
+##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
-#if $getVar('Extras.pages.last7days', None) is None and $getVar("$Extras.index_page_interval", "last24hours") != "last7days"
-    #stop
-#end if 
-
-#set interval_id = "last7days_"
-
-var startDate = moment("$last7days.start.format('%Y-%m-%dT%H:%M:%S')").utcOffset($utcOffset);
-var endDate = moment("$last7days.end.format('%Y-%m-%dT%H:%M:%S')").utcOffset($utcOffset);
-var startTimestamp = $last7days.start.raw * 1000
-var endTimestamp = $last7days.end.raw * 1000
-#for $aggregate_type in $getVar('Extras.page_definition.last7days.aggregate_interval')
-    #set aggregate_interval = $getVar('Extras.page_definition.last7days.aggregate_interval.' + $aggregate_type)
-    #if $aggregate_interval == 'day'
-        #set source = "#set global $endTimestamp = ((($last7days.end.raw // 86400) * 86400)  - ($utcOffset * 60)) * 1000;\n"
-        #set $source += "var endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
-        #include source=$source
-    #else if $aggregate_interval == 'hour'
-        #set source = "#set global $endTimestamp = ((($last7days.end.raw // 3600) * 3600)  - ($utcOffset * 60)) * 1000;\n"
-        #set $source += "var endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
-        #include source=$source    
-    #else
-        #set source = "#set global $endTimestamp = ((($last7days.end.raw // 60) * 60)  - ($utcOffset * 60)) * 1000;\n"
-        #set $source += "var endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
-        #include source=$source        
-    #end if
-#end for
-
-#for aggregate_type in $aggregate_types
-    #set interval_name = $interval_id + $aggregate_type
-    $interval_name = new Object();
-#end for
-
-#for $observation in $observations
-    #for aggregate_type in $observations[$observation]['aggregate_types']
-        #set aggregate_interval = $getVar('Extras.page_definition.last7days.aggregate_interval.' + $aggregate_type, None)
-        #set interval_name = $interval_id + $aggregate_type
-        #set array_name = $interval_name + "." + $observation
-        #set dateTime_name = $interval_name + "_" + $observation + "_dateTime"
-        #set data_name = $interval_name + "_" + $observation + "_data"
-        
-        #if $aggregate_interval is not None
-            #set obs = $array_name + " = $last7days." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms').round(2).json"
-        #else
-            #set obs = $array_name + " = $last7days." + $observation + ".series(time_series='start', time_unit='unix_epoch_ms').round(2).json"
-        #end if
-        $skinDebug($obs)
-        #include source=$obs + ";\n"
-        #echo $dateTime_name + " = [].concat(" + $array_name + ".map(arr => arr[0]));\n"
-        #echo $data_name + " = [].concat(" + $array_name + ".map(arr => arr[1]));\n"
-    #end for
-#end for
-
-## ToDo - wind rose proof of concept
-#set avg, max, wind_directions, wind_range_legend = $windCompass(604800, 0)
-#set line = "var windRangeLegend = " + $wind_range_legend
-$line;
-#set i = 0
-#for $wind in $wind_directions
-    #set line = "last7days_avg.windCompassRange"  + str($i) + " = "  + str($wind) +  ";"
-    $line
-    #set $i += 1
-#end for
+#set global interval_name_global = 'last7days'
+#set global page_definition_name_global = 'last7days'
+#set global interval_long_name_global = $interval_name_global + "_" 
+#if $getVar("$Extras.pages." + $page, False)
+    /* jshint esversion: 6 */
+    #include 'generators/startEndActive.gen'
+    #include 'generators/data.gen'
+#end if    
+#set global interval_name_global = None
+#set global page_definition_name_global = None
+#set global interval_long_name_global = None
