@@ -25,8 +25,21 @@ EXTENSION_CONFIG = """
 
             # The client id abd secret for Aeris APIs
             client_id = REPLACE_ME
-            client_secret = REPLACE_ME        
-
+            client_secret = REPLACE_ME       
+            
+            [[[[mqtt]]]]
+                enable = False
+                
+                host = REPLACE_ME
+                port = REPLACE_ME
+                
+                useSSL = false
+                
+                username = REPLACE_ME
+                password = REPLACE_ME
+                
+                topic = REPLACE_ME
+                
             # Create an additional chart.
             [[[[charts]]]]
                 # The name of this chart is inTemp. It could be anything.
@@ -82,8 +95,8 @@ EXTENSION_CONFIG = """
                 [[[[[index]]]]]
                     [[[[[[observations]]]]]]
                     [[[[[[minmax]]]]]]
-                    [[[[[[forecast]]]]]]
-                        layout = row                                             
+                    #[[[[[[forecast]]]]]]
+                    #    layout = row                                             
                     [[[[[[outTemp]]]]]]
                     [[[[[[barometer]]]]]]  
                     [[[[[[outHumidity]]]]]]  
@@ -148,30 +161,26 @@ class JASInstaller(ExtensionInstaller):
             author_email="bellrichm@gmail.com",
             config=EXTENSION_DICT,
             files=[('bin/user', ['bin/user/jas.py']),
-                   ('skins/jas', ['skins/jas/day.html.tmpl',
-                                  'skins/jas/forecast.inc',
+                   ('skins/jas', ['skins/jas/debug.html.tmpl',
+                                  'skins/jas/day.html.tmpl',
                                   'skins/jas/index.html.tmpl',
                                   'skins/jas/last7days.html.tmpl',
                                   'skins/jas/last24hours.html.tmpl',
                                   'skins/jas/last31days.html.tmpl',
                                   'skins/jas/last366days.html.tmpl',
-                                  'skins/jas/minmax.inc',
+                                  'skins/jas/manifest.json.tmpl',
                                   'skins/jas/month.html.tmpl',
-                                  'skins/jas/observations.inc',
-                                  'skins/jas/radar.inc',
-                                  'skins/jas/reload.inc',
                                   'skins/jas/skin.conf',
-                                  'skins/jas/thisdate.inc',
                                   'skins/jas/week.html.tmpl',
                                   'skins/jas/year.html.tmpl',
                                   'skins/jas/yesterday.html.tmpl',
-                                  'skins/jas/zoomControl.inc',
                                   'skins/jas/%Y.html.tmpl',
                                   'skins/jas/%Y-%m.html.tmpl'
                                   ]),
                    ('skins/jas/charts', ['skins/jas/charts/day.js.tmpl',
+                                         'skins/jas/charts/debug.js.tmpl',
                                          'skins/jas/charts/index.js.tmpl',
-                                         'skins/jas/charts/last7day.js.tmpl',
+                                         'skins/jas/charts/last7days.js.tmpl',
                                          'skins/jas/charts/last24hours.js.tmpl',
                                          'skins/jas/charts/last31days.js.tmpl',
                                          'skins/jas/charts/last366days.js.tmpl',
@@ -182,7 +191,8 @@ class JASInstaller(ExtensionInstaller):
                                          'skins/jas/charts/%Y.js.tmpl',
                                          'skins/jas/charts/%Y-%m.js.tmpl'
                                          ]),
-                   ('skins/jas/data', ['skins/jas/data/alltime.js.tmpl',
+                   ('skins/jas/data', ['skins/jas/data/current.js.tmpl',
+                                       'skins/jas/data/alltime.js.tmpl',
                                        'skins/jas/data/day.js.tmpl',
                                        'skins/jas/data/last7days.js.tmpl',
                                        'skins/jas/data/last24hours.js.tmpl',
@@ -195,11 +205,39 @@ class JASInstaller(ExtensionInstaller):
                                        'skins/jas/data/year%Y.js.tmpl',
                                        'skins/jas/data/month%Y%m.js.tmpl'
                                       ]),
-                   ('skins/jas/generators', ['skins/jas/generators/navbar.gen',
-                                             'skins/jas/generators/pages.gen'
+                   ('skins/jas/generators', ['skins/jas/generators/data.gen',
+                                             'skins/jas/generators/js.gen',
+                                             'skins/jas/generators/navbar.gen',
+                                             'skins/jas/generators/pages.gen',
+                                             'skins/jas/generators/startEndHistorical.gen',
+                                             'skins/jas/generators/startEndActive.gen'
                                             ]),
-                   ('skins/jas/javascript', ['skins/jas/javascript/mqtt.js']),
+                   ('skins/jas/javascript', ['skins/jas/javascript/common.js.tmpl',
+                                             'skins/jas/javascript/day.js.tmpl',
+                                             'skins/jas/javascript/debug.js.tmpl',
+                                             'skins/jas/javascript/index.js.tmpl',
+                                             'skins/jas/javascript/last7days.js.tmpl',
+                                             'skins/jas/javascript/last24hours.js.tmpl',
+                                             'skins/jas/javascript/last31days.js.tmpl',
+                                             'skins/jas/javascript/last366days.js.tmpl',
+                                             'skins/jas/javascript/month.js.tmpl',
+                                             'skins/jas/javascript/mqtt.js.tmpl',
+                                             'skins/jas/javascript/week.js.tmpl',
+                                             'skins/jas/javascript/year.js.tmpl',
+                                             'skins/jas/javascript/yesterday.js.tmpl',
+                                             'skins/jas/javascript/%Y.js.tmpl',
+                                             'skins/jas/javascript/%Y-%m.js.tmpl'
+                                             ]),
                    ('skins/jas/lang', ['skins/jas/lang/en.conf']),
+                   ('skins/jas/sections', [
+                                           'skins/jas/sections/forecast.inc',
+                                           'skins/jas/sections/minmax.inc',
+                                           'skins/jas/sections/observations.inc',
+                                           'skins/jas/sections/radar.inc',
+                                           'skins/jas/sections/reload.inc',
+                                           'skins/jas/sections/thisdate.inc',
+                                           'skins/jas/sections/zoomControl.inc'
+                                           ]),
                    ('skins/jas/weather-icons/css', ['skins/jas/weather-icons/css/weather-icons.min.css',
                                                     'skins/jas/weather-icons/css/weather-icons-wind.min.css'
                                                    ]),
