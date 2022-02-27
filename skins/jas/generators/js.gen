@@ -140,7 +140,15 @@ function handleMQTT(message) {
 }
 
 #if to_bool($getVar('$Extras.pages.' + $page + '.reload', False))
-  #include "sections/reload.inc"
+    #set wait_milliseconds = int($getVar('$Extras.pages.' + $page + '.wait_seconds', 300)) * 1000
+    #set delay_milliseconds = int($getVar('$Extras.pages.' + $page + '.delay_seconds', 60)) * 1000
+    // Set a timer to reload the iframe/page.
+    var current = new Date();
+    var future = new Date();
+    future.setTime(future.getTime() + $wait_milliseconds); 
+    var futureTimestamp = Math.floor(future.getTime()/$wait_milliseconds) * $wait_milliseconds;
+    var timeout = futureTimestamp - current.getTime() + $delay_milliseconds;
+    setTimeout(function() { window.location.reload(true); }, timeout);
 #end if
 
 #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)

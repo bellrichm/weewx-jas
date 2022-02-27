@@ -159,7 +159,6 @@ class JASInstaller(ExtensionInstaller):
                                   'skins/jas/month.html.tmpl',
                                   'skins/jas/observations.inc',
                                   'skins/jas/radar.inc',
-                                  'skins/jas/reload.inc',
                                   'skins/jas/skin.conf',
                                   'skins/jas/thisdate.inc',
                                   'skins/jas/week.html.tmpl',
