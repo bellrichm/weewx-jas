@@ -526,9 +526,8 @@ class JAS(SearchList):
                 if key == 'series':
                     chart2 += indent + "series: [\n"
                     for obs in value:
-                        weewx_options = self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs].get('weewx', {})
-                        observation = weewx_options.get('observation', obs)
-                        aggregate_type = weewx_options.get('aggregate_type', 'avg')
+                        observation = weewx_options = self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs]['weewx']['observation']
+                        aggregate_type = weewx_options = self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs]['weewx']['aggregate_type']
                         aggregate_interval = self.skin_dict['Extras']['page_definition'][page]['aggregate_interval'].get(aggregate_type, 'none')
 
                         # set the aggregate_interval at the beginning of the chart definition, somit can be used in the chart
@@ -567,9 +566,16 @@ class JAS(SearchList):
             self.chart_config[chart].merge(self.skin_dict['Extras']['chart_definitions'][chart])
             self.chart_defs[chart].merge(self.skin_dict['Extras']['chart_definitions'][chart])
 
+            weewx_options = {}
+            weewx_options['aggregate_type'] = 'avg'
+                                  
             for value in self.skin_dict['Extras']['chart_definitions'][chart]['series']:
                 charttype =  self.skin_dict['Extras']['chart_definitions'][chart]['series'][value]['type']
                 self.chart_defs[chart]['series'][value].merge((self.chart_series_defaults.get(coordinate_type, {}).get(charttype,{})))
+                weewx_options['observation'] = value
+                if 'weewx' not in self.chart_defs[chart]['series'][value]:
+                    self.chart_defs[chart]['series'][value]['weewx'] = {}
+                weeutil.config.conditional_merge(self.chart_defs[chart]['series'][value]['weewx'], weewx_options)
 
     def _gen_charts(self, page, interval):
         #chart_final = 'var pageCharts = [];\n'
