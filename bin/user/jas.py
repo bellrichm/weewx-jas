@@ -537,8 +537,6 @@ class JAS(SearchList):
                         chart2 += indent + " {\n"
                         chart2 = self._iterdict(indent + '  ', page, chart, chart2, interval, value[obs])
 
-                        if interval != 'mqtt':
-                            chart2 += indent + "  data: " + interval + "_" + aggregate_type + "." + observation + ",\n"
                         chart2 += indent + "},\n"
                     chart2 += indent +"]\n"
                 else:
@@ -593,7 +591,22 @@ class JAS(SearchList):
                 chart2 += "var " + chart + "chart = echarts.init(document.getElementById('" + chart + interval + "'));\n"
                 chart2 += chart + "chart.setOption(option);\n"
 
-                chart2 += "pageCharts.push(" + chart + "chart);\n"
+                chart2 += "pageChart = {};\n"
+
+                if interval != 'mqtt':
+                    chart2 += "option = {\n"
+                    chart2 += "  series: [\n"
+                    for obs in self.chart_defs[chart]['series']:
+                        aggregate_type = self.chart_defs[chart]['series'][obs]['weewx']['aggregate_type']
+                        chart2 += "    {name: " + self.chart_defs[chart]['series'][obs]['name'] + ",\n"
+                        chart2 += "    data: " + interval + "_" + aggregate_type + "." + self.chart_defs[chart]['series'][obs]['weewx']['observation'] + "},\n"
+                    chart2 += "]};\n"
+                    chart2 += "pageChart.option = option;\n"
+                else:
+                    chart2 += "pageChart.option = null;\n"
+
+                chart2 += "pageChart.chart = " + chart + "chart;\n"
+                chart2 += "pageCharts.push(pageChart);\n"
 
                 chart_final += chart2
 

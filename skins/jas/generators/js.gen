@@ -7,6 +7,13 @@
 
 var pageCharts = [];
 
+// Update the chart's data
+function updateCharts() {
+    for (var index in pageCharts) {
+        pageCharts[index].chart.setOption(pageCharts[index].option)
+    }
+}
+
 // Ensure that the height of charts is consistent ratio of the width.
 function refreshSizes(){
   #if not $getVar("$Extras.pages." + $page + '.radar', True)
@@ -15,9 +22,9 @@ function refreshSizes(){
   #end if
 
     for (var index in pageCharts) {
-      chartElem = pageCharts[index].getDom();
+      chartElem = pageCharts[index].chart.getDom();
       height = chartElem.offsetWidth / 1.618 + 17  +"px"; // adding is a hack
-      pageCharts[index].resize({width: null, height: height});
+      pageCharts[index].chart.resize({width: null, height: height});
     }
 }
 
@@ -255,6 +262,8 @@ window.addEventListener("load", function (event) {
         });
     });
     myObserver.observe(document.body);
+
+    updateCharts()
 
     #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
         // Set up the date/time picker
