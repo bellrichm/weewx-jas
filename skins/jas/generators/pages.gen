@@ -1,4 +1,4 @@
-##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
+##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
 #*
@@ -20,14 +20,14 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
 
       <script src="https://cdn.jsdelivr.net/npm/echarts@5.2.2/dist/echarts.min.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
-      <script src="javascript/common.js"></script>
+      <script src="../javascript/common.js"></script>
 
       #if $interval_name_global and $interval_name_global != 'mqtt'
         #set data = $interval_name_global + ".js"
-        <script src="data/$data"></script>
+        <script src="../data/$data"></script>
       #end if
 
-    #set data = '<script src="javascript/' + $page_name_global + '.js"></script>'
+    #set data = '<script src="../javascript/' + $page_name_global + '.js"></script>'
     $data
 
       <title>$title_global</title>
@@ -97,6 +97,6 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
       </div>
     #end if
     </div>     
-    #set data = '<script src="charts/' + $page_name_global + '.js"></script>'
+    #set data = '<script src="../charts/' + $page_name_global + '.js"></script>'
     $data
 </body> 

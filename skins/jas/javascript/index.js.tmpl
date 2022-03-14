@@ -62,7 +62,7 @@ function setYear(year) {
   var li = document.createElement("li");
   var link = document.createElement("a"); 
   link.classList.add("dropdown-item");           
-  var url = year + ".html";
+  var url = "pages/" + year + ".html";
   link.id = url;
   link.onclick = makeonClickHandler(url);
 
@@ -81,7 +81,7 @@ function setYear(year) {
     li = document.createElement("li");
     link = document.createElement("a"); 
     link.classList.add("dropdown-item");
-    url = yearMonth[year][i] + ".html";
+    url = "pages/" + yearMonth[year][i] + ".html";
     link.id = url;
     link.onclick = makeonClickHandler(url);
 
@@ -149,7 +149,7 @@ window.addEventListener("load", function (event) {
   if (sessionStorage.getItem('currentPage') === null) {
       sessionStorage.setItem('currentPage', '');
       ## ToDo - configure landing page
-      setIframeSrc('child-iframe', 'last24hours.html');
+      setIframeSrc('child-iframe', 'pages/last24hours.html');
   }
   else
   {

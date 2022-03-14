@@ -1,4 +1,4 @@
-#    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
+#    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
 #    See the file LICENSE.txt for your rights.
 
 """ Installer for the jas skin. """
@@ -161,21 +161,21 @@ class JASInstaller(ExtensionInstaller):
             author_email="bellrichm@gmail.com",
             config=EXTENSION_DICT,
             files=[('bin/user', ['bin/user/jas.py']),
-                   ('skins/jas', ['skins/jas/debug.html.tmpl',
-                                  'skins/jas/day.html.tmpl',
+                   ('skins/jas', ['skins/jas/pages/debug.html.tmpl',
+                                  'skins/jas/pages/day.html.tmpl',
                                   'skins/jas/index.html.tmpl',
-                                  'skins/jas/last7days.html.tmpl',
-                                  'skins/jas/last24hours.html.tmpl',
-                                  'skins/jas/last31days.html.tmpl',
-                                  'skins/jas/last366days.html.tmpl',
+                                  'skins/jas/pages/last7days.html.tmpl',
+                                  'skins/jas/pages/last24hours.html.tmpl',
+                                  'skins/jas/pages/last31days.html.tmpl',
+                                  'skins/jas/pages/last366days.html.tmpl',
                                   'skins/jas/manifest.json.tmpl',
-                                  'skins/jas/month.html.tmpl',
+                                  'skins/jas/pages/month.html.tmpl',
                                   'skins/jas/skin.conf',
-                                  'skins/jas/week.html.tmpl',
-                                  'skins/jas/year.html.tmpl',
-                                  'skins/jas/yesterday.html.tmpl',
-                                  'skins/jas/%Y.html.tmpl',
-                                  'skins/jas/%Y-%m.html.tmpl'
+                                  'skins/jas/pages/week.html.tmpl',
+                                  'skins/jas/pages/year.html.tmpl',
+                                  'skins/jas/pages/yesterday.html.tmpl',
+                                  'skins/jas/pages/%Y.html.tmpl',
+                                  'skins/jas/pages/%Y-%m.html.tmpl'
                                   ]),
                    ('skins/jas/charts', ['skins/jas/charts/day.js.tmpl',
                                          'skins/jas/charts/debug.js.tmpl',

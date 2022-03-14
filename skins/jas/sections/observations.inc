@@ -1,7 +1,7 @@
-##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
+##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
-<script src="data/current.js"> </script>
+<script src="../data/current.js"> </script>
 <div class="col-12 col-xl-6 mb-4">
     <div class="card">
         <div class="card-body text-center">

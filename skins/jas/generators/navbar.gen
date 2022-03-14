@@ -26,7 +26,7 @@
             #set in_navbar = $getVar('Extras.pages.' + $page_data + '.in_navbar', 'True')
             #if in_navbar == 'True'
               <li class="nav-item">
-                #set navItem = '<a id= "' + $page_data + '.html" class="nav-link" onclick="setIframeSrc(\'child-iframe\', \'' + $page_data + '.html\')">' + $gettext($page_data + '.navbarText') + '</a>'
+                #set navItem = '<a id= "pages/' + $page_data + '.html" class="nav-link" onclick="setIframeSrc(\'child-iframe\', \'' + 'pages/' + $page_data + '.html\')">' + $gettext($page_data + '.navbarText') + '</a>'
                 $navItem
               </li>
             #end if
