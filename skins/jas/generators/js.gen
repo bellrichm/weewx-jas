@@ -212,7 +212,6 @@ function handleMQTT(message) {
                 suffixText = " " + suffix.value;
             }
 
-            document.getElementById(obs.name + "_label").innerHTML = obs.label;
             document.getElementById(obs.name + "_value").innerHTML = obs.value + obs.unit + suffixText;
         }
         sessionStorage.setItem("observations", observations.join(","));

@@ -13,11 +13,19 @@
                 <table class="table">
                   <tbody>
                     #for observation in $Extras.current.observations
+                        #set type = $getVar("$Extras.current.observations" + "." + $observation + ".type", "")
+                        #if $type == 'rise'    
+                            #set label = 'foo'
+                        #else if $type == 'sum'
+                            #set label = '$obs.label.' + $observation + $type
+                        #else
+                            #set label = '$obs.label.' + $observation + $type
+                        #end if    
+                    
                         #set i += 1
-                        #set labelId = $observation + '_label'
                         #set valueId = $observation + '_value'
                         #if $i % 2 # <tr> #end if
-                            <th id="$labelId" scope="row"></th>
+                            <th scope="row">#include source=$label#</th>
                             <td id="$valueId"></td>
                         #if not $i % 2 # </tr> #end if
                     #end for

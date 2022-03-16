@@ -32,16 +32,13 @@ current.suffixes = new Map();
             #set label = 'foo'
         #else if $type == 'sum'
             #set observation_value = '$' + $interval_global + '.' + $observation + "." + $type
-            #set label = '$obs.label.' + $observation + $type
         #else
             #set observation_value = '$current.' + $observation + '.format(add_label=False)'
             #set observation_unit = '$unit.label.' + $observation
-            #set label = '$obs.label.' + $observation + $type
         #end if
 
     var observation = {};
     observation.name = "$observation";
-    observation.label = "#include source=$label#";
     observation.value = "#include source=$observation_value#";
     observation.unit = "#include source=$observation_unit#";
     #if $suffix
