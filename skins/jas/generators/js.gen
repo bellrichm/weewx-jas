@@ -175,6 +175,55 @@ function handleMQTT(message) {
     }
 #end if
 
+#if 'observations' in $getVar('$Extras.pages.' + $page)
+    function updateCurrentObservations() {
+        if(sessionStorage.getItem("header") === null || !MQTTConfig){
+            sessionStorage.setItem("header", JSON.stringify(current.header));
+        }
+        header = JSON.parse(sessionStorage.getItem("header"));
+        document.getElementById("$Extras.current.observation").innerHTML = header.value + header.unit;
+
+        // ToDo - cleanup, perhaps put suffix data into an array and store that
+        // ToDo - do a bit more in cheetah?
+        suffixes = [];
+        for (var [suffix, data] of current.suffixes) {
+            suffixes.push(suffix);
+            if (sessionStorage.getItem(suffix) === null || !MQTTConfig){
+                sessionStorage.setItem(suffix, JSON.stringify(data));
+            }
+        }
+        sessionStorage.setItem("suffixes", suffixes.join(","));
+
+        // ToDo - cleanup, perhaps put observation data into an array and store that
+        // ToDo - do a bit more in cheetah?
+        observations = [];
+        for (var [observation, data] of current.observations) {
+            observations.push(observation);
+            if (sessionStorage.getItem(observation) === null || !MQTTConfig){
+                sessionStorage.setItem(observation, JSON.stringify(data));
+            }
+            obs = JSON.parse(sessionStorage.getItem(observation));
+           
+            suffix = JSON.parse(sessionStorage.getItem(data.suffix));
+            if ( suffix=== null) {
+                suffixText = "";
+            }
+            else {
+                suffixText = " " + suffix.value;
+            }
+
+            document.getElementById(obs.name + "_label").innerHTML = obs.label;
+            document.getElementById(obs.name + "_value").innerHTML = obs.value + obs.unit + suffixText;
+        }
+        sessionStorage.setItem("observations", observations.join(","));
+
+        if(sessionStorage.getItem("updateDate") === null || !MQTTConfig){
+            sessionStorage.setItem("updateDate", updateDate);
+        }
+        document.getElementById("updateDate").innerHTML = moment.unix(sessionStorage.getItem("updateDate")/1000).utcOffset($utcOffset).format('$gettext("current_date_time")');       
+    }
+#end if
+
 #if 'minmax' in $getVar('$Extras.pages.' + $page)
     // Update the min/max observations
     function updateMinMax(startTimestamp, endTimestamp) {
@@ -263,6 +312,7 @@ window.addEventListener("load", function (event) {
     });
     myObserver.observe(document.body);
 
+    // todo rmb
     updateCharts()
 
     #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
@@ -296,6 +346,7 @@ window.addEventListener("load", function (event) {
         #else
             #set $endTimestamp = "endTimestamp"
         #end if
+        // todo rmb
         updateMinMax(startTimestamp, $endTimestamp);
     #end if
 
@@ -337,51 +388,8 @@ window.addEventListener("load", function (event) {
         // ToDo
         MQTTConfig = $Extras.mqtt.enable.lower();
 
-        if(sessionStorage.getItem("header") === null || !MQTTConfig){
-            sessionStorage.setItem("header", JSON.stringify(current.header));
-        }
-        header = JSON.parse(sessionStorage.getItem("header"));
-        document.getElementById("$Extras.current.observation").innerHTML = header.value + header.unit;
-
-        // ToDo - cleanup, perhaps put suffix data into an array and store that
-        // ToDo - do a bit more in cheetah?
-        suffixes = [];
-        for (var [suffix, data] of current.suffixes) {
-            suffixes.push(suffix);
-            if (sessionStorage.getItem(suffix) === null || !MQTTConfig){
-                sessionStorage.setItem(suffix, JSON.stringify(data));
-            }
-        }
-        sessionStorage.setItem("suffixes", suffixes.join(","));
-
-        // ToDo - cleanup, perhaps put observation data into an array and store that
-        // ToDo - do a bit more in cheetah?
-        observations = [];
-        for (var [observation, data] of current.observations) {
-            observations.push(observation);
-            if (sessionStorage.getItem(observation) === null || !MQTTConfig){
-                sessionStorage.setItem(observation, JSON.stringify(data));
-            }
-            obs = JSON.parse(sessionStorage.getItem(observation));
-           
-            suffix = JSON.parse(sessionStorage.getItem(data.suffix));
-            if ( suffix=== null) {
-                suffixText = "";
-            }
-            else {
-                suffixText = " " + suffix.value;
-            }
-
-            document.getElementById(obs.name + "_label").innerHTML = obs.label;
-            document.getElementById(obs.name + "_value").innerHTML = obs.value + obs.unit + suffixText;
-        }
-        sessionStorage.setItem("observations", observations.join(","));
-
-        if(sessionStorage.getItem("updateDate") === null || !MQTTConfig){
-            sessionStorage.setItem("updateDate", updateDate);
-        }
-        document.getElementById("updateDate").innerHTML = moment.unix(sessionStorage.getItem("updateDate")/1000).utcOffset($utcOffset).format('$gettext("current_date_time")');   
-
+        // todo rmb
+        updateCurrentObservations()
     #end if
 });
 
