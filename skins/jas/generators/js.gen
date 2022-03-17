@@ -10,7 +10,7 @@ var pageCharts = [];
 // Update the chart's data
 function updateCharts() {
     for (var index in pageCharts) {
-        pageCharts[index].chart.setOption(pageCharts[index].option)
+        pageCharts[index].chart.setOption(pageCharts[index].option);
     }
 }
 
@@ -292,7 +292,23 @@ function handleMQTT(message) {
             #end if
         #end for  
     }      
-#end if   
+#end if
+
+#if 'forecast' in $getVar('$Extras.pages.' + $page)
+    function updateForecasts() {
+        i = 0;
+        forecasts.forEach(function(forecast)
+        {
+            observationId = 'forecastObservation' + i;
+            document.getElementById('forecastDate' + i).innerHTML = forecast['day']  + ' ' + forecast['date'];
+            document.getElementById('forecastObservation' + i).innerHTML = forecast['observation'];
+            document.getElementById('forecastTemp' + i).innerHTML = forecast['min_temp'] + ' | ' + forecast['max_temp'];
+            document.getElementById('forecastRain' + i).innerHTML = forecast['rain'] + '%';
+            document.getElementById('forecastWind' + i).innerHTML = forecast['min_wind'] + ' | ' + forecast['max_wind'] + ' mph';
+            i += 1;
+        });
+    }
+#end if
 
 window.addEventListener("load", function (event) {
     ## Todo - create functions for code in the if statements
@@ -311,8 +327,7 @@ window.addEventListener("load", function (event) {
     });
     myObserver.observe(document.body);
 
-    // todo rmb
-    updateCharts()
+    updateCharts();
 
     #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
         // Set up the date/time picker
@@ -345,7 +360,6 @@ window.addEventListener("load", function (event) {
         #else
             #set $endTimestamp = "endTimestamp"
         #end if
-        // todo rmb
         updateMinMax(startTimestamp, $endTimestamp);
     #end if
 
@@ -387,8 +401,11 @@ window.addEventListener("load", function (event) {
         // ToDo
         MQTTConfig = $Extras.mqtt.enable.lower();
 
-        // todo rmb
-        updateCurrentObservations()
+        updateCurrentObservations();
+    #end if
+
+    #if 'forecast' in $getVar('$Extras.pages.' + $page)
+        updateForecasts();
     #end if
 });
 

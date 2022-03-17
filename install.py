@@ -193,6 +193,7 @@ class JASInstaller(ExtensionInstaller):
                                          ]),
                    ('skins/jas/data', ['skins/jas/data/current.js.tmpl',
                                        'skins/jas/data/alltime.js.tmpl',
+                                       'skins/jas/data/forecast.js.tmpl',
                                        'skins/jas/data/day.js.tmpl',
                                        'skins/jas/data/last7days.js.tmpl',
                                        'skins/jas/data/last24hours.js.tmpl',

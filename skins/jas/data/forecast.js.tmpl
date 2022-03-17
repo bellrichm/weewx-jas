@@ -1,0 +1,19 @@
+##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
+##    See the file LICENSE.txt for your rights.
+
+var forecasts = [];
+#set i = 0
+#for $forecast in $forecasts
+    forecast = {};
+    forecast.day = '$forecast["day"]';
+    forecast.date = '$forecast["date"]';
+    forecast.observation = '$forecast["observation"]';
+    forecast.min_temp = '$forecast["min_temp"]';
+    forecast.max_temp = '$forecast["max_temp"]';
+    forecast.rain = '$forecast["rain"]';
+    forecast.min_wind = '$forecast["min_wind"]';
+    forecast.max_wind = '$forecast["max_wind"]';
+
+    forecasts.push(forecast);
+    #set i += 1
+#end for
