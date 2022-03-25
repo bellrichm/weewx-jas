@@ -35,7 +35,7 @@ function setIframeSrc(id, url) {
   ## ToDo - better way/location?
   // When on the debug iframe, add the connect/disconnect buttons to the header.
   // The need to be on the parent page because the MQTT connection is on the parent. 
-  if (url == 'debug.html') {
+  if (url == 'pages/debug.html') {
     document.getElementById('connectButton').classList.remove("d-none");
     document.getElementById('disconnectButton').classList.remove("d-none");
   }
