@@ -1,8 +1,31 @@
-//    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
+//    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
 //    See the file LICENSE.txt for your rights.
 
 #import random
 var client;
+
+// Send log messages from the parent page to the child iframe.
+function logIt(message) {
+  //console.log(message)
+  // When running without a webserver, there is a lot of 'strangeness'
+  if (window.location.protocol == "file:") {
+      targetOrigin = "*";
+  }
+  else {
+      targetOrigin = window.location.origin;
+  }      
+
+  forwardedMessage = {};
+  forwardedMessage.kind = 'log';
+  forwardedMessage.message = message;
+
+  if (document.getElementById('child-iframe')) {
+    document.getElementById('child-iframe').contentWindow.postMessage(forwardedMessage, targetOrigin);
+  }
+  else {
+    window.self.postMessage(forwardedMessage, targetOrigin);
+  }
+}  
 
 function onConnect() {
     #if $getVar("$Extras.pages.debug", False)
@@ -59,7 +82,13 @@ function onMessageArrived(message) {
     forwardedMessage.message.payload = message.payloadString;
     forwardedMessage.message.qos = message.qos;
     forwardedMessage.message.retain = message.retain;
-    document.getElementById('child-iframe').contentWindow.postMessage(forwardedMessage, targetOrigin);
+
+    if (document.getElementById('child-iframe')) {
+      document.getElementById('child-iframe').contentWindow.postMessage(forwardedMessage, targetOrigin);
+    }
+    else {
+      window.self.postMessage(forwardedMessage, targetOrigin);
+    }
 }
 
 function MQTTConnect() {
