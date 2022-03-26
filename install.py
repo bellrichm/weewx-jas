@@ -93,7 +93,7 @@ EXTENSION_CONFIG = """
             # The pages and the content on the pages to display.
             [[[[pages]]]]
                 [[[[[index]]]]]
-                    [[[[[[observations]]]]]]
+                    [[[[[[current]]]]]]
                     [[[[[[minmax]]]]]]
                     #[[[[[[forecast]]]]]]
                     #    layout = row                                             
@@ -233,7 +233,7 @@ class JASInstaller(ExtensionInstaller):
                    ('skins/jas/sections', [
                                            'skins/jas/sections/forecast.inc',
                                            'skins/jas/sections/minmax.inc',
-                                           'skins/jas/sections/observations.inc',
+                                           'skins/jas/sections/current.inc',
                                            'skins/jas/sections/radar.inc',
                                            'skins/jas/sections/thisdate.inc',
                                            'skins/jas/sections/zoomControl.inc'

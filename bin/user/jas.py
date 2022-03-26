@@ -41,7 +41,7 @@ This search list extension provides the following tags:
     A method to log warning messages.
 
   $observations
-    A dictionary of all the observations that will be chartted.
+    A dictionary of all the observations that will be charted.
 
   $ordinateNames
     The names of the compass ordinates.
