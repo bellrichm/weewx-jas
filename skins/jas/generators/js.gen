@@ -17,9 +17,7 @@ function updateCharts() {
         }
         prevTime = currTime;
         currTime = Date.now();
-        console.log(currTime - prevTime)
     }
-    console.log(Date.now() - startTime)
 }
 
 // Ensure that the height of charts is consistent ratio of the width.
@@ -38,18 +36,14 @@ function refreshSizes(){
 
 // Handle event messages of type 'log'.
 function handleLog(message) {
-    //console.log(message);
     var jasLog = document.getElementById("jasLog");
     if (jasLog) {
         jasLog.innerHTML = message + "\n<br>" + jasLog.innerHTML;
     }
-    //console.log('done');
 }
 
 // Handle event messages of type 'mqtt'.
 function handleMQTT(message) {
-    //console.log(message);
-
     var test_obj = JSON.parse(message.payload);
 
     // Handle the 'header' section of current observations.
@@ -150,7 +144,6 @@ function handleMQTT(message) {
                 ]});
         #end for
     #end if
-    // console.log('done');
 }
 
 #if to_bool($getVar('$Extras.pages.' + $page + '.reload', False))

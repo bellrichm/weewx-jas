@@ -6,7 +6,6 @@ var client;
 
 // Send log messages from the parent page to the child iframe.
 function logIt(message) {
-  //console.log(message)
   // When running without a webserver, there is a lot of 'strangeness'
   if (window.location.protocol == "file:") {
       targetOrigin = "*";
