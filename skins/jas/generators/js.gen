@@ -175,7 +175,7 @@ function handleMQTT(message) {
     }
 #end if
 
-#if 'observations' in $getVar('$Extras.pages.' + $page)
+#if 'current' in $getVar('$Extras.pages.' + $page)
     function updateCurrentObservations() {
         if(sessionStorage.getItem("header") === null || !MQTTConfig){
             sessionStorage.setItem("header", JSON.stringify(current.header));
@@ -397,7 +397,7 @@ window.addEventListener("load", function (event) {
         updateThisDate(selectedDate * 1000);
     #end if
 
-    #if 'observations' in $getVar('$Extras.pages.' + $page)
+    #if 'current' in $getVar('$Extras.pages.' + $page)
         // ToDo
         MQTTConfig = $Extras.mqtt.enable.lower();
 
