@@ -54,9 +54,13 @@ function onConnectionLost(responseObject) {
     sessionStorage.removeItem("MQTTConnected");
 }
 
-function onFailure(message) {
+function onFailure(error) {
+    // On a connect error, WebSocket writes to console. Cannot stop it.
+    // https://stackoverflow.com/questions/31002592/javascript-doesnt-catch-error-in-websocket-instantiation
+    message = "Failed: " + error.errorMessage + " code: " + error.errorCode
+    console.log(message)
     #if $getVar("$Extras.pages.debug", False)
-        logIt("Failed: " + message);
+        logIt(message);
     #end if    
 }
 
