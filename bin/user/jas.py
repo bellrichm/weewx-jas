@@ -89,6 +89,7 @@ except ImportError:
     from urllib2 import Request, urlopen, HTTPError
 
 from weewx.cheetahgenerator import SearchList
+from weewx.units import get_label_string
 from weewx.tags import TimespanBinder
 from weeutil.weeutil import to_bool, TimeSpan
 
@@ -209,6 +210,7 @@ class JAS(SearchList):
                                  'current_observation': self.data_current,
                                  'forecasts': self.data_forecast,
                                  'genCharts': self._gen_charts,
+                                 'getUnitsLabels': self._get_units_labels,
                                  'last24hours': self._get_last24hours(),
                                  'last7days': self._get_last_n_days(7),
                                  'last31days': self._get_last_n_days(31),
@@ -250,6 +252,11 @@ class JAS(SearchList):
                                      converter=self.generator.converter)
 
         return last_n_days
+
+
+    def _get_units_labels(self, units):
+        # For now, return label for first observations unit. ToDo - possibly change to return all?
+        return get_label_string(self.generator.formatter, self.generator.converter, units[0], plural=False)
 
     def _get_wind_compass(self, start_offset=86400, end_offset=0):
         # default is the last 24 hrs
@@ -578,14 +585,20 @@ class JAS(SearchList):
     def _gen_charts(self, page, interval):
         #chart_final = 'var pageCharts = [];\n'
         chart_final = '## charts\n'
+        chart2 = ""
         for chart in self.skin_dict['Extras']['pages'][page]:
             if chart in self.skin_dict['Extras']['chart_definitions'].sections:
+                chart2 += "#set global series_observations_global = []\n"
 
                 # for now, do not support overriding chart options by page
                 #self.charts_def[chart].merge(self.skin_dict['Extras']['pages'][page][chart])
+                for observation in self.chart_defs[chart]['series']:
+                    obs = self.chart_defs[chart]['series'][observation].get('weewx', {}).get('observation', observation)
+                    chart2 += "$series_observations_global.append('" + obs + "')\n"
+                chart2 += "$series_observations_global\n"
 
                 chart_js = "var option = {\n"
-                chart2 = self._iterdict('  ', page, chart, chart_js, interval, self.chart_defs[chart])
+                chart2 += self._iterdict('  ', page, chart, chart_js, interval, self.chart_defs[chart])
                 chart2 += "};\n"
                 chart2 += "var telem = document.getElementById('" + chart + interval + "');\n"
                 chart2 += "var " + chart + "chart = echarts.init(document.getElementById('" + chart + interval + "'));\n"
@@ -607,6 +620,8 @@ class JAS(SearchList):
 
                 chart2 += "pageChart.chart = " + chart + "chart;\n"
                 chart2 += "pageCharts.push(pageChart);\n"
+                chart2 += "#set global series_observations_global = None\n"
+                chart2 += "$series_observations_global\n"
 
                 chart_final += chart2
 
