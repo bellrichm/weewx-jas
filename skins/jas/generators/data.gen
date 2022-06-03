@@ -31,6 +31,9 @@
 ## Example: last7days_min.outTemp = [[dateTime1, outTemp1], [dateTime2, outTemp2]]
 #for $observation in $observations
     #for aggregate_type in $observations[$observation]['aggregate_types']
+        #if aggregate_type == 'mqtt':
+            #continue
+        #end if
         #set aggregate_interval = $getVar('Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval.' + $aggregate_type, None)
         #set interval_name = $interval_long_name_global + $aggregate_type
         #set array_name = $interval_name + "." + $observation
