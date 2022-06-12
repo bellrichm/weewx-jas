@@ -7,15 +7,15 @@
     #set aggregate_interval = $getVar('Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval.' + $aggregate_type)
     #if $aggregate_interval == 'day'
         #set source = "#set global $endTimestamp = ((($" + $interval_name_global + ".end.raw // 86400) * 86400)  - ($utcOffset * 60)) * 1000;\n"
-        #set $source += "var endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
+        #set $source += "var " + $interval_long_name_global + "endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
         #include source=$source
     #else if $aggregate_interval == 'hour'
         #set source = "#set global $endTimestamp = ((($" + $interval_name_global + ".end.raw // 3600) * 3600)  - ($utcOffset * 60)) * 1000;\n"
-        #set $source += "var endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
+        #set $source += "var " + $interval_long_name_global + "endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
         #include source=$source    
     #else
         #set source = "#set global $endTimestamp = ((($" + $interval_name_global + ".end.raw // 60) * 60)  - ($utcOffset * 60)) * 1000;\n"
-        #set $source += "var endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
+        #set $source += "var " + $interval_long_name_global + "endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
         #include source=$source        
     #end if
 #end for

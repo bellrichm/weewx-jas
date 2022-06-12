@@ -159,19 +159,25 @@ function handleMQTT(message) {
 #end if
 
 #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
+    #set $startDate = $interval_long_name_global + "startDate"
+    #set $endDate = $interval_long_name_global + "endDate"
+    #set $startTimestamp = $interval_long_name_global + "startTimestamp"
+    #set $endTimestamp = $interval_long_name_global + "endTimestamp"
+
     // Handle reset button
     function resetRange() {
-        dateRangePicker2.setStartDate(startDate);
-        dateRangePicker2.setEndDate(endDate);
+        dateRangePicker2.setStartDate($startDate);
+        dateRangePicker2.setEndDate($endDate);
         #for $section in $getVar('Extras.pages.' + $page)
             ## todo - cleanup to not use continue
             #if $section not in $getVar('$Extras.chart_definitions')
                 #continue
             #end if
-            #set line = $section + "chart" + ".dispatchAction({type: 'dataZoom', startValue: startTimestamp, endValue: endTimestamp});"
+            #set line = $section + "chart" + ".dispatchAction({type: 'dataZoom', startValue: " + $startTimestamp + ", endValue: " + $endTimestamp + "});"
             $line
         #end for
-        updateMinMax(startTimestamp, endTimestamp_min);
+        #set line = "updateMinMax(" + $interval_long_name_global + "startTimestamp, " + $interval_long_name_global + "endTimestamp_min);\n"
+        $line
     }
 #end if
 
@@ -331,12 +337,14 @@ window.addEventListener("load", function (event) {
 
     #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
         // Set up the date/time picker
+        #set $startDate = $interval_long_name_global + "startDate"
+        #set $endDate = $interval_long_name_global + "endDate"
         dateRangePicker2 = new DateRangePicker('datetimerange-input2',
                             {
-                                minDate: startDate,
-                                maxDate: endDate,
-                                startDate: startDate,
-                                endDate: endDate,
+                                minDate: $startDate,
+                                maxDate: $endDate,
+                                startDate: $startDate,
+                                endDate: $endDate,
                             },
                             function(start, end, label) {
                                 // Update all charts with selected date/time and min/max values
@@ -356,18 +364,21 @@ window.addEventListener("load", function (event) {
 
     #if 'minmax' in $getVar('$Extras.pages.' + $page)
         #if $getVar('Extras.page_definition.' + $page + '.aggregate_interval.min', None) is not None
-            #set $endTimestamp = "endTimestamp_min"
+            #set $endTimestamp = $interval_long_name_global + "endTimestamp_min"
         #else
-            #set $endTimestamp = "endTimestamp"
+            #set $endTimestamp = $interval_long_name_global + "endTimestamp"
         #end if
-        updateMinMax(startTimestamp, $endTimestamp);
+        #set $startTimestamp = $interval_long_name_global + "startTimestamp"
+        updateMinMax($startTimestamp, $endTimestamp);
     #end if
 
     #if 'thisdate' in $getVar('$Extras.pages.' + $page)
+        #set $startDate = $interval_long_name_global + "startDate"
+        #set $endDate = $interval_long_name_global + "endDate"
         var dateRangePicker = new DateRangePicker('datetimerange-input1',
                             {singleDatePicker: true,
-                                minDate: startDate,
-                                maxDate: endDate
+                                minDate: $startDate,
+                                maxDate: $endDate
                             },
                                 function(start, end, label) {
                                     updateThisDate(start.unix() * 1000);
