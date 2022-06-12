@@ -4,6 +4,7 @@
 #set global interval_global = 'week'
 #set global year_global = None
 #set global month_global = None
+#set global interval_long_name_global = $interval_name_global + "_" 
 
 #if $getVar("$Extras.pages." + $page, False)
     #include 'generators/js.gen'
@@ -12,3 +13,4 @@
 #set global interval_name_global = None
 #set global year_global = None
 #set global month_global = None
+#set global interval_long_name_global = None
