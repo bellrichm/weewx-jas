@@ -55,7 +55,7 @@ This search list extension provides the following tags:
   $version
     Returns:
       The version of this skin.
-      
+
   $windCompass(start_offset, end_offset)
     Arguments:
       start_offset: The starting time offset from the current time. Default is 86400, 24 hours.
@@ -206,7 +206,7 @@ class JAS(SearchList):
         self.timespan = timespan
         self.db_lookup = db_lookup
 
-        search_list_extension = {'aggregate_types': self.aggregate_types,   
+        search_list_extension = {'aggregate_types': self.aggregate_types,
                                  'current_observation': self.data_current,
                                  'forecasts': self.data_forecast,
                                  'genCharts': self._gen_charts,
@@ -533,8 +533,7 @@ class JAS(SearchList):
                 if key == 'series':
                     chart2 += indent + "series: [\n"
                     for obs in value:
-                        observation = weewx_options = self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs]['weewx']['observation']
-                        aggregate_type = weewx_options = self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs]['weewx']['aggregate_type']
+                        aggregate_type = self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs]['weewx']['aggregate_type']
                         aggregate_interval = self.skin_dict['Extras']['page_definition'][page]['aggregate_interval'].get(aggregate_type, 'none')
 
                         # set the aggregate_interval at the beginning of the chart definition, somit can be used in the chart
@@ -553,7 +552,7 @@ class JAS(SearchList):
             else:
                 chart2 += indent + key + ": " + value + ",\n"
         return chart2
-        
+
     def _set_chart_defs(self):
         self.chart_defs = configobj.ConfigObj()
         for chart in self.skin_dict['Extras']['chart_definitions'].sections:
@@ -573,7 +572,7 @@ class JAS(SearchList):
 
             weewx_options = {}
             weewx_options['aggregate_type'] = 'avg'
-                                  
+
             for value in self.skin_dict['Extras']['chart_definitions'][chart]['series']:
                 charttype =  self.skin_dict['Extras']['chart_definitions'][chart]['series'][value]['type']
                 self.chart_defs[chart]['series'][value].merge((self.chart_series_defaults.get(coordinate_type, {}).get(charttype,{})))
@@ -612,7 +611,10 @@ class JAS(SearchList):
                     for obs in self.chart_defs[chart]['series']:
                         aggregate_type = self.chart_defs[chart]['series'][obs]['weewx']['aggregate_type']
                         chart2 += "    {name: " + self.chart_defs[chart]['series'][obs]['name'] + ",\n"
-                        chart2 += "    data: " + interval + "_" + aggregate_type + "." + self.chart_defs[chart]['series'][obs]['weewx']['observation'] + "},\n"
+                        chart2 += "    data: " \
+                                + interval + "_" + aggregate_type \
+                                + "." + self.chart_defs[chart]['series'][obs]['weewx']['observation'] \
+                                + "},\n"
                     chart2 += "]};\n"
                     chart2 += "pageChart.option = option;\n"
                 else:
