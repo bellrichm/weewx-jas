@@ -180,7 +180,6 @@ class JASInstaller(ExtensionInstaller):
                                   ]),
                    ('skins/jas/charts', ['skins/jas/charts/day.js.tmpl',
                                          'skins/jas/charts/debug.js.tmpl',
-                                         'skins/jas/charts/index.js.tmpl',
                                          'skins/jas/charts/last7days.js.tmpl',
                                          'skins/jas/charts/last24hours.js.tmpl',
                                          'skins/jas/charts/last31days.js.tmpl',
