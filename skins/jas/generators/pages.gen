@@ -26,6 +26,12 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
         #set data = $interval_name_global + ".js"
         <script src="../data/$data"></script>
       #end if
+      #if $getVar('$Extras.page_definition.' + $page + '.type', None)
+        #for $year in range(int($getVar('$Extras.pages.' + $page + '.start', None)), int($getVar('$Extras.pages.' + $page + '.end', None)) + 1)
+          #set $line = '<script src="../data/year' + str($year) + '.js"></script>'
+          $line
+        #end for
+      #end if
 
     #set data = '<script src="../javascript/' + $page_name_global + '.js"></script>'
     $data
@@ -84,7 +90,7 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
         #end if
       #end if
       #if $section in $charts
-        #set id = $section + $interval_name_global
+        #set id = $section + $page_name_global
         <div class="col-12 col-xl-6 mb-4">
           <div class="card">
             <div class="card-body text-center">

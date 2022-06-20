@@ -1,4 +1,4 @@
-#    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
+#    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
 #    See the file LICENSE.txt for your rights.
 
 """
@@ -532,18 +532,28 @@ class JAS(SearchList):
                     continue
                 if key == 'series':
                     chart2 += indent + "series: [\n"
-                    for obs in value:
-                        aggregate_type = self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs]['weewx']['aggregate_type']
-                        aggregate_interval = self.skin_dict['Extras']['page_definition'][page]['aggregate_interval'].get(aggregate_type, 'none')
+                    
+                    if self.chart_defs[chart].get('weewx', {}).get('type') == 'yeartoyear':
+                        obs = next(iter(value))
+                        for year in range(int(self.skin_dict['Extras']['pages'][page]['start']), int(self.skin_dict['Extras']['pages'][page]['end']) + 1):
+                            chart2 += indent + " {\n"
+                            chart2 += "    name: '" + str(year) + "',\n"
+                            chart2 = self._iterdict(indent + '  ', page, chart, chart2, interval, value[obs])
+                            chart2 += indent + "  },\n"
+                    else:
+                        for obs in value:
+                            aggregate_type = self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs]['weewx']['aggregate_type']
+                            aggregate_interval = self.skin_dict['Extras']['page_definition'][page].get('aggregate_interval', {}).get(aggregate_type, 'none')
 
-                        # set the aggregate_interval at the beginning of the chart definition, somit can be used in the chart
-                        # Note, this means the last observation's aggregate type will be used to determine the aggregate interval
-                        chart2 = "#set global aggregate_interval_global = 'aggregate_interval_" + aggregate_interval + "'\n" + chart2
+                            # set the aggregate_interval at the beginning of the chart definition, somit can be used in the chart
+                            # Note, this means the last observation's aggregate type will be used to determine the aggregate interval
+                            chart2 = "#set global aggregate_interval_global = 'aggregate_interval_" + aggregate_interval + "'\n" + chart2
 
-                        chart2 += indent + " {\n"
-                        chart2 = self._iterdict(indent + '  ', page, chart, chart2, interval, value[obs])
+                            chart2 += indent + " {\n"
+                            chart2 = self._iterdict(indent + '  ', page, chart, chart2, interval, value[obs])
 
-                        chart2 += indent + "},\n"
+                            chart2 += indent + "},\n"
+
                     chart2 += indent +"]\n"
                 else:
                     chart2 += indent + key + ":" + " {\n"
@@ -562,6 +572,8 @@ class JAS(SearchList):
                 coordinate_type = 'polar'
             elif 'grid' in self.skin_dict['Extras']['chart_definitions'][chart]:
                 coordinate_type = 'grid'
+            elif 'weewx' in self.skin_dict['Extras']['chart_definitions'][chart]:
+                coordinate_type = self.skin_dict['Extras']['chart_definitions'][chart]['weewx']['type']
             else:
                 coordinate_type = 'grid'
             self.chart_config[chart].merge(self.chart_defaults.get(coordinate_type, {}))
@@ -581,7 +593,7 @@ class JAS(SearchList):
                     self.chart_defs[chart]['series'][value]['weewx'] = {}
                 weeutil.config.conditional_merge(self.chart_defs[chart]['series'][value]['weewx'], weewx_options)
 
-    def _gen_charts(self, page, interval):
+    def _gen_charts(self, page, interval, page_name):
         #chart_final = 'var pageCharts = [];\n'
         chart_final = '## charts\n'
         chart2 = ""
@@ -594,13 +606,13 @@ class JAS(SearchList):
                 for observation in self.chart_defs[chart]['series']:
                     obs = self.chart_defs[chart]['series'][observation].get('weewx', {}).get('observation', observation)
                     chart2 += "$series_observations_global.append('" + obs + "')\n"
-                chart2 += "$series_observations_global\n"
+                #chart2 += "$series_observations_global\n"
 
                 chart_js = "var option = {\n"
                 chart2 += self._iterdict('  ', page, chart, chart_js, interval, self.chart_defs[chart])
                 chart2 += "};\n"
-                chart2 += "var telem = document.getElementById('" + chart + interval + "');\n"
-                chart2 += "var " + chart + "chart = echarts.init(document.getElementById('" + chart + interval + "'));\n"
+                chart2 += "var telem = document.getElementById('" + chart + page_name + "');\n"
+                chart2 += "var " + chart + "chart = echarts.init(document.getElementById('" + chart + page_name + "'));\n"
                 chart2 += chart + "chart.setOption(option);\n"
 
                 chart2 += "pageChart = {};\n"
@@ -608,13 +620,24 @@ class JAS(SearchList):
                 if interval != 'mqtt':
                     chart2 += "option = {\n"
                     chart2 += "  series: [\n"
-                    for obs in self.chart_defs[chart]['series']:
+                    chart_type = self.chart_defs[chart].get('weewx', {}).get('type')
+                    if chart_type == 'yeartoyear':
+                        obs = next(iter( self.chart_defs[chart]['series']))
                         aggregate_type = self.chart_defs[chart]['series'][obs]['weewx']['aggregate_type']
-                        chart2 += "    {name: " + self.chart_defs[chart]['series'][obs]['name'] + ",\n"
-                        chart2 += "    data: " \
-                                + interval + "_" + aggregate_type \
-                                + "." + self.chart_defs[chart]['series'][obs]['weewx']['observation'] \
-                                + "},\n"
+                        for year in range(int(self.skin_dict['Extras']['pages'][page]['start']), int(self.skin_dict['Extras']['pages'][page]['end']) + 1):
+                            chart2 += "    {name: '" + str(year) + "',\n"
+                            chart2 += "     data: year" + str(year) + "_" + aggregate_type \
+                                   + "." + obs \
+                                   + ".map(arr => [moment.unix(arr[0] / 1000).utcOffset(" + "-240.0).format('MM/DD'), arr[1]]),\n" \
+                                   + "},\n"
+                    else:
+                        for obs in self.chart_defs[chart]['series']:
+                            aggregate_type = self.chart_defs[chart]['series'][obs]['weewx']['aggregate_type']
+                            chart2 += "    {name: " + self.chart_defs[chart]['series'][obs]['name'] + ",\n"
+                            chart2 += "    data: " \
+                                    + interval + "_" + aggregate_type \
+                                    + "." + self.chart_defs[chart]['series'][obs]['weewx']['observation'] \
+                                    + "},\n"
                     chart2 += "]};\n"
                     chart2 += "pageChart.option = option;\n"
                 else:

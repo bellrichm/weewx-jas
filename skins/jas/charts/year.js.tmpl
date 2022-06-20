@@ -1,8 +1,8 @@
-##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
+##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
 #if $getVar("$Extras.pages.year", False)
-    #set charts = $genCharts('year', 'year')
+    #set charts = $genCharts('year', 'year', 'year')
     $skinDebug($charts)
     #include source=$charts
 #end if    

@@ -1,8 +1,8 @@
-##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
+##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
 #if $getVar("$Extras.pages.last24hours", False)
-    #set charts = $genCharts('last24hours', 'last24hours')
+    #set charts = $genCharts('last24hours', 'last24hours', 'last24hours')
     $skinDebug($charts)
     #include source=$charts
 #end if    
