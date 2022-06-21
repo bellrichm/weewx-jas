@@ -621,7 +621,11 @@ class JAS(SearchList):
                     chart2 += "option = {\n"
                     chart2 += "  series: [\n"
                     chart_type = self.chart_defs[chart].get('weewx', {}).get('type')
-                    if chart_type == 'yeartoyear':
+                    if page_name == 'historical':
+                        print("start")
+                        chart2 += "here"
+                        print("end")
+                    elif chart_type == 'yeartoyear':
                         obs = next(iter( self.chart_defs[chart]['series']))
                         aggregate_type = self.chart_defs[chart]['series'][obs]['weewx']['aggregate_type']
                         for year in range(int(self.skin_dict['Extras']['pages'][page]['start']), int(self.skin_dict['Extras']['pages'][page]['end']) + 1):
