@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="lang">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.2.2/dist/echarts.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+  <script src="../javascript/common.js"></script>
+
+  <script src="../data/year2016.js"></script>
+  <script src="../data/year2017.js"></script>
+  <script src="../data/year2018.js"></script>
+  <script src="../data/year2019.js"></script>
+  <script src="../data/year2020.js"></script>
+  <script src="../data/year2021.js"></script>
+  <script src="../data/year2022.js"></script>
+
+
+  <script>
+    var pageCharts = [];
+
+    // Update the chart's data
+    function updateCharts() {
+      currTime = Date.now();
+      startTime = currTime
+      for (var index in pageCharts) {
+        if (pageCharts[index].option) {
+          pageCharts[index].chart.setOption(pageCharts[index].option);
+        }
+        prevTime = currTime;
+        currTime = Date.now();
+      }
+    }
+
+    // Ensure that the height of charts is consistent ratio of the width.
+    function refreshSizes() {
+
+      for (var index in pageCharts) {
+        chartElem = pageCharts[index].chart.getDom();
+        height = chartElem.offsetWidth / 1.618 + 17 + "px"; // adding is a hack
+        pageCharts[index].chart.resize({
+          width: null,
+          height: height
+        });
+      }
+    }
+
+    window.addEventListener("load", function (event) {
+      updateCharts();
+    })
+  </script>
+
+  <title>Year 2016</title>
+</head>
+
+<body onresize="refreshSizes()" onload="refreshSizes()">
+  <h1>Year 2016</h1>
+
+  <!-- Optional JavaScript; choose one of the two! -->
+
+  <!-- Option 1: Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous">
+  </script>
+
+  <!-- Option 2: Separate Popper and Bootstrap JS -->
+  <!--
+      <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+      <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+      -->
+
+
+
+  <link type="text/css" rel="stylesheet"
+    href="https://cdn.jsdelivr.net/gh/alumuko/vanilla-datetimerange-picker@latest/dist/vanilla-datetimerange-picker.css">
+
+  <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js" type="text/javascript"></script>
+  <script
+    src="https://cdn.jsdelivr.net/gh/alumuko/vanilla-datetimerange-picker@latest/dist/vanilla-datetimerange-picker.js">
+  </script>
+  <div class="container">
+    <div class="row mt-5 mb-4 graphrow align-content-start">
+
+      <div class="col-12 col-xl-6 mb-4">
+        <div class="card">
+          <div class="card-body text-center">
+            <h5 class="h5-responsive indigo-text">
+              Outside Temperature
+            </h5>
+            <div id="outTempMinMax2016"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-xl-6 mb-4">
+        <div class="card">
+          <div class="card-body text-center">
+            <h5 class="h5-responsive indigo-text">
+              Rain
+            </h5>
+            <div id="rain2016"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var option = {
+      tooltip: {
+        trigger: 'axis',
+        formatter: function (params) {
+          var toolTip = moment.unix(params[0].axisValue / 1000).utcOffset(-240.0).format('MM/DD/YY');
+          params.forEach(function (param) {
+            toolTip += '<br>' + param.marker + param.seriesName + ' ' + param.value[1];
+          });
+          return toolTip;
+        },
+      },
+      title: {
+        left: 'center',
+      },
+      toolbox: {
+        feature: {
+          dataZoom: {
+            yAxisIndex: 'none',
+            restore: {},
+            saveAsImage: {},
+          },
+        },
+      },
+      xAxis: {
+        type: 'time',
+        boundaryGap: false,
+        axisLabel: {
+          formatter: function (value) {
+            return moment.unix(value / 1000).utcOffset(-240.0).format('MM/YY');
+          },
+        },
+      },
+      yAxis: {
+        type: 'value',
+        name: '°F',
+        boundaryGap: [0, '100%'],
+        min: function (value) {
+          return Math.floor(value.min);
+        },
+        max: function (value) {
+          return Math.ceil(value.max);
+        },
+      },
+      series: [{
+          name: 'Min Temperature',
+          type: 'line',
+          smooth: true,
+          symbol: 'none',
+        },
+        {
+          name: 'Max Temperature',
+          type: 'line',
+          smooth: true,
+          symbol: 'none',
+        },
+      ]
+    };
+    var telem = document.getElementById('outTempMinMax2016');
+    var outTempMinMaxchart = echarts.init(document.getElementById('outTempMinMax2016'));
+    outTempMinMaxchart.setOption(option);
+    pageChart = {};
+    option = {
+      // [...array1, ...array2]
+      series: [{
+          name: 'Min Temperature',
+          data: [...year2016_min.outTemp, ...year2017_min.outTemp, ...year2018_min.outTemp, ...year2019_min.outTemp, ...year2020_min.outTemp, ...year2021_min.outTemp, ...year2022_min.outTemp,  ]
+        },
+        {
+          name: 'Max Temperature',
+          data: [...year2016_max.outTemp, ...year2017_max.outTemp, ...year2018_max.outTemp, ...year2019_max.outTemp, ...year2020_max.outTemp,  ...year2021_max.outTemp, ...year2022_max.outTemp,]
+        },
+      ]
+    };
+    pageChart.option = option;
+    pageChart.chart = outTempMinMaxchart;
+    pageCharts.push(pageChart);
+
+
+    var option = {
+      tooltip: {
+        trigger: 'axis',
+        formatter: function (params) {
+          var toolTip = moment.unix(params[0].axisValue / 1000).utcOffset(-240.0).format('MM/DD/YY');
+          params.forEach(function (param) {
+            toolTip += '<br>' + param.marker + param.seriesName + ' ' + param.value[1];
+          });
+          return toolTip;
+        },
+      },
+      title: {
+        left: 'center',
+      },
+      toolbox: {
+        feature: {
+          dataZoom: {
+            yAxisIndex: 'none',
+            restore: {},
+            saveAsImage: {},
+          },
+        },
+      },
+      xAxis: {
+        type: 'time',
+        boundaryGap: false,
+        axisLabel: {
+          formatter: function (value) {
+            return moment.unix(value / 1000).utcOffset(-240.0).format('MM/DD/YY');
+          },
+        },
+      },
+      yAxis: {
+        type: 'value',
+        name: ' in',
+        boundaryGap: [0, '100%'],
+        min: function (value) {
+          return Math.floor(value.min);
+        },
+        max: function (value) {
+          return Math.ceil(value.max);
+        },
+      },
+      series: [{
+        name: 'Rain',
+        type: 'bar',
+      }, ]
+    };
+    var telem = document.getElementById('rain2016');
+    var rainchart = echarts.init(document.getElementById('rain2016'));
+    rainchart.setOption(option);
+    pageChart = {};
+    option = {
+      series: [{
+        name: 'Rain',
+        data: [...year2016_sum.rain, ...year2017_sum.rain, ...year2018_sum.rain, ...year2019_sum.rain, ...year2020_sum.rain, ...year2021_sum.rain, ...year2022_sum.rain,]
+      }, ]
+    };
+    pageChart.option = option;
+    pageChart.chart = rainchart;
+    pageCharts.push(pageChart);
+  </script>
+
+
+
+
+</body>
