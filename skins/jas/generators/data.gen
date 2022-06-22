@@ -3,19 +3,26 @@
 
 ## Create time stamps by aggregation time for the end of interval
 ## For example: endTimestamp_min, endTimestamp_max
+#set $data_binding = $getVar("$Extras.data_binding", 'wx_binding')
 #for $aggregate_type in $getVar('Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval')
     #set aggregate_interval = $getVar('Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval.' + $aggregate_type)
+   ## The 'start' and 'end' tags ignore/do not use the '$data_binding' on the 'time period'.
+    ## This makes sense because a DB call is not needed.
+    ## ToDo - verify: Either reading code or ask.
     #if $aggregate_interval == 'day'
+        #set source = "#set global $endTimestamp = ((($" + $interval_name_global + ".end.raw // 86400) * 86400)  - ($utcOffset * 60)) * 1000;\n"
         #set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding='wx_binding').end.raw // 86400) * 86400)  - ($utcOffset * 60)) * 1000;\n"
-        #set $source += "var " + $interval_long_name_global + "endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
+        ##set $source += "var " + $interval_long_name_global + "endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
         #include source=$source
     #else if $aggregate_interval == 'hour'
-        #set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding='wx_binding').end.raw // 3600) * 3600)  - ($utcOffset * 60)) * 1000;\n"
-        #set $source += "var " + $interval_long_name_global + "endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
+        #set source = "#set global $endTimestamp = ((($" + $interval_name_global + ".end.raw // 3600) * 3600)  - ($utcOffset * 60)) * 1000;\n"
+        #set source = "#set global $endTimestamp = ((($" + $interval_name_global + ".end.raw // 3600) * 3600)  - ($utcOffset * 60)) * 1000;\n"
+        ##set $source += "var " + $interval_long_name_global + "endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
         #include source=$source    
     #else
         #set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding='wx_binding').end.raw // 60) * 60)  - ($utcOffset * 60)) * 1000;\n"
-        #set $source += "var " + $interval_long_name_global + "endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
+        #set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding='wx_binding').end.raw // 60) * 60)  - ($utcOffset * 60)) * 1000;\n"
+        ##set $source += "var " + $interval_long_name_global + "endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
         #include source=$source        
     #end if
 #end for
@@ -41,9 +48,9 @@
         #set data_name = $interval_name + "_" + $observation + "_data"
 
         #if $aggregate_interval is not None
-            #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='wx_binding')." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms').round(2).json"
+            #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='" + $data_binding + "')." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms').round(2).json"
         #else
-            #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='wx_binding')." + $observation + ".series(time_series='start', time_unit='unix_epoch_ms').round(2).json"
+            #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='" + $data_binding + "')." + $observation + ".series(time_series='start', time_unit='unix_epoch_ms').round(2).json"
         #end if
         $skinDebug($obs)
         #include source=$obs + ";\n"
