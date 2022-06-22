@@ -14,7 +14,7 @@
         #set $source += "var " + $interval_long_name_global + "endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
         #include source=$source    
     #else
-        #set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding='pwx_binding').end.raw // 60) * 60)  - ($utcOffset * 60)) * 1000;\n"
+        #set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding='wx_binding').end.raw // 60) * 60)  - ($utcOffset * 60)) * 1000;\n"
         #set $source += "var " + $interval_long_name_global + "endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
         #include source=$source        
     #end if
