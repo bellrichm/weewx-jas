@@ -171,9 +171,6 @@ class JAS(SearchList):
         self.html_root = html_root
         self.mkdir_p(os.path.join(self.html_root, 'data'))
 
-        client_id = self.skin_dict['Extras']['client_id']
-        client_secret = self.skin_dict['Extras']['client_secret']
-
         latitude = self.generator.config_dict['Station']['latitude']
         longitude = self.generator.config_dict['Station']['longitude']
 
@@ -183,11 +180,14 @@ class JAS(SearchList):
         self.raw_forecast_data_file = os.path.join(
             self.html_root, 'data', 'raw.forecast.json')
 
-        self.forecast_url = "%s%s,%s?format=json&filter=day&limit=7&client_id=%s&client_secret=%s" \
-                            % (forecast_endpoint, latitude, longitude, client_id, client_secret)
+        client_id = self.skin_dict['Extras'].get('client_id')
+        if client_id:
+            client_secret = self.skin_dict['Extras']['client_secret']
+            self.forecast_url = "%s%s,%s?format=json&filter=day&limit=7&client_id=%s&client_secret=%s" \
+                                % (forecast_endpoint, latitude, longitude, client_id, client_secret)
 
-        self.current_url = "%s%s,%s?&format=json&filter=allstations&limit=1&client_id=%s&client_secret=%s" \
-                           % (current_endpoint, latitude, longitude, client_id, client_secret)
+            self.current_url = "%s%s,%s?&format=json&filter=allstations&limit=1&client_id=%s&client_secret=%s" \
+                            % (current_endpoint, latitude, longitude, client_id, client_secret)
 
         self.observations, self.aggregate_types = self._get_observations()
 
