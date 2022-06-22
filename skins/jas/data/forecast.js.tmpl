@@ -3,17 +3,20 @@
 
 var forecasts = [];
 #set i = 0
-#for $forecast in $forecasts
-    forecast = {};
-    forecast.day = '$forecast["day"]';
-    forecast.date = '$forecast["date"]';
-    forecast.observation = '$forecast["observation"]';
-    forecast.min_temp = '$forecast["min_temp"]';
-    forecast.max_temp = '$forecast["max_temp"]';
-    forecast.rain = '$forecast["rain"]';
-    forecast.min_wind = '$forecast["min_wind"]';
-    forecast.max_wind = '$forecast["max_wind"]';
 
-    forecasts.push(forecast);
-    #set i += 1
-#end for
+#if $forecasts
+    #for $forecast in $forecasts
+        forecast = {};
+        forecast.day = '$forecast["day"]';
+        forecast.date = '$forecast["date"]';
+        forecast.observation = '$forecast["observation"]';
+        forecast.min_temp = '$forecast["min_temp"]';
+        forecast.max_temp = '$forecast["max_temp"]';
+        forecast.rain = '$forecast["rain"]';
+        forecast.min_wind = '$forecast["min_wind"]';
+        forecast.max_wind = '$forecast["max_wind"]';
+
+        forecasts.push(forecast);
+        #set i += 1
+    #end for
+#end if
