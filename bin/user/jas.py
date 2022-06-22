@@ -496,19 +496,26 @@ class JAS(SearchList):
         aggregate_types = {}
         charts = self.skin_dict.get('Extras', {}).get('chart_definitions', {})
 
-        for chart in charts:
-            series = charts[chart].get('series', {})
-            for obs in series:
-                weewx_options = series[obs].get('weewx', {})
-                observation = weewx_options.get('observation', obs)
-                if observation not in self.wind_observations:
-                    if observation not in observations:
-                        observations[observation] = {}
-                        observations[observation]['aggregate_types'] = {}
+        charts_used = {}
+        pages =  self.skin_dict.get('Extras', {}).get('pages', {})
+        for page in pages:
+            for chart in pages[page].sections:
+                charts_used[chart] = ''
 
-                    aggregate_type = weewx_options.get('aggregate_type', 'avg')
-                    observations[observation]['aggregate_types'][aggregate_type] = {}
-                    aggregate_types[aggregate_type] = {}
+        for chart in charts:
+            if chart in charts_used:
+                series = charts[chart].get('series', {})
+                for obs in series:
+                    weewx_options = series[obs].get('weewx', {})
+                    observation = weewx_options.get('observation', obs)
+                    if observation not in self.wind_observations:
+                        if observation not in observations:
+                            observations[observation] = {}
+                            observations[observation]['aggregate_types'] = {}
+
+                        aggregate_type = weewx_options.get('aggregate_type', 'avg')
+                        observations[observation]['aggregate_types'][aggregate_type] = {}
+                        aggregate_types[aggregate_type] = {}
 
         minmax_observations = self.skin_dict.get('Extras', {}).get('minmax', {}).get('observations', {})
         for observation in minmax_observations:
