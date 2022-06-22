@@ -14,40 +14,42 @@ This data is stored in a javascript object named 'current'.
 ## Might have to make this an include (.inc)
 #set global interval_global = $getVar("$Extras.index_page_interval", "last24hours")
 
-var mqtt_enabled = false;
-var updateDate = $current.dateTime.raw * 1000;
-var current = {};
-current.header = {};
-current.header.name = "$getVar('Extras.current.observation')";
-current.header.value =  "#include source='$current.' + $getVar('Extras.current.observation') + '.format(add_label=False)' + '";'
-current.header.unit =  "#include source='$unit.label.' + $getVar('Extras.current.observation') +  '";'
-current.observations = new Map();
-current.suffixes = new Map();
+#if $getVar("$Extras.current", False)
+    var mqtt_enabled = false;
+    var updateDate = $current.dateTime.raw * 1000;
+    var current = {};
+    current.header = {};
+    current.header.name = "$getVar('Extras.current.observation')";
+    current.header.value =  "#include source='$current.' + $getVar('Extras.current.observation') + '.format(add_label=False)' + '";'
+    current.header.unit =  "#include source='$unit.label.' + $getVar('Extras.current.observation') +  '";'
+    current.observations = new Map();
+    current.suffixes = new Map();
 
-#for observation in $Extras.current.observations
-        #set type = $getVar("$Extras.current.observations" + "." + $observation + ".type", "")
-        #set suffix = $getVar("$Extras.current.observations" + "." + $observation + ".suffix", "")
-        #if $type == 'rise'    
-            #set observation_value = '$' + 'almanac.' + $observation + 'rise'
-            #set label = 'foo'
-        #else if $type == 'sum'
-            #set observation_value = '$' + $interval_global + '.' + $observation + "." + $type
-        #else
-            #set observation_value = '$current.' + $observation + '.format(add_label=False)'
-            #set observation_unit = '$unit.label.' + $observation
+    #for observation in $Extras.current.observations
+            #set type = $getVar("$Extras.current.observations" + "." + $observation + ".type", "")
+            #set suffix = $getVar("$Extras.current.observations" + "." + $observation + ".suffix", "")
+            #if $type == 'rise'    
+                #set observation_value = '$' + 'almanac.' + $observation + 'rise'
+                #set label = 'foo'
+            #else if $type == 'sum'
+                #set observation_value = '$' + $interval_global + '.' + $observation + "." + $type
+            #else
+                #set observation_value = '$current.' + $observation + '.format(add_label=False)'
+                #set observation_unit = '$unit.label.' + $observation
+            #end if
+
+        var observation = {};
+        observation.name = "$observation";
+        observation.value = "#include source=$observation_value#";
+        observation.unit = "#include source=$observation_unit#";
+        #if $suffix
+            observation.suffix = "$observation" + "_suffix";
+            var suffix = {};
+            suffix.value = "#include source=$suffix#";
+            current.suffixes.set(observation.suffix, suffix);
         #end if
-
-    var observation = {};
-    observation.name = "$observation";
-    observation.value = "#include source=$observation_value#";
-    observation.unit = "#include source=$observation_unit#";
-    #if $suffix
-        observation.suffix = "$observation" + "_suffix";
-        var suffix = {};
-        suffix.value = "#include source=$suffix#";
-        current.suffixes.set(observation.suffix, suffix);
-    #end if
-    current.observations.set("$observation", observation);
-#end for
+        current.observations.set("$observation", observation);
+    #end for
+#end if
 
 #set global interval_global = None
