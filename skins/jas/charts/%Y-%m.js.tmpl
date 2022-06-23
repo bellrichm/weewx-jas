@@ -2,9 +2,13 @@
 ##    See the file LICENSE.txt for your rights.
 
 #if $getVar("$Extras.pages.archive-month", False)
-    #set interval_name = 'month' + $year.start.format('%Y') + $month.start.format('%m')
-    #set page_name = $year.start.format('%Y') + '-' + $month.start.format('%m')
-    #set charts = $genCharts('archive-month', $interval_name, $page_name)
-    $skinDebug($charts)
-    #include source=$charts
+    #set global interval_name_global = 'month' + $year.start.format('%Y') + $month.start.format('%m')
+    #set global page_name_global = $year.start.format('%Y') + '-' + $month.start.format('%m')
+    #set global page_definition_name_global = 'archive-month'
+    
+    #include 'generators/charts.gen'
+
+    #set global interval_long_name_global = None
+    #set global page_name_global = None
+    #set global page_definition_name_global = None
 #end if    

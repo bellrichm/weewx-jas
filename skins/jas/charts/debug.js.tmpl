@@ -1,8 +1,14 @@
-##    Copyright (c) 202-20221 Rich Bell <bellrichm@gmail.com>
+##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
 #if $getVar("$Extras.pages.debug", False)
-    #set charts = $genCharts('debug', 'mqtt', 'debug')
-    $skinDebug($charts)
-    #include source=$charts
+    #set global interval_name_global = 'mqtt'
+    #set global page_name_global = 'debug'
+    #set global page_definition_name_global = 'debug'
+    
+    #include 'generators/charts.gen'
+
+    #set global interval_long_name_global = None
+    #set global page_name_global = None
+    #set global page_definition_name_global = None
 #end if    

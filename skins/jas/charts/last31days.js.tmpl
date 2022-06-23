@@ -2,7 +2,13 @@
 ##    See the file LICENSE.txt for your rights.
 
 #if $getVar("$Extras.pages.last31days", False)
-    #set charts = $genCharts('last31days', 'last31days', 'last31days')
-    $skinDebug($charts)
-    #include source=$charts
+    #set global interval_name_global = 'last31days'
+    #set global page_name_global = 'last31days'
+    #set global page_definition_name_global = 'last31days'
+    
+    #include 'generators/charts.gen'
+
+    #set global interval_long_name_global = None
+    #set global page_name_global = None
+    #set global page_definition_name_global = None
 #end if    

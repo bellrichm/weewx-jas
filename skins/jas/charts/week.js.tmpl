@@ -2,7 +2,13 @@
 ##    See the file LICENSE.txt for your rights.
 
 #if $getVar("$Extras.pages.week", False)
-    #set charts = $genCharts('week', 'week', 'week')
-    $skinDebug($charts)
-    #include source=$charts
+    #set global interval_name_global = 'week'
+    #set global page_name_global = 'week'
+    #set global page_definition_name_global = 'week'
+    
+    #include 'generators/charts.gen'
+
+    #set global interval_long_name_global = None
+    #set global page_name_global = None
+    #set global page_definition_name_global = None
 #end if    

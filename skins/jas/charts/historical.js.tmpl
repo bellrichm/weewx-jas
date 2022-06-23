@@ -2,7 +2,13 @@
 ##    See the file LICENSE.txt for your rights.
 
 #if $getVar("$Extras.pages.historical", False)
-    #set charts = $genCharts('historical', 'year', 'historical')
-    $skinDebug($charts)
-    #include source=$charts
+    #set global interval_name_global = 'year'
+    #set global page_name_global = 'historical'
+    #set global page_definition_name_global = 'historical'
+    
+    #include 'generators/charts.gen'
+
+    #set global interval_long_name_global = None
+    #set global page_name_global = None
+    #set global page_definition_name_global = None
 #end if    
