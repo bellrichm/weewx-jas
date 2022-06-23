@@ -2,7 +2,13 @@
 ##    See the file LICENSE.txt for your rights.
 
 #if $getVar("$Extras.pages.yesterday", False)
-    #set charts = $genCharts('yesterday', 'yesterday', 'yesterday')
-    $skinDebug($charts)
-    #include source=$charts
+    #set global interval_name_global = 'yesterday'
+    #set global page_name_global = 'yesterday'
+    #set global page_definition_name_global = 'yesterday'
+    
+    #include 'generators/charts.gen'
+
+    #set global interval_long_name_global = None
+    #set global page_name_global = None
+    #set global page_definition_name_global = None
 #end if    

@@ -1,8 +1,14 @@
-##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
+##    Copyright (c) 2021-200 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
 #if $getVar("$Extras.pages.year", False)
-    #set charts = $genCharts('year', 'year', 'year')
-    $skinDebug($charts)
-    #include source=$charts
+    #set global interval_name_global = 'year'
+    #set global page_name_global = 'year'
+    #set global page_definition_name_global = 'year'
+    
+    #include 'generators/charts.gen'
+
+    #set global interval_long_name_global = None
+    #set global page_name_global = None
+    #set global page_definition_name_global = None
 #end if    
