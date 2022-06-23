@@ -3,6 +3,8 @@
 
 #import datetime
 #from weeutil.weeutil import to_bool
+#import time
+#set $start_time = time.time()
  /* jshint esversion: 6 */
 
 var pageCharts = [];
@@ -449,3 +451,7 @@ window.addEventListener('message',
                         }},
                         false
                        );
+
+#set elapsed_time = time.time() - $start_time
+#set log_msg = "Generated " + $filename + " in " + str($elapsed_time)
+$loginf($log_msg)
