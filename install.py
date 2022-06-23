@@ -92,7 +92,7 @@ EXTENSION_CONFIG = """
 
             # The pages and the content on the pages to display.
             [[[[pages]]]]
-                [[[[[index]]]]]
+                [[[[[last24hours]]]]]
                     [[[[[[current]]]]]]
                     [[[[[[minmax]]]]]]
                     #[[[[[[forecast]]]]]]
