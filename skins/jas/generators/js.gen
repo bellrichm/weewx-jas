@@ -183,11 +183,13 @@ function handleMQTT(message) {
 
 #if 'current' in $getVar('$Extras.pages.' + $page)
     function updateCurrentObservations() {
-        if(sessionStorage.getItem("header") === null || !MQTTConfig){
-            sessionStorage.setItem("header", JSON.stringify(current.header));
-        }
-        header = JSON.parse(sessionStorage.getItem("header"));
-        document.getElementById("$Extras.current.observation").innerHTML = header.value + header.unit;
+        #if $getVar('$Extras.current.observation', False)
+            if(sessionStorage.getItem("header") === null || !MQTTConfig){
+                sessionStorage.setItem("header", JSON.stringify(current.header));
+            }
+            header = JSON.parse(sessionStorage.getItem("header"));
+            document.getElementById("$Extras.current.observation").innerHTML = header.value + header.unit;
+        #end if
 
         // ToDo - cleanup, perhaps put suffix data into an array and store that
         // ToDo - do a bit more in cheetah?

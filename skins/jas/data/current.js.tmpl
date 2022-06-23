@@ -18,10 +18,12 @@ This data is stored in a javascript object named 'current'.
     var mqtt_enabled = false;
     var updateDate = $current.dateTime.raw * 1000;
     var current = {};
-    current.header = {};
-    current.header.name = "$getVar('Extras.current.observation')";
-    current.header.value =  "#include source='$current.' + $getVar('Extras.current.observation') + '.format(add_label=False)' + '";'
-    current.header.unit =  "#include source='$unit.label.' + $getVar('Extras.current.observation') +  '";'
+    #if $getVar('$Extras.current.observation', False)
+        current.header = {};
+        current.header.name = "$getVar('Extras.current.observation')";
+        current.header.value =  "#include source='$current.' + $getVar('Extras.current.observation') + '.format(add_label=False)' + '";'
+        current.header.unit =  "#include source='$unit.label.' + $getVar('Extras.current.observation') +  '";'
+    #end if
     current.observations = new Map();
     current.suffixes = new Map();
 

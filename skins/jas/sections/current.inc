@@ -5,7 +5,9 @@
 <div class="col-12 col-xl-6 mb-4">
     <div class="card">
         <div class="card-body text-center">
-            <h1 id="$Extras.current.observation" class="display-2 indigo-text"></h1>
+            #if $getVar('$Extras.current.observation', False)
+              <h1 id="$Extras.current.observation" class="display-2 indigo-text"></h1>
+            #end if
             #if $getVar("$Extras.display_aeris_observation", False)
                 $current_observation['observation']
             #end if
