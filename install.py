@@ -16,7 +16,8 @@ VERSION = "0.2.1"
 
 EXTENSION_CONFIG = """
 [StdReport]
-    # https://github.com/bellrichm/weewx-jas/wiki/Getting-Started
+    # jas (Just another Skin) is highly configurable. This is an example to get the skin up and running.
+    # For more information head over to, https://github.com/bellrichm/weewx-jas/wiki/Getting-Started
     [[jas]]
         skin = jas
         HTML_ROOT = jas
@@ -42,21 +43,26 @@ EXTENSION_CONFIG = """
                 topic = REPLACE_ME
                 
             # Define an additional chart.
+            # Once a chart is defined, it can be added to pages.
             # https://github.com/bellrichm/weewx-jas/wiki/Defining-New-Charts
             [[[[chart_definitions]]]]
                 # The name of this chart is inTemp. It could be anything.
-                # The name is used to add it to a page.
                 [[[[[inTemp]]]]]
+                    # Options that are not used by eCharts are put under 'weewx' stanzas'
                     [[[[[[weewx]]]]]]
                         title = Inside Temperature
                     [[[[[[series]]]]]]
                         # Chart one observation, inTemp
                         [[[[[[[inTemp]]]]]]]
-                            name = "'inTemp'"
-                            # The series type is line.
+                            # The name of the series. 
+                            # This is a literal in javascript, so it needs the single quote in its value
+                            name = "'Temperature'"
+                            # The series type. 'line' and 'bar' are the most common.
+                            # This is a literal in javascript, so it needs the single quote in its value
                             type = "'line'"     
 
             # The '$current' value of these observations will be displayed.
+            # If MQTT is enabled, these will be updated when a message is received.
             # https://github.com/bellrichm/weewx-jas/wiki/Sections#current
             [[[[current]]]]
                 # The header observation is outTemp
@@ -111,6 +117,7 @@ EXTENSION_CONFIG = """
                     [[[[[[wind]]]]]]  
                     [[[[[[rain]]]]]]                      
                     [[[[[[radar]]]]]]
+                    # Here is the user defined chart, inTemp
                     [[[[[[inTemp]]]]]]             
                 [[[[[last7days]]]]]
                     [[[[[[minmax]]]]]]
@@ -246,9 +253,10 @@ class JASInstaller(ExtensionInstaller):
                                              ]),
                    ('skins/jas/lang', ['skins/jas/lang/en.conf']),
                    ('skins/jas/sections', [
+                                           'skins/jas/sections/current.inc',
+                                           'skins/jas/sections/debug.inc',
                                            'skins/jas/sections/forecast.inc',
                                            'skins/jas/sections/minmax.inc',
-                                           'skins/jas/sections/current.inc',
                                            'skins/jas/sections/radar.inc',
                                            'skins/jas/sections/thisdate.inc',
                                            'skins/jas/sections/zoomControl.inc'
