@@ -97,7 +97,7 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
           <div class="card">
             <div class="card-body text-center">
               <h5 class="h5-responsive indigo-text">
-                $gettext($section + '.title')
+                $getVar('$Extras.chart_definitions.' + $section + '.weewx.title', $gettext($section + '.title'))
               </h5>
               <div id="$id"></div>
             </div>

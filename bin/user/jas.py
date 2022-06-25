@@ -580,7 +580,7 @@ class JAS(SearchList):
             elif 'grid' in self.skin_dict['Extras']['chart_definitions'][chart]:
                 coordinate_type = 'grid'
             elif 'weewx' in self.skin_dict['Extras']['chart_definitions'][chart]:
-                coordinate_type = self.skin_dict['Extras']['chart_definitions'][chart]['weewx']['type']
+                coordinate_type = self.skin_dict['Extras']['chart_definitions'][chart]['weewx'].get('type', 'grid')
             else:
                 coordinate_type = 'grid'
             self.chart_config[chart].merge(self.chart_defaults.get(coordinate_type, {}))

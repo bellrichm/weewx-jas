@@ -16,6 +16,7 @@ VERSION = "0.2.1"
 
 EXTENSION_CONFIG = """
 [StdReport]
+    # https://github.com/bellrichm/weewx-jas/wiki/Getting-Started
     [[jas]]
         skin = jas
         HTML_ROOT = jas
@@ -40,21 +41,23 @@ EXTENSION_CONFIG = """
                 
                 topic = REPLACE_ME
                 
-            # Create an additional chart.
-            [[[[charts]]]]
+            # Define an additional chart.
+            # https://github.com/bellrichm/weewx-jas/wiki/Defining-New-Charts
+            [[[[chart_definitions]]]]
                 # The name of this chart is inTemp. It could be anything.
                 # The name is used to add it to a page.
                 [[[[[inTemp]]]]]
-                    [[[[[[chart]]]]]]
-                        # The chart type is line.
-                        type = "'line'"            
-                    [[[[[[dataLabels]]]]]]
-                        enabled = false
+                    [[[[[[weewx]]]]]]
+                        title = Inside Temperature
                     [[[[[[series]]]]]]
                         # Chart one observation, inTemp
                         [[[[[[[inTemp]]]]]]]
+                            name = "'inTemp'"
+                            # The series type is line.
+                            type = "'line'"     
 
             # The '$current' value of these observations will be displayed.
+            # https://github.com/bellrichm/weewx-jas/wiki/Sections#current
             [[[[current]]]]
                 # The header observation is outTemp
                 observation = outTemp
@@ -72,6 +75,7 @@ EXTENSION_CONFIG = """
                         type = sum
             
             # The minimum and maximum values of these observations will be displayed. 
+            # https://github.com/bellrichm/weewx-jas/wiki/Sections#minmax
             [[[[minmax]]]]
                 [[[[[observations]]]]]
                     [[[[[[outTemp]]]]]]
@@ -82,6 +86,7 @@ EXTENSION_CONFIG = """
                     [[[[[[barometer]]]]]]
             
             # For the selected date, values of these observations will be displayed.
+            # https://github.com/bellrichm/weewx-jas/wiki/Sections#thisdate
             [[[[thisdate]]]]
                 [[[[[observations]]]]]
                     [[[[[[outTemp]]]]]]
@@ -91,6 +96,9 @@ EXTENSION_CONFIG = """
                         type = sum
 
             # The pages and the content on the pages to display.
+            # https://github.com/bellrichm/weewx-jas/wiki/Pages
+            # https://github.com/bellrichm/weewx-jas/wiki/Predefined-Charts
+            # https://github.com/bellrichm/weewx-jas/wiki/Sections
             [[[[pages]]]]
                 [[[[[last24hours]]]]]
                     [[[[[[current]]]]]]
@@ -102,7 +110,8 @@ EXTENSION_CONFIG = """
                     [[[[[[outHumidity]]]]]]  
                     [[[[[[wind]]]]]]  
                     [[[[[[rain]]]]]]                      
-                    [[[[[[radar]]]]]]              
+                    [[[[[[radar]]]]]]
+                    [[[[[[inTemp]]]]]]             
                 [[[[[last7days]]]]]
                     [[[[[[minmax]]]]]]
                     [[[[[[outTemp]]]]]]
