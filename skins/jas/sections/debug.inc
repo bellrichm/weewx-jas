@@ -15,8 +15,7 @@
 </div>
 
 <script>
-  currentPage = sessionStorage.getItem('currentPage');
-  if (currentPage === null) {
+  if (window.self === window.top) {
     document.getElementById('connectButton').classList.remove("d-none");
     document.getElementById('disconnectButton').classList.remove("d-none");
   }
