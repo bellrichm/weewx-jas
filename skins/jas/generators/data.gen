@@ -5,7 +5,6 @@
 #set $start_time = time.time()
 ## Create time stamps by aggregation time for the end of interval
 ## For example: endTimestamp_min, endTimestamp_max
-#set $data_binding = $getVar('Extras.pages.' + $page_definition_name_global + '.data_binding', $getVar("$Extras.data_binding", 'wx_binding'))
 
 #for $aggregate_type in $getVar('Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval')
     #set aggregate_interval = $getVar('Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval.' + $aggregate_type)
@@ -46,28 +45,32 @@
         #end if
         #set aggregate_interval = $getVar('Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval.' + $aggregate_type, None)
         #set interval_name = $interval_long_name_global + $aggregate_type
-        #set array_name = $interval_name + "." + $observation + "_"  + $data_binding
         #set dateTime_name = $interval_name + "_" + $observation + "_dateTime"
-        #set data_name = $interval_name + "_" + $observation + "_"  + $data_binding + "_data"
+        #for data_binding in $observations[$observation]['aggregate_types'][$aggregate_type]:
+            #set array_name = $interval_name + "." + $observation + "_"  + $data_binding
+            #set data_name = $interval_name + "_" + $observation + "_"  + $data_binding + "_data"
 
-        #if $aggregate_interval is not None
-            #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='" + $data_binding + "')." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms').round(2).json"
-        #else
-            #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='" + $data_binding + "')." + $observation + ".series(time_series='start', time_unit='unix_epoch_ms').round(2).json"
-        #end if
-        $skinDebug($obs)
-        #include source=$obs + ";\n"
+            #if $aggregate_interval is not None
+                #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='" + $data_binding + "')." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms').round(2).json"
+            #else
+                #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='" + $data_binding + "')." + $observation + ".series(time_series='start', time_unit='unix_epoch_ms').round(2).json"
+            #end if
+            $skinDebug($obs)
+            #include source=$obs + ";\n"
 
-        ## Cache the dateTimes into its own list variable
-        #echo $dateTime_name + " = [].concat(" + $array_name + ".map(arr => arr[0]));\n"
-        ## Cache the values into its own list variable
-        #echo $data_name + " = [].concat(" + $array_name + ".map(arr => arr[1]));\n"
+            ## Cache the dateTimes into its own list variable
+            #echo $dateTime_name + " = [].concat(" + $array_name + ".map(arr => arr[0]));\n"
+            ## Cache the values into its own list variable
+            #echo $data_name + " = [].concat(" + $array_name + ".map(arr => arr[1]));\n"
+        #end for
     #end for
 #end for
 
 ## ToDo - wind rose proof of concept
 ## Create data for wind rose chart
 #if $getVar('Extras.pages.' + $page_definition_name_global + '.windRose',None) is not None
+    ## ToDo - wind data_binding?
+    #set $data_binding = $getVar('Extras.pages.' + $page_definition_name_global + '.data_binding', $getVar("$Extras.data_binding", 'wx_binding'))
     #set avg, max, wind_directions, wind_range_legend = $windCompass()
     #set line = "var windRangeLegend = " + $wind_range_legend
     $line;

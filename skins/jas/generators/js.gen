@@ -7,7 +7,7 @@
 #set $start_time = time.time()
  /* jshint esversion: 6 */
 
-#set $data_binding = $getVar('Extras.pages.' + $page + '.data_binding', $getVar("$Extras.data_binding", 'wx_binding'))
+#set $skin_data_binding = $getVar("$Extras.data_binding", 'wx_binding')
 
 var pageCharts = [];
 
@@ -234,10 +234,12 @@ function handleMQTT(message) {
 #end if
 
 #if 'minmax' in $getVar('$Extras.pages.' + $page)
+    #set $minmax_data_binding = $getVar("$Extras.minmax.data_binding", $skin_data_binding)
     // Update the min/max observations
     function updateMinMax(startTimestamp, endTimestamp) {
         ## todo - optimize to only get index once for all observations?
         #for $observation in $getVar('Extras.minmax.observations')
+            #set $data_binding = $getVar("$Extras.minmax.observations." + $observation + ".data_binding", minmax_data_binding)
             #set min_datetime_array = $interval_name_global + "_min_" + $observation + "_dateTime";
             #set min_data_array = $interval_name_global + "_min_" + $observation + "_" + $data_binding + "_data";
             #set max_datetime_array = $interval_name_global + "_max_" + $observation + "_dateTime";
@@ -265,6 +267,8 @@ function handleMQTT(message) {
 #end if
 
 #if 'thisdate' in $getVar('$Extras.pages.' + $page)
+    #set $thisdate_data_binding = $getVar("$Extras.minmax.data_binding", $skin_data_binding)
+
     // Get the observation for timeSramp
     function getObservation(timeStamp, observations) {
         var array_result = observations.filter(function(v,i) { return v[0] === timeStamp; });
@@ -278,6 +282,7 @@ function handleMQTT(message) {
     // Update the 'on this date' observations with observations at timeStamp
     function updateThisDate(timeStamp) {
         #for observation in $Extras.thisdate.observations
+            #set $data_binding = $getVar("$Extras.thisdate.observations" + $observation + ".data_binding", $thisdate_data_binding)
             #set aggregation_type = $getVar("$Extras.thisdate.observations." + $observation + ".type", None)
             #if $aggregation_type is None
                 #set value = $interval_name_global + '_min.' + $observation + "_" + $data_binding

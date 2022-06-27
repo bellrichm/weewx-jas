@@ -492,41 +492,46 @@ class JAS(SearchList):
 
     def _get_observations(self):
         # todo - rename now has 'side effect' of returning aggregate_types
+        
         observations = {}
         aggregate_types = {}
+        skin_data_binding = self.skin_dict['Extras'].get('data_binding','wx_binding')
         charts = self.skin_dict.get('Extras', {}).get('chart_definitions', {})
 
-        charts_used = {}
         pages =  self.skin_dict.get('Extras', {}).get('pages', {})
         for page in pages:
             for chart in pages[page].sections:
-                charts_used[chart] = ''
+                if chart in charts:
+                    chart_data_binding = charts[chart].get('weewx', {}).get('data_binding', skin_data_binding)
+                    series = charts[chart].get('series', {})
+                    for obs in series:
+                        weewx_options = series[obs].get('weewx', {})
+                        observation = weewx_options.get('observation', obs)
+                        data_binding =  series[obs].get('weewx', {}).get('data_binding', chart_data_binding)
+                        if observation not in self.wind_observations:
+                            if observation not in observations:
+                                observations[observation] = {}
+                                observations[observation]['aggregate_types'] = {}
 
-        for chart in charts:
-            if chart in charts_used:
-                series = charts[chart].get('series', {})
-                for obs in series:
-                    weewx_options = series[obs].get('weewx', {})
-                    observation = weewx_options.get('observation', obs)
-                    if observation not in self.wind_observations:
-                        if observation not in observations:
-                            observations[observation] = {}
-                            observations[observation]['aggregate_types'] = {}
-
-                        aggregate_type = weewx_options.get('aggregate_type', 'avg')
-                        observations[observation]['aggregate_types'][aggregate_type] = {}
-                        aggregate_types[aggregate_type] = {}
+                            aggregate_type = weewx_options.get('aggregate_type', 'avg')
+                            observations[observation]['aggregate_types'][aggregate_type] = {}
+                            observations[observation]['aggregate_types'][aggregate_type][data_binding] = {}
+                            aggregate_types[aggregate_type] = {}
 
         minmax_observations = self.skin_dict.get('Extras', {}).get('minmax', {}).get('observations', {})
+        minmax_data_binding = self.skin_dict.get('Extras', {}).get('minmax', {}).get('data_binding', skin_data_binding)
         for observation in minmax_observations:
+            data_binding =  minmax_observations[observation].get('data_binding', minmax_data_binding)
             if observation not in self.wind_observations:
                 if observation not in observations:
                     observations[observation] = {}
                     observations[observation]['aggregate_types'] = {}
 
                 observations[observation]['aggregate_types']['min'] = {}
+                observations[observation]['aggregate_types']['min'][data_binding] = {}
                 aggregate_types['min'] = {}
                 observations[observation]['aggregate_types']['max'] = {}
+                observations[observation]['aggregate_types']['max'][data_binding] = {}
                 aggregate_types['max'] = {}
 
         return observations, aggregate_types
@@ -601,19 +606,22 @@ class JAS(SearchList):
                 weeutil.config.conditional_merge(self.chart_defs[chart]['series'][value]['weewx'], weewx_options)
 
     def _gen_charts(self, page, interval, page_name):
-        data_binding = self.skin_dict['Extras']['pages'][page].get('data_binding', self.skin_dict['Extras'].get('data_binding','wx_binding'))
+        skin_data_binding = self.skin_dict['Extras'].get('data_binding','wx_binding')
 
         #chart_final = 'var pageCharts = [];\n'
         chart_final = '## charts\n'
         chart2 = ""
+        charts = self.skin_dict['Extras']['chart_definitions']
         for chart in self.skin_dict['Extras']['pages'][page]:
-            if chart in self.skin_dict['Extras']['chart_definitions'].sections:
+            if chart in charts.sections:
+                chart_data_binding = charts[chart].get('weewx', {}).get('data_binding', skin_data_binding)
                 chart2 += "#set global series_observations_global = []\n"
 
                 # for now, do not support overriding chart options by page
                 #self.charts_def[chart].merge(self.skin_dict['Extras']['pages'][page][chart])
                 for observation in self.chart_defs[chart]['series']:
                     obs = self.chart_defs[chart]['series'][observation].get('weewx', {}).get('observation', observation)
+                    data_binding = self.chart_defs[chart]['series'][observation].get('weewx', {}).get('data_binding', chart_data_binding)
                     chart2 += "$series_observations_global.append('" + obs + "')\n"
                 #chart2 += "$series_observations_global\n"
 
