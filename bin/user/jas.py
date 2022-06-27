@@ -601,6 +601,8 @@ class JAS(SearchList):
                 weeutil.config.conditional_merge(self.chart_defs[chart]['series'][value]['weewx'], weewx_options)
 
     def _gen_charts(self, page, interval, page_name):
+        data_binding = self.skin_dict['Extras'].get('data_binding','wx_binding')
+
         #chart_final = 'var pageCharts = [];\n'
         chart_final = '## charts\n'
         chart2 = ""
@@ -634,7 +636,7 @@ class JAS(SearchList):
                             chart2 += "    {name: " + self.chart_defs[chart]['series'][obs]['name'] + ",\n"
                             chart2 += "     data: [\n" 
                             for year in range(int(self.skin_dict['Extras']['pages'][page]['start']), int(self.skin_dict['Extras']['pages'][page]['end']) + 1):
-                                chart2 += "            ...year" + str(year) + "_" + aggregate_type + "." + self.chart_defs[chart]['series'][obs]['weewx']['observation'] + ",\n"
+                                chart2 += "            ...year" + str(year) + "_" + aggregate_type + "." + self.chart_defs[chart]['series'][obs]['weewx']['observation'] + "_"  + data_binding + ",\n"
                             chart2 += "          ]},\n"
                     elif chart_type == 'yeartoyear':
                         obs = next(iter( self.chart_defs[chart]['series']))
@@ -642,7 +644,7 @@ class JAS(SearchList):
                         for year in range(int(self.skin_dict['Extras']['pages'][page]['start']), int(self.skin_dict['Extras']['pages'][page]['end']) + 1):
                             chart2 += "    {name: '" + str(year) + "',\n"
                             chart2 += "     data: year" + str(year) + "_" + aggregate_type \
-                                   + "." + obs \
+                                   + "." + obs + "_"  + data_binding \
                                    + ".map(arr => [moment.unix(arr[0] / 1000).utcOffset(" + "-240.0).format('MM/DD'), arr[1]]),\n" \
                                    + "},\n"
                     else:
@@ -651,7 +653,7 @@ class JAS(SearchList):
                             chart2 += "    {name: " + self.chart_defs[chart]['series'][obs]['name'] + ",\n"
                             chart2 += "    data: " \
                                     + interval + "_" + aggregate_type \
-                                    + "." + self.chart_defs[chart]['series'][obs]['weewx']['observation'] \
+                                    + "." + self.chart_defs[chart]['series'][obs]['weewx']['observation'] + "_"  + data_binding \
                                     + "},\n"
                     chart2 += "]};\n"
                     chart2 += "pageChart.option = option;\n"

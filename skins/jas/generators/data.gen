@@ -45,9 +45,9 @@
         #end if
         #set aggregate_interval = $getVar('Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval.' + $aggregate_type, None)
         #set interval_name = $interval_long_name_global + $aggregate_type
-        #set array_name = $interval_name + "." + $observation
+        #set array_name = $interval_name + "." + $observation + "_"  + $data_binding
         #set dateTime_name = $interval_name + "_" + $observation + "_dateTime"
-        #set data_name = $interval_name + "_" + $observation + "_data"
+        #set data_name = $interval_name + "_" + $observation + "_"  + $data_binding + "_data"
 
         #if $aggregate_interval is not None
             #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='" + $data_binding + "')." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms').round(2).json"
@@ -72,7 +72,7 @@
     $line;
     #set i = 0
     #for $wind in $wind_directions
-        #set line = $interval_name_global + "_avg.windCompassRange"  + str($i) + " = "  + str($wind) +  ";"
+        #set line = $interval_name_global + "_avg.windCompassRange"  + str($i) + "_" + $data_binding + " = "  + str($wind) +  ";"
         $line
         #set $i += 1
     #end for

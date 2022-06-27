@@ -7,6 +7,8 @@
 #set $start_time = time.time()
  /* jshint esversion: 6 */
 
+ #set $data_binding = $getVar("$Extras.data_binding", 'wx_binding')
+
 var pageCharts = [];
 
 // Update the chart's data
@@ -239,9 +241,9 @@ function handleMQTT(message) {
         ## todo - optimize to only get index once for all observations?
         #for $observation in $getVar('Extras.minmax.observations')
             #set min_datetime_array = $interval_name_global + "_min_" + $observation + "_dateTime";
-            #set min_data_array = $interval_name_global + "_min_" + $observation + "_data";
+            #set min_data_array = $interval_name_global + "_min_" + $observation + "_" + $data_binding + "_data";
             #set max_datetime_array = $interval_name_global + "_max_" + $observation + "_dateTime";
-            #set max_data_array = $interval_name_global + "_max_" + $observation + "_data";
+            #set max_data_array = $interval_name_global + "_max_" + $observation + "_" + $data_binding + "_data";
             #set min_id = $observation + "_minmax_min";
             #set max_id = $observation + "_minmax_max";
             #set label = $getVar('unit.label.' + $observation);
@@ -280,20 +282,20 @@ function handleMQTT(message) {
         #for observation in $Extras.thisdate.observations
             #set aggregation_type = $getVar("$Extras.thisdate.observations." + $observation + ".type", None)
             #if $aggregation_type is None
-                #set value = $interval_name_global + '_min.' + $observation
+                #set value = $interval_name_global + '_min.' + $observation + "_" + $data_binding
                 #set line = "obs = getObservation(timeStamp, " + $value + ");"
                 #set id = $observation + "_thisdate_min"
                 $line
                 observation=document.getElementById("$id");
                 observation.innerHTML = obs;        
-                #set value = $interval_name_global + '_max.' + $observation
+                #set value = $interval_name_global + '_max.' + $observation + "_" + $data_binding
                 #set line = "obs = getObservation(timeStamp, " + $value + ");"
                 #set id = $observation + "_thisdate_max"
                 $line
                 observation=document.getElementById("$id");
                 observation.innerHTML = obs;      
             #else
-                #set value = $interval_name_global + '_' + $aggregation_type + '.' + $observation
+                #set value = $interval_name_global + '_' + $aggregation_type + '.' + $observation + "_" + $data_binding
                 #set line = "obs = getObservation(timeStamp, " + $value + ");"
                 #set id = $observation + "_thisdate_" + $aggregation_type
                 $line
