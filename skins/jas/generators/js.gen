@@ -7,7 +7,7 @@
 #set $start_time = time.time()
  /* jshint esversion: 6 */
 
- #set $data_binding = $getVar("$Extras.data_binding", 'wx_binding')
+#set $data_binding = $getVar('Extras.pages.' + $page + '.data_binding', $getVar("$Extras.data_binding", 'wx_binding'))
 
 var pageCharts = [];
 

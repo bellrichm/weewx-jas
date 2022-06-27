@@ -601,7 +601,7 @@ class JAS(SearchList):
                 weeutil.config.conditional_merge(self.chart_defs[chart]['series'][value]['weewx'], weewx_options)
 
     def _gen_charts(self, page, interval, page_name):
-        data_binding = self.skin_dict['Extras'].get('data_binding','wx_binding')
+        data_binding = self.skin_dict['Extras']['pages'][page].get('data_binding', self.skin_dict['Extras'].get('data_binding','wx_binding'))
 
         #chart_final = 'var pageCharts = [];\n'
         chart_final = '## charts\n'

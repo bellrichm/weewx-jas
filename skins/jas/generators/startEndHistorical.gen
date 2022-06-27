@@ -1,7 +1,7 @@
 ##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
-#set $data_binding = $getVar("$Extras.data_binding", 'wx_binding')
+#set $data_binding = $getVar('Extras.pages.' + $page_definition_name_global + '.data_binding', $getVar("$Extras.data_binding", 'wx_binding'))
 #set source = "#import datetime\n"
 #set source += "#import weeutil\n"
 #set source += "#set startTimestamp = weeutil.weeutil.startOfDay($" + $interval_name_global + "($data_binding='" + $data_binding + "').usUnits.firsttime.raw)\n"

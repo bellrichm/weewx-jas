@@ -5,7 +5,8 @@
 #set $start_time = time.time()
 ## Create time stamps by aggregation time for the end of interval
 ## For example: endTimestamp_min, endTimestamp_max
-#set $data_binding = $getVar("$Extras.data_binding", 'wx_binding')
+#set $data_binding = $getVar('Extras.pages.' + $page_definition_name_global + '.data_binding', $getVar("$Extras.data_binding", 'wx_binding'))
+
 #for $aggregate_type in $getVar('Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval')
     #set aggregate_interval = $getVar('Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval.' + $aggregate_type)
     ## The 'start' and 'end' tags ignore/do not use the '$data_binding' on the 'time period'.
