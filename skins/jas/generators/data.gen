@@ -84,4 +84,4 @@
 
 #set elapsed_time = time.time() - $start_time
 #set log_msg = "Generated " + $filename + " in " + str($elapsed_time)
-$loginf($log_msg)
+##$loginf($log_msg)
