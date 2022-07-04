@@ -560,7 +560,7 @@ class JAS(SearchList):
                             # set the aggregate_interval at the beginning of the chart definition, so it can be used in the chart
                             # Note, this means the last observation's aggregate type will be used to determine the aggregate interval
                             if series_type == 'multiple':
-                                chart2 = "#set global aggregate_interval_global = 'aggregate_interval_historical" + "'\n" + chart2
+                                chart2 = "#set global aggregate_interval_global = 'aggregate_interval_multiyear" + "'\n" + chart2
                             elif series_type == 'mqtt':
                                 chart2 = "#set global aggregate_interval_global = 'aggregate_interval_mqtt" + "'\n" + chart2                                
                             else:

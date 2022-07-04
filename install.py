@@ -191,7 +191,7 @@ class JASInstaller(ExtensionInstaller):
                                   'skins/jas/pages/year.html.tmpl',
                                   'skins/jas/pages/yesterday.html.tmpl',
                                   'skins/jas/pages/yeartoyear.html.tmpl',
-                                  'skins/jas/pages/historical.html.tmpl',
+                                  'skins/jas/pages/multiyear.html.tmpl',
                                   'skins/jas/pages/%Y.html.tmpl',
                                   'skins/jas/pages/%Y-%m.html.tmpl'
                                   ]),
@@ -206,7 +206,7 @@ class JASInstaller(ExtensionInstaller):
                                          'skins/jas/charts/year.js.tmpl',
                                          'skins/jas/charts/yesterday.js.tmpl',
                                          'skins/jas/charts/yeartoyear.js.tmpl',
-                                         'skins/jas/charts/historical.js.tmpl',
+                                         'skins/jas/charts/multiyear.js.tmpl',
                                          'skins/jas/charts/%Y.js.tmpl',
                                          'skins/jas/charts/%Y-%m.js.tmpl'
                                          ]),
@@ -247,7 +247,7 @@ class JASInstaller(ExtensionInstaller):
                                              'skins/jas/javascript/year.js.tmpl',
                                              'skins/jas/javascript/yesterday.js.tmpl',
                                              'skins/jas/javascript/yeartoyear.js.tmpl',
-                                             'skins/jas/javascript/historical.js.tmpl',
+                                             'skins/jas/javascript/multiyear.js.tmpl',
                                              'skins/jas/javascript/%Y.js.tmpl',
                                              'skins/jas/javascript/%Y-%m.js.tmpl'
                                              ]),
