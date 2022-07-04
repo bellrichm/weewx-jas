@@ -51,65 +51,67 @@ function handleLog(message) {
 function handleMQTT(message) {
     var test_obj = JSON.parse(message.payload);
 
-    // Handle the 'header' section of current observations.
-    header = JSON.parse(sessionStorage.getItem("header"));
-    if (test_obj[header.name]) {
-        header.value = test_obj[header.name];
-        if (test_obj[header.unit]) {
-            header.unit = test_obj[header.unit];
-        }
-        sessionStorage.setItem("header", JSON.stringify(header));
-        headerElem = document.getElementById(header.name);
-        if (headerElem) {
-            headerElem.innerHTML = header.value + header.unit;
-        }  
-    }
-
-    // Handle information that will be appended to the observation's value.
-    suffixes = sessionStorage.getItem("suffixes").split(",");
-    suffixes.forEach(function(suffix) {
-        if (test_obj[suffix]) {
-            data = JSON.parse(sessionStorage.getItem(suffix));
-            data.value = test_obj[suffix];
-            sessionStorage.setItem(suffix, JSON.stringify(data));
-        }
-    });
-
-    // Process each observation in the 'current' section.
-    observations = sessionStorage.getItem("observations").split(",");
-    observations.forEach(function(observation) {
-        if (test_obj[observation]) {
-            data = JSON.parse(sessionStorage.getItem(observation));
-            data.value = test_obj[observation];
-            sessionStorage.setItem(observation, JSON.stringify(data));
-
-            suffix = JSON.parse(sessionStorage.getItem(data.suffix));
-            if ( suffix=== null) {
-                suffixText = "";
+    #if to_bool($getVar('Extras.pages.' + $page + '.mqtt', True))
+        // Handle the 'header' section of current observations.
+        header = JSON.parse(sessionStorage.getItem("header"));
+        if (test_obj[header.name]) {
+            header.value = test_obj[header.name];
+            if (test_obj[header.unit]) {
+                header.unit = test_obj[header.unit];
             }
-            else {
-                suffixText = " " + suffix.value;
-            }
+            sessionStorage.setItem("header", JSON.stringify(header));
+            headerElem = document.getElementById(header.name);
+            if (headerElem) {
+                headerElem.innerHTML = header.value + header.unit;
+            }  
+        }
 
-            labelElem = document.getElementById(observation + "_label");
-            if (labelElem) {
-                labelElem.innerHTML = data.label;
+        // Handle information that will be appended to the observation's value.
+        suffixes = sessionStorage.getItem("suffixes").split(",");
+        suffixes.forEach(function(suffix) {
+            if (test_obj[suffix]) {
+                data = JSON.parse(sessionStorage.getItem(suffix));
+                data.value = test_obj[suffix];
+                sessionStorage.setItem(suffix, JSON.stringify(data));
             }
-            dataElem = document.getElementById(data.name + "_value");
-            if (dataElem) {
-                dataElem.innerHTML = data.value + data.unit + suffixText;
+        });
+
+        // Process each observation in the 'current' section.
+        observations = sessionStorage.getItem("observations").split(",");
+        observations.forEach(function(observation) {
+            if (test_obj[observation]) {
+                data = JSON.parse(sessionStorage.getItem(observation));
+                data.value = test_obj[observation];
+                sessionStorage.setItem(observation, JSON.stringify(data));
+
+                suffix = JSON.parse(sessionStorage.getItem(data.suffix));
+                if ( suffix=== null) {
+                    suffixText = "";
+                }
+                else {
+                    suffixText = " " + suffix.value;
+                }
+
+                labelElem = document.getElementById(observation + "_label");
+                if (labelElem) {
+                    labelElem.innerHTML = data.label;
+                }
+                dataElem = document.getElementById(data.name + "_value");
+                if (dataElem) {
+                    dataElem.innerHTML = data.value + data.unit + suffixText;
+                }
+            }
+        });
+
+        // And the 'current' section's date/time.
+        if (test_obj.dateTime) {
+            sessionStorage.setItem("updateDate", test_obj.dateTime*1000);
+            timeElem = document.getElementById("updateDate");
+            if (timeElem) {
+                timeElem.innerHTML = moment.unix(test_obj.dateTime).utcOffset($utcOffset).format('$gettext("current_date_time")');
             }
         }
-    });
-
-    // And the 'current' section's date/time.
-    if (test_obj.dateTime) {
-        sessionStorage.setItem("updateDate", test_obj.dateTime*1000);
-        timeElem = document.getElementById("updateDate");
-        if (timeElem) {
-            timeElem.innerHTML = moment.unix(test_obj.dateTime).utcOffset($utcOffset).format('$gettext("current_date_time")');
-        }
-    }
+    #end if
 
     ## ToDo - proof of concept, charting MQTT data
     #set page_series_type = $getVar('Extras.page_definition.' + $page + '.series_type', 'single')
@@ -410,10 +412,13 @@ window.addEventListener("load", function (event) {
         updateThisDate(selectedDate * 1000);
     #end if
 
-    #if 'current' in $getVar('$Extras.pages.' + $page)
-        // ToDo
-        MQTTConfig = $Extras.mqtt.enable.lower();
+    #if to_bool($getVar('Extras.pages.' + $page + '.mqtt', True)) and to_bool($getVar('Extras.mqtt.enable', False))
+        MQTTConfig = true;
+    #else 
+        MQTTConfig = false;
+    #end if
 
+    #if 'current' in $getVar('$Extras.pages.' + $page)
         updateCurrentObservations();
     #end if
 
