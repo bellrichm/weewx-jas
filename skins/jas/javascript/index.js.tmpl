@@ -81,14 +81,6 @@ function setYear(year) {
 }
 
 window.addEventListener("load", function (event) {
-  ## ToDo - proof of concept, charting MQTT data
-  #for observation in $observations
-    #if "mqtt" in $observations[$observation]["aggregate_types"]
-      #set mqtt_data = $observation + "MQTT"
-      sessionStorage.setItem('$mqtt_data', JSON.stringify([]));
-    #end if
-  #end for
-
   var list = document.getElementById("dropdownYearMenu");
   list.innerHTML = "";
   list.currentSelection = null;
