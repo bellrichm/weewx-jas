@@ -31,6 +31,12 @@ function onConnect() {
         logIt("In onConnect");
     #end if    
     client.subscribe("$Extras.mqtt.topic");
+    ## ToDo -log or display on GUI
+    #set disconnect_seconds = $getVar('$Extras.mqtt.disconnect', None)
+    #if $disconnect_seconds
+        #set disconnect_milliseconds = int($disconnect_seconds) * 1000
+        setTimeout(MQTTDisconnect, $disconnect_milliseconds);
+    #end if
 }
 
 function onConnected(reconn ,url){
