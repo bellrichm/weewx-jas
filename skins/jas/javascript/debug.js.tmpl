@@ -1,19 +1,8 @@
 ##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
-window.addEventListener("load", function (event) {
-  ## ToDo - proof of concept, charting MQTT data
-  #for observation in $observations
-    #if "mqtt" in $observations[$observation]["aggregate_types"]
-      #set mqtt_data = $observation + "MQTT"
-      if (!sessionStorage.getItem('$mqtt_data')) {
-        sessionStorage.setItem('$mqtt_data', JSON.stringify([]));
-      }
-    #end if
-  #end for
-});
-
-#set global interval_name_global = "mqtt"
+## simulate day page
+#set global interval_name_global = "day"
 #set global year_global = None
 #set global month_global = None
 #set global interval_long_name_global = $interval_name_global + "_" 

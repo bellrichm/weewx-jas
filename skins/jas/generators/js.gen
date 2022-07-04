@@ -10,6 +10,7 @@
 #set $skin_data_binding = $getVar("$Extras.data_binding", 'wx_binding')
 
 var pageCharts = [];
+var mqttData = {}
 
 // Update the chart's data
 function updateCharts() {
@@ -111,41 +112,33 @@ function handleMQTT(message) {
     }
 
     ## ToDo - proof of concept, charting MQTT data
+    #set page_series_type = $getVar('Extras.page_definition.' + $page + '.series_type', 'single')
     #for $chart in $getVar('$Extras.chart_definitions')
-        #for $data in $getVar('$Extras.chart_definitions.' + $chart + '.series')
-                #set weewx_options = $getVar('$Extras.chart_definitions.' + $chart + '.series.' + $data + '.weewx', None)
-                #if $weewx_options
-                    #set aggregation_type = $getVar('$Extras.chart_definitions.' + $chart + '.series.' + $data + '.weewx.aggregate_type', None)
-                    #if $aggregation_type == 'mqtt'
-                        // update any charts that get updated with MQTT data.
-                        #set $data_name = $data + 'MQTT'
-                        $data_name = JSON.parse(sessionStorage.getItem('$data_name'));
-                        #set $line = "if (" + $data_name + ".length >= 1800) {" + $data_name + ".shift();}"
+        #set chart_series_type = $getVar('Extras.pages.' + $page + '.' + chart + '.series_type', $page_series_type)
+        #if $chart_series_type == 'mqtt'
+            #set $option_line = $chart + 'chart.setOption({\n'
+            #set $option_line += '            series: [\n'
+            #for $observation in $getVar('$Extras.chart_definitions.' + $chart + '.series')
+                if (test_obj['$observation']) {
+                    #set line = "if (!mqttData['" + $observation + "'])"
+                    $line
+                    {
+                        #set $line = "mqttData['" + $observation + "'] = []"
                         $line
-                        #set $line = $data_name +".push([parseInt(test_obj.dateTime) * 1000, parseFloat(test_obj." + $data + ")]);"
-                        $line
-                        sessionStorage.setItem('$data_name', JSON.stringify($data_name));
-                    #end if
-                #end if
-        #end for
-    #end for
-
-    #if $interval_name_global == "mqtt"
-        #for $section in $getVar('Extras.pages.' + $page)
-            ## todo - cleanup to not use continue
-            #if $section not in $getVar('$Extras.chart_definitions')
-                #continue
-            #end if
-            #set $line = $section + 'chart.setOption({'
-            $line
-                series: [
-            #for $data in $getVar('$Extras.chart_definitions.' + $section + '.series')
-                #set $data_name = $data + "MQTT"
-                    {data: $data_name},
+                    }    
+                    
+                    #set $line = "if (mqttData['" + $observation + "'].length >= 1800) {mqttData['" + $observation + "'].shift();}"
+                    $line
+                    #set $line = "mqttData['" + $observation + "'].push([parseInt(test_obj.dateTime) * 1000, parseFloat(test_obj." + $observation + ")]);"
+                    $line
+                    
+                    #set $option_line += "          {data: mqttData['" + $observation + "']},\n"                    
+                }    
             #end for
-                ]});
-        #end for
-    #end if
+            #set $option_line += '                ]});\n'
+            $option_line
+        #end if
+    #end for
 }
 
 #if to_bool($getVar('$Extras.pages.' + $page + '.reload', False))
@@ -459,4 +452,4 @@ window.addEventListener('message',
 
 #set elapsed_time = time.time() - $start_time
 #set log_msg = "Generated " + $filename + " in " + str($elapsed_time)
-$loginf($log_msg)
+##$loginf($log_msg)
