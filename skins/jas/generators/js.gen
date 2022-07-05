@@ -412,7 +412,7 @@ window.addEventListener("load", function (event) {
         updateThisDate(selectedDate * 1000);
     #end if
 
-    #if to_bool($getVar('Extras.pages.' + $page + '.mqtt', True)) and to_bool($getVar('Extras.mqtt.enable', False))
+    #if (to_bool($getVar('Extras.pages.' + $page + '.mqtt', True)) and to_bool($getVar('Extras.mqtt.enable', False)) or $page == 'debug' )
         MQTTConfig = true;
     #else 
         MQTTConfig = false;
