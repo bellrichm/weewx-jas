@@ -12,7 +12,7 @@ except ImportError:
 import configobj
 from weecfg.extension import ExtensionInstaller
 
-VERSION = "0.2.1"
+VERSION = "0.2.2-rc02"
 
 EXTENSION_CONFIG = """
 [StdReport]
@@ -213,6 +213,7 @@ class JASInstaller(ExtensionInstaller):
                    ('skins/jas/data', ['skins/jas/data/current.js.tmpl',
                                        'skins/jas/data/alltime.js.tmpl',
                                        'skins/jas/data/forecast.js.tmpl',
+                                       'skins/jas/data/debug.js.tmpl',
                                        'skins/jas/data/day.js.tmpl',
                                        'skins/jas/data/last7days.js.tmpl',
                                        'skins/jas/data/last24hours.js.tmpl',
