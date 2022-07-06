@@ -695,7 +695,7 @@ class JAS(SearchList):
                 chart2 += "#set global series_observations_global = None\n"
                 chart2 += "$series_observations_global\n"
 
-                chart_final += chart2
+        chart_final += chart2
 
         return chart_final
 
