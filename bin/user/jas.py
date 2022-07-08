@@ -248,8 +248,10 @@ class JAS(SearchList):
             logdbg(msg)
 
     def _get_last24hours(self, data_binding=None):
-        start_timestamp = self.timespan.stop - 86400
-        last24hours = TimespanBinder(TimeSpan(start_timestamp, self.timespan.stop),
+        dbm = self.db_lookup(data_binding=data_binding)
+        end_ts = dbm.lastGoodStamp()
+        start_timestamp = end_ts - 86400
+        last24hours = TimespanBinder(TimeSpan(start_timestamp, end_ts),
                                      self.db_lookup,
                                      data_binding=data_binding,
                                      context='last24hours',
@@ -269,9 +271,11 @@ class JAS(SearchList):
         return  self._get_last_n_days(366, data_binding=data_binding)
 
     def _get_last_n_days(self, days, data_binding=None):
-        start_date = datetime.date.fromtimestamp(self.timespan.stop) - datetime.timedelta(days=days)
+        dbm = self.db_lookup(data_binding=data_binding)
+        end_ts = dbm.lastGoodStamp()
+        start_date = datetime.date.fromtimestamp(end_ts) - datetime.timedelta(days=days)
         start_timestamp = time.mktime(start_date.timetuple())
-        last_n_days = TimespanBinder(TimeSpan(start_timestamp, self.timespan.stop),
+        last_n_days = TimespanBinder(TimeSpan(start_timestamp, end_ts),
                                      self.db_lookup,
                                      data_binding = data_binding,
                                      context='last_n_hours',
