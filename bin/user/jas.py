@@ -67,6 +67,21 @@ This search list extension provides the following tags:
         speed_ranges: A list of lists. Each primary list is a speed range that contains a list
           of the counts of that speed for each compass ordinal.
 
+
+https://groups.google.com/g/weewx-development/c/QRHGtzpKV_4/m/lrNSWxNhAwAJ
+The member function get_extension_list() will be called for each template. 
+So, if you have 10 templates, it will get called 10 times. 
+If there is an expensive calculation that does not depend on the timespan that needs to be done,
+then it is best done in the initializer ('__init__') of your extension.
+
+There are 3 runtime options for extensions:
+1. The initializer. Called once per skin.
+2. In  get_extension_list(). Called once per template.
+3. In the extension tag. Gets called when a '$' tag matches your extension tag.
+
+In general, you want expensive calculations to be done farther up this list. 
+But, if they depend on things only known farther down the list, in particular, a timespan, then you're out of luck.
+
 """
 
 import copy
@@ -211,10 +226,10 @@ class JAS(SearchList):
                                  'forecasts': self.data_forecast,
                                  'genCharts': self._gen_charts,
                                  'getUnitsLabels': self._get_units_labels,
-                                 'last24hours': self._get_last24hours(),
-                                 'last7days': self._get_last_n_days(7),
-                                 'last31days': self._get_last_n_days(31),
-                                 'last366days': self._get_last_n_days(366),
+                                 'last24hours': self._get_last24hours,
+                                 'last7days': self._get_last_7_days,
+                                 'last31days': self._get_last_31_days,
+                                 'last366days': self._get_last_366_days,
                                  'logdbg': logdbg,
                                  'loginf': loginf,
                                  'logerr': logerr,
@@ -232,21 +247,33 @@ class JAS(SearchList):
         if self.skin_debug:
             logdbg(msg)
 
-    def _get_last24hours(self):
+    def _get_last24hours(self, data_binding=None):
         start_timestamp = self.timespan.stop - 86400
         last24hours = TimespanBinder(TimeSpan(start_timestamp, self.timespan.stop),
                                      self.db_lookup,
+                                     data_binding=data_binding,
                                      context='last24hours',
                                      formatter=self.generator.formatter,
                                      converter=self.generator.converter)
 
         return last24hours
 
-    def _get_last_n_days(self, days):
+
+    def _get_last_7_days(self, data_binding=None):
+        return  self._get_last_n_days(7, data_binding=data_binding)
+
+    def _get_last_31_days(self, data_binding=None):
+        return  self._get_last_n_days(31, data_binding=data_binding)        
+
+    def _get_last_366_days(self, data_binding=None):
+        return  self._get_last_n_days(366, data_binding=data_binding)
+
+    def _get_last_n_days(self, days, data_binding=None):
         start_date = datetime.date.fromtimestamp(self.timespan.stop) - datetime.timedelta(days=days)
         start_timestamp = time.mktime(start_date.timetuple())
         last_n_days = TimespanBinder(TimeSpan(start_timestamp, self.timespan.stop),
                                      self.db_lookup,
+                                     data_binding = data_binding,
                                      context='last_n_hours',
                                      formatter=self.generator.formatter,
                                      converter=self.generator.converter)
