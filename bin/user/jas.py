@@ -289,9 +289,9 @@ class JAS(SearchList):
         # For now, return label for first observations unit. ToDo - possibly change to return all?
         return get_label_string(self.generator.formatter, self.generator.converter, units[0], plural=False)
 
-    def _get_wind_compass(self, start_offset=86400, end_offset=0):
+    def _get_wind_compass(self, data_binding=None, start_offset=86400, end_offset=0):
         # default is the last 24 hrs
-        db_manager = self.db_lookup()
+        db_manager = self.db_lookup(data_binding=data_binding)
 
         wind_ranges = {}
         wind_ranges['mile_per_hour'] = [1, 4, 8, 13, 19, 25, 32]
