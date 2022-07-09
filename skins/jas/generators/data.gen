@@ -68,12 +68,12 @@
 #if $getVar('Extras.pages.' + $page_definition_name_global + '.windRose',None) is not None
     ## ToDo - wind data_binding?
     #set $data_binding = $getVar('Extras.pages.' + $page_definition_name_global + '.data_binding', $getVar("$Extras.data_binding", 'wx_binding'))
-    #set avg, max, wind_directions, wind_range_legend = $windCompass(data_binding=$data_binding)
+    #set avg, max, wind_directions, wind_range_legend = $windCompass(data_binding=$data_binding, start_time=$interval_start_seconds_global, end_time=$interval_end_seconds_global)
     #set line = "var windRangeLegend = " + $wind_range_legend
     $line;
     #set i = 0
     #for $wind in $wind_directions
-        #set line = $interval_name_global + "_avg.windCompassRange"  + str($i) + "_" + $data_binding + " = "  + str($wind) +  ";"
+        #set line = $interval_long_name_global + "avg.windCompassRange"  + str($i) + "_" + $data_binding + " = "  + str($wind) +  ";"
         $line
         #set $i += 1
     #end for

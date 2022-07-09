@@ -69,8 +69,8 @@ This search list extension provides the following tags:
 
 
 https://groups.google.com/g/weewx-development/c/QRHGtzpKV_4/m/lrNSWxNhAwAJ
-The member function get_extension_list() will be called for each template. 
-So, if you have 10 templates, it will get called 10 times. 
+The member function get_extension_list() will be called for each template.
+So, if you have 10 templates, it will get called 10 times.
 If there is an expensive calculation that does not depend on the timespan that needs to be done,
 then it is best done in the initializer ('__init__') of your extension.
 
@@ -79,7 +79,7 @@ There are 3 runtime options for extensions:
 2. In  get_extension_list(). Called once per template.
 3. In the extension tag. Gets called when a '$' tag matches your extension tag.
 
-In general, you want expensive calculations to be done farther up this list. 
+In general, you want expensive calculations to be done farther up this list.
 But, if they depend on things only known farther down the list, in particular, a timespan, then you're out of luck.
 
 """
@@ -90,8 +90,6 @@ import errno
 import os
 import time
 import json
-
-from io import StringIO
 
 import configobj
 
@@ -265,7 +263,7 @@ class JAS(SearchList):
         return  self._get_last_n_days(7, data_binding=data_binding)
 
     def _get_last_31_days(self, data_binding=None):
-        return  self._get_last_n_days(31, data_binding=data_binding)        
+        return  self._get_last_n_days(31, data_binding=data_binding)
 
     def _get_last_366_days(self, data_binding=None):
         return  self._get_last_n_days(366, data_binding=data_binding)
@@ -289,9 +287,20 @@ class JAS(SearchList):
         # For now, return label for first observations unit. ToDo - possibly change to return all?
         return get_label_string(self.generator.formatter, self.generator.converter, units[0], plural=False)
 
-    def _get_wind_compass(self, data_binding=None, start_offset=86400, end_offset=0):
-        # default is the last 24 hrs
+    def _get_wind_compass(self, data_binding=None, start_time=None, end_time=None):
         db_manager = self.db_lookup(data_binding=data_binding)
+        # default is the last 24 hrs
+        if not end_time:
+            end_ts = db_manager.lastGoodStamp()
+        else:
+            end_ts = end_time
+
+        if not start_time:
+            start_ts = end_ts - 86400
+        else:
+            start_ts = start_time
+
+        data_timespan = TimeSpan(start_ts, end_ts)
 
         wind_ranges = {}
         wind_ranges['mile_per_hour'] = [1, 4, 8, 13, 19, 25, 32]
@@ -307,8 +316,7 @@ class JAS(SearchList):
         # current day calculation
         #day_ts = int(timespan.stop - timespan.stop % age)
 
-        data_timespan = TimeSpan(
-            self.timespan.stop - start_offset, self.timespan.stop - end_offset)
+
         start_vec_t1, stop_vec_t1, wind_speed_data_raw = weewx.xtypes.get_series(  # pylint: disable=unused-variable
             'windSpeed', data_timespan, db_manager)
         start_vec_t2, stop_vec_t2, wind_dir_data = weewx.xtypes.get_series(  # pylint: disable=unused-variable
@@ -336,7 +344,7 @@ class JAS(SearchList):
         i = 0
         wind_speed_data = self.generator.converter.convert(wind_speed_data_raw)
         for wind_speed in wind_speed_data[0]:
-            if wind_speed > 0:
+            if wind_speed and wind_speed > 0:
                 wind_unit = wind_speed_data[1]
                 ordinate_name = self.generator.formatter.to_ordinal_compass(
                     (wind_dir_data[0][i], wind_dir_data[1], wind_dir_data[2]))
@@ -523,7 +531,7 @@ class JAS(SearchList):
 
     def _get_observations(self):
         # todo - rename now has 'side effect' of returning aggregate_types
-        
+
         observations = {}
         aggregate_types = {}
         skin_data_binding = self.skin_dict['Extras'].get('data_binding','wx_binding')
@@ -577,10 +585,11 @@ class JAS(SearchList):
                     continue
                 if key == 'series':
                     chart2 += indent + "series: [\n"
-                    
+
                     if series_type == 'comparison':
                         obs = next(iter(value))
-                        for year in range(int(self.skin_dict['Extras']['pages'][page]['start']), int(self.skin_dict['Extras']['pages'][page]['end']) + 1):
+                        for year in range(int(self.skin_dict['Extras']['pages'][page]['start']), \
+                                          int(self.skin_dict['Extras']['pages'][page]['end']) + 1):
                             chart2 += indent + " {\n"
                             chart2 += "    name: '" + str(year) + "',\n"
                             chart2 = self._iterdict(indent + '  ', page, chart, chart2, series_type, interval, value[obs])
@@ -588,14 +597,15 @@ class JAS(SearchList):
                     else:
                         for obs in value:
                             aggregate_type = self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs]['weewx']['aggregate_type']
-                            aggregate_interval = self.skin_dict['Extras']['page_definition'][page].get('aggregate_interval', {}).get(aggregate_type, 'none')
+                            aggregate_interval = self.skin_dict['Extras']['page_definition'][page].get('aggregate_interval', {}) \
+                                                .get(aggregate_type, 'none')
 
                             # set the aggregate_interval at the beginning of the chart definition, so it can be used in the chart
                             # Note, this means the last observation's aggregate type will be used to determine the aggregate interval
                             if series_type == 'multiple':
                                 chart2 = "#set global aggregate_interval_global = 'aggregate_interval_multiyear" + "'\n" + chart2
                             elif series_type == 'mqtt':
-                                chart2 = "#set global aggregate_interval_global = 'aggregate_interval_mqtt" + "'\n" + chart2                                
+                                chart2 = "#set global aggregate_interval_global = 'aggregate_interval_mqtt" + "'\n" + chart2
                             else:
                                 chart2 = "#set global aggregate_interval_global = 'aggregate_interval_" + aggregate_interval + "'\n" + chart2
 
@@ -660,8 +670,8 @@ class JAS(SearchList):
 
                 chart_def = copy.deepcopy(self.chart_defs[chart])
                 if 'polar' not in chart_def:
-                    weeutil.config.conditional_merge(chart_def, self.skin_dict['Extras']['chart_defaults']['series_type'].get(series_type, {}))                    
-                    
+                    weeutil.config.conditional_merge(chart_def, self.skin_dict['Extras']['chart_defaults']['series_type'].get(series_type, {}))
+
                 chart2 += "#set global series_observations_global = []\n"
 
                 # for now, do not support overriding chart options by page
@@ -685,13 +695,15 @@ class JAS(SearchList):
                     chart2 += "pageChart.option = null;\n"
                 elif series_type == 'multiple':
                     chart2 += "option = {\n"
-                    chart2 += "  series: [\n"    
+                    chart2 += "  series: [\n"
                     for obs in chart_def['series']:
                         aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
                         chart2 += "    {name: " + chart_def['series'][obs]['name'] + ",\n"
-                        chart2 += "     data: [\n" 
-                        for year in range(int(self.skin_dict['Extras']['pages'][page]['start']), int(self.skin_dict['Extras']['pages'][page]['end']) + 1):
-                            chart2 += "            ...year" + str(year) + "_" + aggregate_type + "." + chart_def['series'][obs]['weewx']['observation'] + "_"  + data_binding + ",\n"
+                        chart2 += "     data: [\n"
+                        for year in range(int(self.skin_dict['Extras']['pages'][page]['start']), \
+                                          int(self.skin_dict['Extras']['pages'][page]['end']) + 1):
+                            chart2 += "            ...year" + str(year) + "_" + aggregate_type \
+                                      + "." + chart_def['series'][obs]['weewx']['observation'] + "_"  + data_binding + ",\n"
                         chart2 += "          ]},\n"
                     chart2 += "]};\n"
                     chart2 += "pageChart.option = option;\n"

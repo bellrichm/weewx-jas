@@ -4,8 +4,9 @@
 ## Simulate 'day' interval
 #set global interval_name_global = 'day'
 #set global page_definition_name_global = 'day'
-
 #set global interval_long_name_global = $interval_name_global + "_" 
+#set global interval_start_seconds_global = $day.start.raw
+#set global interval_end_seconds_global = $day.end.raw
 #if $getVar("$Extras.pages." + $page, False)
     /* jshint esversion: 6 */
     #include 'generators/startEndActive.gen'
@@ -14,3 +15,5 @@
 #set global interval_name_global = None
 #set global page_definition_name_global = None
 #set global interval_long_name_global = None
+#set global interval_start_seconds_global = None
+#set global interval_end_seconds_global = None
