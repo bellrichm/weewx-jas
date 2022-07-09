@@ -2,6 +2,7 @@
 ##    See the file LICENSE.txt for your rights.
 
 #import time
+#from weeutil.weeutil import to_bool
 #set $start_time = time.time()
 #*
 Ideally this would be a routine that takes a parameter, interval. But, with Cheetah
