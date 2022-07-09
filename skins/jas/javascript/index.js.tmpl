@@ -1,7 +1,7 @@
 ##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
   
-## ToDo thiscould be cleaned up
+## ToDo: thiscould be cleaned up
 function setIframeSrc(id, url) {
   // Set current page as the active page.
   currentPage = sessionStorage.getItem('currentPage');
@@ -15,7 +15,7 @@ function setIframeSrc(id, url) {
   document.getElementById(url).classList.add("active");
   document.getElementById(id).src = url;
 
-  ## ToDo - better way/location?
+  ## ToDo: better way/location?
   // When on the debug iframe, add the connect/disconnect buttons to the header.
   // The need to be on the parent page because the MQTT connection is on the parent. 
   if (url == 'pages/debug.html') {
@@ -104,7 +104,7 @@ window.addEventListener("load", function (event) {
     var li = document.createElement("li");
     var link = document.createElement("a"); 
     link.classList.add("dropdown-item");
-    ## ToDo - better id?          
+    ## ToDo: better id?          
     link.id = year;
 
     var text = document.createTextNode(year);
@@ -123,7 +123,7 @@ window.addEventListener("load", function (event) {
 
   if (sessionStorage.getItem('currentPage') === null) {
       sessionStorage.setItem('currentPage', '');
-      ## ToDo - configure landing page
+      ## ToDo: configure landing page
       setIframeSrc('child-iframe', 'pages/last24hours.html');
   }
   else
@@ -131,8 +131,8 @@ window.addEventListener("load", function (event) {
       setIframeSrc('child-iframe', sessionStorage.getItem('currentPage'));  
   }
 
-  ## ToDo - put here for now, only include if necessary
-  ## ToDo - convert to boolean
+  ## ToDo: put here for now, only include if necessary
+  ## ToDo: convert to boolean
   #if $Extras.mqtt.enable.lower() == 'true'
     MQTTConnect(); 
   #end if

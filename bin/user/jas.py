@@ -10,7 +10,7 @@ This search list extension provides the following tags:
   $forecasts
     Returns:
       A list of dictionaries containing forecastdata.
-      ToDo - determine and document what forecast data is returned.
+      ToDo: determine and document what forecast data is returned.
 
   $genCharts
     Arguments:
@@ -530,7 +530,7 @@ class JAS(SearchList):
         return False
 
     def _get_observations(self):
-        # todo - rename now has 'side effect' of returning aggregate_types
+        # ToDo: rename now has 'side effect' of returning aggregate_types
 
         observations = {}
         aggregate_types = {}

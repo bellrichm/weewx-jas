@@ -8,7 +8,7 @@
 
 ## The 'start' and 'end' tags ignore/do not use the '$data_binding' on the 'time period'.
 ## This makes sense because a DB call is not needed.
-## ToDo - verify: Either reading code or ask.
+## ToDo: - verify: Either reading code or ask.
 ##include = "var " + $interval_long_name_global + "startDate = moment('$" + $interval_name_global  + "($data_binding=\"wx_binding\").start.format(\"%Y-%m-%dT%H:%M:%S\")').utcOffset($utcOffset);\n"
 ##include source = "var " + $interval_long_name_global + "endDate = moment('$" + $interval_name_global + "($data_binding='wx_binding').end.format(\"%Y-%m-%dT%H:%M:%S\")').utcOffset($utcOffset);\n"
 ##include source = "var " + $interval_long_name_global + "startTimestamp = $" + $interval_name_global + "($data_binding='wx_binding').start.raw * 1000;\n"

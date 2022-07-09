@@ -39,7 +39,7 @@
         </div>
     </div>
 </div>
-        ## ToDo - move the cdn urls
+        ## ToDo: - move the cdn urls
         <script src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js" type="text/javascript"></script>
         <script src="https://cdn.jsdelivr.net/gh/alumuko/vanilla-datetimerange-picker@latest/dist/vanilla-datetimerange-picker.js"></script>
 

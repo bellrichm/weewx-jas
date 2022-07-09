@@ -7,7 +7,7 @@
                 <h5 class="h5-responsive indigo-text">
                   $gettext("minmax.title")
                 </h5>        
-                ## todo move to style sheet, resize observation table to match?
+                ## ToDo: move to style sheet, resize observation table to match?
                 <table class="table table-sm" style="font-size:80%"">
                   <tbody>
                     #for observation in $Extras.minmax.observations

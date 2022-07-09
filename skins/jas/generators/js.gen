@@ -113,7 +113,7 @@ function handleMQTT(message) {
         }
     #end if
 
-    ## ToDo - proof of concept, charting MQTT data
+    ## Proof of concept, charting MQTT data
     #set page_series_type = $getVar('Extras.page_definition.' + $page + '.series_type', 'single')
     #for $chart in $getVar('$Extras.chart_definitions')
         #set chart_series_type = $getVar('Extras.pages.' + $page + '.' + chart + '.series_type', $page_series_type)
@@ -166,7 +166,7 @@ function handleMQTT(message) {
         dateRangePicker2.setStartDate($startDate);
         dateRangePicker2.setEndDate($endDate);
         #for $section in $getVar('Extras.pages.' + $page)
-            ## todo - cleanup to not use continue
+            ## ToDo: cleanup to not use continue
             #if $section not in $getVar('$Extras.chart_definitions')
                 #continue
             #end if
@@ -188,8 +188,8 @@ function handleMQTT(message) {
             document.getElementById("$Extras.current.observation").innerHTML = header.value + header.unit;
         #end if
 
-        // ToDo - cleanup, perhaps put suffix data into an array and store that
-        // ToDo - do a bit more in cheetah?
+        // ToDo: cleanup, perhaps put suffix data into an array and store that
+        // ToDo: do a bit more in cheetah?
         suffixes = [];
         for (var [suffix, data] of current.suffixes) {
             suffixes.push(suffix);
@@ -199,8 +199,8 @@ function handleMQTT(message) {
         }
         sessionStorage.setItem("suffixes", suffixes.join(","));
 
-        // ToDo - cleanup, perhaps put observation data into an array and store that
-        // ToDo - do a bit more in cheetah?
+        // ToDo: cleanup, perhaps put observation data into an array and store that
+        // ToDo: do a bit more in cheetah?
         observations = [];
         for (var [observation, data] of current.observations) {
             observations.push(observation);
@@ -232,7 +232,7 @@ function handleMQTT(message) {
     #set $minmax_data_binding = $getVar("$Extras.minmax.data_binding", $skin_data_binding)
     // Update the min/max observations
     function updateMinMax(startTimestamp, endTimestamp) {
-        ## todo - optimize to only get index once for all observations?
+        ## ToDo: optimize to only get index once for all observations?
         #for $observation in $getVar('Extras.minmax.observations')
             #set $data_binding = $getVar("$Extras.minmax.observations." + $observation + ".data_binding", minmax_data_binding)
             #set min_datetime_array = $interval_name_global + "_min_" + $observation + "_dateTime";
@@ -321,7 +321,7 @@ function handleMQTT(message) {
 #end if
 
 window.addEventListener("load", function (event) {
-    ## Todo - create functions for code in the if statements
+    ## Todo: create functions for code in the if statements
     // Tell the parent page the iframe size
     let message = { height: document.body.scrollHeight, width: document.body.scrollWidth };
     // window.top refers to parent window
@@ -353,7 +353,7 @@ window.addEventListener("load", function (event) {
                             function(start, end, label) {
                                 // Update all charts with selected date/time and min/max values
                                 #for $section in $getVar('Extras.pages.' + $page)
-                                    ## todo - cleanup to not use continue
+                                    ## ToDo: cleanup to not use continue
                                     ##if not isinstance($Extras.pages[$page][$section],dict)
                                     #if $section not in $getVar('$Extras.chart_definitions')
                                         #continue

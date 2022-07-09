@@ -10,7 +10,7 @@
     #set aggregate_interval = $getVar('Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval.' + $aggregate_type)
     ## The 'start' and 'end' tags ignore/do not use the '$data_binding' on the 'time period'.
     ## This makes sense because a DB call is not needed.
-    ## ToDo - verify: Either reading code or ask.
+    ## ToDo: verify: Either reading code or ask.
     #if $aggregate_interval == 'day'
         #set source = "#set global $endTimestamp = ((($" + $interval_name_global + ".end.raw // 86400) * 86400)  - ($utcOffset * 60)) * 1000;\n"
         ##set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding='wx_binding').end.raw // 86400) * 86400)  - ($utcOffset * 60)) * 1000;\n"
@@ -63,10 +63,9 @@
     #end for
 #end for
 
-## ToDo - wind rose proof of concept
+## Proof of concept - wind rose
 ## Create data for wind rose chart
 #if $getVar('Extras.pages.' + $page_definition_name_global + '.windRose',None) is not None
-    ## ToDo - wind data_binding?
     #set $data_binding = $getVar('Extras.pages.' + $page_definition_name_global + '.data_binding', $getVar("$Extras.data_binding", 'wx_binding'))
     #set avg, max, wind_directions, wind_range_legend = $windCompass(data_binding=$data_binding, start_time=$interval_start_seconds_global, end_time=$interval_end_seconds_global)
     #set line = "var windRangeLegend = " + $wind_range_legend

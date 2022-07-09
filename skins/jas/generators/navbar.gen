@@ -1,7 +1,7 @@
 ##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
-## todo move?
+## ToDo: move?
 <style>
 .pre-scrollable {
   max-height: 340px;
@@ -22,7 +22,7 @@
         <ul class="navbar-nav me-auto mb-2 mb-md-0">
           ## Navigation for the congigured 'pages'
           #for $page_data in $getVar('Extras.pages')
-            ## todo - cleanup so more robust check, because string cpould be 'true', etc
+            ## ToDo: cleanup so more robust check, because string cpould be 'true', etc
             #set in_navbar = $getVar('Extras.pages.' + $page_data + '.in_navbar', 'True')
             #if in_navbar == 'True'
               <li class="nav-item">
