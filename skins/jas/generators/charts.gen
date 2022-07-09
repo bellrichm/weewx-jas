@@ -8,7 +8,7 @@
 #include source=$charts
 
 #set elapsed_time = time.time() - $start_time
-#set log_msg = "Generated " + $filename + " in " + str($elapsed_time)
-#if $getVar("$Extras.log_times", True)
+#set log_msg = "Generated " + $HTML_ROOT + "/" + $filename + " in " + str($elapsed_time)
+#if to_bool($getVar("$Extras.log_times", True))
     $logdbg($log_msg)
 #end if
