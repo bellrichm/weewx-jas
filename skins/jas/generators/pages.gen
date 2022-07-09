@@ -121,4 +121,6 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
 
 #set elapsed_time = time.time() - $start_time
 #set log_msg = "Generated " + $filename + " in " + str($elapsed_time)
-##$loginf($log_msg)
+#if $getVar("$Extras.log_times", True)
+  $logdbg($log_msg)
+#end if
