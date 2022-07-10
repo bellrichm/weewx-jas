@@ -524,7 +524,7 @@ class JAS(SearchList):
     def _check_forecast(self):
         pages = self.skin_dict.get('Extras', {}).get('pages', {})
         for page in pages:
-            if 'forecast' in self.skin_dict['Extras']['pages'][page].sections:
+            if self.skin_dict['Extras']['pages'][page].get('enable', True) and 'forecast' in self.skin_dict['Extras']['pages'][page].sections:
                 return True
 
         return False
@@ -539,6 +539,8 @@ class JAS(SearchList):
 
         pages =  self.skin_dict.get('Extras', {}).get('pages', {})
         for page in pages:
+            if not self.skin_dict['Extras']['pages'][page].get('enable', True):
+                continue
             for chart in pages[page].sections:
                 if chart in charts:
                     chart_data_binding = charts[chart].get('weewx', {}).get('data_binding', skin_data_binding)

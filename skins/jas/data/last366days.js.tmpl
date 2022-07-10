@@ -1,12 +1,13 @@
 ##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
+#from weeutil.weeutil import to_bool
 #set global interval_name_global = 'last366days'
 #set global page_definition_name_global = 'last366days'
 #set global interval_long_name_global = $interval_name_global + "_" 
 #set global interval_start_seconds_global = $last366days.start.raw
 #set global interval_end_seconds_global = $last366days.end.raw
-#if $getVar("$Extras.pages." + $page, False)
+#if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
     /* jshint esversion: 6 */
     #include 'generators/startEndActive.gen'
     #include 'generators/data.gen'
