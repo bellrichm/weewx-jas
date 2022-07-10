@@ -1,6 +1,7 @@
 ##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
   
+#from weeutil.weeutil import to_bool  
 ## ToDo: thiscould be cleaned up
 function setIframeSrc(id, url) {
   // Set current page as the active page.
@@ -132,8 +133,7 @@ window.addEventListener("load", function (event) {
   }
 
   ## ToDo: put here for now, only include if necessary
-  ## ToDo: convert to boolean
-  #if $Extras.mqtt.enable.lower() == 'true'
+  #if to_bool($Extras.mqtt.get('enable', False))
     MQTTConnect(); 
   #end if
 });
