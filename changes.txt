@@ -24,3 +24,14 @@ Enhancements:
 - Improve y-axis range.
 - Start of a debug page.
 - Update charts with MQTT data - proof of concept.
+
+V0.2.2-rc01
+Fixes:
+- Observations in multiple charts can have different data bindings.
+- Fixed bug that caused the same chart to be defined multiple times.
+- Use data binding of the observation to determine its interval.
+Enhancements:
+- Allow pages to be enabled/disabled.
+- Wind rose proof of concept.
+- Added legends.
+- Log generation times.
