@@ -158,7 +158,12 @@ EXTENSION_CONFIG = """
                     zoomControl = True
                     [[[[[[minmax]]]]]]
                     [[[[[[outTempMinMax]]]]]]
-                    [[[[[[rain]]]]]]     
+                    [[[[[[rain]]]]]]   
+                [[[[[debug]]]]]   
+                    enable = false
+                    [[[[[[outTemp]]]]]]   
+                        series_type = mqtt  
+                    [[[[[[barometer]]]]]]                   
 """
 
 EXTENSION_DICT = configobj.ConfigObj(StringIO(EXTENSION_CONFIG))
