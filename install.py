@@ -145,6 +145,7 @@ EXTENSION_CONFIG = """
                     [[[[[[wind]]]]]]  
                     [[[[[[rain]]]]]]                        
                [[[[[archive-month]]]]]
+                    enable = false
                     in_navbar = false
                     zoomControl = True
                     [[[[[[minmax]]]]]]
@@ -152,6 +153,7 @@ EXTENSION_CONFIG = """
                     [[[[[[outTempMinMax]]]]]]    
                     [[[[[[rain]]]]]]      
                 [[[[[archive-year]]]]]   
+                    enable = false
                     in_navbar = false
                     zoomControl = True
                     [[[[[[minmax]]]]]]
