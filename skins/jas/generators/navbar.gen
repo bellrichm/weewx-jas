@@ -34,30 +34,35 @@
             #end if
           #end for
           ## Year dropdown
-          <li class="nav-item dropdown">
-          #if $year_global is not None
-            <a class="nav-link dropdown-toggle active" aria-current="page" href="#" id="dropdownYear" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          #else
-            <a class="nav-link dropdown-toggle" href="#" id="dropdownYear" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          #end if
-              $gettext('year_dropdown-label')
-            </a>
-            <div class="dropdown-menu" aria-labelledby="dropdownYear" id="dropdownYearMenu">
-          </li>
-          ## Month dropdown
-          <li class="nav-item dropdown">
-            <div class="dropdown">
-            #if $month_global is not None
-              <a class="nav-link dropdown-toggle active" aria-current="page" href="#" role="button" id="dropdownYearMonth" data-bs-toggle="dropdown" aria-expanded="false">
+          #if ($getVar("$Extras.pages.archive-year", None) and to_bool($getVar("$Extras.pages.archive-year.enable", True))) \
+            or ($getVar("$Extras.pages.archive-month", None) and to_bool($getVar("$Extras.pages.archive-month.enable", True)))
+            <li class="nav-item dropdown">
+            #if $year_global is not None
+              <a class="nav-link dropdown-toggle active" aria-current="page" href="#" id="dropdownYear" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             #else
-              <a class="nav-link dropdown-toggle" href="#" role="button" id="dropdownYearMonth" data-bs-toggle="dropdown" aria-expanded="false">
-             #end if
-              $gettext('yearMonth_dropdown-label')
+              <a class="nav-link dropdown-toggle" href="#" id="dropdownYear" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            #end if
+                $gettext('year_dropdown-label')
               </a>
-              <ul class="dropdown-menu pre-scrollable" aria-labelledby="dropdownYearMonth" id="dropdownYearMonthMenu">
-              </ul>
-            </div>
-          </li>
+              <div class="dropdown-menu" aria-labelledby="dropdownYear" id="dropdownYearMenu">
+            </li>
+          #end if
+          ## Month dropdown
+          #if $getVar("$Extras.pages.archive-month", None) and to_bool($getVar("$Extras.pages.archive-month.enable", True))
+            <li class="nav-item dropdown">
+              <div class="dropdown">
+              #if $month_global is not None
+                <a class="nav-link dropdown-toggle active" aria-current="page" href="#" role="button" id="dropdownYearMonth" data-bs-toggle="dropdown" aria-expanded="false">
+              #else
+                <a class="nav-link dropdown-toggle" href="#" role="button" id="dropdownYearMonth" data-bs-toggle="dropdown" aria-expanded="false">
+              #end if
+                $gettext('yearMonth_dropdown-label')
+                </a>
+                <ul class="dropdown-menu pre-scrollable" aria-labelledby="dropdownYearMonth" id="dropdownYearMonthMenu">
+                </ul>
+              </div>
+            </li>
+          #end if  
         </ul>
         <button id="connectButton" class="btn btn-outline-success d-none" type="button" onclick="MQTTConnect()">Connect</button>
         <button id="disconnectButton" class="btn btn-outline-success d-none" type="button" onclick="MQTTDisconnect()">Disconnect</button>

@@ -33,94 +33,108 @@ function setIframeSrc(id, url) {
 // Handle a year being selected
 function setYear(year) {
   // Handle 'year' and 'month' click/selections
-  var makeonClickHandler = function(url) {
-          return function onClickHandler() {
-                setIframeSrc("child-iframe", url);
-          };
-  };
+  #if $getVar("$Extras.pages.archive-month", None) and to_bool($getVar("$Extras.pages.archive-month.enable", True))
+    var makeonClickHandler = function(url) {
+            return function onClickHandler() {
+                  setIframeSrc("child-iframe", url);
+            };
+    };
 
-  var list = document.getElementById("dropdownYearMonthMenu");
-  list.innerHTML = "";
+    var list = document.getElementById("dropdownYearMonthMenu");
+    list.innerHTML = "";
 
-  // Add the year to the top of the month dropdown.
-  var li = document.createElement("li");
-  var link = document.createElement("a"); 
-  link.classList.add("dropdown-item");           
-  var url = "pages/" + year + ".html";
-  link.id = url;
-  link.onclick = makeonClickHandler(url);
-
-  var text = document.createTextNode(year);
-  link.appendChild(text);
-  li.appendChild(link);
-  list.appendChild(li);
-
-  // Add a divider between the year amd months.
-  var divider = document.createElement("div");
-  divider.classList.add("dropdown-divider");
-  list.appendChild(divider);
-
-  // Add each month to the drop down.
-  for (var i = 0; i < yearMonth[year].length; i++) {
-    li = document.createElement("li");
-    link = document.createElement("a"); 
-    link.classList.add("dropdown-item");
-    url = "pages/" + yearMonth[year][i] + ".html";
-    link.id = url;
-    link.onclick = makeonClickHandler(url);
-
-    var currentPage = sessionStorage.getItem('currentPage');
-    if (currentPage && currentPage == url) {
+    // Add the year to the top of the month dropdown.
+    #if ($getVar("$Extras.pages.archive-year", None) and to_bool($getVar("$Extras.pages.archive-year.enable", True))) 
+      var li = document.createElement("li");
+      var link = document.createElement("a"); 
+      link.classList.add("dropdown-item");           
+      var url = "pages/" + year + ".html";
       link.id = url;
+      link.onclick = makeonClickHandler(url);
+
+      var text = document.createTextNode(year);
+      link.appendChild(text);
+      li.appendChild(link);
+      list.appendChild(li);
+
+      // Add a divider between the year amd months.
+      var divider = document.createElement("div");
+      divider.classList.add("dropdown-divider");
+      list.appendChild(divider);
+    #end if
+
+    // Add each month to the drop down.
+    for (var i = 0; i < yearMonth[year].length; i++) {
+      li = document.createElement("li");
+      link = document.createElement("a"); 
+      link.classList.add("dropdown-item");
+      url = "pages/" + yearMonth[year][i] + ".html";
+      link.id = url;
+      link.onclick = makeonClickHandler(url);
+
+      var currentPage = sessionStorage.getItem('currentPage');
+      if (currentPage && currentPage == url) {
+        link.id = url;
+      }
+    
+      text = document.createTextNode(yearMonth[year][i]);
+      link.appendChild(text);
+      li.appendChild(link);
+      list.appendChild(li);
     }
-  
-    text = document.createTextNode(yearMonth[year][i]);
-    link.appendChild(text);
-    li.appendChild(link);
-    list.appendChild(li);
-  }
+  #else 
+    var url = "pages/" + year + ".html";
+    setIframeSrc('child-iframe', url)
+  #end if
 }
 
 window.addEventListener("load", function (event) {
-  var list = document.getElementById("dropdownYearMenu");
-  list.innerHTML = "";
-  list.currentSelection = null;
-
-  // Handle year selected/click
-  var setActiveYear = function() {
+  #if ($getVar("$Extras.pages.archive-year", None) and to_bool($getVar("$Extras.pages.archive-year.enable", True))) \
+     or ($getVar("$Extras.pages.archive-month", None) and to_bool($getVar("$Extras.pages.archive-month.enable", True)))
     var list = document.getElementById("dropdownYearMenu");
-    var currentSelection = sessionStorage.getItem('currentSelection');
-    if (this.id != currentSelection) {
-        if (currentSelection) {
-            document.getElementById(currentSelection).classList.remove("active");
-        }
-        this.classList.add("active");
-        sessionStorage.setItem('currentSelection', this.id);
-    }
-    setYear(this.innerHTML);
-  };
+    list.innerHTML = "";
+    list.currentSelection = null;
 
-  // build year drop down
-  for (var year in yearMonth){
-    var li = document.createElement("li");
-    var link = document.createElement("a"); 
-    link.classList.add("dropdown-item");
-    ## ToDo: better id?          
-    link.id = year;
+    // Handle year selected/click
+    var setActiveYear = function() {
+      var list = document.getElementById("dropdownYearMenu");
+      var currentSelection = sessionStorage.getItem('currentSelection');
+      if (this.id != currentSelection) {
+          if (currentSelection) {
+              document.getElementById(currentSelection).classList.remove("active");
+          }
+          this.classList.add("active");
+          sessionStorage.setItem('currentSelection', this.id);
+      }
+      setYear(this.innerHTML);
+    };
 
-    var text = document.createTextNode(year);
-    link.onclick = setActiveYear;
-    link.appendChild(text);
-    link.href = "#";
-    li.appendChild(link);
-    list.appendChild(li);
-    var currentSelection = sessionStorage.getItem('currentSelection');
-    if (currentSelection && currentSelection == year) {
-      link.classList.add("active");
-      sessionStorage.setItem('currentSelection', link.id);
-      setYear(link.innerHTML);
+    // build year drop down
+    for (var year in yearMonth){
+      var li = document.createElement("li");
+      var link = document.createElement("a"); 
+      link.classList.add("dropdown-item");
+      ## ToDo: better id?      
+      #if $getVar("$Extras.pages.archive-month", None) and to_bool($getVar("$Extras.pages.archive-month.enable", True))
+        link.id = year;
+      #else
+        link.id = 'pages/' + year + '.html'
+      #end if
+
+      var text = document.createTextNode(year);
+      link.onclick = setActiveYear;
+      link.appendChild(text);
+      link.href = "#";
+      li.appendChild(link);
+      list.appendChild(li);
+      var currentSelection = sessionStorage.getItem('currentSelection');
+      if (currentSelection && currentSelection == year) {
+        link.classList.add("active");
+        sessionStorage.setItem('currentSelection', link.id);
+        setYear(link.innerHTML);
+      }
     }
-  }
+  #end if
 
   if (sessionStorage.getItem('currentPage') === null) {
       sessionStorage.setItem('currentPage', '');
