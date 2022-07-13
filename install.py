@@ -63,7 +63,7 @@ EXTENSION_CONFIG = """
 
             # The '$current' value of these observations will be displayed.
             # If MQTT is enabled, these will be updated when a message is received.
-            # https://github.com/bellrichm/weewx-jas/wiki/Sections#current
+            # https://github.com/bellrichm/weewx-jas/wiki/Sections#the-current-section
             [[[[current]]]]
                 # The header observation is outTemp
                 observation = outTemp
@@ -81,7 +81,7 @@ EXTENSION_CONFIG = """
                         type = sum
             
             # The minimum and maximum values of these observations will be displayed. 
-            # https://github.com/bellrichm/weewx-jas/wiki/Sections#minmax
+            # https://github.com/bellrichm/weewx-jas/wiki/Sections#the-minmax-section
             [[[[minmax]]]]
                 [[[[[observations]]]]]
                     [[[[[[outTemp]]]]]]
@@ -92,7 +92,7 @@ EXTENSION_CONFIG = """
                     [[[[[[barometer]]]]]]
             
             # For the selected date, values of these observations will be displayed.
-            # https://github.com/bellrichm/weewx-jas/wiki/Sections#thisdate
+            # https://github.com/bellrichm/weewx-jas/wiki/Sections#the-thisdate-section
             [[[[thisdate]]]]
                 [[[[[observations]]]]]
                     [[[[[[outTemp]]]]]]
@@ -116,7 +116,7 @@ EXTENSION_CONFIG = """
                     [[[[[[outHumidity]]]]]]  
                     [[[[[[wind]]]]]]  
                     [[[[[[rain]]]]]]                      
-                    [[[[[[radar]]]]]]
+                    #[[[[[[radar]]]]]]
                     # Here is the user defined chart, inTemp
                     [[[[[[inTemp]]]]]]             
                 [[[[[last7days]]]]]
@@ -153,7 +153,6 @@ EXTENSION_CONFIG = """
                     [[[[[[outTempMinMax]]]]]]    
                     [[[[[[rain]]]]]]      
                 [[[[[archive-year]]]]]   
-                    enable = false
                     in_navbar = false
                     zoomControl = True
                     [[[[[[minmax]]]]]]
