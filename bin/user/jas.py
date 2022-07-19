@@ -643,7 +643,7 @@ class JAS(SearchList):
             weewx_options['aggregate_type'] = 'avg'
 
             for value in self.skin_dict['Extras']['chart_definitions'][chart]['series']:
-                charttype =  self.skin_dict['Extras']['chart_definitions'][chart]['series'][value]['type']
+                charttype =  self.skin_dict['Extras']['chart_definitions'][chart]['series'][value]['type'] # ToDo: should type be optional?
                 self.chart_defs[chart]['series'][value].merge((self.chart_series_defaults.get(coordinate_type, {}).get(charttype,{})))
                 weewx_options['observation'] = value
                 if 'weewx' not in self.chart_defs[chart]['series'][value]:
@@ -700,7 +700,7 @@ class JAS(SearchList):
                     chart2 += "  series: [\n"
                     for obs in chart_def['series']:
                         aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
-                        chart2 += "    {name: " + chart_def['series'][obs]['name'] + ",\n"
+                        chart2 += "    {name: " + chart_def['series'][obs].get('name', "'" + '$obs.label.' + obs + "'") + ",\n"
                         chart2 += "     data: [\n"
                         for year in range(int(self.skin_dict['Extras']['pages'][page]['start']), \
                                           int(self.skin_dict['Extras']['pages'][page]['end']) + 1):
@@ -727,7 +727,7 @@ class JAS(SearchList):
                     chart2 += "  series: [\n"
                     for obs in chart_def['series']:
                         aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
-                        chart2 += "    {name: " + chart_def['series'][obs]['name'] + ",\n"
+                        chart2 += "    {name: " + chart_def['series'][obs].get('name', "'" + '$obs.label.' + obs + "'") + ",\n"
                         chart2 += "    data: " \
                                 + interval + "_" + aggregate_type \
                                 + "." + chart_def['series'][obs]['weewx']['observation'] + "_"  + data_binding \
