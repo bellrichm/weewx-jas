@@ -244,9 +244,17 @@ function handleMQTT(message) {
             #set label = $getVar('unit.label.' + $observation);
 
             #echo "        startIndex = " + $min_datetime_array + ".findIndex(element => element == startTimestamp);\n"
+            #echo "        if (startIndex < 0) {\n"
+            #echo "          minIndex = 0;\n"
+            #echo "        } else {\n"
+            #echo "          minIndex =" + $min_data_array + ".indexOf(Math.min(..." + $min_data_array + ".slice(startIndex, endIndex)));\n"
+            #echo "        }\n"
             #echo "        endIndex = " + $min_datetime_array + ".findIndex(element => element == endTimestamp);\n"
-            #echo "        minIndex =" + $min_data_array + ".indexOf(Math.min(..." + $min_data_array + ".slice(startIndex, endIndex)));\n"
-            #echo "        maxIndex =" + $max_data_array + ".indexOf(Math.max(..." + $max_data_array + ".slice(startIndex, endIndex)));\n"
+            #echo "        if (endIndex < 0) {\n"
+            #echo "          maxIndex  = " + $min_datetime_array + ".length - 1;\n"
+            #echo "        } else {\n"
+            #echo "          maxIndex =" + $max_data_array + ".indexOf(Math.max(..." + $max_data_array + ".slice(startIndex, endIndex)));\n"
+            #echo "        }\n"
             #echo "        min = " + $min_data_array + "[minIndex] + '" + $label + "';\n"
             #echo "        max = " + $max_data_array + "[maxIndex] + '" + $label + "';\n"
             #set aggregate_interval = "aggregate_interval_" + $getVar('Extras.page_definition.' + $page + '.aggregate_interval.min', 'none')
