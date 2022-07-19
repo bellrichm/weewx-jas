@@ -284,7 +284,7 @@ class JAS(SearchList):
 
 
     def _get_units_labels(self, units):
-        # For now, return label for first observations unit. ToDo - possibly change to return all?
+        # For now, return label for first observations unit. ToDo: possibly change to return all?
         return get_label_string(self.generator.formatter, self.generator.converter, units[0], plural=False)
 
     def _get_wind_compass(self, data_binding=None, start_time=None, end_time=None):
@@ -643,7 +643,11 @@ class JAS(SearchList):
             weewx_options['aggregate_type'] = 'avg'
 
             for value in self.skin_dict['Extras']['chart_definitions'][chart]['series']:
-                charttype =  self.skin_dict['Extras']['chart_definitions'][chart]['series'][value]['type'] # ToDo: should type be optional?
+                charttype =  self.skin_dict['Extras']['chart_definitions'][chart]['series'][value].get('type', None)
+                if not charttype:
+                    charttype = "'line'"
+                    self.chart_defs[chart]['series'][value]['type'] = charttype
+
                 self.chart_defs[chart]['series'][value].merge((self.chart_series_defaults.get(coordinate_type, {}).get(charttype,{})))
                 weewx_options['observation'] = value
                 if 'weewx' not in self.chart_defs[chart]['series'][value]:
