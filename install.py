@@ -54,12 +54,6 @@ EXTENSION_CONFIG = """
                     [[[[[[series]]]]]]
                         # Chart one observation, inTemp
                         [[[[[[[inTemp]]]]]]]
-                            # The name of the series. 
-                            # This is a literal in javascript, so it needs the single quote in its value
-                            name = "'Temperature'"
-                            # The series type. 'line' and 'bar' are the most common.
-                            # This is a literal in javascript, so it needs the single quote in its value
-                            type = "'line'"     
 
             # The '$current' value of these observations will be displayed.
             # If MQTT is enabled, these will be updated when a message is received.
