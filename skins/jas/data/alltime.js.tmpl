@@ -1,6 +1,10 @@
 ##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
+#from weeutil.weeutil import to_bool  
+#import time
+#set $start_time = time.time()
+
 #*
 Create a object with keys of every year that has data.
 Each year is object that has a key for every month that has data.
@@ -16,3 +20,9 @@ Each year is object that has a key for every month that has data.
         #end if
     #end for
   #end for
+
+#set elapsed_time = time.time() - $start_time
+#set log_msg = "Generated " + $HTML_ROOT + "/" + $filename + " in " + str($elapsed_time)
+#if to_bool($getVar("$Extras.log_times", True))
+    $logdbg($log_msg)
+#end if
