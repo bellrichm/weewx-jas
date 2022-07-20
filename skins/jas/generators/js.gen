@@ -142,7 +142,7 @@ function handleMQTT(message) {
                         #set source = '#set global label_global = $obs.label.' + $observation
                         #include source=$source
                         #set name = "'" + $label_global + "'"
-                        #set label_global = None
+                        #set global label_global = None
                     #end if
                     #set $option_line += "          {\n"
                     #set $option_line += "            name: " + $name + ",\n"
