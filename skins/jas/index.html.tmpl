@@ -1,6 +1,9 @@
 ##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
+#import time
+#from weeutil.weeutil import to_bool
+#set $start_time = time.time()
 #set global year_global = None
 #set global month_global = None
 
@@ -49,3 +52,9 @@
 
 #set global year_global = None
 #set global month_global = None
+
+#set elapsed_time = time.time() - $start_time
+#set log_msg = "Generated " + $HTML_ROOT + "/" + $filename + " in " + str($elapsed_time)
+#if to_bool($getVar("$Extras.log_times", True))
+  $logdbg($log_msg)
+#end if
