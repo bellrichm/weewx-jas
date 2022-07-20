@@ -134,7 +134,19 @@ function handleMQTT(message) {
                     #set $line = "mqttData['" + $observation + "'].push([parseInt(test_obj.dateTime) * 1000, parseFloat(test_obj." + $observation + ")]);"
                     $line
                     
-                    #set $option_line += "          {data: mqttData['" + $observation + "']},\n"                    
+                    ## .name seems to have 'magical' properties
+                    ## if is not in the dictionary, it returns the key
+                    #if 'name' in $getVar('$Extras.chart_definitions.' + $chart + '.series.' + $observation)
+                        #set name =  $getVar('$Extras.chart_definitions.' + $chart + '.series.' + $observation + '.name')
+                    #else
+                        #set source = '#set global label_global = $obs.label.' + $observation
+                        #include source=$source
+                        #set name = "'" + $label_global + "'"
+                        #set label_global = None
+                    #end if
+                    #set $option_line += "          {\n"
+                    #set $option_line += "            name: " + $name + ",\n"
+                    #set $option_line += "            data: mqttData['" + $observation + "']},\n"                    
                 }    
             #end for
             #set $option_line += '                ]});\n'
