@@ -141,9 +141,16 @@ window.addEventListener("load", function (event) {
   if (sessionStorage.getItem('currentPage') === null) {
       sessionStorage.setItem('currentPage', '');
       #set landing_page = $getVar("$Extras.landing_page", None)
-      #if not ($landing_page in $getVar("$Extras.pages") and to_bool($getVar("$Extras.pages." + $landing_page + ".enable", True)))
-        #set $landing_page = next(iter($getVar("$Extras.pages")))
+      #if not $landing_page in $getVar("$Extras.pages")
+        #for $page_name in $getVar("$Extras.pages")
+          #if to_bool($getVar("$Extras.pages." + $page_name + ".enable", True)) and \
+              to_bool($getVar("$Extras.pages." + $page_name + ".in_navbar", True))
+            #set landing_page = $page_name
+            #break
+          #end if
+        #end for
       #end if
+
       #set landing_page = "'pages/" + $landing_page + ".html'"
       setIframeSrc('child-iframe', $landing_page);
   }
