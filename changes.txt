@@ -35,3 +35,18 @@ Enhancements:
 - Wind rose proof of concept.
 - Added legends.
 - Log generation times.
+
+V0.2.2-rc01
+Fixes:
+- Hide year/month drop-down when the associated page(s) are disabled.
+- Handle when the amount of data is less than the interval.  Most common on new installs.
+
+Enhancements:
+- Allow the landing page to be configured.
+- By default, disable the historical month pages.
+- By default, disable the debug pages.
+- By default, disable the radar section.
+- Default an observation’s echart type to line, the most common.
+- Default an observation’s echart name to the WeeWX label. This also allows them to be translated.
+- Include a favicon.
+- Log generation of additional pages.
