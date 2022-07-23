@@ -50,3 +50,5 @@ Enhancements:
 - Default an observation’s echart name to the WeeWX label. This also allows them to be translated.
 - Include a favicon.
 - Log generation of additional pages.
+
+V0.2.2-rc03a

@@ -7,7 +7,7 @@
 #set $start_time = time.time()
  /* jshint esversion: 6 */
 
-#set $skin_data_binding = $getVar("$Extras.data_binding", 'wx_binding')
+#set $skin_data_binding = $getVar("$Extras.data_binding", $data_binding)
 
 var pageCharts = [];
 var mqttData = {}

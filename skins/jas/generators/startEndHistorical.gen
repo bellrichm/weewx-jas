@@ -3,7 +3,7 @@
 
 ## ToDo: document that skin data binding controls start/end of historical data
 ## ToDo: make start/end configurable
-#set $data_binding = $getVar("$Extras.data_binding", 'wx_binding')
+#set $data_binding = $getVar("$Extras.data_binding", $data_binding)
 #set source = "#import datetime\n"
 #set source += "#import weeutil\n"
 #set source += "#set startTimestamp = weeutil.weeutil.startOfDay($" + $interval_name_global + "($data_binding='" + $data_binding + "').usUnits.firsttime.raw)\n"

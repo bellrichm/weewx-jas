@@ -67,7 +67,7 @@
 ## Proof of concept - wind rose
 ## Create data for wind rose chart
 #if $getVar('Extras.pages.' + $page_definition_name_global + '.windRose',None) is not None
-    #set $data_binding = $getVar('Extras.pages.' + $page_definition_name_global + '.data_binding', $getVar("$Extras.data_binding", 'wx_binding'))
+    #set $data_binding = $getVar('Extras.pages.' + $page_definition_name_global + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
     #set avg, max, wind_directions, wind_range_legend = $windCompass(data_binding=$data_binding, start_time=$interval_start_seconds_global, end_time=$interval_end_seconds_global)
     #set line = "var windRangeLegend = " + $wind_range_legend
     $line;

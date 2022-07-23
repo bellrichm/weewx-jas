@@ -144,7 +144,7 @@ except ImportError:
         logmsg(syslog.LOG_ERR, msg)
 
 
-VERSION = "0.2.2-rc02"
+VERSION = "0.2.2-rc03a"
 
 class JAS(SearchList):
     """ Implement tags used by templates in the skin. """
@@ -172,6 +172,7 @@ class JAS(SearchList):
         report_dict = self.generator.config_dict.get('StdReport', {})
 
         self.skin_debug = to_bool(self.skin_dict['Extras'].get('debug', False))
+        self.data_binding = self.skin_dict['data_binding']
 
         self.chart_defaults = self.skin_dict['Extras']['chart_defaults'].get('global', {})
         self.chart_series_defaults = self.skin_dict['Extras']['chart_defaults'].get('chart_type', {}).get('series', {})
@@ -221,6 +222,7 @@ class JAS(SearchList):
 
         search_list_extension = {'aggregate_types': self.aggregate_types,
                                  'current_observation': self.data_current,
+                                 'data_binding': self.data_binding,
                                  'forecasts': self.data_forecast,
                                  'genCharts': self._gen_charts,
                                  'getUnitsLabels': self._get_units_labels,
@@ -534,7 +536,7 @@ class JAS(SearchList):
 
         observations = {}
         aggregate_types = {}
-        skin_data_binding = self.skin_dict['Extras'].get('data_binding','wx_binding')
+        skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
         charts = self.skin_dict.get('Extras', {}).get('chart_definitions', {})
 
         pages =  self.skin_dict.get('Extras', {}).get('pages', {})
@@ -655,7 +657,7 @@ class JAS(SearchList):
                 weeutil.config.conditional_merge(self.chart_defs[chart]['series'][value]['weewx'], weewx_options)
 
     def _gen_charts(self, page, interval, page_name):
-        skin_data_binding = self.skin_dict['Extras'].get('data_binding','wx_binding')
+        skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
         page_series_type = self.skin_dict['Extras']['page_definition'][page].get('series_type', 'single')
 
         #chart_final = 'var pageCharts = [];\n'
