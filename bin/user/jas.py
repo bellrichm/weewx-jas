@@ -224,6 +224,7 @@ class JAS(SearchList):
                                  'data_binding': self.data_binding,
                                  'forecasts': self.data_forecast,
                                  'genCharts': self._gen_charts,
+                                 'getRange': self._get_range,
                                  'getUnitsLabels': self._get_units_labels,
                                  'last24hours': self._get_last24hours,
                                  'last7days': self._get_last_7_days,
