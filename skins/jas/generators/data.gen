@@ -4,7 +4,7 @@
 #import time
 #from weeutil.weeutil import to_bool
 #set $start_time = time.time()
-$logdbg($page)
+##$logdbg($page)
 ## Create time stamps by aggregation time for the end of interval
 ## For example: endTimestamp_min, endTimestamp_max
 
