@@ -217,7 +217,6 @@ class JAS(SearchList):
 
     def get_extension_list(self, timespan, db_lookup):
         # save these for use when the template variable/function is evaluated
-        self.timespan = timespan
         self.db_lookup = db_lookup
 
         search_list_extension = {'aggregate_types': self.aggregate_types,
@@ -533,11 +532,24 @@ class JAS(SearchList):
 
     def _get_range(self, start, end, data_binding):
         dbm = self.db_lookup(data_binding=data_binding)
-        first_ts = dbm.firstGoodStamp()
-        last_ts = dbm.lastGoodStamp()
-        logdbg(first_ts)
-        logdbg(last_ts)
-        return (int(start), int(end) + 1)
+        first_year = int(datetime.datetime.fromtimestamp(dbm.firstGoodStamp()).strftime('%Y'))
+        last_year = int(datetime.datetime.fromtimestamp(dbm.lastGoodStamp()).strftime('%Y'))
+
+        if start is None:
+            start_year = first_year
+        elif start[:1] == "+":
+            start_year = first_year + int(start[1:])
+        elif start[:1] == "-":
+            start_year = last_year - int(start[1:])
+        else:
+            start_year = int(start)
+
+        if end is None:
+            end_year = last_year + 1
+        else:
+            end_year = int(end) + 1
+
+        return (start_year, end_year)
 
     def _get_observations(self):
         # ToDo: rename now has 'side effect' of returning aggregate_types
