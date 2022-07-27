@@ -4,6 +4,7 @@
 #import time
 #from weeutil.weeutil import to_bool
 #set $start_time = time.time()
+$logdbg($page)
 ## Create time stamps by aggregation time for the end of interval
 ## For example: endTimestamp_min, endTimestamp_max
 
@@ -12,6 +13,8 @@
     ## The 'start' and 'end' tags ignore/do not use the '$data_binding' on the 'time period'.
     ## This makes sense because a DB call is not needed.
     ## ToDo: verify: Either reading code or ask.
+    ## 07/25 - I don't think this is true
+    ## have to rethink this
     #if $aggregate_interval == 'day'
         #set source = "#set global $endTimestamp = ((($" + $interval_name_global + ".end.raw // 86400) * 86400)  - ($utcOffset * 60)) * 1000;\n"
         ##set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding='wx_binding').end.raw // 86400) * 86400)  - ($utcOffset * 60)) * 1000;\n"
@@ -26,6 +29,7 @@
         #set source = "#set global $endTimestamp = ((($" + $interval_name_global + ".end.raw // 60) * 60)  - ($utcOffset * 60)) * 1000;\n"
         ##set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding='wx_binding').end.raw // 60) * 60)  - ($utcOffset * 60)) * 1000;\n"
         #set $source += "var " + $interval_long_name_global + "endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
+        ##$logdbg($source)
         #include source=$source        
     #end if
 #end for
@@ -53,6 +57,7 @@
             #else
                 #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='" + $data_binding + "')." + $observation + ".series(time_series='start', time_unit='unix_epoch_ms').round(2).json"
             #end if
+            ##$logdbg($obs)
             $skinDebug($obs)
             #include source=$obs + ";\n"
 
