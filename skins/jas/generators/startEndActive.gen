@@ -1,15 +1,7 @@
 ##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
-#include source = 'var ' + $interval_long_name_global + 'startDate = moment("$' + $interval_name_global  + '.start.format(\'%Y-%m-%dT%H:%M:%S\')").utcOffset($utcOffset);\n'
-#include source = 'var ' + $interval_long_name_global + 'endDate = moment("$' + $interval_name_global + '.end.format(\'%Y-%m-%dT%H:%M:%S\')").utcOffset($utcOffset);\n'
-#include source = 'var ' + $interval_long_name_global + 'startTimestamp = $' + $interval_name_global + '.start.raw * 1000;\n'
-#include source = 'var ' + $interval_long_name_global + 'endTimestamp = $' + $interval_name_global + '.end.raw * 1000;\n'
-
-## The 'start' and 'end' tags ignore/do not use the '$data_binding' on the 'time period'.
-## This makes sense because a DB call is not needed.
-## ToDo: - verify: Either reading code or ask.
-##include = "var " + $interval_long_name_global + "startDate = moment('$" + $interval_name_global  + "($data_binding=\"wx_binding\").start.format(\"%Y-%m-%dT%H:%M:%S\")').utcOffset($utcOffset);\n"
-##include source = "var " + $interval_long_name_global + "endDate = moment('$" + $interval_name_global + "($data_binding='wx_binding').end.format(\"%Y-%m-%dT%H:%M:%S\")').utcOffset($utcOffset);\n"
-##include source = "var " + $interval_long_name_global + "startTimestamp = $" + $interval_name_global + "($data_binding='wx_binding').start.raw * 1000;\n"
-##include source = "var " + $interval_long_name_global + "endTimestamp = $" + $interval_name_global + "($data_binding='wx_binding').end.raw * 1000;\n"
+#include source = "var " + $interval_long_name_global + "startDate = moment('$" + $interval_name_global  + "($data_binding=$data_binding).start.format(\"%Y-%m-%dT%H:%M:%S\")').utcOffset($utcOffset);\n"
+#include source = "var " + $interval_long_name_global + "endDate = moment('$" + $interval_name_global + "($data_binding=$data_binding).end.format(\"%Y-%m-%dT%H:%M:%S\")').utcOffset($utcOffset);\n"
+#include source = "var " + $interval_long_name_global + "startTimestamp = $" + $interval_name_global + "($data_binding=$data_binding).start.raw * 1000;\n"
+#include source = "var " + $interval_long_name_global + "endTimestamp = $" + $interval_name_global + "($data_binding=$data_binding).end.raw * 1000;\n"
