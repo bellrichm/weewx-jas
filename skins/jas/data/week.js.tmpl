@@ -5,8 +5,9 @@
 #set global interval_name_global = 'week'
 #set global page_definition_name_global = 'week'
 #set global interval_long_name_global = $interval_name_global + "_" 
-#set global interval_start_seconds_global = $week.start.raw
-#set global interval_end_seconds_global = $week.ene.raw
+#set $data_binding = $getVar('Extras.pages.' + $page_definition_name_global + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
+#set global interval_start_seconds_global = $week($data_binding=$data_binding).start.raw
+#set global interval_end_seconds_global = $week($data_binding=$data_binding).ene.raw
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
     /* jshint esversion: 6 */
     #include 'generators/startEndActive.gen'

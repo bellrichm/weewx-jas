@@ -3,8 +3,9 @@
 
 #from weeutil.weeutil import to_bool
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
-    #set global interval_name_global = 'month' + $year.start.format('%Y') + $month.start.format('%m')
-    #set global page_name_global = $year.start.format('%Y') + '-' + $month.start.format('%m')
+    #set $data_binding = $getVar('Extras.pages.' + $page + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
+    #set global interval_name_global = 'month' + $year($data_binding=$data_binding).start.format('%Y') + $month($data_binding=$data_binding).start.format('%m')
+    #set global page_name_global = $year($data_binding=$data_binding).start.format('%Y') + '-' + $month($data_binding=$data_binding).start.format('%m')
     #set global page_definition_name_global = 'archive-month'
     
     #include 'generators/charts.gen'
@@ -12,4 +13,4 @@
     #set global interval_long_name_global = None
     #set global page_name_global = None
     #set global page_definition_name_global = None
-#end if    
+#end if
