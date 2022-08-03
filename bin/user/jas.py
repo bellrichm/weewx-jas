@@ -96,10 +96,10 @@ import configobj
 import weewx
 try:
     # Python 3
-    from urllib.request import Request, urlopen, HTTPError
+    from urllib.request import Request, urlopen, HTTPError # pyright: reportMissingImports=false
 except ImportError:
     # Python 2
-    from urllib2 import Request, urlopen, HTTPError
+    from urllib2 import Request, urlopen, HTTPError # pyright: reportMissingImports=false
 
 from weewx.cheetahgenerator import SearchList
 from weewx.units import get_label_string
@@ -217,7 +217,7 @@ class JAS(SearchList):
 
     def get_extension_list(self, timespan, db_lookup):
         # save these for use when the template variable/function is evaluated
-        self.db_lookup = db_lookup
+        #self.db_lookup = db_lookup
 
         search_list_extension = {'aggregate_types': self.aggregate_types,
                                  'current_observation': self.data_current,
@@ -239,7 +239,7 @@ class JAS(SearchList):
                                  'utcOffset': self.utc_offset,
                                  'version': VERSION,
                                  'windCompass': self._get_wind_compass,
-                                 }
+                                }
 
         return [search_list_extension]
 
@@ -248,11 +248,11 @@ class JAS(SearchList):
             logdbg(msg)
 
     def _get_last24hours(self, data_binding=None):
-        dbm = self.db_lookup(data_binding=data_binding)
+        dbm = self.generator.db_binder.get_manager(data_binding=data_binding)
         end_ts = dbm.lastGoodStamp()
         start_timestamp = end_ts - 86400
         last24hours = TimespanBinder(TimeSpan(start_timestamp, end_ts),
-                                     self.db_lookup,
+                                     self.generator.db_binder.bind_default(data_binding),
                                      data_binding=data_binding,
                                      context='last24hours',
                                      formatter=self.generator.formatter,
@@ -271,13 +271,13 @@ class JAS(SearchList):
         return  self._get_last_n_days(366, data_binding=data_binding)
 
     def _get_last_n_days(self, days, data_binding=None):
-        dbm = self.db_lookup(data_binding=data_binding)
+        dbm = self.generator.db_binder.get_manager(data_binding=data_binding)
         end_ts = dbm.lastGoodStamp()
         start_date = datetime.date.fromtimestamp(end_ts) - datetime.timedelta(days=days)
         start_timestamp = time.mktime(start_date.timetuple())
         last_n_days = TimespanBinder(TimeSpan(start_timestamp, end_ts),
-                                     self.db_lookup,
-                                     data_binding = data_binding,
+                                     self.generator.db_binder.bind_default(data_binding),
+                                     data_binding=data_binding,
                                      context='last_n_hours',
                                      formatter=self.generator.formatter,
                                      converter=self.generator.converter)
@@ -290,7 +290,7 @@ class JAS(SearchList):
         return get_label_string(self.generator.formatter, self.generator.converter, units[0], plural=False)
 
     def _get_wind_compass(self, data_binding=None, start_time=None, end_time=None):
-        db_manager = self.db_lookup(data_binding=data_binding)
+        db_manager = self.generator.db_binder.get_manager(data_binding=data_binding)
         # default is the last 24 hrs
         if not end_time:
             end_ts = db_manager.lastGoodStamp()
@@ -393,6 +393,7 @@ class JAS(SearchList):
         wind_speed_unit = self.skin_dict["Units"]["Groups"]["group_speed"]
         wind_speed_unit_label = self.skin_dict["Units"]["Labels"][wind_speed_unit]
         low_range = wind_ranges[wind_speed_unit][0]
+        high_range = wind_ranges[wind_speed_unit][len(wind_ranges[wind_speed_unit]) - 1]
         wind_range_legend = "['<%s %s', " % (low_range, wind_speed_unit_label)
         for high_range in wind_ranges[wind_speed_unit][1:]:
             wind_range_legend += "'%s-%s %s', " % (low_range, high_range, wind_speed_unit_label)
@@ -532,7 +533,7 @@ class JAS(SearchList):
         return False
 
     def _get_range(self, start, end, data_binding):
-        dbm = self.db_lookup(data_binding=data_binding)
+        dbm = self.generator.db_binder.get_manager(data_binding=data_binding)
         first_year = int(datetime.datetime.fromtimestamp(dbm.firstGoodStamp()).strftime('%Y'))
         last_year = int(datetime.datetime.fromtimestamp(dbm.lastGoodStamp()).strftime('%Y'))
 
@@ -560,7 +561,7 @@ class JAS(SearchList):
         skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
         charts = self.skin_dict.get('Extras', {}).get('chart_definitions', {})
 
-        pages =  self.skin_dict.get('Extras', {}).get('pages', {})
+        pages = self.skin_dict.get('Extras', {}).get('pages', {})
         for page in pages:
             if not self.skin_dict['Extras']['pages'][page].get('enable', True):
                 continue
@@ -571,7 +572,7 @@ class JAS(SearchList):
                     for obs in series:
                         weewx_options = series[obs].get('weewx', {})
                         observation = weewx_options.get('observation', obs)
-                        obs_data_binding =  series[obs].get('weewx', {}).get('data_binding', chart_data_binding)
+                        obs_data_binding = series[obs].get('weewx', {}).get('data_binding', chart_data_binding)
                         if observation not in self.wind_observations:
                             if observation not in observations:
                                 observations[observation] = {}
@@ -587,7 +588,7 @@ class JAS(SearchList):
         minmax_observations = self.skin_dict.get('Extras', {}).get('minmax', {}).get('observations', {})
         minmax_data_binding = self.skin_dict.get('Extras', {}).get('minmax', {}).get('data_binding', skin_data_binding)
         for observation in minmax_observations:
-            data_binding =  minmax_observations[observation].get('data_binding', minmax_data_binding)
+            data_binding = minmax_observations[observation].get('data_binding', minmax_data_binding)
             if observation not in self.wind_observations:
                 if observation not in observations:
                     observations[observation] = {}
@@ -614,8 +615,8 @@ class JAS(SearchList):
                     if series_type == 'comparison':
                         obs = next(iter(value))
                         (start_year, end_year) = self._get_range(self.skin_dict['Extras']['pages'][page].get('start', None),
-                                                                self.skin_dict['Extras']['pages'][page].get('end', None),
-                                                                chart_data_binding)
+                                                                 self.skin_dict['Extras']['pages'][page].get('end', None),
+                                                                 chart_data_binding)
                         for year in range(start_year, end_year):
                             chart2 += indent + " {\n"
                             chart2 += "    name: '" + str(year) + "',\n"
@@ -668,12 +669,12 @@ class JAS(SearchList):
             weewx_options['aggregate_type'] = 'avg'
 
             for value in self.skin_dict['Extras']['chart_definitions'][chart]['series']:
-                charttype =  self.skin_dict['Extras']['chart_definitions'][chart]['series'][value].get('type', None)
+                charttype = self.skin_dict['Extras']['chart_definitions'][chart]['series'][value].get('type', None)
                 if not charttype:
                     charttype = "'line'"
                     self.chart_defs[chart]['series'][value]['type'] = charttype
 
-                self.chart_defs[chart]['series'][value].merge((self.chart_series_defaults.get(coordinate_type, {}).get(charttype,{})))
+                self.chart_defs[chart]['series'][value].merge((self.chart_series_defaults.get(coordinate_type, {}).get(charttype, {})))
                 weewx_options['observation'] = value
                 if 'weewx' not in self.chart_defs[chart]['series'][value]:
                     self.chart_defs[chart]['series'][value]['weewx'] = {}
