@@ -49,7 +49,6 @@
             #else
                 #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='" + $data_binding + "')." + $observation + ".series(time_series='start', time_unit='unix_epoch_ms').round(2).json"
             #end if
-            ##$logdbg($obs)
             $skinDebug($obs)
             #include source=$obs + ";\n"
 

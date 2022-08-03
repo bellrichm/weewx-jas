@@ -709,9 +709,7 @@ class JAS(SearchList):
                 #self.charts_def[chart].merge(self.skin_dict['Extras']['pages'][page][chart])
                 for observation in chart_def['series']:
                     obs = chart_def['series'][observation].get('weewx', {}).get('observation', observation)
-                    #obs_data_binding = chart_def['series'][observation].get('weewx', {}).get('data_binding', chart_data_binding)
                     chart2 += "$series_observations_global.append('" + obs + "')\n"
-                #chart2 += "$series_observations_global\n"
 
                 chart_js = "var option = {\n"
                 chart2 += self._iterdict('  ', page, chart, chart_js, series_type, interval, chart_def, chart_data_binding)
