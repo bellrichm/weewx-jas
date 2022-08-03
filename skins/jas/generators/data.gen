@@ -4,27 +4,23 @@
 #import time
 #from weeutil.weeutil import to_bool
 #set $start_time = time.time()
+##$logdbg("Starting  " + $HTML_ROOT + "/" + $filename)
 ## Create time stamps by aggregation time for the end of interval
 ## For example: endTimestamp_min, endTimestamp_max
 
 #for $aggregate_type in $getVar('Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval')
     #set aggregate_interval = $getVar('Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval.' + $aggregate_type)
-    ## The 'start' and 'end' tags ignore/do not use the '$data_binding' on the 'time period'.
-    ## This makes sense because a DB call is not needed.
-    ## ToDo: verify: Either reading code or ask.
+    #set $data_binding = $getVar('Extras.pages.' + $page_definition_name_global + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
     #if $aggregate_interval == 'day'
-        #set source = "#set global $endTimestamp = ((($" + $interval_name_global + ".end.raw // 86400) * 86400)  - ($utcOffset * 60)) * 1000;\n"
-        ##set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding='wx_binding').end.raw // 86400) * 86400)  - ($utcOffset * 60)) * 1000;\n"
+        #set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding=$data_binding).end.raw // 86400) * 86400)  - ($utcOffset * 60)) * 1000;\n"
         #set $source += "var " + $interval_long_name_global + "endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
         #include source=$source
     #else if $aggregate_interval == 'hour'
-        #set source = "#set global $endTimestamp = ((($" + $interval_name_global + ".end.raw // 3600) * 3600)  - ($utcOffset * 60)) * 1000;\n"
-        ##set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding='wx_binding').end.raw // 3600) * 3600)  - ($utcOffset * 60)) * 1000;\n"
+        #set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding=$data_binding).end.raw // 3600) * 3600)  - ($utcOffset * 60)) * 1000;\n"
         #set $source += "var " + $interval_long_name_global + "endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
         #include source=$source    
     #else
-        #set source = "#set global $endTimestamp = ((($" + $interval_name_global + ".end.raw // 60) * 60)  - ($utcOffset * 60)) * 1000;\n"
-        ##set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding='wx_binding').end.raw // 60) * 60)  - ($utcOffset * 60)) * 1000;\n"
+        #set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding=$data_binding).end.raw // 60) * 60)  - ($utcOffset * 60)) * 1000;\n"
         #set $source += "var " + $interval_long_name_global + "endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
         #include source=$source        
     #end if

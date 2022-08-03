@@ -2,11 +2,12 @@
 ##    See the file LICENSE.txt for your rights.
 
 #from weeutil.weeutil import to_bool
+#set $data_binding = $getVar('Extras.pages.' + $page + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
 #set global interval_global = 'month'
-#set global interval_name_global = 'month' + $year.start.format('%Y') + $month.start.format('%m')
-#set global page_name_global = $year.start.format('%Y') + '-' + $month.start.format('%m')
+#set global interval_name_global = 'month' + $year($data_binding=$data_binding).start.format('%Y') + $month($data_binding=$data_binding).start.format('%m')
+#set global page_name_global = $year($data_binding=$data_binding).start.format('%Y') + '-' + $month($data_binding=$data_binding).start.format('%m')
 #set global year_global = $year_name
-#set global month_global = $month.start.format('%m')
+#set global month_global = $month($data_binding=$data_binding).start.format('%m')
 #set global title_global = $month_name + ' ' + str($year_name)
 #set global h1_global = $month_name +' ' + str($year_name)
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))

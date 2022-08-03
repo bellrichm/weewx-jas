@@ -3,8 +3,7 @@
 
 #from weeutil.weeutil import to_bool
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
-    ## simulate day page
-    #set global interval_name_global = 'day'
+    #set global interval_name_global = $getVar("$Extras.pages.debug.simulate_interval", 'day')
     #set global page_name_global = 'debug'
     #set global page_definition_name_global = 'debug'
     
