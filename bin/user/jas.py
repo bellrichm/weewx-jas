@@ -203,7 +203,7 @@ class JAS(SearchList):
             self.current_url = "%s%s,%s?&format=json&filter=allstations&limit=1&client_id=%s&client_secret=%s" \
                             % (current_endpoint, latitude, longitude, client_id, client_secret)
 
-        self.observations, self.aggregate_types = self._get_observations()
+        self.observations, self.aggregate_types = self._get_observations_information()
 
         self._set_chart_defs()
 
@@ -553,9 +553,7 @@ class JAS(SearchList):
 
         return (start_year, end_year)
 
-    def _get_observations(self):
-        # ToDo: rename now has 'side effect' of returning aggregate_types
-
+    def _get_observations_information(self):
         observations = {}
         aggregate_types = {}
         skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
