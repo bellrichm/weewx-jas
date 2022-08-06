@@ -242,8 +242,7 @@ class JASInstaller(ExtensionInstaller):
                                              'skins/jas/generators/startEndHistorical.gen',
                                              'skins/jas/generators/startEndActive.gen'
                                             ]),
-                   ('skins/jas/javascript', ['skins/jas/javascript/common.js.tmpl',
-                                             'skins/jas/javascript/day.js.tmpl',
+                   ('skins/jas/javascript', ['skins/jas/javascript/day.js.tmpl',
                                              'skins/jas/javascript/debug.js.tmpl',
                                              'skins/jas/javascript/index.js.tmpl',
                                              'skins/jas/javascript/last7days.js.tmpl',
