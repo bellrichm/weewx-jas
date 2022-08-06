@@ -45,7 +45,75 @@
       -->
     </head>      
     <body>
-      #include "generators/navbar.gen"
+      ## ToDo: move?
+      <style>
+      .pre-scrollable {
+      max-height: 340px;
+      overflow-y: scroll;
+      }
+      </style>
+
+      <script src="data/index.js"> </script>
+
+      <div class="fixed-top">
+      <nav class="navbar navbar-expand-md navbar-dark bg-dark">
+         <div class="container-fluid">
+            <a class="navbar-brand" href="#">$station.location</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav me-auto mb-2 mb-md-0">
+               ## Navigation for the congigured 'pages'
+               #for $page_data in $getVar('Extras.pages')
+                  #if not to_bool($getVar("$Extras.pages." + $page_data + ".enable", True))
+                  #continue
+                  #end if
+                  #if to_bool($getVar('Extras.pages.' + $page_data + '.in_navbar', True))
+                  <li class="nav-item">
+                     #set navItem = '<a id= "pages/' + $page_data + '.html" class="nav-link" onclick="setIframeSrc(\'child-iframe\', \'' + 'pages/' + $page_data + '.html\')">' + $gettext($page_data + '.navbarText') + '</a>'
+                     $navItem
+                  </li>
+                  #end if
+               #end for
+               ## Year dropdown
+               #if ($getVar("$Extras.pages.archive-year", None) and to_bool($getVar("$Extras.pages.archive-year.enable", True))) \
+                  or ($getVar("$Extras.pages.archive-month", None) and to_bool($getVar("$Extras.pages.archive-month.enable", True)))
+                  <li class="nav-item dropdown">
+                  #if $year_global is not None
+                  <a class="nav-link dropdown-toggle active" aria-current="page" href="#" id="dropdownYear" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  #else
+                  <a class="nav-link dropdown-toggle" href="#" id="dropdownYear" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  #end if
+                     $gettext('year_dropdown-label')
+                  </a>
+                  <div class="dropdown-menu" aria-labelledby="dropdownYear" id="dropdownYearMenu">
+                  </li>
+               #end if
+               ## Month dropdown
+               #if $getVar("$Extras.pages.archive-month", None) and to_bool($getVar("$Extras.pages.archive-month.enable", True))
+                  <li class="nav-item dropdown">
+                  <div class="dropdown">
+                  #if $month_global is not None
+                     <a class="nav-link dropdown-toggle active" aria-current="page" href="#" role="button" id="dropdownYearMonth" data-bs-toggle="dropdown" aria-expanded="false">
+                  #else
+                     <a class="nav-link dropdown-toggle" href="#" role="button" id="dropdownYearMonth" data-bs-toggle="dropdown" aria-expanded="false">
+                  #end if
+                     $gettext('yearMonth_dropdown-label')
+                     </a>
+                     <ul class="dropdown-menu pre-scrollable" aria-labelledby="dropdownYearMonth" id="dropdownYearMonthMenu">
+                     </ul>
+                  </div>
+                  </li>
+               #end if  
+            </ul>
+            <button id="connectButton" class="btn btn-outline-success d-none" type="button" onclick="MQTTConnect()">Connect</button>
+            <button id="disconnectButton" class="btn btn-outline-success d-none" type="button" onclick="MQTTDisconnect()">Disconnect</button>
+            <button class="btn btn-outline-success" type="button" onclick="setIframeSrc('child-iframe', sessionStorage.getItem('currentPage'))">Refresh</button>
+            </div>
+         </div>
+      </nav>
+      </div>
       <iframe id="child-iframe" id="child-iframe" scrolling="no" width="100%"></iframe>
    </body>
 </html>

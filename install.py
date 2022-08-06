@@ -237,7 +237,6 @@ class JASInstaller(ExtensionInstaller):
                    ('skins/jas/generators', ['skins/jas/generators/charts.gen',
                                             'skins/jas/generators/data.gen',
                                              'skins/jas/generators/js.gen',
-                                             'skins/jas/generators/navbar.gen',
                                              'skins/jas/generators/pages.gen',
                                              'skins/jas/generators/startEndHistorical.gen',
                                              'skins/jas/generators/startEndActive.gen'
