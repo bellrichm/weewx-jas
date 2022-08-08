@@ -159,11 +159,11 @@ function handleMQTT(message) {
     #set wait_milliseconds = int($getVar('$Extras.pages.' + $page + '.wait_seconds', 300)) * 1000
     #set delay_milliseconds = int($getVar('$Extras.pages.' + $page + '.delay_seconds', 60)) * 1000
     // Set a timer to reload the iframe/page.
-    var current = new Date();
-    var future = new Date();
-    future.setTime(future.getTime() + $wait_milliseconds); 
-    var futureTimestamp = Math.floor(future.getTime()/$wait_milliseconds) * $wait_milliseconds;
-    var timeout = futureTimestamp - current.getTime() + $delay_milliseconds;
+    var currentDate = new Date();
+    var futureDate = new Date();
+    futureDate.setTime(futureDate.getTime() + $wait_milliseconds); 
+    var futureTimestamp = Math.floor(futureDate.getTime()/$wait_milliseconds) * $wait_milliseconds;
+    var timeout = futureTimestamp - currentDate.getTime() + $delay_milliseconds;
     setTimeout(function() { window.location.reload(true); }, timeout);
 #end if
 

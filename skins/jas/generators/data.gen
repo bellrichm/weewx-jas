@@ -1,3 +1,4 @@
+#errorCatcher Echo
 ##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
@@ -8,19 +9,19 @@
 ## Create time stamps by aggregation time for the end of interval
 ## For example: endTimestamp_min, endTimestamp_max
 
+#set global $page_data_binding = $getVar('Extras.pages.' + $page_definition_name_global + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
 #for $aggregate_type in $getVar('Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval')
     #set aggregate_interval = $getVar('Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval.' + $aggregate_type)
-    #set $data_binding = $getVar('Extras.pages.' + $page_definition_name_global + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
     #if $aggregate_interval == 'day'
-        #set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding=$data_binding).end.raw // 86400) * 86400)  - ($utcOffset * 60)) * 1000;\n"
+        #set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding=$page_data_binding).end.raw // 86400) * 86400)  - ($utcOffset * 60)) * 1000;\n"
         #set $source += "var " + $interval_long_name_global + "endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
         #include source=$source
     #else if $aggregate_interval == 'hour'
-        #set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding=$data_binding).end.raw // 3600) * 3600)  - ($utcOffset * 60)) * 1000;\n"
+        #set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding=$page_data_binding).end.raw // 3600) * 3600)  - ($utcOffset * 60)) * 1000;\n"
         #set $source += "var " + $interval_long_name_global + "endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
         #include source=$source    
     #else
-        #set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding=$data_binding).end.raw // 60) * 60)  - ($utcOffset * 60)) * 1000;\n"
+        #set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding=$page_data_binding).end.raw // 60) * 60)  - ($utcOffset * 60)) * 1000;\n"
         #set $source += "var " + $interval_long_name_global + "endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
         #include source=$source        
     #end if
@@ -60,11 +61,59 @@
     #end for
 #end for
 
+#*
+Create the data used to display current conditions.
+This data is only used when MQTT is not enabled.
+This data is stored in a javascript object named 'current'.
+'current.header' is an object with the data for the header portion of this section.
+'current.observations' is a map. The key is the observation name, like 'outTemp'. The value is the data to populate the section.
+'current.suffixes is also a map'. Its key is observation_suffix, for example 'outTemp_suffix'.
+*#
+#if $getVar("$Extras.pages." + $page_definition_name_global + ".current", None) is not None
+    #set $interval_current = $getVar("$Extras.current.interval", $interval_global)
+    var mqtt_enabled = false;
+    var updateDate = $current($data_binding=$page_data_binding).dateTime.raw * 1000;
+    var current = {};
+    #if $getVar('$Extras.current.observation', False)
+        current.header = {};
+        current.header.name = "$getVar('Extras.current.observation')";
+        current.header.value =  "#include source='$current($data_binding=$page_data_binding).' + $getVar('Extras.current.observation') + '.format(add_label=False)' + '";'
+        current.header.unit =  "#include source='$unit.label.' + $getVar('Extras.current.observation') +  '";'
+    #end if
+    current.observations = new Map();
+    current.suffixes = new Map();
+
+    #for observation in $Extras.current.observations
+            #set type = $getVar("$Extras.current.observations" + "." + $observation + ".type", "")
+            #set suffix = $getVar("$Extras.current.observations" + "." + $observation + ".suffix", "")
+            #if $type == 'rise'    
+                #set observation_value = '$' + 'almanac.' + $observation + 'rise'
+                #set label = 'foo'
+            #else if $type == 'sum'
+                #set observation_value = '$' + $interval_current + '($data_binding=$page_data_binding).' + $observation + "." + $type
+            #else
+                #set observation_value = '$current($data_binding=$page_data_binding).' + $observation + '.format(add_label=False)'
+                #set observation_unit = '$unit.label.' + $observation
+            #end if
+
+        var observation = {};
+        observation.name = "$observation";
+        observation.value = "#include source=$observation_value#";
+        observation.unit = "#include source=$observation_unit#";
+        #if $suffix
+            observation.suffix = "$observation" + "_suffix";
+            var suffix = {};
+            suffix.value = "#include source=$suffix#";
+            current.suffixes.set(observation.suffix, suffix);
+        #end if
+        current.observations.set("$observation", observation);
+    #end for
+#end if
+
 ## Proof of concept - wind rose
 ## Create data for wind rose chart
 #if $getVar('Extras.pages.' + $page_definition_name_global + '.windRose',None) is not None
-    #set $data_binding = $getVar('Extras.pages.' + $page_definition_name_global + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
-    #set avg, max, wind_directions, wind_range_legend = $windCompass(data_binding=$data_binding, start_time=$interval_start_seconds_global, end_time=$interval_end_seconds_global)
+    #set avg, max, wind_directions, wind_range_legend = $windCompass(data_binding=$page_data_binding, start_time=$interval_start_seconds_global, end_time=$interval_end_seconds_global)
     #set line = "var windRangeLegend = " + $wind_range_legend
     $line;
     #set i = 0
