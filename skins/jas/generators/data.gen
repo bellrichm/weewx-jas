@@ -88,9 +88,11 @@ This data is stored in a javascript object named 'current'.
             #set suffix = $getVar("$Extras.current.observations" + "." + $observation + ".suffix", "")
             #if $type == 'rise'    
                 #set observation_value = '$' + 'almanac.' + $observation + 'rise'
+                #set observation_unit = " "
                 #set label = 'foo'
             #else if $type == 'sum'
-                #set observation_value = '$' + $interval_current + '($data_binding=$page_data_binding).' + $observation + "." + $type
+                #set observation_value = '$' + $interval_current + '($data_binding=$page_data_binding).' + $observation + "." + $type + '.format(add_label=False)'
+                #set observation_unit = '$unit.label.' + $observation
             #else
                 #set observation_value = '$current($data_binding=$page_data_binding).' + $observation + '.format(add_label=False)'
                 #set observation_unit = '$unit.label.' + $observation
