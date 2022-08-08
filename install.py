@@ -260,6 +260,7 @@ class JASInstaller(ExtensionInstaller):
                    ('skins/jas/lang', ['skins/jas/lang/en.conf']),
                    ('skins/jas/sections', [
                                            'skins/jas/sections/current.inc',
+                                           'skins/jas/sections/debug.inc',
                                            'skins/jas/sections/forecast.inc',
                                            'skins/jas/sections/minmax.inc',
                                            'skins/jas/sections/radar.inc',
