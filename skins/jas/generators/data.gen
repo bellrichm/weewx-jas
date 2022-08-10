@@ -112,6 +112,15 @@ This data is stored in a javascript object named 'current'.
     #end for
 #end if
 
+fieldMap = new Map()
+## ToDo: optimize - only do if page uses MQTT
+#if $getVar('$Extras.mqtt', False)
+    #for $field in $getVar('$Extras.mqtt.fields', [])
+        #set $fieldname = $getVar('$Extras.mqtt.fields.' + $field + '.name')
+        fieldMap.set('$fieldname', '$field')
+    #end for
+#end if
+
 ## Proof of concept - wind rose
 ## Create data for wind rose chart
 #if $getVar('Extras.pages.' + $page_definition_name_global + '.windRose',None) is not None

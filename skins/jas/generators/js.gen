@@ -54,8 +54,15 @@ function handleMQTT(message) {
     #if to_bool($getVar('Extras.pages.' + $page + '.mqtt', True))
         // Handle the 'header' section of current observations.
         header = JSON.parse(sessionStorage.getItem("header"));
-        if (header && test_obj[header.name]) {
-            header.value = test_obj[header.name];
+        if (header) {
+            observation = fieldMap.get(header.name);
+            if (observation === undefined) {
+                header.value = test_obj[header.name];
+            }
+            else {
+                header.value = test_obj[observation];
+            }
+
             if (test_obj[header.unit]) {
                 header.unit = test_obj[header.unit];
             }
@@ -79,9 +86,14 @@ function handleMQTT(message) {
         // Process each observation in the 'current' section.
         observations = sessionStorage.getItem("observations").split(",");
         observations.forEach(function(observation) {
-            if (test_obj[observation]) {
+            obs = fieldMap.get(observation);
+            if (obs === undefined) {
+                obs = observation
+            }
+        
+            if (test_obj[obs]) {
                 data = JSON.parse(sessionStorage.getItem(observation));
-                data.value = test_obj[observation];
+                data.value = test_obj[obs];
                 sessionStorage.setItem(observation, JSON.stringify(data));
 
                 suffix = JSON.parse(sessionStorage.getItem(data.suffix));
@@ -121,7 +133,13 @@ function handleMQTT(message) {
             #set $option_line = $chart + 'chart.setOption({\n'
             #set $option_line += '            series: [\n'
             #for $observation in $getVar('$Extras.chart_definitions.' + $chart + '.series')
-                if (test_obj['$observation']) {
+
+                obs = fieldMap.get('$observation');
+                if (obs === undefined) {
+                    obs = '$observation'
+                }
+
+                if (test_obj[obs]) {
                     #set line = "if (!mqttData['" + $observation + "'])"
                     $line
                     {
@@ -131,7 +149,7 @@ function handleMQTT(message) {
                     
                     #set $line = "if (mqttData['" + $observation + "'].length >= 1800) {mqttData['" + $observation + "'].shift();}"
                     $line
-                    #set $line = "mqttData['" + $observation + "'].push([parseInt(test_obj.dateTime) * 1000, parseFloat(test_obj." + $observation + ")]);"
+                    #set $line = "mqttData['" + $observation + "'].push([parseInt(test_obj.dateTime) * 1000, parseFloat(test_obj[obs])]);"
                     $line
                     
                     ## .name seems to have 'magical' properties
