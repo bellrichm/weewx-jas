@@ -24,6 +24,8 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
       <script src="https://cdn.jsdelivr.net/npm/echarts@5.2.2/dist/echarts.min.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
 
+      <link href="../weather-icons/css/weather-icons.min.css" rel="stylesheet" />
+
       #if $interval_name_global
         #set data = $interval_name_global + ".js"
         <script src="../data/$data"></script>

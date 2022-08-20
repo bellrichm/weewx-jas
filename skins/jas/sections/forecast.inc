@@ -16,8 +16,8 @@
           </h5>
           <div class="card-text" id="forecastObservation$i"></div>
           <div class="card-text" id="forecastTemp$i"></div>
-          <div class="card-text" id="forecastRain$i"><i class="wi wi-raindrop"></i></div>
-          <div class="card-text" id="forecastWind$i"><i class="wi wi-strong-wind"></i></div>
+          <div class="card-text" id="forecastRain$i"></div>
+          <div class="card-text" id="forecastWind$i"></div>
         </div>
       </div>            
     </div>
