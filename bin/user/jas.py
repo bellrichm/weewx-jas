@@ -601,6 +601,35 @@ class JAS(SearchList):
 
         return observations, aggregate_types
 
+    def _set_chart_defs(self):
+        self.chart_defs = configobj.ConfigObj()
+        for chart in self.skin_dict['Extras']['chart_definitions'].sections:
+            self.chart_defs[chart] = {}
+            if 'polar' in self.skin_dict['Extras']['chart_definitions'][chart]:
+                coordinate_type = 'polar'
+            elif 'grid' in self.skin_dict['Extras']['chart_definitions'][chart]:
+                coordinate_type = 'grid'
+            else:
+                coordinate_type = 'grid'
+            self.chart_defs[chart].merge(self.chart_defaults.get(coordinate_type, {}))
+
+            self.chart_defs[chart].merge(self.skin_dict['Extras']['chart_definitions'][chart])
+
+            weewx_options = {}
+            weewx_options['aggregate_type'] = 'avg'
+
+            for value in self.skin_dict['Extras']['chart_definitions'][chart]['series']:
+                charttype = self.skin_dict['Extras']['chart_definitions'][chart]['series'][value].get('type', None)
+                if not charttype:
+                    charttype = "'line'"
+                    self.chart_defs[chart]['series'][value]['type'] = charttype
+
+                self.chart_defs[chart]['series'][value].merge((self.chart_series_defaults.get(coordinate_type, {}).get(charttype, {})))
+                weewx_options['observation'] = value
+                if 'weewx' not in self.chart_defs[chart]['series'][value]:
+                    self.chart_defs[chart]['series'][value]['weewx'] = {}
+                weeutil.config.conditional_merge(self.chart_defs[chart]['series'][value]['weewx'], weewx_options)
+
     def _iterdict(self, indent, page, chart, chart_js, series_type, interval, dictionary, chart_data_binding):
         chart2 = chart_js
         for key, value in dictionary.items():
@@ -648,35 +677,6 @@ class JAS(SearchList):
             else:
                 chart2 += indent + key + ": " + value + ",\n"
         return chart2
-
-    def _set_chart_defs(self):
-        self.chart_defs = configobj.ConfigObj()
-        for chart in self.skin_dict['Extras']['chart_definitions'].sections:
-            self.chart_defs[chart] = {}
-            if 'polar' in self.skin_dict['Extras']['chart_definitions'][chart]:
-                coordinate_type = 'polar'
-            elif 'grid' in self.skin_dict['Extras']['chart_definitions'][chart]:
-                coordinate_type = 'grid'
-            else:
-                coordinate_type = 'grid'
-            self.chart_defs[chart].merge(self.chart_defaults.get(coordinate_type, {}))
-
-            self.chart_defs[chart].merge(self.skin_dict['Extras']['chart_definitions'][chart])
-
-            weewx_options = {}
-            weewx_options['aggregate_type'] = 'avg'
-
-            for value in self.skin_dict['Extras']['chart_definitions'][chart]['series']:
-                charttype = self.skin_dict['Extras']['chart_definitions'][chart]['series'][value].get('type', None)
-                if not charttype:
-                    charttype = "'line'"
-                    self.chart_defs[chart]['series'][value]['type'] = charttype
-
-                self.chart_defs[chart]['series'][value].merge((self.chart_series_defaults.get(coordinate_type, {}).get(charttype, {})))
-                weewx_options['observation'] = value
-                if 'weewx' not in self.chart_defs[chart]['series'][value]:
-                    self.chart_defs[chart]['series'][value]['weewx'] = {}
-                weeutil.config.conditional_merge(self.chart_defs[chart]['series'][value]['weewx'], weewx_options)
 
     def _gen_charts(self, page, interval, page_name):
         skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
