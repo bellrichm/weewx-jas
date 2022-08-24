@@ -197,9 +197,11 @@ class JAS(SearchList):
         client_id = self.skin_dict['Extras'].get('client_id')
         if client_id:
             client_secret = self.skin_dict['Extras']['client_secret']
-            self.forecast_url = F"{forecast_endpoint}{latitude},{longitude}?format=json&filter=day&limit=7&client_id={client_id}&client_secret={client_secret}"
+            self.forecast_url = F"{forecast_endpoint}{latitude},{longitude}?"
+            self.forecast_url += F"format=json&filter=day&limit=7&client_id={client_id}&client_secret={client_secret}"
 
-            self.current_url = F"{current_endpoint}{latitude},{longitude}?&format=json&filter=allstations&limit=1&client_id={client_id}&client_secret={client_secret}"
+            self.current_url = F"{current_endpoint}{latitude},{longitude}?"
+            self.current_url += F"&format=json&filter=allstations&limit=1&client_id={client_id}&client_secret={client_secret}"
 
         self.observations, self.aggregate_types = self._get_observations_information()
 
@@ -363,7 +365,7 @@ class JAS(SearchList):
 
             i += 1
 
-        for ordinate_name in wind_data:
+        for ordinate_name,  in wind_data.items():
             if wind_data[ordinate_name]['count'] > 0:
                 wind_data[ordinate_name]['average'] = \
                     wind_data[ordinate_name]['sum'] / \
@@ -379,7 +381,7 @@ class JAS(SearchList):
             wind_compass_speeds.append([])
             j += 1
 
-        for wind_ordinal_data in wind_data:
+        for wind_ordinal_data, in wind_data.items():
             wind_compass_avg.append(wind_data[wind_ordinal_data]['average'])
             wind_compass_max.append(wind_data[wind_ordinal_data]['max'])
 
