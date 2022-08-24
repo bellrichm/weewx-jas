@@ -450,7 +450,7 @@ class JAS(SearchList):
         if not os.path.isfile(self.forecast_filename):
             forecast_data = self._retrieve_forecasts(current_hour)
         else:
-            with open(self.forecast_filename, "r") as forecast_fp:
+            with open(self.forecast_filename, "r", encoding="utf-8") as forecast_fp:
                 forecast_data = json.load(forecast_fp)
 
             if current_hour > forecast_data['generated']:
@@ -460,7 +460,7 @@ class JAS(SearchList):
 
     def _retrieve_forecasts(self, current_hour):
         data = self._call_api(self.forecast_url)
-        with open(self.raw_forecast_data_file, "w") as raw_forecast_fp:
+        with open(self.raw_forecast_data_file, "w", encoding="utf-8") as raw_forecast_fp:
             json.dump(data, raw_forecast_fp, indent=2)
 
         forecast_data = {}
@@ -484,7 +484,7 @@ class JAS(SearchList):
                 forecasts.append(forecast)
 
             forecast_data['forecasts'] = forecasts
-            with open(self.forecast_filename, "w") as forecast_fp:
+            with open(self.forecast_filename, "w", encoding="utf-8") as forecast_fp:
                 json.dump(forecast_data, forecast_fp, indent=2)
         return forecast_data
 
@@ -494,7 +494,7 @@ class JAS(SearchList):
         if not os.path.isfile(self.current_filename):
             current_data = self._retrieve_current(current_hour)
         else:
-            with open(self.current_filename, "r") as current_fp:
+            with open(self.current_filename, "r", encoding="utf-8") as current_fp:
                 current_data = json.load(current_fp)
 
             if current_hour > current_data['generated']:
@@ -517,7 +517,7 @@ class JAS(SearchList):
             current['observation'] = self._get_observation_text(current_observation['weatherPrimaryCoded'])
 
             current_data['current'] = current
-            with open(self.current_filename, "w") as current_fp:
+            with open(self.current_filename, "w", encoding="utf-8") as current_fp:
                 json.dump(current_data, current_fp, indent=2)
 
         return current_data
