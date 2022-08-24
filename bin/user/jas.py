@@ -129,7 +129,7 @@ except ImportError:
 
     def logmsg(level, msg):
         """ log to syslog """
-        syslog.syslog(level, 'Belchertown Extension: %s' % msg)
+        syslog.syslog(level, F'jas: {msg}')
 
     def logdbg(msg):
         """ log debug messages """
@@ -197,11 +197,9 @@ class JAS(SearchList):
         client_id = self.skin_dict['Extras'].get('client_id')
         if client_id:
             client_secret = self.skin_dict['Extras']['client_secret']
-            self.forecast_url = "%s%s,%s?format=json&filter=day&limit=7&client_id=%s&client_secret=%s" \
-                                % (forecast_endpoint, latitude, longitude, client_id, client_secret)
+            self.forecast_url = F"{forecast_endpoint}{latitude},{longitude}?format=json&filter=day&limit=7&client_id={client_id}&client_secret={client_secret}"
 
-            self.current_url = "%s%s,%s?&format=json&filter=allstations&limit=1&client_id=%s&client_secret=%s" \
-                            % (current_endpoint, latitude, longitude, client_id, client_secret)
+            self.current_url = F"{current_endpoint}{latitude},{longitude}?&format=json&filter=allstations&limit=1&client_id={client_id}&client_secret={client_secret}"
 
         self.observations, self.aggregate_types = self._get_observations_information()
 
@@ -394,11 +392,11 @@ class JAS(SearchList):
         wind_speed_unit_label = self.skin_dict["Units"]["Labels"][wind_speed_unit]
         low_range = wind_ranges[wind_speed_unit][0]
         high_range = wind_ranges[wind_speed_unit][len(wind_ranges[wind_speed_unit]) - 1]
-        wind_range_legend = "['<%s %s', " % (low_range, wind_speed_unit_label)
+        wind_range_legend = F"['<{low_range} {wind_speed_unit_label}', "
         for high_range in wind_ranges[wind_speed_unit][1:]:
-            wind_range_legend += "'%s-%s %s', " % (low_range, high_range, wind_speed_unit_label)
+            wind_range_legend += F"'{low_range}-{high_range} {wind_speed_unit_label}', "
             low_range = high_range
-        wind_range_legend += "'>%s %s']" % (high_range, wind_speed_unit_label)
+        wind_range_legend += F"'>{high_range} {wind_speed_unit_label}']"
 
         return wind_compass_avg, wind_compass_max, wind_compass_speeds, wind_range_legend
 
@@ -443,7 +441,7 @@ class JAS(SearchList):
         if data['success']:
             return data['response']
         else:
-            logerr("An error occurred: %s" % (data['error']['description']))
+            logerr(F"An error occurred: {data['error']['description']}")
             return {}
 
     def _get_forecasts(self):
