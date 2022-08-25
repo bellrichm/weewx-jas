@@ -129,7 +129,7 @@ except ImportError:
 
     def logmsg(level, msg):
         """ log to syslog """
-        syslog.syslog(level, 'Belchertown Extension: %s' % msg)
+        syslog.syslog(level, F'jas: {msg}')
 
     def logdbg(msg):
         """ log debug messages """
@@ -144,7 +144,7 @@ except ImportError:
         logmsg(syslog.LOG_ERR, msg)
 
 
-VERSION = "0.2.2-rc03"
+VERSION = "0.2.3-rc01a"
 
 class JAS(SearchList):
     """ Implement tags used by templates in the skin. """
@@ -197,11 +197,11 @@ class JAS(SearchList):
         client_id = self.skin_dict['Extras'].get('client_id')
         if client_id:
             client_secret = self.skin_dict['Extras']['client_secret']
-            self.forecast_url = "%s%s,%s?format=json&filter=day&limit=7&client_id=%s&client_secret=%s" \
-                                % (forecast_endpoint, latitude, longitude, client_id, client_secret)
+            self.forecast_url = F"{forecast_endpoint}{latitude},{longitude}?"
+            self.forecast_url += F"format=json&filter=day&limit=7&client_id={client_id}&client_secret={client_secret}"
 
-            self.current_url = "%s%s,%s?&format=json&filter=allstations&limit=1&client_id=%s&client_secret=%s" \
-                            % (current_endpoint, latitude, longitude, client_id, client_secret)
+            self.current_url = F"{current_endpoint}{latitude},{longitude}?"
+            self.current_url += F"&format=json&filter=allstations&limit=1&client_id={client_id}&client_secret={client_secret}"
 
         self.observations, self.aggregate_types = self._get_observations_information()
 
@@ -225,7 +225,7 @@ class JAS(SearchList):
                                  'forecasts': self.data_forecast,
                                  'genCharts': self._gen_charts,
                                  'getRange': self._get_range,
-                                 'getUnitsLabels': self._get_units_labels,
+                                 'getUnitLabel': self._get_unit_label,
                                  'last24hours': self._get_last24hours,
                                  'last7days': self._get_last_7_days,
                                  'last31days': self._get_last_31_days,
@@ -285,9 +285,9 @@ class JAS(SearchList):
         return last_n_days
 
 
-    def _get_units_labels(self, units):
+    def _get_unit_label(self, observation):
         # For now, return label for first observations unit. ToDo: possibly change to return all?
-        return get_label_string(self.generator.formatter, self.generator.converter, units[0], plural=False)
+        return get_label_string(self.generator.formatter, self.generator.converter, observation, plural=False)
 
     def _get_wind_compass(self, data_binding=None, start_time=None, end_time=None):
         db_manager = self.generator.db_binder.get_manager(data_binding=data_binding)
@@ -365,7 +365,7 @@ class JAS(SearchList):
 
             i += 1
 
-        for ordinate_name in wind_data:
+        for ordinate_name,  in wind_data.items():
             if wind_data[ordinate_name]['count'] > 0:
                 wind_data[ordinate_name]['average'] = \
                     wind_data[ordinate_name]['sum'] / \
@@ -381,7 +381,7 @@ class JAS(SearchList):
             wind_compass_speeds.append([])
             j += 1
 
-        for wind_ordinal_data in wind_data:
+        for wind_ordinal_data, in wind_data.items():
             wind_compass_avg.append(wind_data[wind_ordinal_data]['average'])
             wind_compass_max.append(wind_data[wind_ordinal_data]['max'])
 
@@ -394,11 +394,11 @@ class JAS(SearchList):
         wind_speed_unit_label = self.skin_dict["Units"]["Labels"][wind_speed_unit]
         low_range = wind_ranges[wind_speed_unit][0]
         high_range = wind_ranges[wind_speed_unit][len(wind_ranges[wind_speed_unit]) - 1]
-        wind_range_legend = "['<%s %s', " % (low_range, wind_speed_unit_label)
+        wind_range_legend = F"['<{low_range} {wind_speed_unit_label}', "
         for high_range in wind_ranges[wind_speed_unit][1:]:
-            wind_range_legend += "'%s-%s %s', " % (low_range, high_range, wind_speed_unit_label)
+            wind_range_legend += F"'{low_range}-{high_range} {wind_speed_unit_label}', "
             low_range = high_range
-        wind_range_legend += "'>%s %s']" % (high_range, wind_speed_unit_label)
+        wind_range_legend += F"'>{high_range} {wind_speed_unit_label}']"
 
         return wind_compass_avg, wind_compass_max, wind_compass_speeds, wind_range_legend
 
@@ -443,7 +443,7 @@ class JAS(SearchList):
         if data['success']:
             return data['response']
         else:
-            logerr("An error occurred: %s" % (data['error']['description']))
+            logerr(F"An error occurred: {data['error']['description']}")
             return {}
 
     def _get_forecasts(self):
@@ -452,7 +452,7 @@ class JAS(SearchList):
         if not os.path.isfile(self.forecast_filename):
             forecast_data = self._retrieve_forecasts(current_hour)
         else:
-            with open(self.forecast_filename, "r") as forecast_fp:
+            with open(self.forecast_filename, "r", encoding="utf-8") as forecast_fp:
                 forecast_data = json.load(forecast_fp)
 
             if current_hour > forecast_data['generated']:
@@ -462,7 +462,7 @@ class JAS(SearchList):
 
     def _retrieve_forecasts(self, current_hour):
         data = self._call_api(self.forecast_url)
-        with open(self.raw_forecast_data_file, "w") as raw_forecast_fp:
+        with open(self.raw_forecast_data_file, "w", encoding="utf-8") as raw_forecast_fp:
             json.dump(data, raw_forecast_fp, indent=2)
 
         forecast_data = {}
@@ -486,7 +486,7 @@ class JAS(SearchList):
                 forecasts.append(forecast)
 
             forecast_data['forecasts'] = forecasts
-            with open(self.forecast_filename, "w") as forecast_fp:
+            with open(self.forecast_filename, "w", encoding="utf-8") as forecast_fp:
                 json.dump(forecast_data, forecast_fp, indent=2)
         return forecast_data
 
@@ -496,7 +496,7 @@ class JAS(SearchList):
         if not os.path.isfile(self.current_filename):
             current_data = self._retrieve_current(current_hour)
         else:
-            with open(self.current_filename, "r") as current_fp:
+            with open(self.current_filename, "r", encoding="utf-8") as current_fp:
                 current_data = json.load(current_fp)
 
             if current_hour > current_data['generated']:
@@ -519,7 +519,7 @@ class JAS(SearchList):
             current['observation'] = self._get_observation_text(current_observation['weatherPrimaryCoded'])
 
             current_data['current'] = current
-            with open(self.current_filename, "w") as current_fp:
+            with open(self.current_filename, "w", encoding="utf-8") as current_fp:
                 json.dump(current_data, current_fp, indent=2)
 
         return current_data
@@ -601,6 +601,43 @@ class JAS(SearchList):
 
         return observations, aggregate_types
 
+    def _set_chart_defs(self):
+        self.chart_defs = configobj.ConfigObj()
+        for chart in self.skin_dict['Extras']['chart_definitions'].sections:
+            self.chart_defs[chart] = {}
+            if 'polar' in self.skin_dict['Extras']['chart_definitions'][chart]:
+                coordinate_type = 'polar'
+            elif 'grid' in self.skin_dict['Extras']['chart_definitions'][chart]:
+                coordinate_type = 'grid'
+            else:
+                coordinate_type = 'grid'
+            self.chart_defs[chart].merge(self.chart_defaults.get(coordinate_type, {}))
+
+            self.chart_defs[chart].merge(self.skin_dict['Extras']['chart_definitions'][chart])
+
+            weewx_options = {}
+            weewx_options['aggregate_type'] = 'avg'
+
+            if 'weewx' not in self.chart_defs[chart]:
+                self.chart_defs[chart]['weewx'] = {}
+            self.chart_defs[chart]['weewx']['yAxis'] = {}
+            self.chart_defs[chart]['weewx']['yAxis']['0'] = next(iter(self.skin_dict['Extras']['chart_definitions'][chart]['series']))
+            for value in self.skin_dict['Extras']['chart_definitions'][chart]['series']:
+                charttype = self.skin_dict['Extras']['chart_definitions'][chart]['series'][value].get('type', None)
+                if not charttype:
+                    charttype = "'line'"
+                    self.chart_defs[chart]['series'][value]['type'] = charttype
+
+                y_axis_index = self.skin_dict['Extras']['chart_definitions'][chart]['series'][value].get('yAxisIndex', None)
+                if y_axis_index is not None:
+                    self.chart_defs[chart]['weewx']['yAxis'][y_axis_index] = value
+
+                self.chart_defs[chart]['series'][value].merge((self.chart_series_defaults.get(coordinate_type, {}).get(charttype, {})))
+                weewx_options['observation'] = value
+                if 'weewx' not in self.chart_defs[chart]['series'][value]:
+                    self.chart_defs[chart]['series'][value]['weewx'] = {}
+                weeutil.config.conditional_merge(self.chart_defs[chart]['series'][value]['weewx'], weewx_options)
+
     def _iterdict(self, indent, page, chart, chart_js, series_type, interval, dictionary, chart_data_binding):
         chart2 = chart_js
         for key, value in dictionary.items():
@@ -649,35 +686,6 @@ class JAS(SearchList):
                 chart2 += indent + key + ": " + value + ",\n"
         return chart2
 
-    def _set_chart_defs(self):
-        self.chart_defs = configobj.ConfigObj()
-        for chart in self.skin_dict['Extras']['chart_definitions'].sections:
-            self.chart_defs[chart] = {}
-            if 'polar' in self.skin_dict['Extras']['chart_definitions'][chart]:
-                coordinate_type = 'polar'
-            elif 'grid' in self.skin_dict['Extras']['chart_definitions'][chart]:
-                coordinate_type = 'grid'
-            else:
-                coordinate_type = 'grid'
-            self.chart_defs[chart].merge(self.chart_defaults.get(coordinate_type, {}))
-
-            self.chart_defs[chart].merge(self.skin_dict['Extras']['chart_definitions'][chart])
-
-            weewx_options = {}
-            weewx_options['aggregate_type'] = 'avg'
-
-            for value in self.skin_dict['Extras']['chart_definitions'][chart]['series']:
-                charttype = self.skin_dict['Extras']['chart_definitions'][chart]['series'][value].get('type', None)
-                if not charttype:
-                    charttype = "'line'"
-                    self.chart_defs[chart]['series'][value]['type'] = charttype
-
-                self.chart_defs[chart]['series'][value].merge((self.chart_series_defaults.get(coordinate_type, {}).get(charttype, {})))
-                weewx_options['observation'] = value
-                if 'weewx' not in self.chart_defs[chart]['series'][value]:
-                    self.chart_defs[chart]['series'][value]['weewx'] = {}
-                weeutil.config.conditional_merge(self.chart_defs[chart]['series'][value]['weewx'], weewx_options)
-
     def _gen_charts(self, page, interval, page_name):
         skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
         page_series_type = self.skin_dict['Extras']['page_definition'][page].get('series_type', 'single')
@@ -702,16 +710,34 @@ class JAS(SearchList):
                 if 'polar' not in chart_def:
                     weeutil.config.conditional_merge(chart_def, self.skin_dict['Extras']['chart_defaults']['series_type'].get(series_type, {}))
 
-                chart2 += "#set global series_observations_global = []\n"
-
                 # for now, do not support overriding chart options by page
                 #self.charts_def[chart].merge(self.skin_dict['Extras']['pages'][page][chart])
                 for observation in chart_def['series']:
                     obs = chart_def['series'][observation].get('weewx', {}).get('observation', observation)
-                    chart2 += "$series_observations_global.append('" + obs + "')\n"
 
                 chart_js = "var option = {\n"
                 chart2 += self._iterdict('  ', page, chart, chart_js, series_type, interval, chart_def, chart_data_binding)
+
+                # ToDo: do not hard code 'grid'
+                default_grid_properties = self.skin_dict['Extras']['chart_defaults'].get('properties', {}).get('grid', None)
+                if 'yAxis' not in chart_def:
+                    chart2 += '  yAxis: [\n'
+                    for i in range(0, len(chart_def['weewx']['yAxis'])):
+                        if str(i) in chart_def['weewx']['yAxis']:
+                            chart2 += "#set yAxisObservation = '" + chart_def['weewx']['yAxis'][str(i)] + "'\n"
+
+                        chart2 += '  #set index = ' + str(i) + '\n'
+                        chart2 += '    {\n'
+                        chart2 += self._iterdict('      ',
+                                                 page, chart,
+                                                 '',
+                                                 series_type,
+                                                 interval,
+                                                 default_grid_properties['yAxis'],
+                                                 chart_data_binding)
+                        chart2 += '    },\n'
+                    chart2 += '  ],\n'
+
                 chart2 += "};\n"
                 chart2 += "var telem = document.getElementById('" + chart + page_name + "');\n"
                 chart2 += "var " + chart + "chart = echarts.init(document.getElementById('" + chart + page_name + "'));\n"
@@ -771,8 +797,6 @@ class JAS(SearchList):
 
                 chart2 += "pageChart.chart = " + chart + "chart;\n"
                 chart2 += "pageCharts.push(pageChart);\n"
-                chart2 += "#set global series_observations_global = None\n"
-                chart2 += "$series_observations_global\n"
 
         chart_final += chart2
 

@@ -29,7 +29,7 @@ Prior to making any updates/changes, always make a backup.
 
 |WeeWX version   |Python version                               |
 |----------------|---------------------------------------------|
-|4.6.0 or greater|Python 2.7.x <br>or<br> Python 3.5 or greater|
+|4.6.0 or greater|Python 3.6 or greater                        |
 
 ## Installation
 
