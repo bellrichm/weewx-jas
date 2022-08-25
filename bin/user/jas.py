@@ -225,7 +225,7 @@ class JAS(SearchList):
                                  'forecasts': self.data_forecast,
                                  'genCharts': self._gen_charts,
                                  'getRange': self._get_range,
-                                 'getUnitsLabels': self._get_units_labels,
+                                 'getUnitLabel': self._get_unit_label,
                                  'last24hours': self._get_last24hours,
                                  'last7days': self._get_last_7_days,
                                  'last31days': self._get_last_31_days,
@@ -285,9 +285,9 @@ class JAS(SearchList):
         return last_n_days
 
 
-    def _get_units_labels(self, units):
+    def _get_unit_label(self, observation):
         # For now, return label for first observations unit. ToDo: possibly change to return all?
-        return get_label_string(self.generator.formatter, self.generator.converter, units[0], plural=False)
+        return get_label_string(self.generator.formatter, self.generator.converter, observation, plural=False)
 
     def _get_wind_compass(self, data_binding=None, start_time=None, end_time=None):
         db_manager = self.generator.db_binder.get_manager(data_binding=data_binding)
@@ -618,11 +618,19 @@ class JAS(SearchList):
             weewx_options = {}
             weewx_options['aggregate_type'] = 'avg'
 
+            if 'weewx' not in self.chart_defs[chart]:
+                self.chart_defs[chart]['weewx'] = {}
+            self.chart_defs[chart]['weewx']['yAxis'] = {}
+            self.chart_defs[chart]['weewx']['yAxis']['0'] = next(iter(self.skin_dict['Extras']['chart_definitions'][chart]['series']))
             for value in self.skin_dict['Extras']['chart_definitions'][chart]['series']:
                 charttype = self.skin_dict['Extras']['chart_definitions'][chart]['series'][value].get('type', None)
                 if not charttype:
                     charttype = "'line'"
                     self.chart_defs[chart]['series'][value]['type'] = charttype
+
+                y_axis_index = self.skin_dict['Extras']['chart_definitions'][chart]['series'][value].get('yAxisIndex', None)
+                if y_axis_index is not None:
+                    self.chart_defs[chart]['weewx']['yAxis'][y_axis_index] = value
 
                 self.chart_defs[chart]['series'][value].merge((self.chart_series_defaults.get(coordinate_type, {}).get(charttype, {})))
                 weewx_options['observation'] = value
@@ -702,16 +710,34 @@ class JAS(SearchList):
                 if 'polar' not in chart_def:
                     weeutil.config.conditional_merge(chart_def, self.skin_dict['Extras']['chart_defaults']['series_type'].get(series_type, {}))
 
-                chart2 += "#set global series_observations_global = []\n"
-
                 # for now, do not support overriding chart options by page
                 #self.charts_def[chart].merge(self.skin_dict['Extras']['pages'][page][chart])
                 for observation in chart_def['series']:
                     obs = chart_def['series'][observation].get('weewx', {}).get('observation', observation)
-                    chart2 += "$series_observations_global.append('" + obs + "')\n"
 
                 chart_js = "var option = {\n"
                 chart2 += self._iterdict('  ', page, chart, chart_js, series_type, interval, chart_def, chart_data_binding)
+
+                # ToDo: do not hard code 'grid'
+                default_grid_properties = self.skin_dict['Extras']['chart_defaults'].get('properties', {}).get('grid', None)
+                if 'yAxis' not in chart_def:
+                    chart2 += '  yAxis: [\n'
+                    for i in range(0, len(chart_def['weewx']['yAxis'])):
+                        if str(i) in chart_def['weewx']['yAxis']:
+                            chart2 += "#set yAxisObservation = '" + chart_def['weewx']['yAxis'][str(i)] + "'\n"
+
+                        chart2 += '  #set index = ' + str(i) + '\n'
+                        chart2 += '    {\n'
+                        chart2 += self._iterdict('      ',
+                                                 page, chart,
+                                                 '',
+                                                 series_type,
+                                                 interval,
+                                                 default_grid_properties['yAxis'],
+                                                 chart_data_binding)
+                        chart2 += '    },\n'
+                    chart2 += '  ],\n'
+
                 chart2 += "};\n"
                 chart2 += "var telem = document.getElementById('" + chart + page_name + "');\n"
                 chart2 += "var " + chart + "chart = echarts.init(document.getElementById('" + chart + page_name + "'));\n"
@@ -771,8 +797,6 @@ class JAS(SearchList):
 
                 chart2 += "pageChart.chart = " + chart + "chart;\n"
                 chart2 += "pageCharts.push(pageChart);\n"
-                chart2 += "#set global series_observations_global = None\n"
-                chart2 += "$series_observations_global\n"
 
         chart_final += chart2
 
