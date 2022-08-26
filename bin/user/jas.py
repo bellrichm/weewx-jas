@@ -365,7 +365,7 @@ class JAS(SearchList):
 
             i += 1
 
-        for ordinate_name,  in wind_data.items():
+        for ordinate_name, _  in wind_data.items():
             if wind_data[ordinate_name]['count'] > 0:
                 wind_data[ordinate_name]['average'] = \
                     wind_data[ordinate_name]['sum'] / \
@@ -381,7 +381,7 @@ class JAS(SearchList):
             wind_compass_speeds.append([])
             j += 1
 
-        for wind_ordinal_data, in wind_data.items():
+        for wind_ordinal_data, _ in wind_data.items():
             wind_compass_avg.append(wind_data[wind_ordinal_data]['average'])
             wind_compass_max.append(wind_data[wind_ordinal_data]['max'])
 
@@ -719,8 +719,14 @@ class JAS(SearchList):
                 chart2 += self._iterdict('  ', page, chart, chart_js, series_type, interval, chart_def, chart_data_binding)
 
                 # ToDo: do not hard code 'grid'
+                if 'polar' in self.skin_dict['Extras']['chart_definitions'][chart]:
+                    coordinate_type = 'polar'
+                elif 'grid' in self.skin_dict['Extras']['chart_definitions'][chart]:
+                    coordinate_type = 'grid'
+                else:
+                    coordinate_type = 'grid'
                 default_grid_properties = self.skin_dict['Extras']['chart_defaults'].get('properties', {}).get('grid', None)
-                if 'yAxis' not in chart_def:
+                if 'yAxis' not in chart_def and coordinate_type == 'grid':
                     chart2 += '  yAxis: [\n'
                     for i in range(0, len(chart_def['weewx']['yAxis'])):
                         if str(i) in chart_def['weewx']['yAxis']:
