@@ -67,13 +67,17 @@ EXTENSION_CONFIG = """
                     [[[[[[dewpoint]]]]]]
                     [[[[[[outHumidity]]]]]]
                     [[[[[[barometer]]]]]]
-                        suffix = ($trend.barometer.formatted)
+                        suffix = ($trend($data_binding=$data_binding).barometer.formatted)
                     [[[[[[windSpeed]]]]]]
                         suffix = $current.windDir.ordinal_compass ($current.windDir)
-                    [[[[[[rainRate]]]]]]
                     [[[[[[rain]]]]]]
                         type = sum
-            
+                    [[[[[[rainRate]]]]]]
+                    [[[[[[ET]]]]]]
+                        type = sum
+                    [[[[[[UV]]]]]]
+                    [[[[[[radiation]]]]]]
+                    
             # The minimum and maximum values of these observations will be displayed. 
             # https://github.com/bellrichm/weewx-jas/wiki/Sections#the-minmax-section
             [[[[minmax]]]]
@@ -84,16 +88,29 @@ EXTENSION_CONFIG = """
                     [[[[[[dewpoint]]]]]]
                     [[[[[[outHumidity]]]]]]
                     [[[[[[barometer]]]]]]
-            
+                    [[[[[[windSpeed]]]]]]
+                    [[[[[[rainRate]]]]]]
+                    [[[[[[UV]]]]]]
+                    [[[[[[radiation]]]]]]
+
             # For the selected date, values of these observations will be displayed.
             # https://github.com/bellrichm/weewx-jas/wiki/Sections#the-thisdate-section
             [[[[thisdate]]]]
                 [[[[[observations]]]]]
                     [[[[[[outTemp]]]]]]
+                    [[[[[[heatindex]]]]]]
+                    [[[[[[windchill]]]]]]
+                    [[[[[[dewpoint]]]]]]
+                    [[[[[[outHumidity]]]]]]
                     [[[[[[barometer]]]]]]
-                        type = avg                    
+                    [[[[[[windSpeed]]]]]]
                     [[[[[[rain]]]]]]
                         type = sum
+                    [[[[[[rainRate]]]]]]
+                    [[[[[[ET]]]]]]
+                        type = sum
+                    [[[[[[UV]]]]]]
+                    [[[[[[radiation]]]]]]
 
             # The pages and the content on the pages to display.
             # https://github.com/bellrichm/weewx-jas/wiki/Pages
@@ -150,6 +167,7 @@ EXTENSION_CONFIG = """
                     in_navbar = false
                     zoomControl = True
                     [[[[[[minmax]]]]]]
+                    [[[[[[thisdate]]]]]]       
                     [[[[[[outTempMinMax]]]]]]
                     [[[[[[rain]]]]]]   
                 [[[[[debug]]]]]   
@@ -184,7 +202,7 @@ class JASInstaller(ExtensionInstaller):
                                   'skins/jas/icon/favicon.ico',
                                   'skins/jas/icon/favicon-16x16.png',
                                   'skins/jas/icon/favicon-32x32.png'
-                                ]), 
+                                ]),
                    ('skins/jas/pages', ['skins/jas/pages/debug.html.tmpl',
                                         'skins/jas/pages/day.html.tmpl',
                                         'skins/jas/index.html.tmpl',
