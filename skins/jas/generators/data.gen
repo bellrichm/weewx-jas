@@ -121,6 +121,15 @@ fieldMap = new Map()
     #end for
 #end if
 
+var thisDateObservation = {};
+#if $getVar('$Extras.thisdate', False)
+    #for observation in $Extras.thisdate.observations
+        #set source = "thisDateObservation." + $observation + ".unitLabel = '$unit.label." + $observation + "';\n"
+        thisDateObservation.$observation = {};
+        #include source=$source
+    #end for
+#end if
+
 ## Proof of concept - wind rose
 ## Create data for wind rose chart
 #if $getVar('Extras.pages.' + $page_definition_name_global + '.windRose',None) is not None
