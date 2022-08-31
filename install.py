@@ -91,7 +91,6 @@ EXTENSION_CONFIG = """
                     [[[[[[windSpeed]]]]]]
                     [[[[[[rainRate]]]]]]
                     [[[[[[UV]]]]]]
-                    [[[[[[ET]]]]]]
                     [[[[[[radiation]]]]]]
 
             # For the selected date, values of these observations will be displayed.
