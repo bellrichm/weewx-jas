@@ -51,7 +51,7 @@ function handleLog(message) {
 function handleMQTT(message) {
     var test_obj = JSON.parse(message.payload);
 
-    #if to_bool($getVar('Extras.pages.' + $page + '.mqtt', True))
+    #if $getVar("$Extras.pages." + $page + ".current", None) is not None and to_bool($getVar('Extras.pages.' + $page + '.mqtt', True))
         // Handle the 'header' section of current observations.
         header = JSON.parse(sessionStorage.getItem("header"));
         if (header) {
@@ -76,7 +76,8 @@ function handleMQTT(message) {
         // Handle information that will be appended to the observation's value.
         suffixes = sessionStorage.getItem("suffixes").split(",");
         suffixes.forEach(function(suffix) {
-            if (test_obj[suffix]) {
+            suffixInfo = current.suffixes.get(suffix);        
+            if (suffixInfo.mqtt && test_obj[suffix]) {
                 data = JSON.parse(sessionStorage.getItem(suffix));
                 data.value = test_obj[suffix];
                 sessionStorage.setItem(suffix, JSON.stringify(data));
@@ -91,7 +92,8 @@ function handleMQTT(message) {
                 obs = observation
             }
         
-            if (test_obj[obs]) {
+            observationInfo = current.observations.get(obs);
+            if (observationInfo.mqtt && test_obj[obs]) {
                 data = JSON.parse(sessionStorage.getItem(observation));
                 data.value = test_obj[obs];
                 sessionStorage.setItem(observation, JSON.stringify(data));
@@ -234,7 +236,7 @@ function handleMQTT(message) {
         observations = [];
         for (var [observation, data] of current.observations) {
             observations.push(observation);
-            if (sessionStorage.getItem(observation) === null || !MQTTConfig){
+            if (sessionStorage.getItem(observation) === null || !MQTTConfig || ! data.mqtt){
                 sessionStorage.setItem(observation, JSON.stringify(data));
             }
             obs = JSON.parse(sessionStorage.getItem(observation));

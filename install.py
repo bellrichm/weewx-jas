@@ -105,10 +105,12 @@ EXTENSION_CONFIG = """
                     [[[[[[barometer]]]]]]
                     [[[[[[windSpeed]]]]]]
                     [[[[[[rain]]]]]]
+                        mqtt= false
                         type = sum
                     [[[[[[rainRate]]]]]]
                     [[[[[[UV]]]]]]
                     [[[[[[ET]]]]]]
+                        mqtt = false
                         type = sum
                     [[[[[[radiation]]]]]]
 

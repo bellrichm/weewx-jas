@@ -100,11 +100,13 @@ This data is stored in a javascript object named 'current'.
 
         var observation = {};
         observation.name = "$observation";
+        observation.mqtt = $getVar('$Extras.current.observations.' + $observation + '.mqtt', 'true');
         observation.value = "#include source=$observation_value#";
         observation.unit = "#include source=$observation_unit#";
         #if $suffix
             observation.suffix = "$observation" + "_suffix";
             var suffix = {};
+            suffix.mqtt = $getVar('$Extras.current.observations.' + $observation + '.mqtt', 'true');
             suffix.value = "#include source=$suffix#";
             current.suffixes.set(observation.suffix, suffix);
         #end if
