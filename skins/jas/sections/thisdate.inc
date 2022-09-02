@@ -1,9 +1,10 @@
-##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
+##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
-<link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/alumuko/vanilla-datetimerange-picker@latest/dist/vanilla-datetimerange-picker.css">
+#set date_picker_version = $getVar("$Extras.date_picker_version", "latest")
+<link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/alumuko/vanilla-datetimerange-picker@$date_picker_version/dist/vanilla-datetimerange-picker.css">
 
-<script src="https://cdn.jsdelivr.net/gh/alumuko/vanilla-datetimerange-picker@latest/dist/vanilla-datetimerange-picker.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/alumuko/vanilla-datetimerange-picker@$date_picker_version/dist/vanilla-datetimerange-picker.js"></script>
 
 <div class="col-12 col-xl-6 mb-4">
     <div class="card">
