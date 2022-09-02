@@ -9,6 +9,7 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
 'scoping' I couldn't get it to work. So, I resorted to a global variable and a simple include.
 *#
 #set bootstrap_version = $getVar("$Extras.bootstrap_version", "latest")
+#set paho_mqtt_version = $getVar("Extras.paho_mqtt_version", "latest")
 <!doctype html>
 <html lang="$gettext("lang")">
    <head>
@@ -48,7 +49,7 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
     #end if
 
     #if $page_name_global == 'debug'
-      <script src="https://cdn.jsdelivr.net/npm/paho-mqtt@1.0.4/paho-mqtt.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/paho-mqtt@$paho_mqtt_version/paho-mqtt.min.js"></script>
       <script src="../javascript/mqtt.js"></script>
     #end if
 
