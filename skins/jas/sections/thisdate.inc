@@ -40,7 +40,7 @@
     </div>
 </div>
         ## ToDo: - move the cdn urls
-        #set momentjs_version = $getVar("Extras.momentjs_version", "latest")
+        #set momentjs_version = $getVar("$Extras.momentjs_version", "latest")
         <script src="https://cdn.jsdelivr.net/npm/moment@$momentjs_version/moment.min.js" type="text/javascript"></script>
         <script src="https://cdn.jsdelivr.net/gh/alumuko/vanilla-datetimerange-picker@latest/dist/vanilla-datetimerange-picker.js"></script>
 
