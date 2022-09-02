@@ -12,6 +12,7 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
 #set paho_mqtt_version = $getVar("$Extras.paho_mqtt_version", "latest")
 #set momentjs_version = $getVar("$Extras.momentjs_version", "latest")
 #set popperjs_core_version = $getVar("$Extras.popperjs_core_version", "latest")
+#set echarts_version = $getVar("$Extras.echarts_version", "latest")
 
 <!doctype html>
 <html lang="$gettext("lang")">
@@ -25,7 +26,7 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
       <link href="https://cdn.jsdelivr.net/npm/bootstrap@$bootstrap_version/dist/css/bootstrap.min.css" rel="stylesheet">
 
 
-      <script src="https://cdn.jsdelivr.net/npm/echarts@5.2.2/dist/echarts.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/echarts@$echarts_version/dist/echarts.min.js"></script>
       <script src="https://cdn.jsdelivr.net/npm/moment@$momentjs_version/moment.min.js"></script>
 
       <link href="../weather-icons/css/weather-icons.min.css" rel="stylesheet" />
