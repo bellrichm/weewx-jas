@@ -103,6 +103,7 @@ This data is stored in a javascript object named 'current'.
         observation.mqtt = $getVar('$Extras.current.observations.' + $observation + '.mqtt', 'true');
         observation.value = "#include source=$observation_value#";
         observation.unit = "#include source=$observation_unit#";
+        observation.maxDecimals = $getVar('$Extras.current.observations.' + $observation + '.max_decimals', 'null');
         #if $suffix
             observation.suffix = "$observation" + "_suffix";
             var suffix = {};

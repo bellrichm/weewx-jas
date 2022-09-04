@@ -95,7 +95,10 @@ function handleMQTT(message) {
             observationInfo = current.observations.get(obs);
             if (observationInfo.mqtt && test_obj[obs]) {
                 data = JSON.parse(sessionStorage.getItem(observation));
-                data.value = test_obj[obs];
+                data.value = Number(test_obj[obs]);
+                if (observationInfo.maxDecimals) {
+                   data.value = parseFloat(data.value.toFixed(observationInfo.maxDecimals));
+                }
                 sessionStorage.setItem(observation, JSON.stringify(data));
 
                 suffix = JSON.parse(sessionStorage.getItem(data.suffix));
