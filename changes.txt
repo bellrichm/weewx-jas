@@ -60,3 +60,18 @@ Enhancements:
 - Add examples of charting data in additional datbases.
 - Configure start and end year for multi-year charts. (#30)
 - Support mapping MQTT names to WeeWX names (#34)
+
+V0.2.3-rc01a
+Fixes:
+- Reinstated the experimental wind and rain icons in the forecast section. (#36)
+- Add unit labels to the 'this date' section. (#35)
+Enhancements:
+- Add support for 2 y axis. (#35)
+- Add some default charts.
+- Add some default observations in the 'current', 'min/max', and 'this date' sections.
+- Option to not update 'current' observations from MQTT. 
+  Useful for 'sum' observations like rain and ET.
+- Dependent javascript library versions are configurable. (#41)
+- Update ECharts to 5.3.3.
+- Number of decimal places in charts defaults to 2. This can overriden when defining charts vie ECharts' 'valueFormatter' option. (#42)
+- The number of decimal places in the 'current' section is configurable. (#42)
