@@ -394,13 +394,20 @@ window.addEventListener("load", function (event) {
         // Set up the date/time picker
         #set $startDate = $interval_long_name_global + "startDate"
         #set $endDate = $interval_long_name_global + "endDate"
+        #set datepicker_format = $gettext('datepicker_date')
+        #if datepicker_format == 'datepicker_date'
+            #set datepicker_format = 'MM/DD/YYYY'
+        #end if    
         dateRangePicker2 = new DateRangePicker('datetimerange-input2',
                             {
                                 minDate: $startDate,
                                 maxDate: $endDate,
                                 startDate: $startDate,
                                 endDate: $endDate,
-                            },
+                                locale: {
+                                    format: '$datepicker_format',
+                                },    
+                            },                                
                             function(start, end, label) {
                                 // Update all charts with selected date/time and min/max values
                                 #for $section in $getVar('Extras.pages.' + $page)
@@ -430,10 +437,17 @@ window.addEventListener("load", function (event) {
     #if 'thisdate' in $getVar('$Extras.pages.' + $page)
         #set $startDate = $interval_long_name_global + "startDate"
         #set $endDate = $interval_long_name_global + "endDate"
+        #set datepicker_format = $gettext('datepicker_date')
+        #if datepicker_format == 'datepicker_date'
+            #set datepicker_format = 'MM/DD/YYYY'
+        #end if    
         var dateRangePicker = new DateRangePicker('datetimerange-input1',
                             {singleDatePicker: true,
                                 minDate: $startDate,
-                                maxDate: $endDate
+                                maxDate: $endDate,
+                                locale: {
+                                    format: '$datepicker_format',
+                                },
                             },
                                 function(start, end, label) {
                                     updateThisDate(start.unix() * 1000);
