@@ -25,9 +25,9 @@
                     
                         #set i += 1
                         #set valueId = $observation + '_value'
-                        #if $i % 2 # <tr> #end if
-                            <th scope="row">#include source=$label#</th>
-                            <td id="$valueId"></td>
+                        #if $i % 2 # <tr class="row mx0"> #end if
+                            <th scope="row" class="col">#include source=$label#</th>
+                            <td id="$valueId" class="col"></td>
                         #if not $i % 2 # </tr> #end if
                     #end for
                 </tbody>
