@@ -13,25 +13,25 @@
                   $gettext("thisdate.title")
                 </h5>     
                 <input type="text" id="datetimerange-input1" style="text-align:center">   
-                <table class="table table-sm" style="font-size:80%"">
+                <table class="table">
                   <tbody>
                     #for observation in $getVar('$Extras.thisdate.observations')
                         #set aggregation_type = $getVar("$Extras.thisdate.observations." + $observation + ".type", None)
                         #set label = '$obs.label.' + $observation 
-                        <tr>
-                        <th scope="row">#include source=$label #</th>
+                        <tr  class="row mx0">
+                        <th class="col" scope="row">#include source=$label #</th>
                         #if $aggregation_type is None
                             #set $id = $observation + "_thisdate_min"
-                            <td id="$id">
+                            <td id="$id" class="col">
                             </td>               
                             #set $id = $observation + "_thisdate_max"
-                            <td id="$id">
+                            <td id="$id" class="col">
                             </td>                                                          
                         #else
                             #set $id = $observation + "_thisdate_" + $aggregation_type
-                            <td id="$id">
+                            <td id="$id" class="col">
                             </td>
-                            <td></td>
+                            <td class="col"></td>
                         #end if
                         </tr>    
                     #end for                
