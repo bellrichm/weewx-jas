@@ -14,11 +14,13 @@ var forecasts = [];
         forecast.day = '$forecast["day"]';
         forecast.date = '$forecast["date"]';
         forecast.observation = '$forecast["observation"]';
-        forecast.min_temp = '$forecast["min_temp"]';
-        forecast.max_temp = '$forecast["max_temp"]';
+        forecast.temp_min = '$forecast["temp_min"]';
+        forecast.temp_max = '$forecast["temp_max"]';
+        forecast.temp_unit = '$forecast["temp_unit"]';
         forecast.rain = '$forecast["rain"]';
-        forecast.min_wind = '$forecast["min_wind"]';
-        forecast.max_wind = '$forecast["max_wind"]';
+        forecast.wind_min = '$forecast["wind_min"]';
+        forecast.wind_max = '$forecast["wind_max"]';
+        forecast.wind_unit = '$forecast["wind_unit"]'
 
         forecasts.push(forecast);
         #set i += 1
