@@ -104,7 +104,7 @@ except ImportError:
 from weewx.cheetahgenerator import SearchList
 from weewx.units import get_label_string
 from weewx.tags import TimespanBinder
-from weeutil.weeutil import to_bool, TimeSpan
+from weeutil.weeutil import to_bool, to_int, TimeSpan
 
 try:
     import weeutil.logger # pylint: disable=unused-import
@@ -492,7 +492,8 @@ class JAS(SearchList):
             },
 
         }
-        foo = SearchList.gettext('bar')
+
+        wind_decimals = to_int(self.skin_dict['Extras'].get('forecast_wind_decimals', 2))
         data = self._call_api(self.forecast_url)
         with open(self.raw_forecast_data_file, "w", encoding="utf-8") as raw_forecast_fp:
             json.dump(data, raw_forecast_fp, indent=2)
@@ -514,11 +515,10 @@ class JAS(SearchList):
                 forecast['temp_max'] = period[forecast_observations[self.unit_system]['temp_max']]
                 forecast['temp_unit'] = forecast_observations[self.unit_system]['temp_unit']
                 forecast['rain'] = period['pop']
-                # ToDO: Need to round the result. How to get it from gettext?
-                forecast['wind_min'] = period[forecast_observations[self.unit_system]['wind_min']] \
-                                        * forecast_observations[self.unit_system]['wind_conversion']
-                forecast['wind_max'] = period[forecast_observations[self.unit_system]['wind_max']] \
-                                        * forecast_observations[self.unit_system]['wind_conversion']
+                forecast['wind_min'] = round(period[forecast_observations[self.unit_system]['wind_min']] \
+                                        * forecast_observations[self.unit_system]['wind_conversion'], wind_decimals)
+                forecast['wind_max'] = round(period[forecast_observations[self.unit_system]['wind_max']] \
+                                        * forecast_observations[self.unit_system]['wind_conversion'], wind_decimals)
                 forecast['wind_unit'] = forecast_observations[self.unit_system]['wind_unit']
                 forecasts.append(forecast)
 
