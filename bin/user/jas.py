@@ -467,11 +467,32 @@ class JAS(SearchList):
                 'temp_max': 'maxTempF',
                 'temp_min': 'minTempF',
                 'temp_unit': 'F',
+                'wind_conversion': 1,
                 'wind_max': 'windSpeedMaxMPH',
                 'wind_min': 'windSpeedMinMPH',
                 'wind_unit': 'mph',
-            }
+            },
+            'METRIC' : {
+                'temp_max': 'maxTempC',
+                'temp_min': 'minTempC',
+                'temp_unit': 'C',
+                'wind_conversion': 1,
+                'wind_max': 'windSpeedMaxKPH',
+                'wind_min': 'windSpeedMinKPH',
+                'wind_unit': 'km/h',
+            },
+            'METRICWX' : {
+                'temp_max': 'maxTempC',
+                'temp_min': 'minTempC',
+                'temp_unit': 'C',
+                'wind_conversion': 1000/3600,
+                'wind_max': 'windSpeedMaxKPH',
+                'wind_min': 'windSpeedMinKPH',
+                'wind_unit': 'm/s',
+            },
+
         }
+        foo = SearchList.gettext('bar')
         data = self._call_api(self.forecast_url)
         with open(self.raw_forecast_data_file, "w", encoding="utf-8") as raw_forecast_fp:
             json.dump(data, raw_forecast_fp, indent=2)
@@ -493,8 +514,11 @@ class JAS(SearchList):
                 forecast['temp_max'] = period[forecast_observations[self.unit_system]['temp_max']]
                 forecast['temp_unit'] = forecast_observations[self.unit_system]['temp_unit']
                 forecast['rain'] = period['pop']
-                forecast['wind_min'] = period[forecast_observations[self.unit_system]['wind_min']]
-                forecast['wind_max'] = period[forecast_observations[self.unit_system]['wind_max']]
+                # ToDO: Need to round the result. How to get it from gettext?
+                forecast['wind_min'] = period[forecast_observations[self.unit_system]['wind_min']] \
+                                        * forecast_observations[self.unit_system]['wind_conversion']
+                forecast['wind_max'] = period[forecast_observations[self.unit_system]['wind_max']] \
+                                        * forecast_observations[self.unit_system]['wind_conversion']
                 forecast['wind_unit'] = forecast_observations[self.unit_system]['wind_unit']
                 forecasts.append(forecast)
 
