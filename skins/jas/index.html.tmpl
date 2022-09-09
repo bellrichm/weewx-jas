@@ -106,8 +106,8 @@
                   </li>
                #end if  
             </ul>
-            <button id="connectButton" class="btn btn-outline-success d-none" type="button" onclick="MQTTConnect()">Connect</button>
-            <button id="disconnectButton" class="btn btn-outline-success d-none" type="button" onclick="MQTTDisconnect()">Disconnect</button>
+            <button id="connectButton" class="btn btn-outline-success d-none" type="button" onclick="MQTTConnect()">$gettext('connect_button_label')</button>
+            <button id="disconnectButton" class="btn btn-outline-success d-none" type="button" onclick="MQTTDisconnect()">$gettext('disconnect_button_label')</button>
             <button class="btn btn-outline-success" type="button" onclick="setIframeSrc('child-iframe', sessionStorage.getItem('currentPage'))">$gettext('refresh_button_label')</button>
             </div>
          </div>
