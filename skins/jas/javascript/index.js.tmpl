@@ -126,6 +126,8 @@ window.addEventListener("load", function (event) {
         link.id = year;
       #else
         link.id = 'pages/' + year + '.html'
+        link.setAttribute("data-bs-toggle", "collapse")
+        link.setAttribute("data-bs-target", ".navbar-collapse.show")
       #end if
 
       var text = document.createTextNode(year);
