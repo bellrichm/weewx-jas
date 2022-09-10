@@ -49,10 +49,12 @@ function setYear(year) {
     #if ($getVar("$Extras.pages.archive-year", None) and to_bool($getVar("$Extras.pages.archive-year.enable", True))) 
       var li = document.createElement("li");
       var link = document.createElement("a"); 
-      link.classList.add("dropdown-item");           
+      link.classList.add("dropdown-item");   
       var url = "pages/" + year + ".html";
       link.id = url;
       link.onclick = makeonClickHandler(url);
+      link.setAttribute("data-bs-toggle", "collapse")
+      link.setAttribute("data-bs-target", ".navbar-collapse.show")
 
       var text = document.createTextNode(year);
       link.appendChild(text);
@@ -73,6 +75,9 @@ function setYear(year) {
       url = "pages/" + yearMonth[year][i] + ".html";
       link.id = url;
       link.onclick = makeonClickHandler(url);
+
+      link.setAttribute("data-bs-toggle", "collapse")
+      link.setAttribute("data-bs-target", ".navbar-collapse.show")
 
       var currentPage = sessionStorage.getItem('currentPage');
       if (currentPage && currentPage == url) {
