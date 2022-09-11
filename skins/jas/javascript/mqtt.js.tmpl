@@ -111,6 +111,9 @@ function MQTTConnect() {
     client.onMessageArrived = onMessageArrived;
     client.onConnected = onConnected;
 
+    #set clean_session = $Extras.mqtt.cleanSession.lower()
+    #set reconnect = $Extras.mqtt.reconnect.lower()
+    #set use_SSL = $Extras.mqtt.useSSL.lower()
     #if $getVar("$Extras.pages.debug", False)
         logIt("Attempting to connect");
         logIt("host: $Extras.mqtt.host");
@@ -118,17 +121,17 @@ function MQTTConnect() {
         logIt("clientID: " + clientID);
         logIt("timeout: $Extras.mqtt.timeout");
         logIt("keepAliveInterval: $Extras.mqtt.keepAliveInterval");
-        logIt("cleanSession: $Extras.mqtt.cleanSession");
-        logIt("useSSL: $Extras.mqtt.useSSL");
-        logIt("reconnect: $Extras.mqtt.reconnect");
+        logIt("cleanSession: $clean_session");
+        logIt("useSSL: $use_SSL");
+        logIt("reconnect: $reconnect");
     #end if    
 
     client.connect({ 
         timeout: $Extras.mqtt.timeout,
         keepAliveInterval: $Extras.mqtt.keepAliveInterval,
-        cleanSession: $Extras.mqtt.cleanSession,
-        useSSL: $Extras.mqtt.useSSL,
-        reconnect: $Extras.mqtt.reconnect,
+        cleanSession: $clean_session,
+        useSSL: $use_SSL,
+        reconnect: $reconnect,
         // end defaults
         userName: "$getVar('$Extras.mqtt.username', '')",
         password: "$getVar('$Extras.mqtt.password', '')",
