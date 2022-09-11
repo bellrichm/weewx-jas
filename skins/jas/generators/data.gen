@@ -100,14 +100,14 @@ This data is stored in a javascript object named 'current'.
 
         var observation = {};
         observation.name = "$observation";
-        observation.mqtt = $getVar('$Extras.current.observations.' + $observation + '.mqtt', 'true');
+        observation.mqtt = $getVar('$Extras.current.observations.' + $observation + '.mqtt', 'true').lower();
         observation.value = "#include source=$observation_value#";
         observation.unit = "#include source=$observation_unit#";
         observation.maxDecimals = $getVar('$Extras.current.observations.' + $observation + '.max_decimals', 'null');
         #if $suffix
             observation.suffix = "$observation" + "_suffix";
             var suffix = {};
-            suffix.mqtt = $getVar('$Extras.current.observations.' + $observation + '.mqtt', 'true');
+            suffix.mqtt = $getVar('$Extras.current.observations.' + $observation + '.mqtt', 'true').lower();
             suffix.value = "#include source=$suffix#";
             current.suffixes.set(observation.suffix, suffix);
         #end if
