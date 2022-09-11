@@ -808,6 +808,9 @@ class JAS(SearchList):
                     chart2 += "]};\n"
                     chart2 += "pageChart.option = option;\n"
                 elif series_type == 'comparison':
+                    text_translations = self.generator.skin_dict.get('Texts', weeutil.config.config_from_str('lang = en'))
+                    year_to_year_xaxis_label = text_translations.get('year_to_year_xaxis_label', 'MM/DD')
+
                     chart2 += "option = {\n"
                     chart2 += "  series: [\n"
                     obs = next(iter(chart_def['series']))
@@ -820,7 +823,7 @@ class JAS(SearchList):
                         chart2 += "    {name: '" + str(year) + "',\n"
                         chart2 += "     data: year" + str(year) + "_" + aggregate_type \
                                 + "." + obs + "_"  + obs_data_binding \
-                                + ".map(arr => [moment.unix(arr[0] / 1000).utcOffset(" + str(self.utc_offset) + ").format('MM/DD'), arr[1]]),\n" \
+                                + ".map(arr => [moment.unix(arr[0] / 1000).utcOffset(" + str(self.utc_offset) + ").format('" + year_to_year_xaxis_label + "'), arr[1]]),\n" \
                                 + "},\n"
                     chart2 += "]};\n"
                     chart2 += "pageChart.option = option;\n"

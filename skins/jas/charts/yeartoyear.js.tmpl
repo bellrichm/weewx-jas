@@ -19,13 +19,31 @@
 
    }
 
-   #set separator = "/"
+    #set year_to_year_xaxis_label = $gettext('year_to_year_xaxis_label')
+    #if $year_to_year_xaxis_label == 'year_to_year_xaxis_label'
+        #set $year_to_year_xaxis_label = 'MM/DD'
+    #end if
+    #set $label_start = $year_to_year_xaxis_label[:2]
+    #set $label_end = $year_to_year_xaxis_label[3:]
+    #set $label_separator = $year_to_year_xaxis_label[2:3]
+
+    ## ToDo: could do more checking
+    #if $label_start != 'DD' and $label_start != 'MM'
+        #raise ValueError("Invalid 'year_to_year_xaxis_label': " + $year_to_year_xaxis_label)
+    #end if
+
     var monthDays = [
         #for $month in $month_days
             #set line = ""
             #set i = 0
             #for $i in range(len($month_days[$month]))
-                #set $line += "'" + $month + $separator + $month_days[$month][$i] + "',"
+                #if $label_start == 'MM'
+                    #set $line += "'" + $month + $label_separator + $month_days[$month][$i] + "',"
+                #else if $label_start == 'DD'
+                    #set $line += "'" + $month_days[$month][$i] + $label_separator + $month + "',"
+                #else
+                    #raise ValueError("Invalid 'year_to_year_xaxis_label': " + $year_to_year_xaxis_label)
+                #end if
                 #set $i += 1
             #end for
             $line
