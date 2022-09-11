@@ -820,7 +820,7 @@ class JAS(SearchList):
                         chart2 += "    {name: '" + str(year) + "',\n"
                         chart2 += "     data: year" + str(year) + "_" + aggregate_type \
                                 + "." + obs + "_"  + obs_data_binding \
-                                + ".map(arr => [moment.unix(arr[0] / 1000).utcOffset(" + "-240.0).format('MM/DD'), arr[1]]),\n" \
+                                + ".map(arr => [moment.unix(arr[0] / 1000).utcOffset(" + str(self.utc_offset) + ").format('MM/DD'), arr[1]]),\n" \
                                 + "},\n"
                     chart2 += "]};\n"
                     chart2 += "pageChart.option = option;\n"
