@@ -1,11 +1,6 @@
 ##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
-#set date_picker_version = $getVar("$Extras.date_picker_version", "latest")
-<link type="text/css" rel="stylesheet" href="https://cdn.jsdelivr.net/gh/alumuko/vanilla-datetimerange-picker@$date_picker_version/dist/vanilla-datetimerange-picker.css">
-
-<script src="https://cdn.jsdelivr.net/gh/alumuko/vanilla-datetimerange-picker@$date_picker_version/dist/vanilla-datetimerange-picker.js"></script>
-
 <div class="col-12 col-xl-6 mb-4">
     <div class="card">
         <div class="card-body text-center">
@@ -40,13 +35,3 @@
         </div>
     </div>
 </div>
-        ## ToDo: - move the cdn urls
-        #set momentjs_version = $getVar("$Extras.momentjs_version", "latest")
-        <script src="https://cdn.jsdelivr.net/npm/moment@$momentjs_version/moment.min.js" type="text/javascript"></script>
-        <script src="https://cdn.jsdelivr.net/gh/alumuko/vanilla-datetimerange-picker@$date_picker_version/dist/vanilla-datetimerange-picker.js"></script>
-
-
-
-
-
-
