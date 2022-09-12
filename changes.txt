@@ -78,6 +78,10 @@ Enhancements:
 - Option to not update 'current' observations from MQTT. 
   Useful for 'sum' observations like rain and ET.
 - Dependent javascript library versions are configurable. (#41)
+- Whether to use minified javascript libraries is configurable.
 - Update ECharts to 5.3.3.
 - Number of decimal places in charts defaults to 2. This can overriden when defining charts vie ECharts' 'valueFormatter' option. (#42)
 - The number of decimal places in the 'current' section is configurable. (#42)
+- Force known javascript booleans to lowercase. (#53)
+- Close menu on item selection. (#44)
+- Configure 'year to year' x-axis label format. (#47)
