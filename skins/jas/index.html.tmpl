@@ -19,6 +19,10 @@
 #if $getVar("$Extras.popperjs_core_minified", True)
   #set popperjs_core_minified = ".min"
 #end if
+#set paho_mqtt_minified = ""
+#if $getVar("$Extras.paho_mqtt_minified", True)
+  #set paho_mqtt_minified = ".min"
+#end if
 
 <!doctype html>
 <html lang="$gettext("lang")">
@@ -34,7 +38,7 @@
       <!-- Bootstrap CSS -->
       #echo '<link href="https://cdn.jsdelivr.net/npm/bootstrap@' + $bootstrap_version + '/dist/css/bootstrap' + $bootstrap_minified + '.css" rel="stylesheet">'
 
-      <script src="https://cdn.jsdelivr.net/npm/paho-mqtt@$paho_mqtt_version/paho-mqtt.min.js"></script>
+      #echo '<script src="https://cdn.jsdelivr.net/npm/paho-mqtt@' + $paho_mqtt_version+ '/paho-mqtt' + $paho_mqtt_minified + '.js"></script>'
 
       <script src="javascript/index.js"></script>
       ## ToDo: put here for now, only include if necessary
