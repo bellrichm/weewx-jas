@@ -26,6 +26,10 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
 #if $getVar("$Extras.paho_mqtt_minified", True)
   #set paho_mqtt_minified = ".min"
 #end if
+#set momentjs_minified = ""
+#if $getVar("$Extras.momentjs_minified", True)
+  #set momentjs_minified = ".min"
+#end if
 
 <!doctype html>
 <html lang="$gettext("lang")">
@@ -45,7 +49,7 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
     #end if
 
       <script src="https://cdn.jsdelivr.net/npm/echarts@$echarts_version/dist/echarts.min.js"></script>
-      <script src="https://cdn.jsdelivr.net/npm/moment@$momentjs_version/moment.min.js"></script>
+      #echo '<script src="https://cdn.jsdelivr.net/npm/moment@' + $momentjs_version + '/moment' + $momentjs_minified + '.js"></script>'
 
       <link href="../weather-icons/css/weather-icons.min.css" rel="stylesheet" />
 
