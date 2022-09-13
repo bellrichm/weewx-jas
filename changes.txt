@@ -61,7 +61,7 @@ Enhancements:
 - Configure start and end year for multi-year charts. (#30)
 - Support mapping MQTT names to WeeWX names (#34)
 
-V0.2.3-rc01a
+V0.2.3
 Fixes:
 - Reinstated the experimental wind and rain icons in the forecast section. (#36)
 - Add unit labels to the 'this date' section. (#35)
