@@ -509,8 +509,7 @@ class JAS(SearchList):
             for period in periods:
                 forecast = {}
                 forecast['observation'] = self._get_observation_text(period['weatherPrimaryCoded'])
-                forecast['day'] = datetime.datetime.fromtimestamp(period['timestamp']).strftime("%a")
-                forecast['date'] = datetime.datetime.fromtimestamp(period['timestamp']).strftime("%m/%d")
+                forecast['timestamp'] = period['timestamp']
                 forecast['temp_min'] = period[forecast_observations[self.unit_system]['temp_min']]
                 forecast['temp_max'] = period[forecast_observations[self.unit_system]['temp_max']]
                 forecast['temp_unit'] = forecast_observations[self.unit_system]['temp_unit']

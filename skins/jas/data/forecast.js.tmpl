@@ -8,11 +8,20 @@
 var forecasts = [];
 #set i = 0
 
+#set forecast_day_format = $gettext('forecast_day_format')
+#if $forecast_day_format == 'forecast_day_format'
+    #set $forecast_day_format = 'ddd'
+#end if
+#set forecast_date_format = $gettext('forecast_date_format')
+#if $forecast_date_format == 'forecast_date_format'
+    #set $forecast_date_format = 'MM/DD'    
+#end if
+
 #if $forecasts
     #for $forecast in $forecasts
         forecast = {};
-        forecast.day = '$forecast["day"]';
-        forecast.date = '$forecast["date"]';
+        forecast.day = moment.unix($forecast["timestamp"]).utcOffset($utcOffset).format('$forecast_day_format');
+        forecast.date = moment.unix($forecast["timestamp"]).utcOffset($utcOffset).format('$forecast_date_format');
         forecast.observation = '$forecast["observation"]';
         forecast.temp_min = '$forecast["temp_min"]';
         forecast.temp_max = '$forecast["temp_max"]';
@@ -20,7 +29,7 @@ var forecasts = [];
         forecast.rain = '$forecast["rain"]';
         forecast.wind_min = '$forecast["wind_min"]';
         forecast.wind_max = '$forecast["wind_max"]';
-        forecast.wind_unit = '$forecast["wind_unit"]'
+        forecast.wind_unit = '$forecast["wind_unit"]';
 
         forecasts.push(forecast);
         #set i += 1
