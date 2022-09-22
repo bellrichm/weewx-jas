@@ -148,7 +148,6 @@ EXTENSION_CONFIG = """
                 [[[[[last31days]]]]]
                     zoomControl = True
                     [[[[[[minmax]]]]]]
-                    [[[[[[thisdate]]]]]]
                     [[[[[[outTempMinMax]]]]]]
                     [[[[[[outHumidityMinMax]]]]]]  
                     [[[[[[barometer]]]]]]  
@@ -160,7 +159,6 @@ EXTENSION_CONFIG = """
                 [[[[[last366days]]]]]   
                     zoomControl = True
                     [[[[[[minmax]]]]]]
-                    [[[[[[thisdate]]]]]]
                     [[[[[[outTempMinMax]]]]]]
                     [[[[[[outHumidityMinMax]]]]]]  
                     [[[[[[barometer]]]]]]  
