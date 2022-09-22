@@ -635,6 +635,22 @@ class JAS(SearchList):
                 observations[observation]['aggregate_types']['max'][data_binding] = {}
                 aggregate_types['max'] = {}
 
+        thisdate_observations = self.skin_dict.get('Extras', {}).get('thisdate', {}).get('observations', {})
+        thisdate_data_binding = self.skin_dict.get('Extras', {}).get('thisdate', {}).get('data_binding', skin_data_binding)
+        for observation in thisdate_observations:
+            data_binding = thisdate_observations[observation].get('data_binding', thisdate_data_binding)
+            if observation not in self.wind_observations:
+                if observation not in observations:
+                    observations[observation] = {}
+                    observations[observation]['aggregate_types'] = {}
+
+                observations[observation]['aggregate_types']['min'] = {}
+                observations[observation]['aggregate_types']['min'][data_binding] = {}
+                aggregate_types['min'] = {}
+                observations[observation]['aggregate_types']['max'] = {}
+                observations[observation]['aggregate_types']['max'][data_binding] = {}
+                aggregate_types['max'] = {}                
+
         return observations, aggregate_types
 
     def _set_chart_defs(self):
