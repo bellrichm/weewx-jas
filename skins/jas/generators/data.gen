@@ -22,15 +22,15 @@
     #if $aggregate_interval == 'day'
         #set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding=$page_data_binding).end.raw // 86400) * 86400)  - ($utcOffset * 60)) * 1000;\n"
         #set $source += "var " + $interval_long_name_global + "endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
-        #include source=$source
+        $evaluate($source)
     #else if $aggregate_interval == 'hour'
         #set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding=$page_data_binding).end.raw // 3600) * 3600)  - ($utcOffset * 60)) * 1000;\n"
         #set $source += "var " + $interval_long_name_global + "endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
-        #include source=$source    
+        $evaluate($source)
     #else
         #set source = "#set global $endTimestamp = ((($" + $interval_name_global + "($data_binding=$page_data_binding).end.raw // 60) * 60)  - ($utcOffset * 60)) * 1000;\n"
         #set $source += "var " + $interval_long_name_global + "endTimestamp_" + $aggregate_type + " = $" + "endTimestamp;\n"
-        #include source=$source        
+        $evaluate($source)
     #end if
 #end for
 
@@ -142,7 +142,7 @@ var thisDateObservation = {};
     #for observation in $Extras.thisdate.observations
         #set source = "thisDateObservation." + $observation + ".unitLabel = '$unit.label." + $observation + "';\n"
         thisDateObservation.$observation = {};
-        #include source=$source
+        $evaluate($source)
     #end for
 #end if
 
