@@ -5,8 +5,16 @@
 #from weeutil.weeutil import to_bool
 #set $start_time = time.time()
 
+#def evaluate(data)
+    #include source=$data
+    #if $getVar('Extras.debug_includes', True)
+    /* $data */
+    ##$logdbg($data)
+    #end if
+#end def
+
 #set charts = $genCharts($page_definition_name_global, $interval_name_global, $page_name_global)
-#include source=$charts
+$evaluate($charts)
 
 #set elapsed_time = time.time() - $start_time
 #set log_msg = "Generated " + $HTML_ROOT + "/" + $filename + " in " + str($elapsed_time)

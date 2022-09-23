@@ -3,6 +3,15 @@
 
 ## ToDo: document that skin data binding controls start/end of historical data
 ## ToDo: make start/end configurable
+
+#def evaluate(data)
+    #include source=$data
+    #if $getVar('Extras.debug_includes', True)
+    /* $data */
+    ##$logdbg($data)
+    #end if
+#end def
+
 #set $data_binding = $getVar("$Extras.data_binding", $data_binding)
 #set source = "#import datetime\n"
 #set source += "#import weeutil\n"
@@ -16,4 +25,4 @@
 #set source += "var " + $interval_long_name_global + "endTimestamp = $endTimestamp * 1000;\n"
 #set source += "var " + $interval_long_name_global + "endDate = moment('$endDate').utcOffset($utcOffset);\n"
 
-#include source = $source
+$evaluate($source)
