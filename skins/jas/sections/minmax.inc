@@ -12,10 +12,6 @@
                   <tbody>
                     #for observation in $Extras.minmax.observations
                         #set label = '$obs.label.' + $observation 
-                        #set min_value = '$' + $interval_global + '.' + $observation + '.min'
-                        #set min_value_time = '$' + $interval_global + '.' + $observation + '.mintime.format'
-                        #set max_value = '$' + $interval_global + '.' + $observation + '.max'                
-                        #set max_value_time = '$' + $interval_global + '.' + $observation + '.maxtime.format'
                         #set min_id = $observation + "_minmax_min"
                         #set max_id = $observation + "_minmax_max"
                         <tr class="row mx0">
