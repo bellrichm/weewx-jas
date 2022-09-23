@@ -9,8 +9,8 @@
 #def evaluate(data)
     #include source=$data
     #if $getVar('Extras.debug_includes', True)
-    // $data
-    $logdbg($data)
+    /* $data */
+    ##$logdbg($data)
     #end if
 #end def
 ## Create time stamps by aggregation time for the end of interval
@@ -86,8 +86,9 @@ This data is stored in a javascript object named 'current'.
         current.header = {};
         current.header.name = "$getVar('Extras.current.observation')";
         #set line = '$current($data_binding=$page_data_binding).' + $getVar('Extras.current.observation') + '.format(add_label=False)' + '";'
-        current.header.value =  "$evaluate($line)
-        current.header.unit =  "#include source='$unit.label.' + $getVar('Extras.current.observation') +  '";'
+        current.header.value = "$evaluate($line)
+        #set line = '$unit.label.' + $getVar('Extras.current.observation') +  '";'
+        current.header.unit = "$evaluate($line)
     #end if
     current.observations = new Map();
     current.suffixes = new Map();
@@ -110,14 +111,17 @@ This data is stored in a javascript object named 'current'.
         var observation = {};
         observation.name = "$observation";
         observation.mqtt = $getVar('$Extras.current.observations.' + $observation + '.mqtt', 'true').lower();
-        observation.value = "#include source=$observation_value#";
-        observation.unit = "#include source=$observation_unit#";
+        #set source = '"' + $observation_value + '";'
+        observation.value = $evaluate($source)
+        #set source = '"' + $observation_unit + '";'
+        observation.unit = $evaluate($source)
         observation.maxDecimals = $getVar('$Extras.current.observations.' + $observation + '.max_decimals', 'null');
         #if $suffix
             observation.suffix = "$observation" + "_suffix";
             var suffix = {};
             suffix.mqtt = $getVar('$Extras.current.observations.' + $observation + '.mqtt', 'true').lower();
-            suffix.value = "#include source=$suffix#";
+            #set source = '"' + $suffix + '";'
+            suffix.value = $evaluate($source)
             current.suffixes.set(observation.suffix, suffix);
         #end if
         current.observations.set("$observation", observation);
