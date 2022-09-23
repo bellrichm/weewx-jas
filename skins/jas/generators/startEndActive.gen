@@ -3,7 +3,7 @@
 
 #def evaluate(data)
     #include source=$data
-    #if $getVar('Extras.debug_includes', True)
+    #if $getVar('Extras.debug_includes', False)
     /* $data */
     ##$logdbg($data)
     #end if
