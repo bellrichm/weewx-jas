@@ -6,6 +6,13 @@
 #from weeutil.weeutil import to_bool
 #set $start_time = time.time()
 ##$logdbg("Starting  " + $HTML_ROOT + "/" + $filename)
+#def evaluate(data)
+    #include source=$data
+    #if $getVar('Extras.debug_includes', True)
+    // $data
+    $logdbg($data)
+    #end if
+#end def
 ## Create time stamps by aggregation time for the end of interval
 ## For example: endTimestamp_min, endTimestamp_max
 
@@ -40,9 +47,9 @@
     #for aggregate_type in $observations[$observation]['aggregate_types']
         #set aggregate_interval = $getVar('Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval.' + $aggregate_type, None)
         #set interval_name = $interval_long_name_global + $aggregate_type
-        #set dateTime_name = $interval_name + "_" + $observation + "_dateTime"
         #for data_binding in $observations[$observation]['aggregate_types'][$aggregate_type]:
             #set array_name = $interval_name + "." + $observation + "_"  + $data_binding
+            #set dateTime_name = $interval_name + "_" + $observation + "_" + $data_binding + "_dateTime"
             #set data_name = $interval_name + "_" + $observation + "_"  + $data_binding + "_data"
 
             #if $aggregate_interval is not None
@@ -51,7 +58,8 @@
                 #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='" + $data_binding + "')." + $observation + ".series(time_series='start', time_unit='unix_epoch_ms').round(2).json"
             #end if
             $skinDebug($obs)
-            #include source=$obs + ";\n"
+            #set line = $obs + ";\n"
+            $evaluate($line)
 
             ## Cache the dateTimes into its own list variable
             #echo $dateTime_name + " = [].concat(" + $array_name + ".map(arr => arr[0]));\n"
@@ -77,7 +85,8 @@ This data is stored in a javascript object named 'current'.
     #if $getVar('$Extras.current.observation', False)
         current.header = {};
         current.header.name = "$getVar('Extras.current.observation')";
-        current.header.value =  "#include source='$current($data_binding=$page_data_binding).' + $getVar('Extras.current.observation') + '.format(add_label=False)' + '";'
+        #set line = '$current($data_binding=$page_data_binding).' + $getVar('Extras.current.observation') + '.format(add_label=False)' + '";'
+        current.header.value =  "$evaluate($line)
         current.header.unit =  "#include source='$unit.label.' + $getVar('Extras.current.observation') +  '";'
     #end if
     current.observations = new Map();
