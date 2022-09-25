@@ -502,6 +502,7 @@ class JAS(SearchList):
         forecast_data['forecasts'] = []
 
         if data:
+            text_translations = self.generator.skin_dict.get('Texts', weeutil.config.config_from_str('lang = en'))
             forecast_data['generated'] = current_hour
             forecasts = []
             periods = data[0]['periods']
@@ -510,6 +511,10 @@ class JAS(SearchList):
                 forecast = {}
                 forecast['observation'] = self._get_observation_text(period['weatherPrimaryCoded'])
                 forecast['timestamp'] = period['timestamp']
+                day_of_week = (int(datetime.datetime.fromtimestamp(period['timestamp']).strftime("%w")) + 6) % 7
+                day_of_week_key = 'forecast_week_day' + str(day_of_week)
+                day_of_week_text = text_translations.get(day_of_week_key, day_of_week_key)
+                forecast['day'] = day_of_week_text
                 forecast['temp_min'] = period[forecast_observations[self.unit_system]['temp_min']]
                 forecast['temp_max'] = period[forecast_observations[self.unit_system]['temp_max']]
                 forecast['temp_unit'] = forecast_observations[self.unit_system]['temp_unit']
@@ -592,6 +597,7 @@ class JAS(SearchList):
     def _get_observations_information(self):
         observations = {}
         aggregate_types = {}
+        # ToDo: isn't this done in the init method?
         skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
         charts = self.skin_dict.get('Extras', {}).get('chart_definitions', {})
 
@@ -649,7 +655,7 @@ class JAS(SearchList):
                 aggregate_types['min'] = {}
                 observations[observation]['aggregate_types']['max'] = {}
                 observations[observation]['aggregate_types']['max'][data_binding] = {}
-                aggregate_types['max'] = {}                
+                aggregate_types['max'] = {}
 
         return observations, aggregate_types
 
@@ -657,12 +663,14 @@ class JAS(SearchList):
         self.chart_defs = configobj.ConfigObj()
         for chart in self.skin_dict['Extras']['chart_definitions'].sections:
             self.chart_defs[chart] = {}
+            #self.chart_defs[chart] = weeutil.config.deep_copy(self.skin_dict['Extras']['chart_definitions'][chart])
             if 'polar' in self.skin_dict['Extras']['chart_definitions'][chart]:
                 coordinate_type = 'polar'
             elif 'grid' in self.skin_dict['Extras']['chart_definitions'][chart]:
                 coordinate_type = 'grid'
             else:
                 coordinate_type = 'grid'
+            # ToDo fix here
             self.chart_defs[chart].merge(self.chart_defaults.get(coordinate_type, {}))
 
             self.chart_defs[chart].merge(self.skin_dict['Extras']['chart_definitions'][chart])
@@ -674,6 +682,7 @@ class JAS(SearchList):
                 self.chart_defs[chart]['weewx'] = {}
             self.chart_defs[chart]['weewx']['yAxis'] = {}
             self.chart_defs[chart]['weewx']['yAxis']['0'] = next(iter(self.skin_dict['Extras']['chart_definitions'][chart]['series']))
+            # ToDo rework
             for value in self.skin_dict['Extras']['chart_definitions'][chart]['series']:
                 charttype = self.skin_dict['Extras']['chart_definitions'][chart]['series'][value].get('type', None)
                 if not charttype:

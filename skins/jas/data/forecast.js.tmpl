@@ -20,9 +20,9 @@ var forecasts = [];
 #if $forecasts
     #for $forecast in $forecasts
         forecast = {};
-        forecast.day = moment.unix($forecast["timestamp"]).utcOffset($utcOffset).format('$forecast_day_format');
         forecast.date = moment.unix($forecast["timestamp"]).utcOffset($utcOffset).format('$forecast_date_format');
         forecast.observation = '$forecast["observation"]';
+        forecast.day = '$forecast["day"]';
         forecast.temp_min = '$forecast["temp_min"]';
         forecast.temp_max = '$forecast["temp_max"]';
         forecast.temp_unit = '$forecast["temp_unit"]';
