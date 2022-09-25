@@ -50,6 +50,8 @@ EXTENSION_CONFIG = """
                 [[[[[inTemp]]]]]
                     # Options that are not used by eCharts are put under 'weewx' stanzas'
                     [[[[[[weewx]]]]]]
+                        # Because we are defining the chart to be used only at this site,
+                        # we can put text strings directly in weewx.conf
                         title = Inside Temperature
                     [[[[[[series]]]]]]
                         # Chart one observation, inTemp
@@ -133,8 +135,8 @@ EXTENSION_CONFIG = """
                     [[[[[[UV]]]]]]
                     [[[[[[radiation]]]]]]
                     #[[[[[[radar]]]]]]
-                    # Here is the user defined chart, inTemp
-                    [[[[[[inTemp]]]]]]             
+                    # Here is the user defined chart, inTemp.
+                    #[[[[[[inTemp]]]]]]             
                 [[[[[last7days]]]]]
                     [[[[[[minmax]]]]]]
                     [[[[[[outTemp]]]]]]  
