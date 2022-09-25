@@ -662,8 +662,7 @@ class JAS(SearchList):
     def _set_chart_defs(self):
         self.chart_defs = configobj.ConfigObj()
         for chart in self.skin_dict['Extras']['chart_definitions'].sections:
-            self.chart_defs[chart] = {}
-            #self.chart_defs[chart] = weeutil.config.deep_copy(self.skin_dict['Extras']['chart_definitions'][chart])
+            self.chart_defs[chart] = weeutil.config.deep_copy(self.skin_dict['Extras']['chart_definitions'][chart])
             if 'polar' in self.skin_dict['Extras']['chart_definitions'][chart]:
                 coordinate_type = 'polar'
             elif 'grid' in self.skin_dict['Extras']['chart_definitions'][chart]:
@@ -672,8 +671,6 @@ class JAS(SearchList):
                 coordinate_type = 'grid'
             # ToDo fix here
             self.chart_defs[chart].merge(self.chart_defaults.get(coordinate_type, {}))
-
-            self.chart_defs[chart].merge(self.skin_dict['Extras']['chart_definitions'][chart])
 
             weewx_options = {}
             weewx_options['aggregate_type'] = 'avg'
@@ -720,7 +717,7 @@ class JAS(SearchList):
                             chart2 += indent + "  },\n"
                     else:
                         for obs in value:
-                            aggregate_type = self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs]['weewx']['aggregate_type']
+                            aggregate_type = self.chart_defs[chart]['series'][obs]['weewx']['aggregate_type']
                             aggregate_interval = self.skin_dict['Extras']['page_definition'][page].get('aggregate_interval', {}) \
                                                 .get(aggregate_type, 'none')
 
