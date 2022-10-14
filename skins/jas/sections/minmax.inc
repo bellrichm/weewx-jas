@@ -10,7 +10,7 @@
                 ## ToDo: move to style sheet, resize observation table to match?
                 <table class="table">
                   <tbody>
-                    #for observation in $Extras.minmax.observations
+                    #for observation in $Extras.minmax.observations.sections
                         #set label = '$obs.label.' + $observation 
                         #set min_id = $observation + "_minmax_min"
                         #set max_id = $observation + "_minmax_max"

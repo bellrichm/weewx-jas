@@ -281,7 +281,7 @@ function handleMQTT(message) {
     // Update the min/max observations
     function updateMinMax(startTimestamp, endTimestamp) {
         ## ToDo: optimize to only get index once for all observations?
-        #for $observation in $getVar('Extras.minmax.observations')
+        #for $observation in $getVar('Extras.minmax.observations.sections')
             #set $data_binding = $getVar("$Extras.minmax.observations." + $observation + ".data_binding", minmax_data_binding)
             #set min_datetime_array = $interval_name_global + "_min_" + $observation + "_" + $data_binding + "_dateTime";
             #set min_data_array = $interval_name_global + "_min_" + $observation + "_" + $data_binding + "_data";
@@ -306,8 +306,14 @@ function handleMQTT(message) {
             #echo "          minIndex =" + $min_data_array + ".indexOf(Math.min(..." + $min_data_array + ".slice(startIndex, endIndex)));\n"
             #echo "          maxIndex =" + $max_data_array + ".indexOf(Math.max(..." + $max_data_array + ".slice(startIndex, endIndex)));\n"
             #echo "        }\n"
-            #echo "        min = " + $min_data_array + "[minIndex] + '" + $label + "';\n"
-            #echo "        max = " + $max_data_array + "[maxIndex] + '" + $label + "';\n"
+            #set max_decimals = $getVar('$Extras.minmax.observations.' + $observation + '.max_decimals', False)
+            #if max_decimals
+                #echo "        min = parseFloat(Number(" + $min_data_array + "[minIndex]).toFixed(" + $max_decimals + ")) + '" + $label + "';\n"
+                #echo "        max = parseFloat(Number(" + $max_data_array + "[maxIndex]).toFixed(" + $max_decimals + ")) + '" + $label + "';\n"
+            #else
+                #echo "        min = " + $min_data_array + "[minIndex] + '" + $label + "';\n"
+                #echo "        max = " + $max_data_array + "[maxIndex] + '" + $label + "';\n"
+            #end if
             #set aggregate_interval = "aggregate_interval_" + $getVar('Extras.page_definition.' + $page + '.aggregate_interval.min', 'none')
             #echo "        minDate = moment.unix(" + $min_datetime_array + "[minIndex]/1000).utcOffset(" + str($utcOffset) + ").format('" + $pgettext($aggregate_interval, 'label') + "');\n"
             #echo "        maxDate = moment.unix(" + $max_datetime_array + "[maxIndex]/1000).utcOffset(" + str($utcOffset) + ").format('" + $pgettext($aggregate_interval, 'label') + "');\n"

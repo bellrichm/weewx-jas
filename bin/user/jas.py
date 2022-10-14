@@ -627,7 +627,7 @@ class JAS(SearchList):
 
         minmax_observations = self.skin_dict.get('Extras', {}).get('minmax', {}).get('observations', {})
         minmax_data_binding = self.skin_dict.get('Extras', {}).get('minmax', {}).get('data_binding', skin_data_binding)
-        for observation in minmax_observations:
+        for observation in self.skin_dict['Extras']['minmax']['observations'].sections:
             data_binding = minmax_observations[observation].get('data_binding', minmax_data_binding)
             if observation not in self.wind_observations:
                 if observation not in observations:
