@@ -87,6 +87,10 @@ This data is stored in a javascript object named 'current'.
         current.header.name = "$getVar('Extras.current.observation')";
         #set line = '$current($data_binding=$page_data_binding).' + $getVar('Extras.current.observation') + '.format(add_label=False)' + '";'
         current.header.value = "$evaluate($line)
+        #set header_max_decimals = $getVar('$Extras.current.header_max_decimals', False)
+        #if $header_max_decimals
+            current.header.value = parseFloat(Number(current.header.value).toFixed($header_max_decimals));
+        #end if        
         #set line = '$unit.label.' + $getVar('Extras.current.observation') +  '";'
         current.header.unit = "$evaluate($line)
     #end if
@@ -113,6 +117,10 @@ This data is stored in a javascript object named 'current'.
         observation.mqtt = $getVar('$Extras.current.observations.' + $observation + '.mqtt', 'true').lower();
         #set source = '"' + $observation_value + '";'
         observation.value = $evaluate($source)
+        #set max_decimals = $getVar('$Extras.current.observations.' + $observation + '.max_decimals', False)
+        #if max_decimals
+            observation.value = parseFloat(Number(observation.value).toFixed($max_decimals));
+        #end if
         #set source = '"' + $observation_unit + '";'
         observation.unit = $evaluate($source)
         observation.maxDecimals = $getVar('$Extras.current.observations.' + $observation + '.max_decimals', 'null');
