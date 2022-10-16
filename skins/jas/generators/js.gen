@@ -87,15 +87,18 @@ function handleMQTT(message) {
         }
 
         // Handle information that will be appended to the observation's value.
-        suffixes = sessionStorage.getItem("suffixes").split(",");
-        suffixes.forEach(function(suffix) {
-            suffixInfo = current.suffixes.get(suffix);        
-            if (suffixInfo.mqtt && test_obj[suffix]) {
-                data = JSON.parse(sessionStorage.getItem(suffix));
-                data.value = test_obj[suffix];
-                sessionStorage.setItem(suffix, JSON.stringify(data));
-            }
-        });
+        suffix_list = sessionStorage.getItem("suffixes");
+        if (suffix_list) {
+            suffixes = suffix_list.split(",");
+            suffixes.forEach(function(suffix) {
+                suffixInfo = current.suffixes.get(suffix);        
+                if (suffixInfo && suffixInfo.mqtt && test_obj[suffix]) {
+                    data = JSON.parse(sessionStorage.getItem(suffix));
+                    data.value = test_obj[suffix];
+                    sessionStorage.setItem(suffix, JSON.stringify(data));
+                }
+            });
+        }
 
         // Process each observation in the 'current' section.
         observations = sessionStorage.getItem("observations").split(",");
