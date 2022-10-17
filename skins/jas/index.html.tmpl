@@ -76,7 +76,7 @@
                   <span class="navbar-toggler-icon"></span>
                </button>
                <div class="collapse navbar-collapse" id="navbarCollapse">
-                  <ul class="navbar-nav me-auto mb-2 mb-md-0">
+                  <ul class="navbar-nav me-auto mb-2 mb-md-0 navbar-nav-scroll">
                      ## Navigation for the congigured 'pages'
                      #for $page_data in $getVar('Extras.pages')
                         #if not to_bool($getVar("$Extras.pages." + $page_data + ".enable", True))
