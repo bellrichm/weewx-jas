@@ -69,9 +69,11 @@ EXTENSION_CONFIG = """
                     [[[[[[dewpoint]]]]]]
                     [[[[[[outHumidity]]]]]]
                     [[[[[[barometer]]]]]]
-                        suffix = ($trend($data_binding=$data_binding).barometer.formatted)
+                        # ToDo: how to handle number localized formatting (use of periods and commas)
+                        #suffix = ($trend($data_binding=$data_binding).barometer.formatted)
                     [[[[[[windSpeed]]]]]]
-                        suffix = $current.windDir.ordinal_compass ($current.windDir)
+                        # ToDo: how to handle number localized formatting (use of periods and commas)
+                        #suffix = $current.windDir.ordinal_compass ($current.windDir)
                     [[[[[[rain]]]]]]
                         mqtt = false
                         type = sum
