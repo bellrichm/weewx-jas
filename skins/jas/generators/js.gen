@@ -73,8 +73,11 @@ function handleMQTT(message) {
 
             #set header_max_decimals = $getVar('$Extras.current.header_max_decimals', False)
             #if $header_max_decimals
-                header.value = parseFloat(Number(header.value).toFixed($header_max_decimals));
+                header.value = Number(header.value).toFixed($header_max_decimals);
             #end if
+            if (!isNaN(header.value)) {
+                header.value = Number(header.value).toLocaleString();
+            }            
 
             if (test_obj[header.unit]) {
                 header.unit = test_obj[header.unit];
@@ -113,7 +116,10 @@ function handleMQTT(message) {
                 data = JSON.parse(sessionStorage.getItem(observation));
                 data.value = Number(test_obj[obs]);
                 if (observationInfo.maxDecimals != null) {
-                   data.value = parseFloat(data.value.toFixed(observationInfo.maxDecimals));
+                   data.value = data.value.toFixed(observationInfo.maxDecimals);
+                }
+                if (!isNaN(data.value)) {
+                    data.value = Number(data.value).toLocaleString();
                 }
                 sessionStorage.setItem(observation, JSON.stringify(data));
 

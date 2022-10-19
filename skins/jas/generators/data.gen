@@ -88,11 +88,12 @@ This data is stored in a javascript object named 'current'.
         #set line = '$current($data_binding=$page_data_binding).' + $getVar('Extras.current.observation') + '.format(add_label=False, localize=False)' + ';'
         current.header.value = $evaluate($line)
         #set header_max_decimals = $getVar('$Extras.current.header_max_decimals', False)
-        #* ToDo - doesnt work with numbers using comma to separate decimal place
         #if $header_max_decimals
-            current.header.value = parseFloat(Number(current.header.value).toFixed($header_max_decimals));
+            current.header.value = current.header.value.toFixed($header_max_decimals);
         #end if
-        *#
+        if (!isNaN(current.header.value)) {
+            current.header.value = Number(current.header.value).toLocaleString();
+        }
         #set line = '$unit.label.' + $getVar('Extras.current.observation') +  '";'
         current.header.unit = "$evaluate($line)
     #end if
@@ -120,11 +121,12 @@ This data is stored in a javascript object named 'current'.
         #set source = $observation_value + ';'
         observation.value = $evaluate($source)
         #set max_decimals = $getVar('$Extras.current.observations.' + $observation + '.max_decimals', False)
-        #* ToDo - doesnt work with numbers using comma to separate decimal place
         #if max_decimals
-            observation.value = parseFloat(Number(observation.value).toFixed($max_decimals));
+            observation.value = observation.value.toFixed($max_decimals);
         #end if
-        *#
+        if (!isNaN(observation.value)) {
+            observation.value = Number(observation.value).toLocaleString();
+        }
         #set source = '"' + $observation_unit + '";'
         observation.unit = $evaluate($source)
         observation.maxDecimals = $getVar('$Extras.current.observations.' + $observation + '.max_decimals', 'null');
