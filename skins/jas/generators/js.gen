@@ -323,6 +323,8 @@ function handleMQTT(message) {
                 #echo "        min = min.toFixed(" + $max_decimals + ");\n"
                 #echo "        max = max.toFixed(" + $max_decimals + ");\n"
             #end if
+            #echo "        min = Number(min).toLocaleString();\n"
+            #echo "        max = Number(max).toLocaleString();\n"
             #echo "        min = min + '" + $label + "';\n"
             #echo "        max = max + '" + $label + "';\n"
 
