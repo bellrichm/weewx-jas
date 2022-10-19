@@ -342,10 +342,10 @@ function handleMQTT(message) {
     function getObservation(timeStamp, observations) {
         var array_result = observations.filter(function(v,i) { return v[0] === timeStamp; });
         if (array_result.length > 0)     {
-            return array_result[0][1];
+            return array_result[0][1].toLocaleString();
         }
 
-        return observations[0][1];
+        return observations[0][1].toLocaleString();
     }
 
     // Update the 'on this date' observations with observations at timeStamp
