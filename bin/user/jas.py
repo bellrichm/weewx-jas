@@ -669,7 +669,7 @@ class JAS(SearchList):
                 coordinate_type = 'grid'
             else:
                 coordinate_type = 'grid'
-            # ToDo fix here
+            # ToDo: fix here
             self.chart_defs[chart].merge(self.chart_defaults.get(coordinate_type, {}))
 
             weewx_options = {}
@@ -679,7 +679,7 @@ class JAS(SearchList):
                 self.chart_defs[chart]['weewx'] = {}
             self.chart_defs[chart]['weewx']['yAxis'] = {}
             self.chart_defs[chart]['weewx']['yAxis']['0'] = next(iter(self.skin_dict['Extras']['chart_definitions'][chart]['series']))
-            # ToDo rework
+            # ToDo: rework
             for value in self.skin_dict['Extras']['chart_definitions'][chart]['series']:
                 charttype = self.skin_dict['Extras']['chart_definitions'][chart]['series'][value].get('type', None)
                 if not charttype:
