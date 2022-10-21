@@ -73,8 +73,11 @@ function handleMQTT(message) {
 
             #set header_max_decimals = $getVar('$Extras.current.header_max_decimals', False)
             #if $header_max_decimals
-                header.value = parseFloat(Number(header.value).toFixed($header_max_decimals));
+                header.value = Number(header.value).toFixed($header_max_decimals);
             #end if
+            if (!isNaN(header.value)) {
+                header.value = Number(header.value).toLocaleString();
+            }            
 
             if (test_obj[header.unit]) {
                 header.unit = test_obj[header.unit];
@@ -113,7 +116,10 @@ function handleMQTT(message) {
                 data = JSON.parse(sessionStorage.getItem(observation));
                 data.value = Number(test_obj[obs]);
                 if (observationInfo.maxDecimals != null) {
-                   data.value = parseFloat(data.value.toFixed(observationInfo.maxDecimals));
+                   data.value = data.value.toFixed(observationInfo.maxDecimals);
+                }
+                if (!isNaN(data.value)) {
+                    data.value = Number(data.value).toLocaleString();
                 }
                 sessionStorage.setItem(observation, JSON.stringify(data));
 
@@ -309,14 +315,19 @@ function handleMQTT(message) {
             #echo "          minIndex =" + $min_data_array + ".indexOf(Math.min(..." + $min_data_array + ".slice(startIndex, endIndex)));\n"
             #echo "          maxIndex =" + $max_data_array + ".indexOf(Math.max(..." + $max_data_array + ".slice(startIndex, endIndex)));\n"
             #echo "        }\n"
+
+            #echo "        min = " + $min_data_array + "[minIndex];\n" 
+            #echo "        max = " + $max_data_array + "[maxIndex];\n" 
             #set max_decimals = $getVar('$Extras.minmax.observations.' + $observation + '.max_decimals', False)
             #if max_decimals
-                #echo "        min = parseFloat(Number(" + $min_data_array + "[minIndex]).toFixed(" + $max_decimals + ")) + '" + $label + "';\n"
-                #echo "        max = parseFloat(Number(" + $max_data_array + "[maxIndex]).toFixed(" + $max_decimals + ")) + '" + $label + "';\n"
-            #else
-                #echo "        min = " + $min_data_array + "[minIndex] + '" + $label + "';\n"
-                #echo "        max = " + $max_data_array + "[maxIndex] + '" + $label + "';\n"
+                #echo "        min = min.toFixed(" + $max_decimals + ");\n"
+                #echo "        max = max.toFixed(" + $max_decimals + ");\n"
             #end if
+            #echo "        min = Number(min).toLocaleString();\n"
+            #echo "        max = Number(max).toLocaleString();\n"
+            #echo "        min = min + '" + $label + "';\n"
+            #echo "        max = max + '" + $label + "';\n"
+
             #set aggregate_interval = "aggregate_interval_" + $getVar('Extras.page_definition.' + $page + '.aggregate_interval.min', 'none')
             #echo "        minDate = moment.unix(" + $min_datetime_array + "[minIndex]/1000).utcOffset(" + str($utcOffset) + ").format('" + $pgettext($aggregate_interval, 'label') + "');\n"
             #echo "        maxDate = moment.unix(" + $max_datetime_array + "[maxIndex]/1000).utcOffset(" + str($utcOffset) + ").format('" + $pgettext($aggregate_interval, 'label') + "');\n"
@@ -336,10 +347,10 @@ function handleMQTT(message) {
     function getObservation(timeStamp, observations) {
         var array_result = observations.filter(function(v,i) { return v[0] === timeStamp; });
         if (array_result.length > 0)     {
-            return array_result[0][1];
+            return array_result[0][1].toLocaleString();
         }
 
-        return observations[0][1];
+        return observations[0][1].toLocaleString();
     }
 
     // Update the 'on this date' observations with observations at timeStamp
