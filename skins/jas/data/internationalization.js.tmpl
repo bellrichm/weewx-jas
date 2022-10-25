@@ -1,0 +1,41 @@
+#from weeutil.weeutil import to_list
+
+## ToDo: get lang from browser, fallback to $lang
+lang = '$lang';
+dateTimeFormat = {};
+
+#for $language in to_list($getVar('$Extras.languages', $lang))
+    #echo 'dateTimeFormat.' + $language + ' = {};\n'
+    #echo 'dateTimeFormat.' + $language + '.chart = {};\n'
+
+    #echo 'dateTimeFormat.' + $language + '.forecast = "' + $gettext('forecast_date_format') + '";\n'
+    #echo 'dateTimeFormat.' + $language + '.current = "' + $gettext('current_date_time') + '";\n'
+    #echo 'dateTimeFormat.' + $language + '.datePicker = "' + $gettext('datepicker_date_format') + '";\n'
+
+    #echo 'dateTimeFormat.' + $language + '.chart.yearToYearXaxis = "' + $gettext('year_to_year_xaxis_label') + '";\n'
+
+    #echo 'dateTimeFormat.' + $language + '.chart.mqtt = {};\n'
+    #echo 'dateTimeFormat.' + $language + '.chart.mqtt.toolTipX = "' + $pgettext('aggregate_interval_mqtt', 'tooltip_x') + '";\n'
+    #echo 'dateTimeFormat.' + $language + '.chart.mqtt.xAxisLabel = "' + $pgettext('aggregate_interval_mqtt', 'xaxis_label') + '";\n'
+    #echo 'dateTimeFormat.' + $language + '.chart.mqtt.label = "' + $pgettext('aggregate_interval_mqtt', 'label') + '";\n'
+
+    #echo 'dateTimeFormat.' + $language + '.chart.multiyear = {};\n'
+    #echo 'dateTimeFormat.' + $language + '.chart.multiyear.toolTipX = "' + $pgettext('aggregate_interval_multiyear', 'tooltip_x') + '";\n'
+    #echo 'dateTimeFormat.' + $language + '.chart.multiyear.xAxisLabel = "' + $pgettext('aggregate_interval_multiyear', 'xaxis_label') + '";\n'
+    #echo 'dateTimeFormat.' + $language + '.chart.multiyear.label = "' + $pgettext('aggregate_interval_multiyear', 'label') + '";\n'    
+
+    #echo 'dateTimeFormat.' + $language + '.chart.none = {};\n'
+    #echo 'dateTimeFormat.' + $language + '.chart.none.toolTipX = "' + $pgettext('aggregate_interval_none', 'tooltip_x') + '";\n'
+    #echo 'dateTimeFormat.' + $language + '.chart.none.xAxisLabel = "' + $pgettext('aggregate_interval_none', 'xaxis_label') + '";\n'
+    #echo 'dateTimeFormat.' + $language + '.chart.none.label = "' + $pgettext('aggregate_interval_none', 'label') + '";\n'    
+
+    #echo 'dateTimeFormat.' + $language + '.chart.hour = {};\n'
+    #echo 'dateTimeFormat.' + $language + '.chart.hour.toolTipX = "' + $pgettext('aggregate_interval_hour', 'tooltip_x') + '";\n'
+    #echo 'dateTimeFormat.' + $language + '.chart.hour.xAxisLabel = "' + $pgettext('aggregate_interval_hour', 'xaxis_label') + '";\n'
+    #echo 'dateTimeFormat.' + $language + '.chart.hour.label = "' + $pgettext('aggregate_interval_hour', 'label') + '";\n'    
+
+    #echo 'dateTimeFormat.' + $language + '.chart.day = {};\n'
+    #echo 'dateTimeFormat.' + $language + '.chart.day.toolTipX = "' + $pgettext('aggregate_interval_day', 'tooltip_x') + '";\n'
+    #echo 'dateTimeFormat.' + $language + '.chart.day.xAxisLabel = "' + $pgettext('aggregate_interval_day', 'xaxis_label') + '";\n'
+    #echo 'dateTimeFormat.' + $language + '.chart.day.label = "' + $pgettext('aggregate_interval_day', 'label') + '";\n'             
+#end for

@@ -147,7 +147,7 @@ function handleMQTT(message) {
             sessionStorage.setItem("updateDate", test_obj.dateTime*1000);
             timeElem = document.getElementById("updateDate");
             if (timeElem) {
-                timeElem.innerHTML = moment.unix(test_obj.dateTime).utcOffset($utcOffset).format('$gettext("current_date_time")');
+                timeElem.innerHTML = moment.unix(test_obj.dateTime).utcOffset($utcOffset).format(dateTimeFormat[lang].current);
             }
         }
     #end if
@@ -281,7 +281,7 @@ function handleMQTT(message) {
         if(sessionStorage.getItem("updateDate") === null || !MQTTConfig){
             sessionStorage.setItem("updateDate", updateDate);
         }
-        document.getElementById("updateDate").innerHTML = moment.unix(sessionStorage.getItem("updateDate")/1000).utcOffset($utcOffset).format('$gettext("current_date_time")');       
+        document.getElementById("updateDate").innerHTML = moment.unix(sessionStorage.getItem("updateDate")/1000).utcOffset($utcOffset).format(dateTimeFormat[lang].current);       
     }
 #end if
 
@@ -422,10 +422,6 @@ window.addEventListener("load", function (event) {
         // Set up the date/time picker
         #set $startDate = $interval_long_name_global + "startDate"
         #set $endDate = $interval_long_name_global + "endDate"
-        #set datepicker_date_format = $gettext('datepicker_date_format')
-        #if datepicker_date_format == 'datepicker_date_format'
-            #set datepicker_date_format = 'MM/DD/YYYY'
-        #end if    
         dateRangePicker2 = new DateRangePicker('datetimerange-input2',
                             {
                                 minDate: $startDate,
@@ -433,7 +429,7 @@ window.addEventListener("load", function (event) {
                                 startDate: $startDate,
                                 endDate: $endDate,
                                 locale: {
-                                    format: '$datepicker_date_format',
+                                    format: dateTimeFormat[lang].datePicker,
                                     applyLabel: '$gettext("datepicker_apply_label")',
                                     cancelLabel: '$gettext("datepicker_cancel_label")',
                                 },    
@@ -467,16 +463,12 @@ window.addEventListener("load", function (event) {
     #if 'thisdate' in $getVar('$Extras.pages.' + $page)
         #set $startDate = $interval_long_name_global + "startDate"
         #set $endDate = $interval_long_name_global + "endDate"
-        #set datepicker_date_format = $gettext('datepicker_date_format')
-        #if datepicker_date_format == 'datepicker_date_format'
-            #set datepicker_date_format = 'MM/DD/YYYY'
-        #end if    
         var dateRangePicker = new DateRangePicker('datetimerange-input1',
                             {singleDatePicker: true,
                                 minDate: $startDate,
                                 maxDate: $endDate,
                                 locale: {
-                                    format: '$datepicker_date_format',
+                                    format: dateTimeFormat[lang].datePicker,
                                     applyLabel: '$gettext("datepicker_apply_label")',
                                     cancelLabel: '$gettext("datepicker_cancel_label")',                                    
                                 },
