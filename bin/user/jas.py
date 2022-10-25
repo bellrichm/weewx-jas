@@ -724,11 +724,11 @@ class JAS(SearchList):
                             # set the aggregate_interval at the beginning of the chart definition, so it can be used in the chart
                             # Note, this means the last observation's aggregate type will be used to determine the aggregate interval
                             if series_type == 'multiple':
-                                chart2 = "#set global aggregate_interval_global = 'aggregate_interval_multiyear" + "'\n" + chart2
+                                chart2 = "#set global aggregate_interval_global = 'multiyear'\n" + chart2
                             elif series_type == 'mqtt':
-                                chart2 = "#set global aggregate_interval_global = 'aggregate_interval_mqtt" + "'\n" + chart2
+                                chart2 = "#set global aggregate_interval_global = 'mqtt'\n" + chart2
                             else:
-                                chart2 = "#set global aggregate_interval_global = 'aggregate_interval_" + aggregate_interval + "'\n" + chart2
+                                chart2 = "#set global aggregate_interval_global = '" + aggregate_interval + "'\n" + chart2
 
                             chart2 += indent + " {\n"
                             chart2 = self._iterdict(indent + '  ', page, chart, chart2, series_type, interval, value[obs], chart_data_binding)
@@ -772,6 +772,8 @@ class JAS(SearchList):
                 #self.charts_def[chart].merge(self.skin_dict['Extras']['pages'][page][chart])
                 for observation in chart_def['series']:
                     obs = chart_def['series'][observation].get('weewx', {}).get('observation', observation)
+
+                #
 
                 chart_js = "var option = {\n"
                 chart2 += self._iterdict('  ', page, chart, chart_js, series_type, interval, chart_def, chart_data_binding)
