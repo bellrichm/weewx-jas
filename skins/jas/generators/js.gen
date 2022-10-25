@@ -328,9 +328,10 @@ function handleMQTT(message) {
             #echo "        min = min + '" + $label + "';\n"
             #echo "        max = max + '" + $label + "';\n"
 
-            #set aggregate_interval = "aggregate_interval_" + $getVar('Extras.page_definition.' + $page + '.aggregate_interval.min', 'none')
-            #echo "        minDate = moment.unix(" + $min_datetime_array + "[minIndex]/1000).utcOffset(" + str($utcOffset) + ").format('" + $pgettext($aggregate_interval, 'label') + "');\n"
-            #echo "        maxDate = moment.unix(" + $max_datetime_array + "[maxIndex]/1000).utcOffset(" + str($utcOffset) + ").format('" + $pgettext($aggregate_interval, 'label') + "');\n"
+            #set aggregate_interval = $getVar('Extras.page_definition.' + $page + '.aggregate_interval.min', 'none')
+                                                                                                                                    ## .format(dateTimeFormat[lang].chart['$gettext($aggregate_interval_global)'].xAxisLabel); }"            
+            #echo "        minDate = moment.unix(" + $min_datetime_array + "[minIndex]/1000).utcOffset(" + str($utcOffset) + ").format(dateTimeFormat[lang].chart['" + $gettext($aggregate_interval) + "'].label);\n"
+            #echo "        maxDate = moment.unix(" + $max_datetime_array + "[maxIndex]/1000).utcOffset(" + str($utcOffset) + ").format(dateTimeFormat[lang].chart['" + $gettext($aggregate_interval) + "'].label);\n"
 
             observation_element=document.getElementById("$min_id");
             observation_element.innerHTML = min + '<br>' + minDate;
