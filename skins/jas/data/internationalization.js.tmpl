@@ -8,6 +8,7 @@ languages = {};
 
 ## Set lang to browser's preferred language, falling back to language set in skin
 lang = '$lang';
+#* not quite ready
 for (var i in navigator.languages) {
     user_lang = navigator.languages[i].substr(0, 2);
     if (user_lang in languages) {
@@ -15,6 +16,7 @@ for (var i in navigator.languages) {
         break;
     }
 }
+*#
 
 dateTimeFormat = {};
 
