@@ -19,6 +19,9 @@ This search list extension provides the following tags:
     Returns:
       The charts for the page.
 
+  $languages
+    The languages supported by the skin
+
   $last24hours
     A WeeWX timespanBinder for the last 24 hours.
 
@@ -94,6 +97,7 @@ import json
 import configobj
 
 import weewx
+import weecfg
 try:
     # Python 3
     from urllib.request import Request, urlopen, HTTPError # pyright: reportMissingImports=false
@@ -178,6 +182,9 @@ class JAS(SearchList):
         self.chart_defaults = self.skin_dict['Extras']['chart_defaults'].get('global', {})
         self.chart_series_defaults = self.skin_dict['Extras']['chart_defaults'].get('chart_type', {}).get('series', {})
 
+        skin_path = os.path.join(self.skin_dict['SKIN_ROOT'], 'jas')
+        self.languages = weecfg.get_languages(skin_path)
+
         html_root = self.skin_dict.get('HTML_ROOT',
                                        report_dict.get('HTML_ROOT', 'public_html'))
 
@@ -227,6 +234,7 @@ class JAS(SearchList):
                                  'genCharts': self._gen_charts,
                                  'getRange': self._get_range,
                                  'getUnitLabel': self._get_unit_label,
+                                 'languages': self.languages,
                                  'last24hours': self._get_last24hours,
                                  'last7days': self._get_last_7_days,
                                  'last31days': self._get_last_31_days,

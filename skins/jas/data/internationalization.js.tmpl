@@ -1,7 +1,21 @@
 #from weeutil.weeutil import to_list
 
-## ToDo: get lang from browser, fallback to $lang
+## ToDo: Init dictionary via cheetah and not javascript
+languages = {};
+#for $language in $languages
+    languages['$language'] = '$language';
+#end for
+
+## Set lang to browser's preferred language, falling back to language set in skin
 lang = '$lang';
+for (var i in navigator.languages) {
+    user_lang = navigator.languages[i].substr(0, 2);
+    if (user_lang in languages) {
+        lang = user_lang;
+        break;
+    }
+}
+
 dateTimeFormat = {};
 
 #for $language in to_list($getVar('$Extras.languages', $lang))
