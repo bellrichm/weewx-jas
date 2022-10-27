@@ -7,6 +7,12 @@ This search list extension provides the following tags:
     Returns:
       A dictionary of all aggregate types (avg, max, min, sum, etc.) used.
 
+  $dateTimeFormats
+    Arguments:
+      language: The language to get the formats.
+    Returns:
+      The formats.
+
   $forecasts
     Returns:
       A list of dictionaries containing forecastdata.
@@ -106,6 +112,7 @@ except ImportError:
     from urllib2 import Request, urlopen, HTTPError # pyright: reportMissingImports=false
 
 from weewx.cheetahgenerator import SearchList
+from weewx.reportengine import merge_lang
 from weewx.units import get_label_string
 from weewx.tags import TimespanBinder
 from weeutil.weeutil import to_bool, to_int, TimeSpan
@@ -182,7 +189,8 @@ class JAS(SearchList):
         self.chart_defaults = self.skin_dict['Extras']['chart_defaults'].get('global', {})
         self.chart_series_defaults = self.skin_dict['Extras']['chart_defaults'].get('chart_type', {}).get('series', {})
 
-        skin_path = os.path.join(self.skin_dict['SKIN_ROOT'], 'jas')
+        self.skin_dicts = {}
+        skin_path = os.path.join(self.generator.config_dict['WEEWX_ROOT'], self.skin_dict['SKIN_ROOT'], self.skin_dict['skin'])
         self.languages = weecfg.get_languages(skin_path)
 
         html_root = self.skin_dict.get('HTML_ROOT',
@@ -229,6 +237,7 @@ class JAS(SearchList):
 
         search_list_extension = {'aggregate_types': self.aggregate_types,
                                  'current_observation': self.data_current,
+                                 'dateTimeFormats': self.get_dateTime_formats,
                                  'data_binding': self.data_binding,
                                  'forecasts': self.data_forecast,
                                  'genCharts': self._gen_charts,
@@ -255,6 +264,46 @@ class JAS(SearchList):
     def _skin_debug(self, msg):
         if self.skin_debug:
             logdbg(msg)
+
+    def get_dateTime_formats(self, language):
+        if language not in self.skin_dicts:
+            if language in self.languages:
+                self.skin_dicts[language] = copy.deepcopy(self.skin_dict)
+                merge_lang(language, self.generator.config_dict, self.skin_dict['REPORT_NAME'], self.skin_dicts[language])
+
+        dateTime_formats = {}
+        dateTime_formats['forecast_date_format'] = self.skin_dicts[language]['Texts']['forecast_date_format']
+        dateTime_formats['current_date_time'] = self.skin_dicts[language]['Texts']['current_date_time']
+        dateTime_formats['datepicker_date_format'] = self.skin_dicts[language]['Texts']['datepicker_date_format']
+
+        dateTime_formats['year_to_year_xaxis_label'] = self.skin_dicts[language]['Texts']['year_to_year_xaxis_label']
+
+        dateTime_formats['aggregate_interval_mqtt'] = {}
+        dateTime_formats['aggregate_interval_mqtt']['tooltip_x'] = self.skin_dicts[language]['Texts']['aggregate_interval_mqtt']['tooltip_x']
+        dateTime_formats['aggregate_interval_mqtt']['xaxis_label'] = self.skin_dicts[language]['Texts']['aggregate_interval_mqtt']['xaxis_label']
+        dateTime_formats['aggregate_interval_mqtt']['label'] = self.skin_dicts[language]['Texts']['aggregate_interval_mqtt']['label']
+
+        dateTime_formats['aggregate_interval_multiyear'] = {}
+        dateTime_formats['aggregate_interval_multiyear']['tooltip_x'] = self.skin_dicts[language]['Texts']['aggregate_interval_multiyear']['tooltip_x']
+        dateTime_formats['aggregate_interval_multiyear']['xaxis_label'] = self.skin_dicts[language]['Texts']['aggregate_interval_multiyear']['xaxis_label']
+        dateTime_formats['aggregate_interval_multiyear']['label'] = self.skin_dicts[language]['Texts']['aggregate_interval_multiyear']['label']
+                
+        dateTime_formats['aggregate_interval_none'] = {}
+        dateTime_formats['aggregate_interval_none']['tooltip_x'] = self.skin_dicts[language]['Texts']['aggregate_interval_none']['tooltip_x']
+        dateTime_formats['aggregate_interval_none']['xaxis_label'] = self.skin_dicts[language]['Texts']['aggregate_interval_none']['xaxis_label']
+        dateTime_formats['aggregate_interval_none']['label'] = self.skin_dicts[language]['Texts']['aggregate_interval_none']['label']
+
+        dateTime_formats['aggregate_interval_hour'] = {}
+        dateTime_formats['aggregate_interval_hour']['tooltip_x'] = self.skin_dicts[language]['Texts']['aggregate_interval_hour']['tooltip_x']
+        dateTime_formats['aggregate_interval_hour']['xaxis_label'] = self.skin_dicts[language]['Texts']['aggregate_interval_hour']['xaxis_label']
+        dateTime_formats['aggregate_interval_hour']['label'] = self.skin_dicts[language]['Texts']['aggregate_interval_hour']['label']
+
+        dateTime_formats['aggregate_interval_day'] = {}
+        dateTime_formats['aggregate_interval_day']['tooltip_x'] = self.skin_dicts[language]['Texts']['aggregate_interval_day']['tooltip_x']
+        dateTime_formats['aggregate_interval_day']['xaxis_label'] = self.skin_dicts[language]['Texts']['aggregate_interval_day']['xaxis_label']
+        dateTime_formats['aggregate_interval_day']['label'] = self.skin_dicts[language]['Texts']['aggregate_interval_day']['label']
+
+        return dateTime_formats
 
     def _get_last24hours(self, data_binding=None):
         dbm = self.generator.db_binder.get_manager(data_binding=data_binding)
