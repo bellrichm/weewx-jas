@@ -290,6 +290,7 @@ class JASInstaller(ExtensionInstaller):
                                          'skins/jas/charts/%Y-%m.js.tmpl'
                                          ]),
                    ('skins/jas/data', ['skins/jas/data/index.js.tmpl',
+                                       'skins/jas/data/internationalization.js.tmpl',
                                        'skins/jas/data/forecast.js.tmpl',
                                        'skins/jas/data/debug.js.tmpl',
                                        'skins/jas/data/day.js.tmpl',
