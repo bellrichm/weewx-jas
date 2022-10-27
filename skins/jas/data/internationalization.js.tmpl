@@ -17,8 +17,15 @@ for (var i in navigator.languages) {
 }
 
 dateTimeFormat = {};
+observationLabels = {};
 
 #for $language in $languages
+    #set $obsLabels = $observationLabels($language)
+    #echo 'observationLabels.' + $language + ' = {};\n'
+    #for $observation in $obsLabels
+        #echo 'observationLabels.' + $language + '.' + $observation + ' = "' + $obsLabels[$observation] + '";\n'
+    #end for
+
     #echo 'dateTimeFormat.' + $language + ' = {};\n'
     #echo 'dateTimeFormat.' + $language + '.chart = {};\n'
 

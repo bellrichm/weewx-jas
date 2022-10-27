@@ -52,6 +52,12 @@ This search list extension provides the following tags:
   $observations
     A dictionary of all the observations that will be charted.
 
+  $observationLabels
+    Arguments:
+      language: The language to get the labels.
+    Returns:
+      The labels.
+
   $ordinateNames
     The names of the compass ordinates.
 
@@ -252,6 +258,7 @@ class JAS(SearchList):
                                  'loginf': loginf,
                                  'logerr': logerr,
                                  'observations': self.observations,
+                                 'observationLabels': self.get_observation_labels,
                                  'ordinateNames': self.ordinate_names,
                                  'skinDebug': self._skin_debug,
                                  'utcOffset': self.utc_offset,
@@ -265,11 +272,21 @@ class JAS(SearchList):
         if self.skin_debug:
             logdbg(msg)
 
+    def _get_skin_dict(self, language):
+        self.skin_dicts[language] = copy.deepcopy(self.skin_dict)
+        merge_lang(language, self.generator.config_dict, self.skin_dict['REPORT_NAME'], self.skin_dicts[language])
+
+    def get_observation_labels(self, language):
+        if language not in self.skin_dicts:
+            if language in self.languages:
+                self._get_skin_dict(language)
+
+        return self.skin_dicts[language]['Labels']['Generic']
+
     def get_dateTime_formats(self, language):
         if language not in self.skin_dicts:
             if language in self.languages:
-                self.skin_dicts[language] = copy.deepcopy(self.skin_dict)
-                merge_lang(language, self.generator.config_dict, self.skin_dict['REPORT_NAME'], self.skin_dicts[language])
+                self._get_skin_dict(language)
 
         dateTime_formats = {}
         dateTime_formats['forecast_date_format'] = self.skin_dicts[language]['Texts']['forecast_date_format']
@@ -876,7 +893,7 @@ class JAS(SearchList):
                     for obs in chart_def['series']:
                         aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
                         obs_data_binding = chart_def['series'][obs].get('weewx', {}).get('data_binding', chart_data_binding)
-                        chart2 += "    {name: " + chart_def['series'][obs].get('name', "'" + '$obs.label.' + obs + "'") + ",\n"
+                        chart2 += "    {name: " + chart_def['series'][obs].get('name', 'observationLabels[lang][' + obs + "']") + ",\n"
                         chart2 += "     data: [\n"
                         (start_year, end_year) = self._get_range(self.skin_dict['Extras']['pages'][page].get('start', None),
                                                                  self.skin_dict['Extras']['pages'][page].get('end', None),
@@ -913,7 +930,7 @@ class JAS(SearchList):
                     for obs in chart_def['series']:
                         aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
                         obs_data_binding = chart_def['series'][obs].get('weewx', {}).get('data_binding', chart_data_binding)
-                        chart2 += "    {name: " + chart_def['series'][obs].get('name', "'" + '$obs.label.' + obs + "'") + ",\n"
+                        chart2 += "    {name: " + chart_def['series'][obs].get('name', "observationLabels[lang]['" + obs + "']") + ",\n"
                         chart2 += "    data: " \
                                 + interval + "_" + aggregate_type \
                                 + "." + chart_def['series'][obs]['weewx']['observation'] + "_"  + obs_data_binding \
