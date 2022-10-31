@@ -18,6 +18,7 @@ for (var i in navigator.languages) {
 
 dateTimeFormat = {};
 observationLabels = {};
+textLabels = {};
 
 #for $language in $languages
     #set $obsLabels = $observationLabels($language)
@@ -30,7 +31,8 @@ observationLabels = {};
     #echo 'textLabels.' + $language + ' = {};\n'
     #for $observation in $texts
         #if isinstance($texts[$observation], str)
-            #echo 'textLabels.' + $language + '.' + $observation + ' = "' + $texts[$observation] + '";\n'
+            ## Todo: fix keys to not have '-', '.' 
+            #echo 'textLabels.' + $language + '["' + $observation + '"] = "' + $texts[$observation] + '";\n'
         #end if
     #end for
 
