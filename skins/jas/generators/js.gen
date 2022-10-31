@@ -444,8 +444,8 @@ window.addEventListener("load", function (event) {
                                 endDate: $endDate,
                                 locale: {
                                     format: dateTimeFormat[lang].datePicker,
-                                    applyLabel: observationLabels[lang]["datepicker_apply_label"],
-                                    cancelLabel: observationLabels[lang]["datepicker_cancel_label"],
+                                    applyLabel: textLabels[lang]["datepicker_apply_label"],
+                                    cancelLabel: textLabels[lang]["datepicker_cancel_label"],
                                 },    
                             },                                
                             function(start, end, label) {
@@ -483,8 +483,8 @@ window.addEventListener("load", function (event) {
                                 maxDate: $endDate,
                                 locale: {
                                     format: dateTimeFormat[lang].datePicker,
-                                    applyLabel: observationLabels[lang]["datepicker_apply_label"],
-                                    cancelLabel: observationLabels[lang]["datepicker_cancel_label"],                         
+                                    applyLabel: textLabels[lang]["datepicker_apply_label"],
+                                    cancelLabel: textLabels[lang]["datepicker_cancel_label"],                         
                                 },
                             },
                                 function(start, end, label) {
