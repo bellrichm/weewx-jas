@@ -64,6 +64,12 @@ This search list extension provides the following tags:
   $skinDebug
     The skin debug option.
 
+  $textLabels
+    Arguments:
+      language: The language to get the labels.
+    Returns:
+      The labels.
+
   $utcOffset
     The UTC offset in minutes.
 
@@ -261,6 +267,7 @@ class JAS(SearchList):
                                  'observationLabels': self.get_observation_labels,
                                  'ordinateNames': self.ordinate_names,
                                  'skinDebug': self._skin_debug,
+                                 'textLabels': self.get_text_labels,
                                  'utcOffset': self.utc_offset,
                                  'version': VERSION,
                                  'windCompass': self._get_wind_compass,
@@ -282,6 +289,13 @@ class JAS(SearchList):
                 self._get_skin_dict(language)
 
         return self.skin_dicts[language]['Labels']['Generic']
+
+    def get_text_labels(self, language):
+        if language not in self.skin_dicts:
+            if language in self.languages:
+                self._get_skin_dict(language)
+
+        return self.skin_dicts[language]['Texts']        
 
     def get_dateTime_formats(self, language):
         if language not in self.skin_dicts:

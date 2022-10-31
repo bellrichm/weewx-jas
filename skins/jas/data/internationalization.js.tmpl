@@ -26,6 +26,14 @@ observationLabels = {};
         #echo 'observationLabels.' + $language + '.' + $observation + ' = "' + $obsLabels[$observation] + '";\n'
     #end for
 
+    #set $texts = $textLabels($language)
+    #echo 'textLabels.' + $language + ' = {};\n'
+    #for $observation in $texts
+        #if isinstance($texts[$observation], str)
+            #echo 'textLabels.' + $language + '.' + $observation + ' = "' + $texts[$observation] + '";\n'
+        #end if
+    #end for
+
     #echo 'dateTimeFormat.' + $language + ' = {};\n'
     #echo 'dateTimeFormat.' + $language + '.chart = {};\n'
 
