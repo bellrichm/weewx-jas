@@ -1,2 +1,3 @@
 weewx.conf
 __pycache__/
+skins/jas/lang/de*.conf
