@@ -4,8 +4,7 @@
 <div class="col-12 col-xl-6 mb-4">
     <div class="card">
         <div class="card-body text-center">
-                <h5 class="h5-responsive indigo-text">
-                  $gettext("minmax.title")
+                <h5 class="h5-responsive indigo-text" text_label="minmax.title">
                 </h5>        
                 ## ToDo: move to style sheet, resize observation table to match?
                 <table class="table">
