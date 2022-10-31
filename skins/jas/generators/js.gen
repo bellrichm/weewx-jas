@@ -20,6 +20,13 @@
 var pageCharts = [];
 var mqttData = {}
 
+function updateLabels() {
+    document.querySelectorAll("[obs_label]").forEach(function(element) {
+        observation = element.getAttribute("obs_label");
+        element.innerText = observationLabels[lang][observation];
+    })
+}
+
 // Update the chart's data
 function updateCharts() {
     currTime = Date.now();
@@ -414,6 +421,7 @@ window.addEventListener("load", function (event) {
     });
     myObserver.observe(document.body);
 
+    updateLabels();
     updateCharts();
 
     #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)

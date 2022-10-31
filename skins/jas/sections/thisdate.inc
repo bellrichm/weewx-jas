@@ -12,9 +12,8 @@
                   <tbody>
                     #for observation in $getVar('$Extras.thisdate.observations')
                         #set aggregation_type = $getVar("$Extras.thisdate.observations." + $observation + ".type", None)
-                        #set label = '$obs.label.' + $observation 
                         <tr  class="row mx0">
-                        <th class="col" scope="row">#include source=$label #</th>
+                        <th class="col" scope="row" obs_label="$observation"></th>
                         #if $aggregation_type is None
                             #set $id = $observation + "_thisdate_min"
                             <td id="$id" class="col">
