@@ -893,7 +893,7 @@ class JAS(SearchList):
                     for obs in chart_def['series']:
                         aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
                         obs_data_binding = chart_def['series'][obs].get('weewx', {}).get('data_binding', chart_data_binding)
-                        chart2 += "    {name: " + chart_def['series'][obs].get('name', 'observationLabels[lang][' + obs + "']") + ",\n"
+                        chart2 += "    {name: " + chart_def['series'][obs].get('name', 'observationLabels[lang][' + "'" + obs + "']") + ",\n"
                         chart2 += "     data: [\n"
                         (start_year, end_year) = self._get_range(self.skin_dict['Extras']['pages'][page].get('start', None),
                                                                  self.skin_dict['Extras']['pages'][page].get('end', None),
