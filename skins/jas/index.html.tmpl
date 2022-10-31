@@ -95,27 +95,25 @@
                      ## Year dropdown
                      #if ($getVar("$Extras.pages.archive-year", None) and to_bool($getVar("$Extras.pages.archive-year.enable", True))) \
                         or ($getVar("$Extras.pages.archive-month", None) and to_bool($getVar("$Extras.pages.archive-month.enable", True)))
-                        <li class="nav-item dropdown">
+                        <li class="nav-item dropdown" text_label="year_dropdown-label">
                         #if $year_global is not None
                         <a class="nav-link dropdown-toggle active" aria-current="page" href="#" id="dropdownYear" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         #else
                         <a class="nav-link dropdown-toggle" href="#" id="dropdownYear" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         #end if
-                           $gettext('year_dropdown-label')
                         </a>
                         <div class="dropdown-menu" aria-labelledby="dropdownYear" id="dropdownYearMenu">
                         </li>
                      #end if
                      ## Month dropdown
                      #if $getVar("$Extras.pages.archive-month", None) and to_bool($getVar("$Extras.pages.archive-month.enable", True))
-                        <li class="nav-item dropdown">
+                        <li class="nav-item dropdown" text_label="yearMonth_dropdown-label">
                         <div class="dropdown">
                         #if $month_global is not None
                            <a class="nav-link dropdown-toggle active" aria-current="page" href="#" role="button" id="dropdownYearMonth" data-bs-toggle="dropdown" aria-expanded="false">
                         #else
                            <a class="nav-link dropdown-toggle" href="#" role="button" id="dropdownYearMonth" data-bs-toggle="dropdown" aria-expanded="false">
                         #end if
-                           $gettext('yearMonth_dropdown-label')
                            </a>
                            <ul class="dropdown-menu pre-scrollable" aria-labelledby="dropdownYearMonth" id="dropdownYearMonthMenu">
                            </ul>
@@ -123,9 +121,9 @@
                         </li>
                      #end if  
                   </ul>
-                  <button id="connectButton" class="btn btn-outline-success d-none" type="button" onclick="MQTTConnect()">$gettext('connect_button_label')</button>
-                  <button id="disconnectButton" class="btn btn-outline-success d-none" type="button" onclick="MQTTDisconnect()">$gettext('disconnect_button_label')</button>
-                  <button class="btn btn-outline-success" type="button" onclick="setIframeSrc('child-iframe', sessionStorage.getItem('currentPage'))" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">$gettext('refresh_button_label')</button>
+                  <button id="connectButton" class="btn btn-outline-success d-none" type="button" text_label="connect_button_label" onclick="MQTTConnect()"></button>
+                  <button id="disconnectButton" class="btn btn-outline-success d-none" type="button" text_label="disconnect_button_label" onclick="MQTTDisconnect()"></button>
+                  <button class="btn btn-outline-success" type="button" onclick="setIframeSrc('child-iframe', sessionStorage.getItem('currentPage'))" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" text_label="refresh_button_label"></button>
                </div>
             </div>
          </nav>
