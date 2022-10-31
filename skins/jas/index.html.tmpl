@@ -42,6 +42,7 @@
 
       #echo '<script src="https://cdn.jsdelivr.net/npm/paho-mqtt@' + $paho_mqtt_version+ '/paho-mqtt' + $paho_mqtt_minified + '.js"></script>'
 
+      <script src="data/internationalization.js"></script>
       <script src="javascript/index.js"></script>
       ## ToDo: put here for now, only include if necessary
       <script src="javascript/mqtt.js"></script>
@@ -86,7 +87,7 @@
                         #end if
                         #if to_bool($getVar('Extras.pages.' + $page_data + '.in_navbar', True))
                         <li class="nav-item">
-                           #set navItem = '<a id= "pages/' + $page_data + '.html" class="nav-link" onclick="setIframeSrc(\'child-iframe\', \'' + 'pages/' + $page_data + '.html\')" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">' + $gettext($page_data + '.navbarText') + '</a>'
+                           #set navItem = '<a id= "pages/' + $page_data + '.html" class="nav-link" onclick="setIframeSrc(\'child-iframe\', \'' + 'pages/' + $page_data + '.html\')" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" text_label="' + $page_data + '.navbarText' + '"></a>'
                            $navItem
                         </li>
                         #end if
