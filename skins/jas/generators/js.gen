@@ -27,6 +27,13 @@ function updateLabels() {
     })
 }
 
+function updateTexts() {
+    document.querySelectorAll("[text_label]").forEach(function(element) {
+        observation = element.getAttribute("text_label");
+        element.innerText = textLabels[lang][observation];
+    })
+}
+
 // Update the chart's data
 function updateCharts() {
     currTime = Date.now();
@@ -421,6 +428,7 @@ window.addEventListener("load", function (event) {
     });
     myObserver.observe(document.body);
 
+    updateTexts();
     updateLabels();
     updateCharts();
 
@@ -436,8 +444,8 @@ window.addEventListener("load", function (event) {
                                 endDate: $endDate,
                                 locale: {
                                     format: dateTimeFormat[lang].datePicker,
-                                    applyLabel: '$gettext("datepicker_apply_label")',
-                                    cancelLabel: '$gettext("datepicker_cancel_label")',
+                                    applyLabel: observationLabels[lang]["datepicker_apply_label"],
+                                    cancelLabel: observationLabels[lang]["datepicker_cancel_label"],
                                 },    
                             },                                
                             function(start, end, label) {
@@ -475,8 +483,8 @@ window.addEventListener("load", function (event) {
                                 maxDate: $endDate,
                                 locale: {
                                     format: dateTimeFormat[lang].datePicker,
-                                    applyLabel: '$gettext("datepicker_apply_label")',
-                                    cancelLabel: '$gettext("datepicker_cancel_label")',                                    
+                                    applyLabel: observationLabels[lang]["datepicker_apply_label"],
+                                    cancelLabel: observationLabels[lang]["datepicker_cancel_label"],                         
                                 },
                             },
                                 function(start, end, label) {
