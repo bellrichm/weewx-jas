@@ -2,7 +2,7 @@
 ##    See the file LICENSE.txt for your rights.
 
   <div class="col">
-    <h5 class="h5-responsive indigo-text text-center">$gettext("forecast.title")</h5>
+    <h5 class="h5-responsive indigo-text text-center" text_label="forecast.title"></h5>
   </div>
   <div class="row gx-0 justify-content-center">
   #set i = 0

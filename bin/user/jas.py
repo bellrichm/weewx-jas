@@ -52,11 +52,23 @@ This search list extension provides the following tags:
   $observations
     A dictionary of all the observations that will be charted.
 
+  $observationLabels
+    Arguments:
+      language: The language to get the labels.
+    Returns:
+      The labels.
+
   $ordinateNames
     The names of the compass ordinates.
 
   $skinDebug
     The skin debug option.
+
+  $textLabels
+    Arguments:
+      language: The language to get the labels.
+    Returns:
+      The labels.
 
   $utcOffset
     The UTC offset in minutes.
@@ -155,7 +167,7 @@ except ImportError:
         logmsg(syslog.LOG_ERR, msg)
 
 
-VERSION = "0.2.4-rc02"
+VERSION = "0.2.4-rc05"
 
 class JAS(SearchList):
     """ Implement tags used by templates in the skin. """
@@ -252,8 +264,10 @@ class JAS(SearchList):
                                  'loginf': loginf,
                                  'logerr': logerr,
                                  'observations': self.observations,
+                                 'observationLabels': self.get_observation_labels,
                                  'ordinateNames': self.ordinate_names,
                                  'skinDebug': self._skin_debug,
+                                 'textLabels': self.get_text_labels,
                                  'utcOffset': self.utc_offset,
                                  'version': VERSION,
                                  'windCompass': self._get_wind_compass,
@@ -265,11 +279,28 @@ class JAS(SearchList):
         if self.skin_debug:
             logdbg(msg)
 
+    def _get_skin_dict(self, language):
+        self.skin_dicts[language] = copy.deepcopy(self.skin_dict)
+        merge_lang(language, self.generator.config_dict, self.skin_dict['REPORT_NAME'], self.skin_dicts[language])
+
+    def get_observation_labels(self, language):
+        if language not in self.skin_dicts:
+            if language in self.languages:
+                self._get_skin_dict(language)
+
+        return self.skin_dicts[language]['Labels']['Generic']
+
+    def get_text_labels(self, language):
+        if language not in self.skin_dicts:
+            if language in self.languages:
+                self._get_skin_dict(language)
+
+        return self.skin_dicts[language]['Texts']        
+
     def get_dateTime_formats(self, language):
         if language not in self.skin_dicts:
             if language in self.languages:
-                self.skin_dicts[language] = copy.deepcopy(self.skin_dict)
-                merge_lang(language, self.generator.config_dict, self.skin_dict['REPORT_NAME'], self.skin_dicts[language])
+                self._get_skin_dict(language)
 
         dateTime_formats = {}
         dateTime_formats['forecast_date_format'] = self.skin_dicts[language]['Texts']['forecast_date_format']
@@ -462,7 +493,6 @@ class JAS(SearchList):
 
     def _get_observation_text(self, coded_weather):
         cloud_codes = ["CL", "FW", "SC", "BK", "OV",]
-        text_translations = self.generator.skin_dict.get('Texts', weeutil.config.config_from_str('lang = en'))
 
         coverage_code = coded_weather.split(":")[0]
         intensity_code = coded_weather.split(":")[1]
@@ -470,18 +500,24 @@ class JAS(SearchList):
 
         if weather_code in cloud_codes:
             cloud_code_key = 'cloud_code_' + weather_code
-            observation_text = text_translations.get(cloud_code_key, cloud_code_key)
+            observation_text = "textLabels[lang]['" + cloud_code_key + "']"
         else:
             observation_text = ''
             if coverage_code:
                 coverage_code_key = 'coverage_code_' + coverage_code
-                observation_text += text_translations.get(coverage_code_key, coverage_code_key) + " "
+                if observation_text != "":
+                    observation_text +=  " + ' ' + "
+                observation_text += "textLabels[lang]['" + coverage_code_key + "']"
             if intensity_code:
                 intensity_code_key = 'intensity_code_' + intensity_code
-                observation_text += text_translations.get(intensity_code_key, intensity_code_key) + " "
+                if observation_text != "":
+                    observation_text +=  " + ' ' + "
+                observation_text += "textLabels[lang]['" + intensity_code_key + "']"
 
             weather_code_key = 'weather_code_' + weather_code
-            observation_text += text_translations.get(weather_code_key, weather_code_key)
+            if observation_text != "":
+                observation_text +=  " + ' ' + "
+            observation_text += "textLabels[lang]['" + weather_code_key + "']"
 
         return observation_text
 
@@ -559,7 +595,6 @@ class JAS(SearchList):
         forecast_data['forecasts'] = []
 
         if data:
-            text_translations = self.generator.skin_dict.get('Texts', weeutil.config.config_from_str('lang = en'))
             forecast_data['generated'] = current_hour
             forecasts = []
             periods = data[0]['periods']
@@ -570,8 +605,7 @@ class JAS(SearchList):
                 forecast['timestamp'] = period['timestamp']
                 day_of_week = (int(datetime.datetime.fromtimestamp(period['timestamp']).strftime("%w")) + 6) % 7
                 day_of_week_key = 'forecast_week_day' + str(day_of_week)
-                day_of_week_text = text_translations.get(day_of_week_key, day_of_week_key)
-                forecast['day'] = day_of_week_text
+                forecast['day'] = "textLabels[lang]['" + day_of_week_key + "']"
                 forecast['temp_min'] = period[forecast_observations[self.unit_system]['temp_min']]
                 forecast['temp_max'] = period[forecast_observations[self.unit_system]['temp_max']]
                 forecast['temp_unit'] = forecast_observations[self.unit_system]['temp_unit']
@@ -876,7 +910,7 @@ class JAS(SearchList):
                     for obs in chart_def['series']:
                         aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
                         obs_data_binding = chart_def['series'][obs].get('weewx', {}).get('data_binding', chart_data_binding)
-                        chart2 += "    {name: " + chart_def['series'][obs].get('name', "'" + '$obs.label.' + obs + "'") + ",\n"
+                        chart2 += "    {name: " + chart_def['series'][obs].get('name', 'observationLabels[lang][' + "'" + obs + "']") + ",\n"
                         chart2 += "     data: [\n"
                         (start_year, end_year) = self._get_range(self.skin_dict['Extras']['pages'][page].get('start', None),
                                                                  self.skin_dict['Extras']['pages'][page].get('end', None),
@@ -913,7 +947,7 @@ class JAS(SearchList):
                     for obs in chart_def['series']:
                         aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
                         obs_data_binding = chart_def['series'][obs].get('weewx', {}).get('data_binding', chart_data_binding)
-                        chart2 += "    {name: " + chart_def['series'][obs].get('name', "'" + '$obs.label.' + obs + "'") + ",\n"
+                        chart2 += "    {name: " + chart_def['series'][obs].get('name', "observationLabels[lang]['" + obs + "']") + ",\n"
                         chart2 += "    data: " \
                                 + interval + "_" + aggregate_type \
                                 + "." + chart_def['series'][obs]['weewx']['observation'] + "_"  + obs_data_binding \

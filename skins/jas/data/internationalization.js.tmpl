@@ -17,8 +17,25 @@ for (var i in navigator.languages) {
 }
 
 dateTimeFormat = {};
+observationLabels = {};
+textLabels = {};
 
 #for $language in $languages
+    #set $obsLabels = $observationLabels($language)
+    #echo 'observationLabels.' + $language + ' = {};\n'
+    #for $observation in $obsLabels
+        #echo 'observationLabels.' + $language + '.' + $observation + ' = "' + $obsLabels[$observation] + '";\n'
+    #end for
+
+    #set $texts = $textLabels($language)
+    #echo 'textLabels.' + $language + ' = {};\n'
+    #for $observation in $texts
+        #if isinstance($texts[$observation], str)
+            ## Todo: fix keys to not have '-', '.' 
+            #echo 'textLabels.' + $language + '["' + $observation + '"] = "' + $texts[$observation] + '";\n'
+        #end if
+    #end for
+
     #echo 'dateTimeFormat.' + $language + ' = {};\n'
     #echo 'dateTimeFormat.' + $language + '.chart = {};\n'
 

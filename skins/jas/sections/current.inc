@@ -14,19 +14,10 @@
                 <table class="table">
                   <tbody>
                     #for observation in $Extras.current.observations
-                        #set type = $getVar("$Extras.current.observations" + "." + $observation + ".type", "")
-                        #if $type == 'rise'    
-                            #set label = 'foo'
-                        #else if $type == 'sum'
-                            #set label = '$obs.label.' + $observation + $type
-                        #else
-                            #set label = '$obs.label.' + $observation + $type
-                        #end if    
-                    
                         #set i += 1
                         #set valueId = $observation + '_value'
                         #if $i % 2 # <tr class="row mx0"> #end if
-                            <th scope="row" class="col">#include source=$label#</th>
+                            <th scope="row" class="col" obs_label="$observation"></th>
                             <td id="$valueId" class="col"></td>
                         #if not $i % 2 # </tr> #end if
                     #end for

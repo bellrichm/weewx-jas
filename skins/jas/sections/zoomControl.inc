@@ -3,8 +3,8 @@
 
 <nav class="navbar navbar-expand-md navbar-light bg-light justify-content-center">
     <div class="navbar-text">
-        $gettext('zoomControl_label')
+        <a text_label="zoomControl_label"></a>
         <input type="text" id="datetimerange-input2" style="text-align:center">   
-        <input TYPE="button" name="resetRange" value="$gettext('resetRange_label')" onclick="resetRange()">
+        <button id="resetRange" text_label="resetRange_label" onclick="resetRange()"></button>
     </div>
 </nav>

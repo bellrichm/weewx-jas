@@ -20,6 +20,20 @@
 var pageCharts = [];
 var mqttData = {}
 
+function updateLabels() {
+    document.querySelectorAll("[obs_label]").forEach(function(element) {
+        observation = element.getAttribute("obs_label");
+        element.innerText = observationLabels[lang][observation];
+    })
+}
+
+function updateTexts() {
+    document.querySelectorAll("[text_label]").forEach(function(element) {
+        observation = element.getAttribute("text_label");
+        element.innerText = textLabels[lang][observation];
+    })
+}
+
 // Update the chart's data
 function updateCharts() {
     currTime = Date.now();
@@ -184,10 +198,7 @@ function handleMQTT(message) {
                     #if 'name' in $getVar('$Extras.chart_definitions.' + $chart + '.series.' + $observation)
                         #set name =  $getVar('$Extras.chart_definitions.' + $chart + '.series.' + $observation + '.name')
                     #else
-                        #set source = '#set global label_global = $obs.label.' + $observation
-                        $evaluate($source)
-                        #set name = "'" + $label_global + "'"
-                        #set global label_global = None
+                        #set name = "observationLabels[lang]['" + $observation + "']"
                     #end if
                     #set $option_line += "          {\n"
                     #set $option_line += "            name: " + $name + ",\n"
@@ -417,6 +428,8 @@ window.addEventListener("load", function (event) {
     });
     myObserver.observe(document.body);
 
+    updateTexts();
+    updateLabels();
     updateCharts();
 
     #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
@@ -431,8 +444,8 @@ window.addEventListener("load", function (event) {
                                 endDate: $endDate,
                                 locale: {
                                     format: dateTimeFormat[lang].datePicker,
-                                    applyLabel: '$gettext("datepicker_apply_label")',
-                                    cancelLabel: '$gettext("datepicker_cancel_label")',
+                                    applyLabel: textLabels[lang]["datepicker_apply_label"],
+                                    cancelLabel: textLabels[lang]["datepicker_cancel_label"],
                                 },    
                             },                                
                             function(start, end, label) {
@@ -470,8 +483,8 @@ window.addEventListener("load", function (event) {
                                 maxDate: $endDate,
                                 locale: {
                                     format: dateTimeFormat[lang].datePicker,
-                                    applyLabel: '$gettext("datepicker_apply_label")',
-                                    cancelLabel: '$gettext("datepicker_cancel_label")',                                    
+                                    applyLabel: textLabels[lang]["datepicker_apply_label"],
+                                    cancelLabel: textLabels[lang]["datepicker_cancel_label"],                         
                                 },
                             },
                                 function(start, end, label) {
