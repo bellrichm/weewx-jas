@@ -590,7 +590,6 @@ class JAS(SearchList):
         forecast_data['forecasts'] = []
 
         if data:
-            text_translations = self.generator.skin_dict.get('Texts', weeutil.config.config_from_str('lang = en'))
             forecast_data['generated'] = current_hour
             forecasts = []
             periods = data[0]['periods']
@@ -601,8 +600,7 @@ class JAS(SearchList):
                 forecast['timestamp'] = period['timestamp']
                 day_of_week = (int(datetime.datetime.fromtimestamp(period['timestamp']).strftime("%w")) + 6) % 7
                 day_of_week_key = 'forecast_week_day' + str(day_of_week)
-                day_of_week_text = text_translations.get(day_of_week_key, day_of_week_key)
-                forecast['day'] = day_of_week_text
+                forecast['day'] = "textLabels[lang]['" + day_of_week_key + "']"
                 forecast['temp_min'] = period[forecast_observations[self.unit_system]['temp_min']]
                 forecast['temp_max'] = period[forecast_observations[self.unit_system]['temp_max']]
                 forecast['temp_unit'] = forecast_observations[self.unit_system]['temp_unit']
