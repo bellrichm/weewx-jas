@@ -493,7 +493,6 @@ class JAS(SearchList):
 
     def _get_observation_text(self, coded_weather):
         cloud_codes = ["CL", "FW", "SC", "BK", "OV",]
-        text_translations = self.generator.skin_dict.get('Texts', weeutil.config.config_from_str('lang = en'))
 
         coverage_code = coded_weather.split(":")[0]
         intensity_code = coded_weather.split(":")[1]
@@ -501,18 +500,24 @@ class JAS(SearchList):
 
         if weather_code in cloud_codes:
             cloud_code_key = 'cloud_code_' + weather_code
-            observation_text = text_translations.get(cloud_code_key, cloud_code_key)
+            observation_text = "textLabels[lang]['" + cloud_code_key + "']"
         else:
             observation_text = ''
             if coverage_code:
                 coverage_code_key = 'coverage_code_' + coverage_code
-                observation_text += text_translations.get(coverage_code_key, coverage_code_key) + " "
+                if observation_text != "":
+                    observation_text +=  " + ' ' + "
+                observation_text += "textLabels[lang]['" + coverage_code_key + "']"
             if intensity_code:
                 intensity_code_key = 'intensity_code_' + intensity_code
-                observation_text += text_translations.get(intensity_code_key, intensity_code_key) + " "
+                if observation_text != "":
+                    observation_text +=  " + ' ' + "
+                observation_text += "textLabels[lang]['" + intensity_code_key + "']"
 
             weather_code_key = 'weather_code_' + weather_code
-            observation_text += text_translations.get(weather_code_key, weather_code_key)
+            if observation_text != "":
+                observation_text +=  " + ' ' + "
+            observation_text += "textLabels[lang]['" + weather_code_key + "']"
 
         return observation_text
 

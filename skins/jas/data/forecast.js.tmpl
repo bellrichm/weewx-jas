@@ -12,7 +12,7 @@ var forecasts = [];
     #for $forecast in $forecasts
         forecast = {};
         forecast.date = moment.unix($forecast["timestamp"]).utcOffset($utcOffset).format(dateTimeFormat[lang].forecast);
-        forecast.observation = '$forecast["observation"]';
+        forecast.observation = $forecast["observation"];
         forecast.day = $forecast["day"];
         forecast.temp_min = '$forecast["temp_min"]';
         forecast.temp_max = '$forecast["temp_max"]';
