@@ -88,7 +88,6 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
    </head>
 
     <body onresize="refreshSizes()" onload="refreshSizes()">
-      <h1>$h1_global</h1>
 
       <!-- Optional JavaScript; choose one of the two! -->
 
