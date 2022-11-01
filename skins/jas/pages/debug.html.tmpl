@@ -6,7 +6,6 @@
 #set global interval_name_global = 'debug'
 #set global year_global = None
 #set global month_global = None
-#set global title_global = $gettext($page + '.title')
 #set global h1_global = $gettext($page + '.h1')
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
     #include 'generators/pages.gen'
@@ -16,5 +15,4 @@
 #set global page_name_global = None
 #set global year_global = None
 #set global month_global = None
-#set global title_global = None
 #set global h1_global = None

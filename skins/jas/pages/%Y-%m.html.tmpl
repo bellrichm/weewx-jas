@@ -8,7 +8,6 @@
 #set global page_name_global = $year($data_binding=$data_binding).start.format('%Y') + '-' + $month($data_binding=$data_binding).start.format('%m')
 #set global year_global = $year_name
 #set global month_global = $month($data_binding=$data_binding).start.format('%m')
-#set global title_global = $month_name + ' ' + str($year_name)
 #set global h1_global = $month_name +' ' + str($year_name)
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
     #include 'generators/pages.gen'
@@ -18,5 +17,4 @@
 #set global page_name_global = None
 #set global year_global = None
 #set global month_global = None
-#set global title_global = None
 #set global h1_global = None

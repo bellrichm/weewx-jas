@@ -85,7 +85,6 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
       <script src="../javascript/mqtt.js"></script>
     #end if
 
-      <title>$title_global</title>
    </head>
 
     <body onresize="refreshSizes()" onload="refreshSizes()">
