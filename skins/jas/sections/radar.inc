@@ -4,7 +4,7 @@
           <div class="col-12 col-xl-6 mb-4">
             <div class="card">
               <div class="card-body text-center">
-                <h5 class="h5-responsive indigo-text" text_label="radar.title">
+                <h5 class="h5-responsive indigo-text" text_label="radar_title">
                 </h5>
                 <div id="radar">
                   <iframe width=100% height=100%

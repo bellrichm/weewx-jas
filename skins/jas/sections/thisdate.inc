@@ -4,7 +4,7 @@
 <div class="col-12 col-xl-6 mb-4">
     <div class="card">
         <div class="card-body text-center">
-                <h5 class="h5-responsive indigo-text" text_label="thisdate.title">
+                <h5 class="h5-responsive indigo-text" text_label="thisdate_title">
                 </h5>     
                 <input type="text" id="datetimerange-input1" style="text-align:center">   
                 <table class="table">
