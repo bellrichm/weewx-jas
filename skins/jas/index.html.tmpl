@@ -95,9 +95,9 @@
                      ## Year dropdown
                      #if ($getVar("$Extras.pages.archive-year", None) and to_bool($getVar("$Extras.pages.archive-year.enable", True))) \
                         or ($getVar("$Extras.pages.archive-month", None) and to_bool($getVar("$Extras.pages.archive-month.enable", True)))
-                        <li class="nav-item dropdown" text_label="year_dropdown-label">
+                        <li class="nav-item dropdown">
                         #if $year_global is not None
-                        <a class="nav-link dropdown-toggle active" aria-current="page" href="#" id="dropdownYear" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle active" aria-current="page" href="#" id="dropdownYear" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" text_label="year_dropdown-label">
                         #else
                         <a class="nav-link dropdown-toggle" href="#" id="dropdownYear" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         #end if
@@ -107,12 +107,12 @@
                      #end if
                      ## Month dropdown
                      #if $getVar("$Extras.pages.archive-month", None) and to_bool($getVar("$Extras.pages.archive-month.enable", True))
-                        <li class="nav-item dropdown" text_label="yearMonth_dropdown-label">
+                        <li class="nav-item dropdown">
                         <div class="dropdown">
                         #if $month_global is not None
-                           <a class="nav-link dropdown-toggle active" aria-current="page" href="#" role="button" id="dropdownYearMonth" data-bs-toggle="dropdown" aria-expanded="false">
+                           <a class="nav-link dropdown-toggle active" aria-current="page" href="#" role="button" id="dropdownYearMonth" data-bs-toggle="dropdown" aria-expanded="false" text_label="yearMonth_dropdown-label">
                         #else
-                           <a class="nav-link dropdown-toggle" href="#" role="button" id="dropdownYearMonth" data-bs-toggle="dropdown" aria-expanded="false">
+                           <a class="nav-link dropdown-toggle" href="#" role="button" id="dropdownYearMonth" data-bs-toggle="dropdown" aria-expanded="false" text_label="yearMonth_dropdown-label">
                         #end if
                            </a>
                            <ul class="dropdown-menu pre-scrollable" aria-labelledby="dropdownYearMonth" id="dropdownYearMonthMenu">
