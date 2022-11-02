@@ -102,10 +102,11 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
       -->
     
 
+    <div class="container">
     #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
       #include "sections/zoomControl.inc"
     #end if
-    <div class="container">
+
     #set charts = $getVar('Extras.chart_definitions')
     #set processing_grid = False
     #for $section in $getVar('Extras.pages.' + $page)
@@ -117,7 +118,7 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
       #if $layout == 'grid' 
         #if not $processing_grid
           #set processing_grid = True
-          <div class="row mt-5 mb-4 graphrow align-content-start">
+          <div class="row graphrow align-content-start">
         #end if
       #else
         #if processing_grid
