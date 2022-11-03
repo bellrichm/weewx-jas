@@ -90,7 +90,7 @@ function handleMQTT(message) {
                 header.value = Number(header.value).toFixed($header_max_decimals);
             #end if
             if (!isNaN(header.value)) {
-                header.value = Number(header.value).toLocaleString();
+                header.value = Number(header.value).toLocaleString(lang);
             }            
 
             if (test_obj[header.unit]) {
@@ -133,7 +133,7 @@ function handleMQTT(message) {
                    data.value = data.value.toFixed(observationInfo.maxDecimals);
                 }
                 if (!isNaN(data.value)) {
-                    data.value = Number(data.value).toLocaleString();
+                    data.value = Number(data.value).toLocaleString(lang);
                 }
                 sessionStorage.setItem(observation, JSON.stringify(data));
 
@@ -338,8 +338,8 @@ function handleMQTT(message) {
                 #echo "        min = min.toFixed(" + $max_decimals + ");\n"
                 #echo "        max = max.toFixed(" + $max_decimals + ");\n"
             #end if
-            #echo "        min = Number(min).toLocaleString();\n"
-            #echo "        max = Number(max).toLocaleString();\n"
+            #echo "        min = Number(min).toLocaleString(lang);\n"
+            #echo "        max = Number(max).toLocaleString(lang);\n"
             #echo "        min = min + '" + $label + "';\n"
             #echo "        max = max + '" + $label + "';\n"
 

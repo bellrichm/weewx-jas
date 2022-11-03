@@ -92,7 +92,7 @@ This data is stored in a javascript object named 'current'.
             current.header.value = current.header.value.toFixed($header_max_decimals);
         #end if
         if (!isNaN(current.header.value)) {
-            current.header.value = Number(current.header.value).toLocaleString();
+            current.header.value = Number(current.header.value).toLocaleString(lang);
         }
         #set line = '$unit.label.' + $getVar('Extras.current.observation') +  '";'
         current.header.unit = "$evaluate($line)
@@ -125,7 +125,7 @@ This data is stored in a javascript object named 'current'.
             observation.value = observation.value.toFixed($max_decimals);
         #end if
         if (!isNaN(observation.value)) {
-            observation.value = Number(observation.value).toLocaleString();
+            observation.value = Number(observation.value).toLocaleString(lang);
         }
         #set source = '"' + $observation_unit + '";'
         observation.unit = $evaluate($source)
