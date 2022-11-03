@@ -13,6 +13,7 @@ lang = '$lang';
         user_lang = navigator.languages[i].substr(0, 2);
         if (user_lang in languages) {
             lang = user_lang;
+            document.documentElement.lang = lang;
             break;
         }
     }
