@@ -8,7 +8,7 @@
               <h1 id="$Extras.current.observation" class="display-2 indigo-text"></h1>
             #end if
             #if $getVar("$Extras.display_aeris_observation", False)
-                $current_observation['observation']
+                <div class="card-text" id="currentObservation"></div>
             #end if
             #set i = 0
                 <table class="table">

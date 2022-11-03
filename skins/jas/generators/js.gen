@@ -256,6 +256,10 @@ function handleMQTT(message) {
             document.getElementById("$Extras.current.observation").innerHTML = header.value + header.unit;
         #end if
 
+        #if $getVar("$Extras.display_aeris_observation", False)
+            document.getElementById("currentObservation").innerHTML = $current_observation['observation'];
+        #end if
+
         // ToDo: cleanup, perhaps put suffix data into an array and store that
         // ToDo: do a bit more in cheetah?
         suffixes = [];
