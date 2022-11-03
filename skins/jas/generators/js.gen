@@ -363,10 +363,10 @@ function handleMQTT(message) {
     function getObservation(timeStamp, observations) {
         var array_result = observations.filter(function(v,i) { return v[0] === timeStamp; });
         if (array_result.length > 0)     {
-            return array_result[0][1].toLocaleString();
+            return array_result[0][1];
         }
 
-        return observations[0][1].toLocaleString();
+        return observations[0][1];
     }
 
     // Update the 'on this date' observations with observations at timeStamp
@@ -376,20 +376,20 @@ function handleMQTT(message) {
             #set aggregation_type = $getVar("$Extras.thisdate.observations." + $observation + ".type", None)
             #if $aggregation_type is None
                 #set value = $interval_name_global + '_min.' + $observation + "_" + $data_binding
-                #set line = "obs = getObservation(timeStamp, " + $value + ") + thisDateObservation." + $observation + ".unitLabel;"
+                #set line = "obs = getObservation(timeStamp, " + $value + ").toLocaleString(lang) + thisDateObservation." + $observation + ".unitLabel;"
                 #set id = $observation + "_thisdate_min"
                 $line
                 observation=document.getElementById("$id");
                 observation.innerHTML = obs;        
                 #set value = $interval_name_global + '_max.' + $observation + "_" + $data_binding
-                #set line = "obs = getObservation(timeStamp, " + $value + ") + thisDateObservation." + $observation + ".unitLabel;"
+                #set line = "obs = getObservation(timeStamp, " + $value + ").toLocaleString(lang) + thisDateObservation." + $observation + ".unitLabel;"
                 #set id = $observation + "_thisdate_max"
                 $line
                 observation=document.getElementById("$id");
                 observation.innerHTML = obs;      
             #else
                 #set value = $interval_name_global + '_' + $aggregation_type + '.' + $observation + "_" + $data_binding
-                #set line = "obs = getObservation(timeStamp, " + $value + ") + thisDateObservation." + $observation + ".unitLabel;"
+                #set line = "obs = getObservation(timeStamp, " + $value + ").toLocaleString(lang) + thisDateObservation." + $observation + ".unitLabel;"
                 #set id = $observation + "_thisdate_" + $aggregation_type
                 $line
                 observation=document.getElementById("$id");
