@@ -8,13 +8,15 @@ languages = {};
 
 ## Set lang to browser's preferred language, falling back to language set in skin
 lang = '$lang';
-for (var i in navigator.languages) {
-    user_lang = navigator.languages[i].substr(0, 2);
-    if (user_lang in languages) {
-        lang = user_lang;
-        break;
+#if $getVar("$Extras.use_browser_language_preference", False)
+    for (var i in navigator.languages) {
+        user_lang = navigator.languages[i].substr(0, 2);
+        if (user_lang in languages) {
+            lang = user_lang;
+            break;
+        }
     }
-}
+#end if
 
 dateTimeFormat = {};
 observationLabels = {};

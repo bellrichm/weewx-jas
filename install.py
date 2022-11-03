@@ -23,6 +23,13 @@ EXTENSION_CONFIG = """
         HTML_ROOT = jas
         enable = true 
         [[[Extras]]]
+
+            # When True, the browser's preferred language setting is used to determine the language display settings.
+            # When False, the skin's lang setting is used.
+            # The default is False.
+            # For more information see, https://www.w3.org/International/questions/qa-lang-priorities#changing
+            # use_browser_language_preference = True
+            
             # display_aeris_observation = True
 
             # This sets the 'page' that is first displayed.
