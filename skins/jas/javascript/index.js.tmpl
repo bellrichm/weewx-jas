@@ -31,21 +31,24 @@ function setIframeSrc(id, url) {
   }
 }
 
-function updateLang(lang) {
-    console.log(lang);
+function updateLang(language) {
+    console.log(language);
 
       var currentLanguage = sessionStorage.getItem('currentLanguage');
-      if (lang != currentLanguage) {
+      if (language != currentLanguage) {
           if (currentLanguage) {
               document.getElementById(currentLanguage).classList.remove("active");
           }
-          document.getElementById(lang).classList.add("active");
-          sessionStorage.setItem('currentLanguage', lang);
+          document.getElementById(language).classList.add("active");
+          sessionStorage.setItem('currentLanguage', language);
       }
+
+    lang = language;
+    updateTexts();
 
     message = {};
     message.kind = 'lang';
-    message.message = lang;
+    message.message = language;
     
     // When running without a webserver, there is a lot of 'strangeness'
     if (window.location.protocol == "file:") {
