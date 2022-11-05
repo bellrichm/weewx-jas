@@ -121,6 +121,7 @@
                         </li>
                      #end if
                      ## Language dropdown
+                     #if to_bool($getVar("$Extras.use_browser_language_preference", False)) and to_bool($getVar("$Extras.allow_user_language_selection", False))
                         <li class="nav-item dropdown">
                           <a class="nav-link dropdown-toggle" aria-current="page" href="#" id="dropdownLanguage" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" text_label="language_dropdown_label">
                           lang
@@ -132,6 +133,7 @@
                            #end for
                            </div>
                         </li>
+                     #end if
                   </ul>
                   <button id="connectButton" class="btn btn-outline-success d-none" type="button" text_label="connect_button_label" onclick="MQTTConnect()"></button>
                   <button id="disconnectButton" class="btn btn-outline-success d-none" type="button" text_label="disconnect_button_label" onclick="MQTTDisconnect()"></button>
