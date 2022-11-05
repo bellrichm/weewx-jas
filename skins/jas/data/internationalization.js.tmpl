@@ -1,23 +1,51 @@
 #from weeutil.weeutil import to_list
 
+function updateLabels() {
+    document.querySelectorAll("[obs_label]").forEach(function(element) {
+        observation = element.getAttribute("obs_label");
+        if (observation in observationLabels[lang]) {
+            element.innerText = observationLabels[lang][observation];
+        }
+        else {
+            element.innerText = observation;
+        }        
+    })
+}
+
+function updateTexts() {
+    document.querySelectorAll("[text_label]").forEach(function(element) {
+        observation = element.getAttribute("text_label");
+        if (observation in textLabels[lang]) {
+            element.innerText = textLabels[lang][observation];
+        }
+        else {
+            element.innerText = observation;
+        }
+    });
+}
+
+
 ## ToDo: Init dictionary via cheetah and not javascript
 languages = {};
 #for $language in $languages
-    languages['$language'] = '$language';
+    languages['$language'] = {};
 #end for
 
-## Set lang to browser's preferred language, falling back to language set in skin
-lang = '$lang';
-#if $getVar("$Extras.use_browser_language_preference", False)
-    for (var i in navigator.languages) {
-        user_lang = navigator.languages[i].substr(0, 2);
-        if (user_lang in languages) {
-            lang = user_lang;
-            document.documentElement.lang = lang;
-            break;
+lang = sessionStorage.getItem('currentLanguage');
+if (!lang) {
+    ## Set lang to browser's preferred language, falling back to language set in skin
+    lang = '$lang';
+    #if $getVar("$Extras.use_browser_language_preference", False)
+        for (var i in navigator.languages) {
+            user_lang = navigator.languages[i].substr(0, 2);
+            if (user_lang in languages) {
+                lang = user_lang;
+                document.documentElement.lang = lang;
+                break;
+            }
         }
-    }
-#end if
+    #end if
+}
 
 dateTimeFormat = {};
 observationLabels = {};
@@ -38,6 +66,8 @@ textLabels = {};
             #echo 'textLabels.' + $language + '["' + $observation + '"] = "' + $texts[$observation] + '";\n'
         #end if
     #end for
+
+    languages['$language'] = '$texts["Language"]';
 
     #echo 'dateTimeFormat.' + $language + ' = {};\n'
     #echo 'dateTimeFormat.' + $language + '.chart = {};\n'

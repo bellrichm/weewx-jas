@@ -20,20 +20,6 @@
 var pageCharts = [];
 var mqttData = {}
 
-function updateLabels() {
-    document.querySelectorAll("[obs_label]").forEach(function(element) {
-        observation = element.getAttribute("obs_label");
-        element.innerText = observationLabels[lang][observation];
-    })
-}
-
-function updateTexts() {
-    document.querySelectorAll("[text_label]").forEach(function(element) {
-        observation = element.getAttribute("text_label");
-        element.innerText = textLabels[lang][observation];
-    })
-}
-
 // Update the chart's data
 function updateCharts() {
     currTime = Date.now();
@@ -59,6 +45,12 @@ function refreshSizes(){
       height = chartElem.offsetWidth / 1.618 + 17  +"px"; // adding is a hack
       pageCharts[index].chart.resize({width: null, height: height});
     }
+}
+
+// Handle event messages of type 'lang'.
+function handleLang(lang) {
+    sessionStorage.setItem("currentLanguage", lang);
+    window.location.reload(true);
 }
 
 // Handle event messages of type 'log'.
@@ -557,6 +549,10 @@ window.addEventListener('message',
                         if (message.kind == undefined) {
                             return;
                         }
+                        if (message.kind == 'lang')
+                        {
+                            handleLang(message.message);
+                            }
                         if (message.kind == 'mqtt')
                         {
                             handleMQTT(message.message);

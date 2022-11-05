@@ -31,6 +31,38 @@ function setIframeSrc(id, url) {
   }
 }
 
+function updateLang(language) {
+      var currentLanguage = sessionStorage.getItem('currentLanguage');
+      if (language != currentLanguage) {
+          if (currentLanguage) {
+              document.getElementById(currentLanguage).classList.remove("active");
+          }
+          document.getElementById(language).classList.add("active");
+          sessionStorage.setItem('currentLanguage', language);
+      }
+
+    lang = language;
+    updateTexts();
+
+    message = {};
+    message.kind = 'lang';
+    message.message = language;
+    
+    // When running without a webserver, there is a lot of 'strangeness'
+    if (window.location.protocol == "file:") {
+        targetOrigin = "*";
+    }
+    else {
+        targetOrigin = window.location.origin;
+    }      
+
+    if (document.getElementById('child-iframe')) {
+      document.getElementById('child-iframe').contentWindow.postMessage(message, targetOrigin);
+    }
+    else {
+      window.self.postMessage(message, targetOrigin);
+    }
+}
 
 // Handle a year being selected
 function setYear(year) {
@@ -96,6 +128,10 @@ function setYear(year) {
 }
 
 window.addEventListener("load", function (event) {
+  #if to_bool($getVar("$Extras.allow_user_language_selection", False))
+    document.getElementById(lang).classList.add("active");
+  #end if
+
   #if ($getVar("$Extras.pages.archive-year", None) and to_bool($getVar("$Extras.pages.archive-year.enable", True))) \
      or ($getVar("$Extras.pages.archive-month", None) and to_bool($getVar("$Extras.pages.archive-month.enable", True)))
     var list = document.getElementById("dropdownYearMenu");
@@ -145,10 +181,7 @@ window.addEventListener("load", function (event) {
     }
   #end if
 
-  document.querySelectorAll("[text_label]").forEach(function(element) {
-      observation = element.getAttribute("text_label");
-      element.innerText = textLabels[lang][observation];
-  });
+  updateTexts();
 
   if (sessionStorage.getItem('currentPage') === null) {
       sessionStorage.setItem('currentPage', '');
