@@ -31,6 +31,37 @@ function setIframeSrc(id, url) {
   }
 }
 
+function updateLang(lang) {
+    console.log(lang);
+
+      var currentLanguage = sessionStorage.getItem('currentLanguage');
+      if (lang != currentLanguage) {
+          if (currentLanguage) {
+              document.getElementById(currentLanguage).classList.remove("active");
+          }
+          document.getElementById(lang).classList.add("active");
+          sessionStorage.setItem('currentLanguage', lang);
+      }
+
+    message = {};
+    message.kind = 'lang';
+    message.message = lang;
+    
+    // When running without a webserver, there is a lot of 'strangeness'
+    if (window.location.protocol == "file:") {
+        targetOrigin = "*";
+    }
+    else {
+        targetOrigin = window.location.origin;
+    }      
+
+    if (document.getElementById('child-iframe')) {
+      document.getElementById('child-iframe').contentWindow.postMessage(message, targetOrigin);
+    }
+    else {
+      window.self.postMessage(message, targetOrigin);
+    }
+}
 
 // Handle a year being selected
 function setYear(year) {
@@ -147,7 +178,12 @@ window.addEventListener("load", function (event) {
 
   document.querySelectorAll("[text_label]").forEach(function(element) {
       observation = element.getAttribute("text_label");
-      element.innerText = textLabels[lang][observation];
+      if (observation in textLabels[lang]) {
+        element.innerText = textLabels[lang][observation];
+      }
+      else {
+        element.innerText = observation;
+      }
   });
 
   if (sessionStorage.getItem('currentPage') === null) {

@@ -62,6 +62,11 @@ function refreshSizes(){
 }
 
 // Handle event messages of type 'log'.
+function handleLang(lang) {
+    console.log(lang);
+}
+
+// Handle event messages of type 'log'.
 function handleLog(message) {
     var jasLog = document.getElementById("jasLog");
     if (jasLog) {
@@ -557,6 +562,10 @@ window.addEventListener('message',
                         if (message.kind == undefined) {
                             return;
                         }
+                        if (message.kind == 'lang')
+                        {
+                            handleLang(message.message);
+                            }
                         if (message.kind == 'mqtt')
                         {
                             handleMQTT(message.message);
