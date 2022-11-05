@@ -20,20 +20,6 @@
 var pageCharts = [];
 var mqttData = {}
 
-function updateLabels() {
-    document.querySelectorAll("[obs_label]").forEach(function(element) {
-        observation = element.getAttribute("obs_label");
-        element.innerText = observationLabels[lang][observation];
-    })
-}
-
-function updateTexts() {
-    document.querySelectorAll("[text_label]").forEach(function(element) {
-        observation = element.getAttribute("text_label");
-        element.innerText = textLabels[lang][observation];
-    })
-}
-
 // Update the chart's data
 function updateCharts() {
     currTime = Date.now();

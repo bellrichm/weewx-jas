@@ -176,15 +176,7 @@ window.addEventListener("load", function (event) {
     }
   #end if
 
-  document.querySelectorAll("[text_label]").forEach(function(element) {
-      observation = element.getAttribute("text_label");
-      if (observation in textLabels[lang]) {
-        element.innerText = textLabels[lang][observation];
-      }
-      else {
-        element.innerText = observation;
-      }
-  });
+  updateTexts();
 
   if (sessionStorage.getItem('currentPage') === null) {
       sessionStorage.setItem('currentPage', '');
