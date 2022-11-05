@@ -47,9 +47,10 @@ function refreshSizes(){
     }
 }
 
-// Handle event messages of type 'log'.
+// Handle event messages of type 'lang'.
 function handleLang(lang) {
-    console.log(lang);
+    sessionStorage.setItem("currentLanguage", lang);
+    window.location.reload(true);
 }
 
 // Handle event messages of type 'log'.
