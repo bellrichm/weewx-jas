@@ -3,7 +3,7 @@
 ## ToDo: Init dictionary via cheetah and not javascript
 languages = {};
 #for $language in $languages
-    languages['$language'] = '$language';
+    languages['$language'] = {};
 #end for
 
 ## Set lang to browser's preferred language, falling back to language set in skin
@@ -38,6 +38,8 @@ textLabels = {};
             #echo 'textLabels.' + $language + '["' + $observation + '"] = "' + $texts[$observation] + '";\n'
         #end if
     #end for
+
+    languages['$language'] = '$texts["Language"]';
 
     #echo 'dateTimeFormat.' + $language + ' = {};\n'
     #echo 'dateTimeFormat.' + $language + '.chart = {};\n'
