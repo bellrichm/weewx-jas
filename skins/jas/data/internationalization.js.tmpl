@@ -31,18 +31,21 @@ languages = {};
     languages['$language'] = {};
 #end for
 
-## Set lang to browser's preferred language, falling back to language set in skin
-lang = '$lang';
-#if $getVar("$Extras.use_browser_language_preference", False)
-    for (var i in navigator.languages) {
-        user_lang = navigator.languages[i].substr(0, 2);
-        if (user_lang in languages) {
-            lang = user_lang;
-            document.documentElement.lang = lang;
-            break;
+lang = sessionStorage.getItem('currentLanguage');
+if (!lang) {
+    ## Set lang to browser's preferred language, falling back to language set in skin
+    lang = '$lang';
+    #if $getVar("$Extras.use_browser_language_preference", False)
+        for (var i in navigator.languages) {
+            user_lang = navigator.languages[i].substr(0, 2);
+            if (user_lang in languages) {
+                lang = user_lang;
+                document.documentElement.lang = lang;
+                break;
+            }
         }
-    }
-#end if
+    #end if
+}
 
 dateTimeFormat = {};
 observationLabels = {};
