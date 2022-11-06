@@ -20,6 +20,7 @@ function updatelogLevel() {
     logLevel = sessionStorage.getItem('logLevel');
     if (!logLevel) {
         logLevel = defaultLogLevel;
+        sessionStorage.setItem('logLevel', logLevel);
     }
 
     jasLogDebug = () => {};
@@ -39,10 +40,14 @@ function updatelogLevel() {
     }
 }
 
-function setLogLevel (logLevel) {
+function setLogLevel(logLevel) {
     sessionStorage.setItem('logLevel', logLevel);
     updatelogLevel();
     return "Log level is set."
+}
+
+function getLogLevel() {
+    return sessionStorage.getItem('logLevel')
 }
 
 updatelogLevel();
