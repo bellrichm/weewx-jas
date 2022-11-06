@@ -24,6 +24,13 @@ EXTENSION_CONFIG = """
         enable = true 
         [[[Extras]]]
 
+            # controls logging in the browser console
+            # 1: debug/verbose and higher
+            # 2: info and higher
+            # 3: warn and higher (default)
+            # 4: error and higher
+            jas_debug_level = 3
+
             # When True, the browser's preferred language setting is used to determine the language display settings.
             # When False, the skin's lang setting is used.
             # The default is False.
