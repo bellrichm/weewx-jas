@@ -143,9 +143,6 @@ function handleMQTT(message) {
 
         // Process each observation in the 'current' section.
         observations = sessionStorage.getItem("observations").split(",");
-        jasLogInfo(JSON.stringify(observations));
-        jasLogInfo(JSON.stringify(fieldMap));
-        jasLogInfo(current.observations);
         observations.forEach(function(observation) {
             obs = fieldMap.get(observation);
             if (obs === undefined) {
@@ -153,6 +150,8 @@ function handleMQTT(message) {
             }
         
             observationInfo = current.observations.get(obs);
+            jasLogInfo({obs}, {observationInfo}, {fieldMap}, {observations});
+            jasLogDebug({current});
             if (observationInfo.mqtt && test_obj[obs]) {
                 data = JSON.parse(sessionStorage.getItem(observation));
                 data.value = Number(test_obj[obs]);
