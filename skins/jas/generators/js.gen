@@ -42,6 +42,7 @@ function updatelogLevel() {
 function setLogLevel (logLevel) {
     sessionStorage.setItem('logLevel', logLevel);
     updatelogLevel();
+    return "Log level is set."
 }
 
 updatelogLevel();
