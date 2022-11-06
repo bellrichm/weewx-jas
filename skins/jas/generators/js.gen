@@ -15,14 +15,13 @@
     #end if
 #end def
 
-defaultLogLevel = "3";
-function updatelogLevel() {
-    logLevel = sessionStorage.getItem('logLevel');
-    if (!logLevel) {
-        logLevel = defaultLogLevel;
-        sessionStorage.setItem('logLevel', logLevel);
-    }
+logLevel = sessionStorage.getItem('logLevel');
+if (!logLevel) {
+    logLevel = "$getVar('$Extras.jas_debug_level', '3')";
+    sessionStorage.setItem('logLevel', logLevel);
+}
 
+function updatelogLevel(logLevel) {
     jasLogDebug = () => {};
     jasLogInfo = () => {};
     jasLogWarn= () => {};
@@ -37,20 +36,10 @@ function updatelogLevel() {
             jasLogWarn = console.warn;
         case "4":
             jasLogError = console.error;
-    }
+        }
 }
 
-function setLogLevel(logLevel) {
-    sessionStorage.setItem('logLevel', logLevel);
-    updatelogLevel();
-    return "Log level is set."
-}
-
-function getLogLevel() {
-    return sessionStorage.getItem('logLevel')
-}
-
-updatelogLevel();
+updatelogLevel(logLevel);
 
 #set $skin_data_binding = $getVar("$Extras.data_binding", $data_binding)
 
@@ -82,6 +71,12 @@ function refreshSizes(){
       height = chartElem.offsetWidth / 1.618 + 17  +"px"; // adding is a hack
       pageCharts[index].chart.resize({width: null, height: height});
     }
+}
+
+// Handle event messages of type 'init'.
+function handleInit(message) {
+    logLevel = message.logLevel;
+    updatelogLevel(logLevel);
 }
 
 // Handle event messages of type 'lang'.
@@ -148,6 +143,9 @@ function handleMQTT(message) {
 
         // Process each observation in the 'current' section.
         observations = sessionStorage.getItem("observations").split(",");
+        jasLogInfo(JSON.stringify(observations));
+        jasLogInfo(JSON.stringify(fieldMap));
+        jasLogInfo(current.observations);
         observations.forEach(function(observation) {
             obs = fieldMap.get(observation);
             if (obs === undefined) {
@@ -586,10 +584,14 @@ window.addEventListener('message',
                         if (message.kind == undefined) {
                             return;
                         }
+                        if (message.kind == 'init')
+                        {
+                            handleInit(message.message);
+                        }                        
                         if (message.kind == 'lang')
                         {
                             handleLang(message.message);
-                            }
+                        }
                         if (message.kind == 'mqtt')
                         {
                             handleMQTT(message.message);

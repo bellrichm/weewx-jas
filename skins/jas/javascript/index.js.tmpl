@@ -4,6 +4,47 @@
 #from weeutil.weeutil import to_bool  
 #import time
 #set $start_time = time.time()
+
+function updatelogLevel()
+{
+  logLevel = sessionStorage.getItem('logLevel');
+  if (!logLevel) {
+      logLevel = "$getVar('$Extras.jas_debug_level', '3')";
+      sessionStorage.setItem('logLevel', logLevel);
+  }
+
+  message = {};
+  message.kind = 'init';
+  message.message = {};
+  message.message.logLevel = logLevel;
+   
+    // When running without a webserver, there is a lot of 'strangeness'
+    if (window.location.protocol == "file:") {
+        targetOrigin = "*";
+    }
+    else {
+        targetOrigin = window.location.origin;
+    }      
+
+    if (document.getElementById('child-iframe')) {
+      document.getElementById('child-iframe').contentWindow.postMessage(message, targetOrigin);
+    }
+    else {
+      window.self.postMessage(message, targetOrigin);
+    }
+
+}
+
+function setLogLevel(logLevel) {
+    sessionStorage.setItem('logLevel', logLevel);
+    updatelogLevel();
+    return "Log level is set."
+}
+
+function getLogLevel() {
+    return sessionStorage.getItem('logLevel')
+}
+
 ## ToDo: thiscould be cleaned up
 function setIframeSrc(id, url) {
   // Set current page as the active page.
@@ -17,6 +58,11 @@ function setIframeSrc(id, url) {
   }
   document.getElementById(url).classList.add("active");
   document.getElementById(id).src = url;
+
+  iframe = document.getElementById(id);
+  iframe.onload = () => {
+    updatelogLevel();
+}
 
   ## ToDo: better way/location?
   // When on the debug iframe, add the connect/disconnect buttons to the header.
