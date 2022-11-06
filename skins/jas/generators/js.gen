@@ -15,6 +15,37 @@
     #end if
 #end def
 
+defaultLogLevel = "3";
+function updatelogLevel() {
+    logLevel = sessionStorage.getItem('logLevel');
+    if (!logLevel) {
+        logLevel = defaultLogLevel;
+    }
+
+    jasLogDebug = () => {};
+    jasLogInfo = () => {};
+    jasLogWarn= () => {};
+    jasLogError = () => {};
+
+    switch(logLevel) {
+        case "1":
+            jasLogDebug = console.debug;
+        case "2":
+            jasLogInfo = console.info;
+        case "3":
+            jasLogWarn = console.warn;
+        case "4":
+            jasLogError = console.error;
+    }
+}
+
+function setLogLevel (logLevel) {
+    sessionStorage.setItem('logLevel', logLevel);
+    updatelogLevel();
+}
+
+updatelogLevel();
+
 #set $skin_data_binding = $getVar("$Extras.data_binding", $data_binding)
 
 var pageCharts = [];
