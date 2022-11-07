@@ -21,6 +21,10 @@ if (!logLevel) {
     sessionStorage.setItem('logLevel', logLevel);
 }
 
+function jasShow(data) {
+    console.log(window[data]);
+}
+
 function updatelogLevel(logLevel) {
     jasLogDebug = () => {};
     jasLogInfo = () => {};
@@ -588,6 +592,10 @@ window.addEventListener('message',
                         if (message.kind == undefined) {
                             return;
                         }
+                        if (message.kind == 'jasShow')
+                        {
+                            jasShow(message.message);
+                        }       
                         if (message.kind == 'getLogLevel')
                         {
                             getLogLevel();

@@ -5,6 +5,29 @@
 #import time
 #set $start_time = time.time()
 
+function jasShow(data)
+{
+  message = {};
+  message.kind = 'jasShow';
+  message.message = data;
+   
+    // When running without a webserver, there is a lot of 'strangeness'
+    if (window.location.protocol == "file:") {
+        targetOrigin = "*";
+    }
+    else {
+        targetOrigin = window.location.origin;
+    }      
+
+    if (document.getElementById('child-iframe')) {
+      document.getElementById('child-iframe').contentWindow.postMessage(message, targetOrigin);
+    }
+    else {
+      window.self.postMessage(message, targetOrigin);
+    }
+
+}
+
 function setLogLevel(logLevel)
 {
   message = {};
