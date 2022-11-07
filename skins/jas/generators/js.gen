@@ -101,8 +101,9 @@ function handleLog(message) {
 }
 
 // Handle event messages of type 'mqtt'.
+var test_obj = null; // Not a great idea to be global, but makes remote debugging easier.
 function handleMQTT(message) {
-    var test_obj = JSON.parse(message.payload);
+    test_obj = JSON.parse(message.payload);
 
     #if $getVar("$Extras.pages." + $page + ".current", None) is not None and to_bool($getVar('Extras.pages.' + $page + '.mqtt', True))
         // Handle the 'header' section of current observations.
