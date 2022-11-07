@@ -95,9 +95,9 @@ function handleLang(lang) {
 
 // Handle event messages of type 'log'.
 function handleLog(message) {
-    var jasLog = document.getElementById("jasLog");
-    if (jasLog) {
-        jasLog.innerHTML = message + "\n<br>" + jasLog.innerHTML;
+    var logDisplayElem = document.getElementById("logDisplay");
+    if (logDisplayElem) {
+        logDisplayElem.innerHTML = message + "\n<br>" + logDisplayElem.innerHTML;
     }
 }
 

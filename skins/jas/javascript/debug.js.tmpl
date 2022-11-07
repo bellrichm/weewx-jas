@@ -17,11 +17,11 @@
 #set global interval_long_name_global = None
 
 function copyLog() {
-  var log = document.getElementById("jasLog").textContent;
+  var log = document.getElementById("logDisplay").textContent;
   navigator.clipboard.writeText(log);
 }
 
 function clearLog() {
-    var jasLog = document.getElementById("jasLog");
-        jasLog.innerHTML = "";
+    var logDisplayElem = document.getElementById("logDisplay");
+        logDisplayElem.innerHTML = "";
 }
