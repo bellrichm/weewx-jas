@@ -150,8 +150,6 @@ function handleMQTT(message) {
             }
         
             observationInfo = current.observations.get(observation);
-            jasLogInfo({obs}, {observationInfo}, {fieldMap}, {observations});
-            jasLogDebug({current});
             if (observationInfo.mqtt && test_obj[obs]) {
                 data = JSON.parse(sessionStorage.getItem(observation));
                 data.value = Number(test_obj[obs]);
