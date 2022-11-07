@@ -101,13 +101,17 @@ function handleMQTT(message) {
         // Handle the 'header' section of current observations.
         header = JSON.parse(sessionStorage.getItem("header"));
         if (header) {
+            jasLogInfo(header.name);
             observation = fieldMap.get(header.name);
+            jasLogInfo({observation});
             if (observation === undefined) {
                 header.value = test_obj[header.name];
             }
             else {
                 header.value = test_obj[observation];
             }
+            jasLogDebug({test_obj});
+            jasLogDebug({fieldMap});
 
             #set header_max_decimals = $getVar('$Extras.current.header_max_decimals', False)
             #if $header_max_decimals
