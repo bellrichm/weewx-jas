@@ -25,7 +25,7 @@ function jasShow(data)
     else {
       window.self.postMessage(message, targetOrigin);
     }
-
+  return "Showing..."
 }
 
 function setLogLevel(logLevel)
@@ -49,7 +49,7 @@ function setLogLevel(logLevel)
     else {
       window.self.postMessage(message, targetOrigin);
     }
-
+  return "Setting..."
 }
 
 function getLogLevel() {
@@ -72,6 +72,7 @@ function getLogLevel() {
   else {
     window.self.postMessage(message, targetOrigin);
   }
+  return "Getting..."
 }
 
 ## ToDo: thiscould be cleaned up

@@ -22,7 +22,7 @@ if (!logLevel) {
 }
 
 function jasShow(data) {
-    console.log(window[data]);
+    return window[data]
 }
 
 function updatelogLevel(logLevel) {
@@ -78,12 +78,13 @@ function refreshSizes(){
 }
 
 function getLogLevel() {
-    console.log(sessionStorage.getItem('logLevel'));
+    return sessionStorage.getItem('logLevel')
 }
 
 function setLogLevel(logLevel) {
     sessionStorage.setItem("logLevel", logLevel);
     updatelogLevel(logLevel.toString());
+    return "Set to: " +logLevel
 }
 
 // Handle event messages of type 'lang'.
@@ -118,6 +119,8 @@ function handleMQTT(message) {
             else {
                 header.value = test_obj[observation];
             }
+            jasLogInfo(header.value);
+            jasLogInfo(typeof(header.value));
             jasLogDebug({test_obj});
             jasLogDebug({fieldMap});
 
@@ -125,9 +128,11 @@ function handleMQTT(message) {
             #if $header_max_decimals
                 header.value = Number(header.value).toFixed($header_max_decimals);
             #end if
+            jasLogInfo(header.value);
             if (!isNaN(header.value)) {
                 header.value = Number(header.value).toLocaleString(lang);
-            }            
+            }
+            jasLogInfo(header.value);          
 
             if (test_obj[header.unit]) {
                 header.unit = test_obj[header.unit];
@@ -285,6 +290,7 @@ function handleMQTT(message) {
 #if 'current' in $getVar('$Extras.pages.' + $page)
     function updateCurrentObservations() {
         #if $getVar('$Extras.current.observation', False)
+            jasLogInfo(sessionStorage);
             if(sessionStorage.getItem("header") === null || !MQTTConfig){
                 sessionStorage.setItem("header", JSON.stringify(current.header));
             }
@@ -595,15 +601,15 @@ window.addEventListener('message',
                         }
                         if (message.kind == 'jasShow')
                         {
-                            jasShow(message.message);
+                            console.log(jasShow(message.message));
                         }       
                         if (message.kind == 'getLogLevel')
                         {
-                            getLogLevel();
+                            console.log(getLogLevel());
                         }                                           
                         if (message.kind == 'setLogLevel')
                         {
-                            setLogLevel(message.message.logLevel);
+                            console.log(setLogLevel(message.message.logLevel));
                         }                        
                         if (message.kind == 'lang')
                         {
