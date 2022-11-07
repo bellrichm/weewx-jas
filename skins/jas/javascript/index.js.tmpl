@@ -5,14 +5,8 @@
 #import time
 #set $start_time = time.time()
 
-function updatelogLevel()
+function setLogLevel(logLevel)
 {
-  logLevel = sessionStorage.getItem('logLevel');
-  if (!logLevel) {
-      logLevel = "$getVar('$Extras.jas_debug_level', '3')";
-      sessionStorage.setItem('logLevel', logLevel);
-  }
-
   message = {};
   message.kind = 'setLogLevel';
   message.message = {};
@@ -33,12 +27,6 @@ function updatelogLevel()
       window.self.postMessage(message, targetOrigin);
     }
 
-}
-
-function setLogLevel(logLevel) {
-    sessionStorage.setItem('logLevel', logLevel);
-    updatelogLevel();
-    return "Log level is set."
 }
 
 function getLogLevel() {
@@ -76,11 +64,6 @@ function setIframeSrc(id, url) {
   }
   document.getElementById(url).classList.add("active");
   document.getElementById(id).src = url;
-
-  iframe = document.getElementById(id);
-  iframe.onload = () => {
-    updatelogLevel();
-}
 
   ## ToDo: better way/location?
   // When on the debug iframe, add the connect/disconnect buttons to the header.
