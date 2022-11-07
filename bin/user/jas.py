@@ -167,7 +167,7 @@ except ImportError:
         logmsg(syslog.LOG_ERR, msg)
 
 
-VERSION = "0.2.4-rc07a"
+VERSION = "0.2.4-z01"
 
 class JAS(SearchList):
     """ Implement tags used by templates in the skin. """
