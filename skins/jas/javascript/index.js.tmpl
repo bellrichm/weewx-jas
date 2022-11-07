@@ -14,7 +14,7 @@ function updatelogLevel()
   }
 
   message = {};
-  message.kind = 'init';
+  message.kind = 'setLogLevel';
   message.message = {};
   message.message.logLevel = logLevel;
    
@@ -42,7 +42,25 @@ function setLogLevel(logLevel) {
 }
 
 function getLogLevel() {
-    return sessionStorage.getItem('logLevel')
+
+  message = {};
+  message.kind = 'getLogLevel';
+  message.message = {};
+   
+  // When running without a webserver, there is a lot of 'strangeness'
+  if (window.location.protocol == "file:") {
+      targetOrigin = "*";
+  }
+  else {
+      targetOrigin = window.location.origin;
+  }      
+
+  if (document.getElementById('child-iframe')) {
+    document.getElementById('child-iframe').contentWindow.postMessage(message, targetOrigin);
+  }
+  else {
+    window.self.postMessage(message, targetOrigin);
+  }
 }
 
 ## ToDo: thiscould be cleaned up

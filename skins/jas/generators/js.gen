@@ -73,10 +73,13 @@ function refreshSizes(){
     }
 }
 
-// Handle event messages of type 'init'.
-function handleInit(message) {
-    logLevel = message.logLevel;
-    updatelogLevel(logLevel);
+function getLogLevel() {
+    console.log(sessionStorage.getItem('logLevel'));
+}
+
+function setLogLevel(logLevel) {
+    sessionStorage.setItem("logLevel", logLevel);
+    updatelogLevel(logLevel.toString());
 }
 
 // Handle event messages of type 'lang'.
@@ -585,9 +588,13 @@ window.addEventListener('message',
                         if (message.kind == undefined) {
                             return;
                         }
-                        if (message.kind == 'init')
+                        if (message.kind == 'getLogLevel')
                         {
-                            handleInit(message.message);
+                            getLogLevel();
+                        }                                           
+                        if (message.kind == 'setLogLevel')
+                        {
+                            setLogLevel(message.message.logLevel);
                         }                        
                         if (message.kind == 'lang')
                         {
