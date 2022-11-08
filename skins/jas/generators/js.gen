@@ -44,6 +44,9 @@ function updatelogLevel(logLevel) {
 }
 
 updatelogLevel(logLevel);
+jasLogInfo("Running version: ", '$version');
+jasLogInfo("Language setting is: ", lang);
+jasLogInfo("Log level: ", logLevel);
 
 #set $skin_data_binding = $getVar("$Extras.data_binding", $data_binding)
 
@@ -117,19 +120,21 @@ function handleMQTT(message) {
         if (header) {
             observation = fieldMap.get(header.name);
             if (observation === undefined) {
-                header.value = test_obj[header.name];
+                mqttValue = test_obj[header.name];
             }
             else {
-                header.value = test_obj[observation];
+                mqttValue = test_obj[observation];
             }
 
-            #set header_max_decimals = $getVar('$Extras.current.header_max_decimals', False)
-            #if $header_max_decimals
-                header.value = Number(header.value).toFixed($header_max_decimals);
-            #end if
-            if (!isNaN(header.value)) {
-                header.value = Number(header.value).toLocaleString(lang);
-            }        
+            if (mqttValue != undefined) {
+                #set header_max_decimals = $getVar('$Extras.current.header_max_decimals', False)
+                #if $header_max_decimals
+                    mqttValue = Number(mqttValue).toFixed($header_max_decimals);
+                #end if
+                if (!isNaN(mqttValue)) {
+                    header.value = Number(mqttValue).toLocaleString(lang);
+                }      
+            }  
 
             if (test_obj[header.unit]) {
                 header.unit = test_obj[header.unit];
@@ -342,6 +347,8 @@ function handleMQTT(message) {
     #set $minmax_data_binding = $getVar("$Extras.minmax.data_binding", $skin_data_binding)
     // Update the min/max observations
     function updateMinMax(startTimestamp, endTimestamp) {
+        jasLogDebug("Min start: ", startTimestamp);
+        jasLogDebug("Max start: ", endTimestamp);
         ## ToDo: optimize to only get index once for all observations?
         #for $observation in $getVar('Extras.minmax.observations.sections')
             #set $data_binding = $getVar("$Extras.minmax.observations." + $observation + ".data_binding", minmax_data_binding)
