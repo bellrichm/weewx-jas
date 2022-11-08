@@ -5,6 +5,43 @@
 #import time
 #set $start_time = time.time()
 
+indexPageLogLevel = sessionStorage.getItem('indexPageLogLevel');
+if (!indexPageLogLevel) {
+    indexPageLogLevel = "$getVar('$Extras.jas_debug_level', '3')";
+    sessionStorage.setItem('indexPageLogLevel', indexPageLogLevel);
+}
+
+function updatelogLevel(logLevel) {
+    jasLogDebug = () => {};
+    jasLogInfo = () => {};
+    jasLogWarn= () => {};
+    jasLogError = () => {};
+
+    switch(logLevel) {
+        case "1":
+            jasLogDebug = (prefix, info) => {console.debug(prefix + JSON.stringify(info));};
+        case "2":
+            jasLogInfo = (prefix, info) => {console.info(prefix + JSON.stringify(info));};
+        case "3":
+            jasLogWarn = (prefix, info) => {console.warn(prefix + JSON.stringify(info));};
+        case "4":
+            jasLogError = (prefix, info) => {console.error(prefix + JSON.stringify(info));};
+        }
+}
+
+updatelogLevel(indexPageLogLevel);
+
+jasLogInfo("Running version: ", '$version');
+jasLogInfo("Language setting is: ", lang);
+jasLogInfo("Log level: ", indexPageLogLevel);
+jasLogInfo("", "host: $Extras.mqtt.host");
+jasLogInfo("", "port: $Extras.mqtt.port");
+jasLogInfo("", "timeout: $Extras.mqtt.timeout");
+jasLogInfo("", "keepAliveInterval: $Extras.mqtt.keepAliveInterval");
+jasLogInfo("", "cleanSession: $Extras.mqtt.cleanSession.lower()");
+jasLogInfo("", "useSSL: $Extras.mqtt.useSSL.lower()");
+jasLogInfo("", "reconnect: $Extras.mqtt.reconnect.lower()");
+
 function jasShow(data)
 {
   message = {};
@@ -30,6 +67,11 @@ function jasShow(data)
 
 function setLogLevel(logLevel)
 {
+    sessionStorage.setItem("indexPageLogLevel", logLevel);
+    updatelogLevel(logLevel.toString());
+    //return "Set to: " + logLevel
+
+  // Send the logLevel to the sub-pages
   message = {};
   message.kind = 'setLogLevel';
   message.message = {};
@@ -49,11 +91,13 @@ function setLogLevel(logLevel)
     else {
       window.self.postMessage(message, targetOrigin);
     }
-  return "Setting..."
+
+  return "Index page log level: " + sessionStorage.getItem("indexPageLogLevel")
 }
 
 function getLogLevel() {
 
+  // get sub-page log level
   message = {};
   message.kind = 'getLogLevel';
   message.message = {};
@@ -72,7 +116,8 @@ function getLogLevel() {
   else {
     window.self.postMessage(message, targetOrigin);
   }
-  return "Getting..."
+
+  return "Index page log level: " + sessionStorage.getItem("indexPageLogLevel")
 }
 
 ## ToDo: thiscould be cleaned up

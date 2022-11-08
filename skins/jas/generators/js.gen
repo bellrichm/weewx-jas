@@ -44,16 +44,6 @@ function updatelogLevel(logLevel) {
 }
 
 updatelogLevel(logLevel);
-jasLogInfo("Running version: ", '$version');
-jasLogInfo("Language setting is: ", lang);
-jasLogInfo("Log level: ", logLevel);
-jasLogInfo("", "host: $Extras.mqtt.host");
-jasLogInfo("", "port: $Extras.mqtt.port");
-jasLogInfo("", "timeout: $Extras.mqtt.timeout");
-jasLogInfo("", "keepAliveInterval: $Extras.mqtt.keepAliveInterval");
-jasLogInfo("", "cleanSession: $Extras.mqtt.cleanSession.lower()");
-jasLogInfo("", "useSSL: $Extras.mqtt.useSSL.lower()");
-jasLogInfo("", "reconnect: $Extras.mqtt.reconnect.lower()");
 
 #set $skin_data_binding = $getVar("$Extras.data_binding", $data_binding)
 
@@ -88,13 +78,13 @@ function refreshSizes(){
 }
 
 function getLogLevel() {
-    return sessionStorage.getItem('logLevel')
+    return "Sub-page log level: " + sessionStorage.getItem("logLevel")
 }
 
 function setLogLevel(logLevel) {
     sessionStorage.setItem("logLevel", logLevel);
     updatelogLevel(logLevel.toString());
-    return "Set to: " +logLevel
+    return "Sub-page log level: " + sessionStorage.getItem("logLevel")
 }
 
 // Handle event messages of type 'lang'.
@@ -119,7 +109,8 @@ function handleMQTT(message) {
     jasLogDebug("test_obj: ", test_obj);
     jasLogDebug("sessionStorage: ", sessionStorage);
     jasLogDebug("fieldMap: ", Object.fromEntries(fieldMap));
-    jasLogDebug("current.observations: ", Object.fromEntries(current.observations));
+    // To Do - only exists on pages with 'current' section
+    //jasLogDebug("current.observations: ", Object.fromEntries(current.observations));
 
     #if $getVar("$Extras.pages." + $page + ".current", None) is not None and to_bool($getVar('Extras.pages.' + $page + '.mqtt', True))
         // Handle the 'header' section of current observations.
