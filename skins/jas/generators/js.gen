@@ -47,6 +47,13 @@ updatelogLevel(logLevel);
 jasLogInfo("Running version: ", '$version');
 jasLogInfo("Language setting is: ", lang);
 jasLogInfo("Log level: ", logLevel);
+jasLogInfo("", "host: $Extras.mqtt.host");
+jasLogInfo("", "port: $Extras.mqtt.port");
+jasLogInfo("", "timeout: $Extras.mqtt.timeout");
+jasLogInfo("", "keepAliveInterval: $Extras.mqtt.keepAliveInterval");
+jasLogInfo("", "cleanSession: $Extras.mqtt.cleanSession.lower()");
+jasLogInfo("", "useSSL: $Extras.mqtt.useSSL.lower()");
+jasLogInfo("", "reconnect: $Extras.mqtt.reconnect.lower()");
 
 #set $skin_data_binding = $getVar("$Extras.data_binding", $data_binding)
 
@@ -292,6 +299,7 @@ function handleMQTT(message) {
 #if 'current' in $getVar('$Extras.pages.' + $page)
     function updateCurrentObservations() {
         #if $getVar('$Extras.current.observation', False)
+            ## ToDo: switch to allow non mqtt header data? similar to the observation section
             if(sessionStorage.getItem("header") === null || !MQTTConfig){
                 sessionStorage.setItem("header", JSON.stringify(current.header));
             }
