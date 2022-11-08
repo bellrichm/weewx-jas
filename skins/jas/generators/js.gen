@@ -105,34 +105,29 @@ function handleLog(message) {
 var test_obj = null; // Not a great idea to be global, but makes remote debugging easier.
 function handleMQTT(message) {
     test_obj = JSON.parse(message.payload);
+    currentObs = current.observations;
+    jasLogDebug({test_obj});
+    jasLogDebug({sessionStorage}, {fieldMap}, {currentObs});
 
     #if $getVar("$Extras.pages." + $page + ".current", None) is not None and to_bool($getVar('Extras.pages.' + $page + '.mqtt', True))
         // Handle the 'header' section of current observations.
         header = JSON.parse(sessionStorage.getItem("header"));
         if (header) {
-            jasLogInfo(header.name);
             observation = fieldMap.get(header.name);
-            jasLogInfo({observation});
             if (observation === undefined) {
                 header.value = test_obj[header.name];
             }
             else {
                 header.value = test_obj[observation];
             }
-            jasLogInfo(header.value);
-            jasLogInfo(typeof(header.value));
-            jasLogDebug({test_obj});
-            jasLogDebug({fieldMap});
 
             #set header_max_decimals = $getVar('$Extras.current.header_max_decimals', False)
             #if $header_max_decimals
                 header.value = Number(header.value).toFixed($header_max_decimals);
             #end if
-            jasLogInfo(header.value);
             if (!isNaN(header.value)) {
                 header.value = Number(header.value).toLocaleString(lang);
-            }
-            jasLogInfo(header.value);          
+            }        
 
             if (test_obj[header.unit]) {
                 header.unit = test_obj[header.unit];
@@ -166,7 +161,7 @@ function handleMQTT(message) {
                 obs = observation
             }
         
-            observationInfo = current.observations.get(observation);
+            observationInfo = currentObs.get(observation);
             if (observationInfo.mqtt && test_obj[obs]) {
                 data = JSON.parse(sessionStorage.getItem(observation));
                 data.value = Number(test_obj[obs]);
@@ -290,7 +285,6 @@ function handleMQTT(message) {
 #if 'current' in $getVar('$Extras.pages.' + $page)
     function updateCurrentObservations() {
         #if $getVar('$Extras.current.observation', False)
-            jasLogInfo(sessionStorage);
             if(sessionStorage.getItem("header") === null || !MQTTConfig){
                 sessionStorage.setItem("header", JSON.stringify(current.header));
             }
