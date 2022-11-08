@@ -77,6 +77,7 @@ function onMessageArrived(message) {
     #if $getVar("$Extras.pages.debug", False)
         logIt("onMessageArrived: ");
         logIt(message.payloadString);
+        jasLogDebug("message.payloadString: ", message.payloadString);
     #end if
    
 
