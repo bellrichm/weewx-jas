@@ -15,6 +15,36 @@
     #end if
 #end def
 
+logLevel = sessionStorage.getItem('logLevel');
+if (!logLevel) {
+    logLevel = "$getVar('$Extras.jas_debug_level', '3')";
+    sessionStorage.setItem('logLevel', logLevel);
+}
+
+function jasShow(data) {
+    return window[data]
+}
+
+function updatelogLevel(logLevel) {
+    jasLogDebug = () => {};
+    jasLogInfo = () => {};
+    jasLogWarn= () => {};
+    jasLogError = () => {};
+
+    switch(logLevel) {
+        case "1":
+            jasLogDebug = (prefix, info) => {console.debug(prefix + JSON.stringify(info));};
+        case "2":
+            jasLogInfo = (prefix, info) => {console.info(prefix + JSON.stringify(info));};
+        case "3":
+            jasLogWarn = (prefix, info) => {console.warn(prefix + JSON.stringify(info));};
+        case "4":
+            jasLogError = (prefix, info) => {console.error(prefix + JSON.stringify(info));};
+        }
+}
+
+updatelogLevel(logLevel);
+
 #set $skin_data_binding = $getVar("$Extras.data_binding", $data_binding)
 
 var pageCharts = [];
@@ -47,6 +77,16 @@ function refreshSizes(){
     }
 }
 
+function getLogLevel() {
+    return "Sub-page log level: " + sessionStorage.getItem("logLevel")
+}
+
+function setLogLevel(logLevel) {
+    sessionStorage.setItem("logLevel", logLevel);
+    updatelogLevel(logLevel.toString());
+    return "Sub-page log level: " + sessionStorage.getItem("logLevel")
+}
+
 // Handle event messages of type 'lang'.
 function handleLang(lang) {
     sessionStorage.setItem("currentLanguage", lang);
@@ -55,15 +95,22 @@ function handleLang(lang) {
 
 // Handle event messages of type 'log'.
 function handleLog(message) {
-    var jasLog = document.getElementById("jasLog");
-    if (jasLog) {
-        jasLog.innerHTML = message + "\n<br>" + jasLog.innerHTML;
+    var logDisplayElem = document.getElementById("logDisplay");
+    if (logDisplayElem) {
+        logDisplayElem.innerHTML = message + "\n<br>" + logDisplayElem.innerHTML;
     }
 }
 
 // Handle event messages of type 'mqtt'.
+var test_obj = null; // Not a great idea to be global, but makes remote debugging easier.
 function handleMQTT(message) {
-    var test_obj = JSON.parse(message.payload);
+    test_obj = JSON.parse(message.payload);
+    
+    jasLogDebug("test_obj: ", test_obj);
+    jasLogDebug("sessionStorage: ", sessionStorage);
+    jasLogDebug("fieldMap: ", Object.fromEntries(fieldMap));
+    // To Do - only exists on pages with 'current' section
+    //jasLogDebug("current.observations: ", Object.fromEntries(current.observations));
 
     #if $getVar("$Extras.pages." + $page + ".current", None) is not None and to_bool($getVar('Extras.pages.' + $page + '.mqtt', True))
         // Handle the 'header' section of current observations.
@@ -71,19 +118,21 @@ function handleMQTT(message) {
         if (header) {
             observation = fieldMap.get(header.name);
             if (observation === undefined) {
-                header.value = test_obj[header.name];
+                mqttValue = test_obj[header.name];
             }
             else {
-                header.value = test_obj[observation];
+                mqttValue = test_obj[observation];
             }
 
-            #set header_max_decimals = $getVar('$Extras.current.header_max_decimals', False)
-            #if $header_max_decimals
-                header.value = Number(header.value).toFixed($header_max_decimals);
-            #end if
-            if (!isNaN(header.value)) {
-                header.value = Number(header.value).toLocaleString(lang);
-            }            
+            if (mqttValue != undefined) {
+                #set header_max_decimals = $getVar('$Extras.current.header_max_decimals', False)
+                #if $header_max_decimals
+                    mqttValue = Number(mqttValue).toFixed($header_max_decimals);
+                #end if
+                if (!isNaN(mqttValue)) {
+                    header.value = Number(mqttValue).toLocaleString(lang);
+                }      
+            }  
 
             if (test_obj[header.unit]) {
                 header.unit = test_obj[header.unit];
@@ -117,7 +166,7 @@ function handleMQTT(message) {
                 obs = observation
             }
         
-            observationInfo = current.observations.get(obs);
+            observationInfo = current.observations.get(observation);
             if (observationInfo.mqtt && test_obj[obs]) {
                 data = JSON.parse(sessionStorage.getItem(observation));
                 data.value = Number(test_obj[obs]);
@@ -241,6 +290,7 @@ function handleMQTT(message) {
 #if 'current' in $getVar('$Extras.pages.' + $page)
     function updateCurrentObservations() {
         #if $getVar('$Extras.current.observation', False)
+            ## ToDo: switch to allow non mqtt header data? similar to the observation section
             if(sessionStorage.getItem("header") === null || !MQTTConfig){
                 sessionStorage.setItem("header", JSON.stringify(current.header));
             }
@@ -296,6 +346,8 @@ function handleMQTT(message) {
     #set $minmax_data_binding = $getVar("$Extras.minmax.data_binding", $skin_data_binding)
     // Update the min/max observations
     function updateMinMax(startTimestamp, endTimestamp) {
+        jasLogDebug("Min start: ", startTimestamp);
+        jasLogDebug("Max start: ", endTimestamp);
         ## ToDo: optimize to only get index once for all observations?
         #for $observation in $getVar('Extras.minmax.observations.sections')
             #set $data_binding = $getVar("$Extras.minmax.observations." + $observation + ".data_binding", minmax_data_binding)
@@ -549,10 +601,22 @@ window.addEventListener('message',
                         if (message.kind == undefined) {
                             return;
                         }
+                        if (message.kind == 'jasShow')
+                        {
+                            console.log(jasShow(message.message));
+                        }       
+                        if (message.kind == 'getLogLevel')
+                        {
+                            console.log(getLogLevel());
+                        }                                           
+                        if (message.kind == 'setLogLevel')
+                        {
+                            console.log(setLogLevel(message.message.logLevel));
+                        }                        
                         if (message.kind == 'lang')
                         {
                             handleLang(message.message);
-                            }
+                        }
                         if (message.kind == 'mqtt')
                         {
                             handleMQTT(message.message);

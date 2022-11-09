@@ -12,7 +12,7 @@ except ImportError:
 import configobj
 from weecfg.extension import ExtensionInstaller
 
-VERSION = "0.2.4-rc07a"
+VERSION = "0.2.4-z08"
 
 EXTENSION_CONFIG = """
 [StdReport]
@@ -23,6 +23,13 @@ EXTENSION_CONFIG = """
         HTML_ROOT = jas
         enable = true 
         [[[Extras]]]
+
+            # controls logging in the browser console
+            # 1: debug/verbose and higher
+            # 2: info and higher
+            # 3: warn and higher (default)
+            # 4: error and higher
+            jas_debug_level = 3
 
             # When True, the browser's preferred language setting is used to determine the language display settings.
             # When False, the skin's lang setting is used.
