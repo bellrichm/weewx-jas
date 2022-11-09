@@ -368,10 +368,10 @@ function handleMQTT(message) {
             #echo "          endIndex  = " + $min_datetime_array + ".length - 1;\n"
             #echo "        }\n"
             #echo "        if (startIndex == endIndex) {\n"
-            #echo "          minIndex = startIndex;"
-            #echo "          maxIndex = endIndex;"
+            #echo "          minIndex = startIndex;\n"
+            #echo "          maxIndex = endIndex;\n"
             #echo "        } else {\n"
-            #echo "          minIndex =" + $min_data_array + ".indexOf(Math.min(..." + $min_data_array + ".slice(startIndex, endIndex)));\n"
+            #echo "          minIndex =" + $min_data_array + ".indexOf(Math.min(..." + $min_data_array + ".slice(startIndex, endIndex).filter(obs => obs != null)));\n"
             #echo "          maxIndex =" + $max_data_array + ".indexOf(Math.max(..." + $max_data_array + ".slice(startIndex, endIndex)));\n"
             #echo "        }\n"
 
