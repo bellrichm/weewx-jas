@@ -85,3 +85,25 @@ Enhancements:
 - Force known javascript booleans to lowercase. (#53)
 - Close menu on item selection. (#44)
 - Configure 'year to year' x-axis label format. (#47)
+
+V0.3.0
+New:
+- Dynamic language display. All 'language based' UI elements are dynamically populated.
+  This allows the UI to display based on the browser settings or even based on user choice.
+  The data is populated from WeeWX's lang files, so the translation process is the same as other skins.
+  Note: Currently user defined charts can only be in one language. See #80
+Enhancements:
+- 'max decimals' is configurable in all tabular data.
+- Improved display of collapsed menu.
+- Legend moved to bottom. Improves display on small screens. (#79)
+Fixes:
+- More text is now able to be translated.
+- More dates and times are now able to be formatted. 
+- Missing data in 'this date' section. (#55)
+- Y axis no longer fixed at 0. (#72)
+- Correctly handle mqtt payloads with renamed observations. (#66)
+- Current header observation missing in some MQTT messages. (#66)
+- Handle null/None values when determining the min value in a date/time range. (#76)
+Internal:
+- Ability to output cheetah statements before they are evaluated.
+- Dynamic logging/debugging infrastructure added.
