@@ -167,7 +167,7 @@ except ImportError:
         logmsg(syslog.LOG_ERR, msg)
 
 
-VERSION = "0.3.0"
+VERSION = "0.3.1-rc01"
 
 class JAS(SearchList):
     """ Implement tags used by templates in the skin. """
@@ -712,8 +712,10 @@ class JAS(SearchList):
                             aggregate_type = weewx_options.get('aggregate_type', 'avg')
                             if aggregate_type not in observations[observation]['aggregate_types']:
                                 observations[observation]['aggregate_types'][aggregate_type] = {}
+                                observations[observation]['aggregate_types'][aggregate_type][obs_data_binding] = {}
 
-                            observations[observation]['aggregate_types'][aggregate_type][obs_data_binding] = {}
+                            unit = weewx_options.get('unit', 'default')
+                            observations[observation]['aggregate_types'][aggregate_type][obs_data_binding][unit] = {}
                             aggregate_types[aggregate_type] = {}
 
         minmax_observations = self.skin_dict.get('Extras', {}).get('minmax', {}).get('observations', {})

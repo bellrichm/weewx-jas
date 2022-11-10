@@ -48,23 +48,32 @@
         #set aggregate_interval = $getVar('Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval.' + $aggregate_type, None)
         #set interval_name = $interval_long_name_global + $aggregate_type
         #for data_binding in $observations[$observation]['aggregate_types'][$aggregate_type]:
-            #set array_name = $interval_name + "." + $observation + "_"  + $data_binding
-            #set dateTime_name = $interval_name + "_" + $observation + "_" + $data_binding + "_dateTime"
-            #set data_name = $interval_name + "_" + $observation + "_"  + $data_binding + "_data"
+            #for unit_name in $observations[$observation]['aggregate_types'][$aggregate_type][$data_binding]:
+                #set name_prefix = $interval_name + "." + $observation + "_"  + $data_binding
+                #if $unit_name == "default"
+                    #set unit = ""
+                #else
+                    #set unit = "." + $unit_name
+                    #set name_prefix += "_" + $unit_name
+                #end if
+                #set array_name = $name_prefix
+                #set dateTime_name = $name_prefix + "_dateTime"
+                #set data_name = $name_prefix + "_data"
 
-            #if $aggregate_interval is not None
-                #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='" + $data_binding + "')." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms').round(2).json"
-            #else
-                #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='" + $data_binding + "')." + $observation + ".series(time_series='start', time_unit='unix_epoch_ms').round(2).json"
-            #end if
-            $skinDebug($obs)
-            #set line = $obs + ";\n"
-            $evaluate($line)
+                #if $aggregate_interval is not None
+                    #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='" + $data_binding + "')." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms')" + $unit + ".round(2).json"
+                #else
+                    #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='" + $data_binding + "')." + $observation + ".series(time_series='start', time_unit='unix_epoch_ms')" + $unit + ".round(2).json"
+                #end if
+                $skinDebug($obs)
+                #set line = $obs + ";\n"
+                $evaluate($line)
 
-            ## Cache the dateTimes into its own list variable
-            #echo $dateTime_name + " = [].concat(" + $array_name + ".map(arr => arr[0]));\n"
-            ## Cache the values into its own list variable
-            #echo $data_name + " = [].concat(" + $array_name + ".map(arr => arr[1]));\n"
+                ## Cache the dateTimes into its own list variable
+                #echo $dateTime_name + " = [].concat(" + $array_name + ".map(arr => arr[0]));\n"
+                ## Cache the values into its own list variable
+                #echo $data_name + " = [].concat(" + $array_name + ".map(arr => arr[1]));\n"
+            #end for
         #end for
     #end for
 #end for
