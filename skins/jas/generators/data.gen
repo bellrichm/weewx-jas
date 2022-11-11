@@ -117,7 +117,7 @@ This data is stored in a javascript object named 'current'.
             #set unit_name = $getVar("$Extras.current.observations" + "." + $observation + ".unit", False)
             #if $unit_name
                 #set unit_conv = "." + $unit_name
-                #set observation_unit = $getObsUnitLabel($unit_name)
+                #set observation_unit = $getUnitLabel($unit_name)
             #else
                 #set unit_conv = ""
                 #set observation_unit = '$unit.label.' + $observation
