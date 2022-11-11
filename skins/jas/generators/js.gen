@@ -351,13 +351,24 @@ function handleMQTT(message) {
         ## ToDo: optimize to only get index once for all observations?
         #for $observation in $getVar('Extras.minmax.observations.sections')
             #set $data_binding = $getVar("$Extras.minmax.observations." + $observation + ".data_binding", minmax_data_binding)
-            #set min_datetime_array = $interval_name_global + "_min_" + $observation + "_" + $data_binding + "_dateTime";
-            #set min_data_array = $interval_name_global + "_min_" + $observation + "_" + $data_binding + "_data";
-            #set max_datetime_array = $interval_name_global + "_max_" + $observation + "_" + $data_binding + "_dateTime";
-            #set max_data_array = $interval_name_global + "_max_" + $observation + "_" + $data_binding + "_data";
+            #set $unit_name = $getVar("$Extras.minmax.observations." + $observation + ".unit", "default")
+            #set min_name_prefix = $interval_name_global + "_min_" + $observation + "_" + $data_binding
+            #set max_name_prefix = $interval_name_global + "_max_" + $observation + "_" + $data_binding
+            #if $unit_name != "default"
+                #set $min_name_prefix += "_" + $unit_name
+                #set $max_name_prefix += "_" + $unit_name
+                #set label = $getUnitLabel($unit_name)
+            #else
+                #set label = $getVar('unit.label.' + $observation);
+            #end if
+
+            #set min_datetime_array = $min_name_prefix + "_dateTime";
+            #set min_data_array = $min_name_prefix + "_data";
+            #set max_datetime_array = $max_name_prefix + "_dateTime";
+            #set max_data_array = $max_name_prefix + "_data";
             #set min_id = $observation + "_minmax_min";
             #set max_id = $observation + "_minmax_max";
-            #set label = $getVar('unit.label.' + $observation);
+            
 
             #echo "        startIndex = " + $min_datetime_array + ".findIndex(element => element == startTimestamp);\n"
             #echo "        endIndex = " + $min_datetime_array + ".findIndex(element => element == endTimestamp);\n"
