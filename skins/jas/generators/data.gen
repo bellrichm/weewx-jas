@@ -50,15 +50,17 @@
         #for data_binding in $observations[$observation]['aggregate_types'][$aggregate_type]:
             #for unit_name in $observations[$observation]['aggregate_types'][$aggregate_type][$data_binding]:
                 #set name_prefix = $interval_name + "." + $observation + "_"  + $data_binding
+                #set name_prefix2 = $interval_name + "_" + $observation + "_"  + $data_binding
                 #if $unit_name == "default"
                     #set unit = ""
                 #else
                     #set unit = "." + $unit_name
                     #set name_prefix += "_" + $unit_name
+                    #set name_prefix2 += "_" + $unit_name
                 #end if
                 #set array_name = $name_prefix
-                #set dateTime_name = $name_prefix + "_dateTime"
-                #set data_name = $name_prefix + "_data"
+                #set dateTime_name = $name_prefix2 + "_dateTime"
+                #set data_name = $name_prefix2 + "_data"
 
                 #if $aggregate_interval is not None
                     #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='" + $data_binding + "')." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms')" + $unit + ".round(2).json"
@@ -112,6 +114,7 @@ This data is stored in a javascript object named 'current'.
     #for observation in $Extras.current.observations
             #set type = $getVar("$Extras.current.observations" + "." + $observation + ".type", "")
             #set suffix = $getVar("$Extras.current.observations" + "." + $observation + ".suffix", "")
+            # ToDo: unit for obs
             #if $type == 'rise'    
                 #set observation_value = '"$' + 'almanac.' + $observation + 'rise"'
                 #set observation_unit = " "

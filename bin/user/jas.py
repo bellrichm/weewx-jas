@@ -723,15 +723,20 @@ class JAS(SearchList):
         for observation in self.skin_dict['Extras']['minmax']['observations'].sections:
             data_binding = minmax_observations[observation].get('data_binding', minmax_data_binding)
             if observation not in self.wind_observations:
+                unit = minmax_observations[observation].get('unit', 'default')
                 if observation not in observations:
                     observations[observation] = {}
                     observations[observation]['aggregate_types'] = {}
 
-                observations[observation]['aggregate_types']['min'] = {}
-                observations[observation]['aggregate_types']['min'][data_binding] = {}
+                if 'min' not in observations[observation]['aggregate_types']:
+                    observations[observation]['aggregate_types']['min'] = {}
+                    observations[observation]['aggregate_types']['min'][data_binding] = {}
+                observations[observation]['aggregate_types']['min'][data_binding][unit] = {}
                 aggregate_types['min'] = {}
-                observations[observation]['aggregate_types']['max'] = {}
-                observations[observation]['aggregate_types']['max'][data_binding] = {}
+                if 'max' not in observations[observation]['aggregate_types']:
+                    observations[observation]['aggregate_types']['max'] = {}
+                    observations[observation]['aggregate_types']['max'][data_binding] = {}
+                observations[observation]['aggregate_types']['max'][data_binding][unit] = {}
                 aggregate_types['max'] = {}
 
         thisdate_observations = self.skin_dict.get('Extras', {}).get('thisdate', {}).get('observations', {})
@@ -739,15 +744,20 @@ class JAS(SearchList):
         for observation in thisdate_observations:
             data_binding = thisdate_observations[observation].get('data_binding', thisdate_data_binding)
             if observation not in self.wind_observations:
+                unit = thisdate_observations[observation].get('unit', 'default')
                 if observation not in observations:
                     observations[observation] = {}
                     observations[observation]['aggregate_types'] = {}
 
-                observations[observation]['aggregate_types']['min'] = {}
-                observations[observation]['aggregate_types']['min'][data_binding] = {}
+                if 'min' not in observations[observation]['aggregate_types']:
+                    observations[observation]['aggregate_types']['min'] = {}
+                    observations[observation]['aggregate_types']['min'][data_binding] = {}
+                observations[observation]['aggregate_types']['min'][data_binding][unit] = {}
                 aggregate_types['min'] = {}
-                observations[observation]['aggregate_types']['max'] = {}
-                observations[observation]['aggregate_types']['max'][data_binding] = {}
+                if 'max' not in observations[observation]['aggregate_types']:
+                    observations[observation]['aggregate_types']['max'] = {}
+                    observations[observation]['aggregate_types']['max'][data_binding] = {}
+                observations[observation]['aggregate_types']['max'][data_binding][unit] = {}
                 aggregate_types['max'] = {}
 
         return observations, aggregate_types
