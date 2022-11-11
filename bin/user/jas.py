@@ -254,7 +254,7 @@ class JAS(SearchList):
                                  'forecasts': self.data_forecast,
                                  'genCharts': self._gen_charts,
                                  'getRange': self._get_range,
-                                 'getUnitLabel': self._get_unit_label,
+                                 'getObsUnitLabel': self._get_obs_unit_label,
                                  'languages': self.languages,
                                  'last24hours': self._get_last24hours,
                                  'last7days': self._get_last_7_days,
@@ -374,7 +374,7 @@ class JAS(SearchList):
         return last_n_days
 
 
-    def _get_unit_label(self, observation):
+    def _get_obs_unit_label(self, observation):
         # For now, return label for first observations unit. ToDo: possibly change to return all?
         return get_label_string(self.generator.formatter, self.generator.converter, observation, plural=False)
 
