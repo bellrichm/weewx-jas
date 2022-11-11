@@ -428,6 +428,12 @@ function handleMQTT(message) {
     function updateThisDate(timeStamp) {
         #for observation in $Extras.thisdate.observations
             #set $data_binding = $getVar("$Extras.thisdate.observations" + $observation + ".data_binding", $thisdate_data_binding)
+            #set $unit_name = $getVar("$Extras.thisdate.observations." + $observation + ".unit", "default")
+            #if $unit_name == "default"
+                #set unit_suffix = ""
+            #else
+                #set unit_suffix = "_" + $unit_name
+            #end if
             #set aggregation_type = $getVar("$Extras.thisdate.observations." + $observation + ".type", None)
             #set max_decimals = $getVar('$Extras.thisdate.observations.' + $observation + '.max_decimals', False)
             #if max_decimals
@@ -436,20 +442,20 @@ function handleMQTT(message) {
               #set decimal_string = ""
             #end if
             #if $aggregation_type is None
-                #set value = $interval_name_global + '_min.' + $observation + "_" + $data_binding
+                #set value = $interval_name_global + '_min.' + $observation + "_" + $data_binding + $unit_suffix
                 #set line = "obs = Number(getObservation(timeStamp, " + $value + ")" + $decimal_string + ").toLocaleString(lang) + thisDateObservation." + $observation + ".unitLabel;"
                 #set id = $observation + "_thisdate_min"
                 $line
                 observation=document.getElementById("$id");
                 observation.innerHTML = obs;        
-                #set value = $interval_name_global + '_max.' + $observation + "_" + $data_binding
+                #set value = $interval_name_global + '_max.' + $observation + "_" + $data_binding + $unit_suffix
                 #set line = "obs = Number(getObservation(timeStamp, " + $value + ")" + $decimal_string + ").toLocaleString(lang) + thisDateObservation." + $observation + ".unitLabel;"
                 #set id = $observation + "_thisdate_max"
                 $line
                 observation=document.getElementById("$id");
                 observation.innerHTML = obs;      
             #else
-                #set value = $interval_name_global + '_' + $aggregation_type + '.' + $observation + "_" + $data_binding
+                #set value = $interval_name_global + '_' + $aggregation_type + '.' + $observation + "_" + $data_binding + $unit_suffix
                 #set line = "obs = Number(getObservation(timeStamp, " + $value + ")" + $decimal_string + ").toLocaleString(lang) + thisDateObservation." + $observation + ".unitLabel;"
                 #set id = $observation + "_thisdate_" + $aggregation_type
                 $line
