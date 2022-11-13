@@ -717,7 +717,7 @@ class JAS(SearchList):
                             if aggregate_type not in observations[observation]['aggregate_types']:
                                 observations[observation]['aggregate_types'][aggregate_type] = {}
 
-                            if obs_data_binding not in observations[observation]['aggregate_types']:
+                            if obs_data_binding not in observations[observation]['aggregate_types'][aggregate_type]:
                                 observations[observation]['aggregate_types'][aggregate_type][obs_data_binding] = {}
 
                             unit = weewx_options.get('unit', 'default')
