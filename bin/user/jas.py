@@ -787,12 +787,14 @@ class JAS(SearchList):
             if 'weewx' not in self.chart_defs[chart]:
                 self.chart_defs[chart]['weewx'] = {}
             obs = next(iter(self.skin_dict['Extras']['chart_definitions'][chart]['series']))
-            self.chart_defs[chart]['weewx']['yAxis'] = {}
+            if 'yAxis' not in self.chart_defs[chart]['weewx']:
+                self.chart_defs[chart]['weewx']['yAxis'] = {}
             self.chart_defs[chart]['weewx']['yAxis']['0'] = {}
-            self.chart_defs[chart]['weewx']['yAxis']['0']['obs'] = obs
+            self.chart_defs[chart]['weewx']['yAxis']['0']['weewx'] = {}
+            self.chart_defs[chart]['weewx']['yAxis']['0']['weewx']['obs'] = obs
             
             if self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs].get('weewx', False):
-                self.chart_defs[chart]['weewx']['yAxis']['0']['unit'] = self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs]['weewx'].get('unit', None)
+                self.chart_defs[chart]['weewx']['yAxis']['0']['weewx']['unit'] = self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs]['weewx'].get('unit', None)
 
             # ToDo: rework
             for value in self.skin_dict['Extras']['chart_definitions'][chart]['series']:
@@ -805,9 +807,11 @@ class JAS(SearchList):
                 if y_axis_index is not None:
                     if y_axis_index not in self.chart_defs[chart]['weewx']['yAxis']:
                         self.chart_defs[chart]['weewx']['yAxis'][y_axis_index] = {}
-                    self.chart_defs[chart]['weewx']['yAxis'][y_axis_index]['obs'] = value
+                    if 'weewx' not in self.chart_defs[chart]['weewx']['yAxis'][y_axis_index]:
+                        self.chart_defs[chart]['weewx']['yAxis'][y_axis_index]['weewx'] = {}
+                    self.chart_defs[chart]['weewx']['yAxis'][y_axis_index]['weewx']['obs'] = value
                     if self.skin_dict['Extras']['chart_definitions'][chart]['series'][value].get('weewx', False):
-                        self.chart_defs[chart]['weewx']['yAxis']['0']['unit'] = self.skin_dict['Extras']['chart_definitions'][chart]['series'][value]['weewx'].get('unit', None)
+                        self.chart_defs[chart]['weewx']['yAxis']['0']['weewx']['unit'] = self.skin_dict['Extras']['chart_definitions'][chart]['series'][value]['weewx'].get('unit', None)
 
                 self.chart_defs[chart]['series'][value].merge((self.chart_series_defaults.get(coordinate_type, {}).get(charttype, {})))
                 weewx_options['observation'] = value
@@ -908,24 +912,26 @@ class JAS(SearchList):
                 if 'yAxis' not in chart_def and coordinate_type == 'grid':
                     chart2 += '  yAxis: [\n'
                     for i in range(0, len(chart_def['weewx']['yAxis'])):
-                        if str(i) in chart_def['weewx']['yAxis']:
+                        i_str = str(i)
+                        y_axis_default = copy.deepcopy(default_grid_properties['yAxis'])
+                        if i_str in chart_def['weewx']['yAxis']:
                        
-                            unit_name = chart_def['weewx']['yAxis'][str(i)].get('unit', None)
+                            unit_name = chart_def['weewx']['yAxis'][i_str]['weewx'].get('unit', None)
                             if unit_name is not None:
                                 y_axis_label = self._get_unit_label(unit_name)
                             else:
-                                y_axis_label = self._get_obs_unit_label( chart_def['weewx']['yAxis'][str(i)]['obs'])
+                                y_axis_label = self._get_obs_unit_label( chart_def['weewx']['yAxis'][i_str]['weewx']['obs'])
 
                             chart2 += "#set yAxisLabel = '" + y_axis_label + "'\n"
 
-                        chart2 += '  #set index = ' + str(i) + '\n'
+                        chart2 += '  #set index = ' + i_str + '\n'
                         chart2 += '    {\n'
                         chart2 += self._iterdict('      ',
                                                  page, chart,
                                                  '',
                                                  series_type,
                                                  interval,
-                                                 default_grid_properties['yAxis'],
+                                                 y_axis_default,
                                                  chart_data_binding)
                         chart2 += '    },\n'
                     chart2 += '  ],\n'
