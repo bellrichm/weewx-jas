@@ -382,8 +382,8 @@ function handleMQTT(message) {
             #echo "          minIndex = startIndex;\n"
             #echo "          maxIndex = endIndex;\n"
             #echo "        } else {\n"
-            #echo "          minIndex =" + $min_data_array + ".indexOf(Math.min(..." + $min_data_array + ".slice(startIndex, endIndex).filter(obs => obs != null)));\n"
-            #echo "          maxIndex =" + $max_data_array + ".indexOf(Math.max(..." + $max_data_array + ".slice(startIndex, endIndex)));\n"
+            #echo "          minIndex =" + $min_data_array + ".indexOf(Math.min(..." + $min_data_array + ".slice(startIndex, endIndex + 1).filter(obs => obs != null)));\n"
+            #echo "          maxIndex =" + $max_data_array + ".indexOf(Math.max(..." + $max_data_array + ".slice(startIndex, endIndex + 1)));\n"
             #echo "        }\n"
 
             #echo "        min = " + $min_data_array + "[minIndex];\n" 
