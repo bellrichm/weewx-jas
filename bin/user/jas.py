@@ -792,17 +792,24 @@ class JAS(SearchList):
             if 'weewx' not in self.chart_defs[chart]:
                 self.chart_defs[chart]['weewx'] = {}
             obs = next(iter(self.skin_dict['Extras']['chart_definitions'][chart]['series']))
+            observation = obs
+            if 'weewx' in self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs]:
+                observation = self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs]['weewx'].get('observation', obs)
             if 'yAxis' not in self.chart_defs[chart]['weewx']:
                 self.chart_defs[chart]['weewx']['yAxis'] = {}
             self.chart_defs[chart]['weewx']['yAxis']['0'] = {}
             self.chart_defs[chart]['weewx']['yAxis']['0']['weewx'] = {}
-            self.chart_defs[chart]['weewx']['yAxis']['0']['weewx']['obs'] = obs
+            self.chart_defs[chart]['weewx']['yAxis']['0']['weewx']['obs'] = observation
             
             if self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs].get('weewx', False):
                 self.chart_defs[chart]['weewx']['yAxis']['0']['weewx']['unit'] = self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs]['weewx'].get('unit', None)
 
             # ToDo: rework
             for value in self.skin_dict['Extras']['chart_definitions'][chart]['series']:
+                observation = value
+                if 'weewx' in self.skin_dict['Extras']['chart_definitions'][chart]['series'][value]:
+                    observation = self.skin_dict['Extras']['chart_definitions'][chart]['series'][value]['weewx'].get('observation', value)
+
                 charttype = self.skin_dict['Extras']['chart_definitions'][chart]['series'][value].get('type', None)
                 if not charttype:
                     charttype = "'line'"
@@ -814,12 +821,12 @@ class JAS(SearchList):
                         self.chart_defs[chart]['weewx']['yAxis'][y_axis_index] = {}
                     if 'weewx' not in self.chart_defs[chart]['weewx']['yAxis'][y_axis_index]:
                         self.chart_defs[chart]['weewx']['yAxis'][y_axis_index]['weewx'] = {}
-                    self.chart_defs[chart]['weewx']['yAxis'][y_axis_index]['weewx']['obs'] = value
+                    self.chart_defs[chart]['weewx']['yAxis'][y_axis_index]['weewx']['obs'] = observation
                     if self.skin_dict['Extras']['chart_definitions'][chart]['series'][value].get('weewx', False):
-                        self.chart_defs[chart]['weewx']['yAxis']['0']['weewx']['unit'] = self.skin_dict['Extras']['chart_definitions'][chart]['series'][value]['weewx'].get('unit', None)
+                        self.chart_defs[chart]['weewx']['yAxis'][y_axis_index]['weewx']['unit'] = self.skin_dict['Extras']['chart_definitions'][chart]['series'][value]['weewx'].get('unit', None)
 
                 self.chart_defs[chart]['series'][value].merge((self.chart_series_defaults.get(coordinate_type, {}).get(charttype, {})))
-                weewx_options['observation'] = value
+                weewx_options['observation'] = observation
                 if 'weewx' not in self.chart_defs[chart]['series'][value]:
                     self.chart_defs[chart]['series'][value]['weewx'] = {}
                 weeutil.config.conditional_merge(self.chart_defs[chart]['series'][value]['weewx'], weewx_options)
