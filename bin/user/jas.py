@@ -77,6 +77,10 @@ This search list extension provides the following tags:
     Returns:
       The version of this skin.
 
+  $weewx_version
+    Returns:
+      The version of WeeWX.      
+
   $windCompass(start_offset, end_offset)
     Arguments:
       start_offset: The starting time offset from the current time. Default is 86400, 24 hours.
@@ -167,7 +171,7 @@ except ImportError:
         logmsg(syslog.LOG_ERR, msg)
 
 
-VERSION = "0.3.1-rc01"
+VERSION = "0.3.1-rc02"
 
 class JAS(SearchList):
     """ Implement tags used by templates in the skin. """
@@ -271,6 +275,7 @@ class JAS(SearchList):
                                  'textLabels': self.get_text_labels,
                                  'utcOffset': self.utc_offset,
                                  'version': VERSION,
+                                 'weewx_version': weewx.__version__,
                                  'windCompass': self._get_wind_compass,
                                 }
 
@@ -915,7 +920,8 @@ class JAS(SearchList):
                         i_str = str(i)
                         y_axis_default = copy.deepcopy(default_grid_properties['yAxis'])
                         if i_str in chart_def['weewx']['yAxis']:
-                       
+                            y_axis_default.merge(chart_def['weewx']['yAxis'][str(i)])
+
                             unit_name = chart_def['weewx']['yAxis'][i_str]['weewx'].get('unit', None)
                             if unit_name is not None:
                                 y_axis_label = self._get_unit_label(unit_name)
