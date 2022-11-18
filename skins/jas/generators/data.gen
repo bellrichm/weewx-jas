@@ -65,7 +65,17 @@
                 #if $aggregate_interval is not None
                     #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='" + $data_binding + "')." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms')" + $unit_conv + ".round(2).json"
                 #else
-                    #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='" + $data_binding + "')." + $observation + ".series(time_series='start', time_unit='unix_epoch_ms')" + $unit_conv + ".round(2).json"
+                    ## wind 'observation' is special see #87
+                    #if $observation == 'wind'
+                        #if $aggregate_type == 'max'
+                            #set weewx_observation = 'windGust'
+                        #else
+                            #set weewx_observation = 'windSpeed'
+                        #end if
+                    #else
+                        #set weewx_observation = $observation
+                    #end if
+                    #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='" + $data_binding + "')." + $weewx_observation + ".series(time_series='start', time_unit='unix_epoch_ms')" + $unit_conv + ".round(2).json"
                 #end if
                 $skinDebug($obs)
                 #set line = $obs + ";\n"
