@@ -980,8 +980,6 @@ class JAS(SearchList):
                     chart2 += "]};\n"
                     chart2 += "pageChart.option = option;\n"
                 elif series_type == 'comparison':
-                    text_translations = self.generator.skin_dict.get('Texts', weeutil.config.config_from_str('lang = en'))
-
                     chart2 += "option = {\n"
                     chart2 += "  series: [\n"
                     obs = next(iter(chart_def['series']))
