@@ -321,8 +321,10 @@ class JAS(SearchList):
         dateTime_formats['aggregate_interval_mqtt']['label'] = self.skin_dicts[language]['Texts']['aggregate_interval_mqtt']['label']
 
         dateTime_formats['aggregate_interval_multiyear'] = {}
-        dateTime_formats['aggregate_interval_multiyear']['tooltip_x'] = self.skin_dicts[language]['Texts']['aggregate_interval_multiyear']['tooltip_x']
-        dateTime_formats['aggregate_interval_multiyear']['xaxis_label'] = self.skin_dicts[language]['Texts']['aggregate_interval_multiyear']['xaxis_label']
+        dateTime_formats['aggregate_interval_multiyear']['tooltip_x'] = \
+            self.skin_dicts[language]['Texts']['aggregate_interval_multiyear']['tooltip_x']
+        dateTime_formats['aggregate_interval_multiyear']['xaxis_label'] = \
+            self.skin_dicts[language]['Texts']['aggregate_interval_multiyear']['xaxis_label']
         dateTime_formats['aggregate_interval_multiyear']['label'] = self.skin_dicts[language]['Texts']['aggregate_interval_multiyear']['label']
 
         dateTime_formats['aggregate_interval_none'] = {}
@@ -802,7 +804,8 @@ class JAS(SearchList):
             self.chart_defs[chart]['weewx']['yAxis']['0']['weewx']['obs'] = observation
 
             if self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs].get('weewx', False):
-                self.chart_defs[chart]['weewx']['yAxis']['0']['weewx']['unit'] = self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs]['weewx'].get('unit', None)
+                self.chart_defs[chart]['weewx']['yAxis']['0']['weewx']['unit'] = \
+                    self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs]['weewx'].get('unit', None)
 
             # ToDo: rework
             for value in self.skin_dict['Extras']['chart_definitions'][chart]['series']:
@@ -823,7 +826,8 @@ class JAS(SearchList):
                         self.chart_defs[chart]['weewx']['yAxis'][y_axis_index]['weewx'] = {}
                     self.chart_defs[chart]['weewx']['yAxis'][y_axis_index]['weewx']['obs'] = observation
                     if self.skin_dict['Extras']['chart_definitions'][chart]['series'][value].get('weewx', False):
-                        self.chart_defs[chart]['weewx']['yAxis'][y_axis_index]['weewx']['unit'] = self.skin_dict['Extras']['chart_definitions'][chart]['series'][value]['weewx'].get('unit', None)
+                        self.chart_defs[chart]['weewx']['yAxis'][y_axis_index]['weewx']['unit'] = \
+                            self.skin_dict['Extras']['chart_definitions'][chart]['series'][value]['weewx'].get('unit', None)
 
                 self.chart_defs[chart]['series'][value].merge((self.chart_series_defaults.get(coordinate_type, {}).get(charttype, {})))
                 weewx_options['observation'] = observation
@@ -991,7 +995,8 @@ class JAS(SearchList):
                         chart2 += "    {name: '" + str(year) + "',\n"
                         chart2 += "     data: year" + str(year) + "_" + aggregate_type \
                                 + "." + obs + "_"  + obs_data_binding \
-                                + ".map(arr => [moment.unix(arr[0] / 1000).utcOffset(" + str(self.utc_offset) + ").format(dateTimeFormat[lang].chart.yearToYearXaxis), arr[1]]),\n" \
+                                + ".map(arr => [moment.unix(arr[0] / 1000).utcOffset(" + str(self.utc_offset) \
+                                + ").format(dateTimeFormat[lang].chart.yearToYearXaxis), arr[1]]),\n" \
                                 + "},\n"
                     chart2 += "]};\n"
                     chart2 += "pageChart.option = option;\n"
