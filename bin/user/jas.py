@@ -79,7 +79,7 @@ This search list extension provides the following tags:
 
   $weewx_version
     Returns:
-      The version of WeeWX.      
+      The version of WeeWX.
 
   $windCompass(start_offset, end_offset)
     Arguments:
@@ -301,7 +301,7 @@ class JAS(SearchList):
             if language in self.languages:
                 self._get_skin_dict(language)
 
-        return self.skin_dicts[language]['Texts']        
+        return self.skin_dicts[language]['Texts']
 
     def get_dateTime_formats(self, language):
         if language not in self.skin_dicts:
@@ -324,7 +324,7 @@ class JAS(SearchList):
         dateTime_formats['aggregate_interval_multiyear']['tooltip_x'] = self.skin_dicts[language]['Texts']['aggregate_interval_multiyear']['tooltip_x']
         dateTime_formats['aggregate_interval_multiyear']['xaxis_label'] = self.skin_dicts[language]['Texts']['aggregate_interval_multiyear']['xaxis_label']
         dateTime_formats['aggregate_interval_multiyear']['label'] = self.skin_dicts[language]['Texts']['aggregate_interval_multiyear']['label']
-                
+
         dateTime_formats['aggregate_interval_none'] = {}
         dateTime_formats['aggregate_interval_none']['tooltip_x'] = self.skin_dicts[language]['Texts']['aggregate_interval_none']['tooltip_x']
         dateTime_formats['aggregate_interval_none']['xaxis_label'] = self.skin_dicts[language]['Texts']['aggregate_interval_none']['xaxis_label']
@@ -800,7 +800,7 @@ class JAS(SearchList):
             self.chart_defs[chart]['weewx']['yAxis']['0'] = {}
             self.chart_defs[chart]['weewx']['yAxis']['0']['weewx'] = {}
             self.chart_defs[chart]['weewx']['yAxis']['0']['weewx']['obs'] = observation
-            
+
             if self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs].get('weewx', False):
                 self.chart_defs[chart]['weewx']['yAxis']['0']['weewx']['unit'] = self.skin_dict['Extras']['chart_definitions'][chart]['series'][obs]['weewx'].get('unit', None)
 
