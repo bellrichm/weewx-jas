@@ -981,7 +981,6 @@ class JAS(SearchList):
                     chart2 += "pageChart.option = option;\n"
                 elif series_type == 'comparison':
                     text_translations = self.generator.skin_dict.get('Texts', weeutil.config.config_from_str('lang = en'))
-                    year_to_year_xaxis_label = text_translations.get('year_to_year_xaxis_label', 'MM/DD')
 
                     chart2 += "option = {\n"
                     chart2 += "  series: [\n"
