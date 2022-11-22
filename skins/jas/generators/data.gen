@@ -13,6 +13,8 @@
     ##$logdbg($data)
     #end if
 #end def
+
+#set $skin_data_binding = $getVar("$Extras.data_binding", $data_binding)
 ## Create time stamps by aggregation time for the end of interval
 ## For example: endTimestamp_min, endTimestamp_max
 
@@ -89,6 +91,40 @@
         #end for
     #end for
 #end for
+
+minMaxObs = [];
+#if 'minmax' in $getVar('$Extras.pages.' + $page)
+    #set $minmax_data_binding = $getVar("$Extras.minmax.data_binding", $skin_data_binding)
+    #for $observation in $getVar('Extras.minmax.observations.sections')
+        #set $data_binding = $getVar("$Extras.minmax.observations." + $observation + ".data_binding", minmax_data_binding)
+        #set $unit_name = $getVar("$Extras.minmax.observations." + $observation + ".unit", "default")
+        #set min_name_prefix = $interval_name_global + "_min_" + $observation + "_" + $data_binding
+        #set max_name_prefix = $interval_name_global + "_max_" + $observation + "_" + $data_binding
+        #if $unit_name != "default"
+            #set $min_name_prefix += "_" + $unit_name
+            #set $max_name_prefix += "_" + $unit_name
+            #set label = $getUnitLabel($unit_name)
+        #else
+            #set label = $getVar('unit.label.' + $observation);
+        #end if
+
+        #set min_datetime_array = $min_name_prefix + "_dateTime";
+        #set min_data_array = $min_name_prefix + "_data";
+        #set max_datetime_array = $max_name_prefix + "_dateTime";
+        #set max_data_array = $max_name_prefix + "_data";
+        #set min_id = $observation + "_minmax_min";
+        #set max_id = $observation + "_minmax_max";
+        minMaxObsData = {};
+        minMaxObsData.minDateTimeArray = $min_datetime_array;
+        minMaxObsData.minDataArray = $min_data_array;
+        minMaxObsData.maxDateTimeArray = $max_datetime_array;
+        minMaxObsData.maxDataArray = $max_data_array;     
+        minMaxObsData.label = "$label";
+        minMaxObsData.minId = "$min_id";   
+        minMaxObsData.maxId = "$max_id";
+        minMaxObs.push(minMaxObsData);
+    #end for
+#end if
 
 #*
 Create the data used to display current conditions.
