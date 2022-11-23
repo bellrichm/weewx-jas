@@ -207,7 +207,7 @@ function handleMQTT(message) {
         }
     #end if
 
-    ## Proof of concept, charting MQTT data
+    // Proof of concept, charting MQTT data
     #set page_series_type = $getVar('Extras.page_definition.' + $page + '.series_type', 'single')
     #for $chart in $getVar('$Extras.chart_definitions')
         #set chart_series_type = $getVar('Extras.pages.' + $page + '.' + chart + '.series_type', $page_series_type)
