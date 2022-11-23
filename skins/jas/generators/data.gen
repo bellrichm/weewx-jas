@@ -92,6 +92,60 @@
     #end for
 #end for
 
+thisDateObsList = [];
+#if 'thisdate' in $getVar('$Extras.pages.' + $page)
+    #set $thisdate_data_binding = $getVar("$Extras.minmax.data_binding", $skin_data_binding)
+    #for observation in $Extras.thisdate.observations
+        #set $data_binding = $getVar("$Extras.thisdate.observations" + $observation + ".data_binding", $thisdate_data_binding)
+        #set $unit_name = $getVar("$Extras.thisdate.observations." + $observation + ".unit", "default")
+        #if $unit_name == "default"
+            #set unit_suffix = ""
+            #set label = $getVar('unit.label.' + $observation);
+        #else
+            #set unit_suffix = "_" + $unit_name
+            #set label = $getUnitLabel($unit_name)
+        #end if
+        #set aggregation_type = $getVar("$Extras.thisdate.observations." + $observation + ".type", None)
+        #set max_decimals = $getVar('$Extras.thisdate.observations.' + $observation + '.max_decimals', False)
+        thisDateObs = [];
+        maxDecimals = null;
+        #if $max_decimals
+            maxDecimals = $max_decimals
+        #end if
+
+        #if $aggregation_type is None
+            thisDateObsDetail = {};
+            thisDateObsDetail.label = "$label";
+            thisDateObsDetail.maxDecimals = maxDecimals;
+            #set value = $interval_name_global + '_min.' + $observation + "_" + $data_binding + $unit_suffix
+            #set id = $observation + "_thisdate_min"
+            thisDateObsDetail.dataArray = $value;
+            thisDateObsDetail.id = "$id";
+            thisDateObs.push(thisDateObsDetail);    
+
+            thisDateObsDetail = {};
+            thisDateObsDetail.label = "$label";
+            thisDateObsDetail.maxDecimals = maxDecimals;
+            #set value = $interval_name_global + '_max.' + $observation + "_" + $data_binding + $unit_suffix
+            #set id = $observation + "_thisdate_max"
+            thisDateObsDetail.dataArray = $value;
+            thisDateObsDetail.id = "$id";
+            thisDateObs.push(thisDateObsDetail);            
+        #else
+            thisDateObsDetail = {};
+            thisDateObsDetail.label = "$label";
+            thisDateObsDetail.maxDecimals = maxDecimals;
+            #set value = $interval_name_global + '_' + $aggregation_type + '.' + $observation + "_" + $data_binding + $unit_suffix
+            #set id = $observation + "_thisdate_" + $aggregation_type
+            thisDateObsDetail.dataArray = $value;
+            thisDateObsDetail.id = "$id";   
+            thisDateObs.push(thisDateObsDetail);    
+
+        #end if
+        thisDateObsList.push(thisDateObs);    
+    #end for
+#end if
+
 minMaxObs = [];
 #if 'minmax' in $getVar('$Extras.pages.' + $page)
     #set $minmax_data_binding = $getVar("$Extras.minmax.data_binding", $skin_data_binding)
@@ -212,15 +266,6 @@ fieldMap = new Map()
     #for $field in $getVar('$Extras.mqtt.fields', [])
         #set $fieldname = $getVar('$Extras.mqtt.fields.' + $field + '.name')
         fieldMap.set('$fieldname', '$field')
-    #end for
-#end if
-
-var thisDateObservation = {};
-#if $getVar('$Extras.thisdate', False)
-    #for observation in $Extras.thisdate.observations
-        #set source = "thisDateObservation." + $observation + ".unitLabel = '$unit.label." + $observation + "';\n"
-        thisDateObservation.$observation = {};
-        $evaluate($source)
     #end for
 #end if
 
