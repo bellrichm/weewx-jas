@@ -274,14 +274,9 @@ function handleMQTT(message) {
     function resetRange() {
         dateRangePicker2.setStartDate($startDate);
         dateRangePicker2.setEndDate($endDate);
-        #for $section in $getVar('Extras.pages.' + $page)
-            ## ToDo: cleanup to not use continue
-            #if $section not in $getVar('$Extras.chart_definitions')
-                #continue
-            #end if
-            #set line = $section + "chart" + ".dispatchAction({type: 'dataZoom', startValue: " + $startTimestamp + ", endValue: " + $endTimestamp + "});"
-            $line
-        #end for
+        pageCharts.forEach(function(pageChart) {
+             pageChart.chart.dispatchAction({type: 'dataZoom', startValue: last366days_startTimestamp, endValue: last366days_endTimestamp});
+        });
         #set line = "updateMinMax(" + $interval_long_name_global + "startTimestamp, " + $interval_long_name_global + "endTimestamp_min);\n"
         $line
     }
