@@ -466,15 +466,10 @@ window.addEventListener("load", function (event) {
                             },                                
                             function(start, end, label) {
                                 // Update all charts with selected date/time and min/max values
-                                #for $section in $getVar('Extras.pages.' + $page)
-                                    ## ToDo: cleanup to not use continue
-                                    ##if not isinstance($Extras.pages[$page][$section],dict)
-                                    #if $section not in $getVar('$Extras.chart_definitions')
-                                        #continue
-                                    #end if
-                                    #set line = $section + "chart" + ".dispatchAction({type: 'dataZoom', startValue: start.unix() * 1000, endValue: end.unix() * 1000});"
-                                    $line
-                                #end for
+                                pageCharts.forEach(function(pageChart) {
+                                    pageChart.chart.dispatchAction({type: 'dataZoom', startValue: start.unix() * 1000, endValue: end.unix() * 1000});
+                                });
+
                                 updateMinMax(start.unix() * 1000, end.startOf('day').unix() * 1000);
                         }
         );
