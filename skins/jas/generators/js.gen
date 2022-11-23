@@ -349,65 +349,40 @@ function handleMQTT(message) {
         jasLogDebug("Min start: ", startTimestamp);
         jasLogDebug("Max start: ", endTimestamp);
         ## ToDo: optimize to only get index once for all observations?
-        #for $observation in $getVar('Extras.minmax.observations.sections')
-            #set $data_binding = $getVar("$Extras.minmax.observations." + $observation + ".data_binding", minmax_data_binding)
-            #set $unit_name = $getVar("$Extras.minmax.observations." + $observation + ".unit", "default")
-            #set min_name_prefix = $interval_name_global + "_min_" + $observation + "_" + $data_binding
-            #set max_name_prefix = $interval_name_global + "_max_" + $observation + "_" + $data_binding
-            #if $unit_name != "default"
-                #set $min_name_prefix += "_" + $unit_name
-                #set $max_name_prefix += "_" + $unit_name
-                #set label = $getUnitLabel($unit_name)
-            #else
-                #set label = $getVar('unit.label.' + $observation);
-            #end if
+        minMaxObs.forEach(function(minMaxObsData) {
+            startIndex = minMaxObsData.minDateTimeArray.findIndex(element => element == startTimestamp);
+            endIndex = minMaxObsData.minDateTimeArray.findIndex(element => element == endTimestamp);
+            if (startIndex < 0) {
+                startIndex = 0;
+            }
+            if (endIndex < 0) {
+                endIndex  = minMaxObsData.minDateTimeArray.length - 1;
+            }
+            if (startIndex == endIndex) {
+                minIndex = startIndex;
+                maxIndex = endIndex;
+            } else {
+                minIndex = minMaxObsData.minDataArray.indexOf(Math.min(...minMaxObsData.minDataArray.slice(startIndex, endIndex + 1).filter(obs => obs != null)));
+                maxIndex = minMaxObsData.maxDataArray.indexOf(Math.max(...minMaxObsData.maxDataArray.slice(startIndex, endIndex + 1)));
+            }
 
-            #set min_datetime_array = $min_name_prefix + "_dateTime";
-            #set min_data_array = $min_name_prefix + "_data";
-            #set max_datetime_array = $max_name_prefix + "_dateTime";
-            #set max_data_array = $max_name_prefix + "_data";
-            #set min_id = $observation + "_minmax_min";
-            #set max_id = $observation + "_minmax_max";
+            min = minMaxObsData.minDataArray[minIndex];
+            max = minMaxObsData.maxDataArray[maxIndex];
+            min = min.toFixed(0);
+            max = max.toFixed(0);
+            min = Number(min).toLocaleString(lang);
+            max = Number(max).toLocaleString(lang);
+            min = min + minMaxObsData.label;
+            max = max + minMaxObsData.label;
             
+            minDate = moment.unix(minMaxObsData.minDateTimeArray[minIndex]/1000).utcOffset(-300.0).format(dateTimeFormat[lang].chart['none'].label);
+            maxDate = moment.unix(minMaxObsData.maxDateTimeArray[maxIndex]/1000).utcOffset(-300.0).format(dateTimeFormat[lang].chart['none'].label);
 
-            #echo "        startIndex = " + $min_datetime_array + ".findIndex(element => element == startTimestamp);\n"
-            #echo "        endIndex = " + $min_datetime_array + ".findIndex(element => element == endTimestamp);\n"
-            #echo "        if (startIndex < 0) {\n"
-            #echo "          startIndex = 0;\n"
-            #echo "        }\n"
-            #echo "        if (endIndex < 0) {\n"
-            #echo "          endIndex  = " + $min_datetime_array + ".length - 1;\n"
-            #echo "        }\n"
-            #echo "        if (startIndex == endIndex) {\n"
-            #echo "          minIndex = startIndex;\n"
-            #echo "          maxIndex = endIndex;\n"
-            #echo "        } else {\n"
-            #echo "          minIndex =" + $min_data_array + ".indexOf(Math.min(..." + $min_data_array + ".slice(startIndex, endIndex + 1).filter(obs => obs != null)));\n"
-            #echo "          maxIndex =" + $max_data_array + ".indexOf(Math.max(..." + $max_data_array + ".slice(startIndex, endIndex + 1)));\n"
-            #echo "        }\n"
-
-            #echo "        min = " + $min_data_array + "[minIndex];\n" 
-            #echo "        max = " + $max_data_array + "[maxIndex];\n" 
-            #set max_decimals = $getVar('$Extras.minmax.observations.' + $observation + '.max_decimals', False)
-            #if max_decimals
-                #echo "        min = min.toFixed(" + $max_decimals + ");\n"
-                #echo "        max = max.toFixed(" + $max_decimals + ");\n"
-            #end if
-            #echo "        min = Number(min).toLocaleString(lang);\n"
-            #echo "        max = Number(max).toLocaleString(lang);\n"
-            #echo "        min = min + '" + $label + "';\n"
-            #echo "        max = max + '" + $label + "';\n"
-
-            #set aggregate_interval = $getVar('Extras.page_definition.' + $page + '.aggregate_interval.min', 'none')
-                                                                                                                                    ## .format(dateTimeFormat[lang].chart['$gettext($aggregate_interval_global)'].xAxisLabel); }"            
-            #echo "        minDate = moment.unix(" + $min_datetime_array + "[minIndex]/1000).utcOffset(" + str($utcOffset) + ").format(dateTimeFormat[lang].chart['" + $gettext($aggregate_interval) + "'].label);\n"
-            #echo "        maxDate = moment.unix(" + $max_datetime_array + "[maxIndex]/1000).utcOffset(" + str($utcOffset) + ").format(dateTimeFormat[lang].chart['" + $gettext($aggregate_interval) + "'].label);\n"
-
-            observation_element=document.getElementById("$min_id");
+            observation_element=document.getElementById(minMaxObsData.minId);
             observation_element.innerHTML = min + '<br>' + minDate;
-            observation_element=document.getElementById("$max_id");
+            observation_element=document.getElementById(minMaxObsData.maxId);
             observation_element.innerHTML = max + '<br>' + maxDate;
-        #end for
+        });
     }
 #end if
 
@@ -426,43 +401,13 @@ function handleMQTT(message) {
 
     // Update the 'on this date' observations with observations at timeStamp
     function updateThisDate(timeStamp) {
-        #for observation in $Extras.thisdate.observations
-            #set $data_binding = $getVar("$Extras.thisdate.observations" + $observation + ".data_binding", $thisdate_data_binding)
-            #set $unit_name = $getVar("$Extras.thisdate.observations." + $observation + ".unit", "default")
-            #if $unit_name == "default"
-                #set unit_suffix = ""
-            #else
-                #set unit_suffix = "_" + $unit_name
-            #end if
-            #set aggregation_type = $getVar("$Extras.thisdate.observations." + $observation + ".type", None)
-            #set max_decimals = $getVar('$Extras.thisdate.observations.' + $observation + '.max_decimals', False)
-            #if max_decimals
-              #set decimal_string = ".toFixed(" + $max_decimals + ")"
-            #else
-              #set decimal_string = ""
-            #end if
-            #if $aggregation_type is None
-                #set value = $interval_name_global + '_min.' + $observation + "_" + $data_binding + $unit_suffix
-                #set line = "obs = Number(getObservation(timeStamp, " + $value + ")" + $decimal_string + ").toLocaleString(lang) + thisDateObservation." + $observation + ".unitLabel;"
-                #set id = $observation + "_thisdate_min"
-                $line
-                observation=document.getElementById("$id");
-                observation.innerHTML = obs;        
-                #set value = $interval_name_global + '_max.' + $observation + "_" + $data_binding + $unit_suffix
-                #set line = "obs = Number(getObservation(timeStamp, " + $value + ")" + $decimal_string + ").toLocaleString(lang) + thisDateObservation." + $observation + ".unitLabel;"
-                #set id = $observation + "_thisdate_max"
-                $line
-                observation=document.getElementById("$id");
-                observation.innerHTML = obs;      
-            #else
-                #set value = $interval_name_global + '_' + $aggregation_type + '.' + $observation + "_" + $data_binding + $unit_suffix
-                #set line = "obs = Number(getObservation(timeStamp, " + $value + ")" + $decimal_string + ").toLocaleString(lang) + thisDateObservation." + $observation + ".unitLabel;"
-                #set id = $observation + "_thisdate_" + $aggregation_type
-                $line
-                observation=document.getElementById("$id");
-                observation.innerHTML = obs;
-            #end if
-        #end for
+        thisDateObsList.forEach(function(thisDateObs) {
+            thisDateObs.forEach(function(thisDateObsDetail) {
+                obs = Number(getObservation(timeStamp, thisDateObsDetail.dataArray)).toLocaleString(lang);
+                observation=document.getElementById(thisDateObsDetail.id);
+                observation.innerHTML = obs + thisDateObsDetail.label;                    
+            });
+        });
     }
 #end if
 
