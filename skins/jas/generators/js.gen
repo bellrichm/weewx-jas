@@ -218,7 +218,6 @@ function handleMQTT(message) {
     
     pageCharts.forEach(function(pageChart) {
         if (pageChart.option === null) {
-            console.log(pageChart);
             echartSeries = [];
             pageChart.series.forEach(function(series) {
                 seriesData = {};
@@ -268,7 +267,7 @@ function handleMQTT(message) {
     function updateCurrentObservations() {
         #if $getVar('$Extras.current.observation', False)
             ## ToDo: switch to allow non mqtt header data? similar to the observation section
-            if(sessionStorage.getItem("header") === null || !MQTTConfig){
+            if(sessionStorage.getItem("header") === null || !jasOptions.MQTTConfig){
                 sessionStorage.setItem("header", JSON.stringify(current.header));
             }
             header = JSON.parse(sessionStorage.getItem("header"));
@@ -284,7 +283,7 @@ function handleMQTT(message) {
         suffixes = [];
         for (var [suffix, data] of current.suffixes) {
             suffixes.push(suffix);
-            if (sessionStorage.getItem(suffix) === null || !MQTTConfig){
+            if (sessionStorage.getItem(suffix) === null || !jasOptions.MQTTConfig){
                 sessionStorage.setItem(suffix, JSON.stringify(data));
             }
         }
@@ -295,7 +294,7 @@ function handleMQTT(message) {
         observations = [];
         for (var [observation, data] of current.observations) {
             observations.push(observation);
-            if (sessionStorage.getItem(observation) === null || !MQTTConfig || ! data.mqtt){
+            if (sessionStorage.getItem(observation) === null || !jasOptions.MQTTConfig || ! data.mqtt){
                 sessionStorage.setItem(observation, JSON.stringify(data));
             }
             obs = JSON.parse(sessionStorage.getItem(observation));
@@ -312,7 +311,7 @@ function handleMQTT(message) {
         }
         sessionStorage.setItem("observations", observations.join(","));
 
-        if(sessionStorage.getItem("updateDate") === null || !MQTTConfig){
+        if(sessionStorage.getItem("updateDate") === null || !jasOptions.MQTTConfig){
             sessionStorage.setItem("updateDate", updateDate);
         }
         document.getElementById("updateDate").innerHTML = moment.unix(sessionStorage.getItem("updateDate")/1000).utcOffset($utcOffset).format(dateTimeFormat[lang].current);       
@@ -503,19 +502,13 @@ window.addEventListener("load", function (event) {
         updateThisDate(selectedDate * 1000);
     #end if
 
-    #if (to_bool($getVar('Extras.pages.' + $page + '.mqtt', True)) and to_bool($getVar('Extras.mqtt.enable', False)) or $page == 'debug' )
-        MQTTConfig = true;
-    #else 
-        MQTTConfig = false;
-    #end if
-
-    #if 'current' in $getVar('$Extras.pages.' + $page)
+    if (jasOptions.current) {
         updateCurrentObservations();
-    #end if
-
-    #if 'forecast' in $getVar('$Extras.pages.' + $page)
+    }
+        
+    if (jasOptions.forecast) {
         updateForecasts();
-    #end if
+    }
 });
 
 window.addEventListener('onresize', function() {

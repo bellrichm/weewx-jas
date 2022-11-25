@@ -14,6 +14,26 @@
     #end if
 #end def
 
+jasOptions = {};
+
+#if 'current' in $getVar('$Extras.pages.' + $page)
+    jasOptions.current = true;
+#else
+    jasOptions.current = false;
+#end if
+
+#if 'forecast' in $getVar('$Extras.pages.' + $page)
+    jasOptions.forecast = true;
+#else
+    jasOptions.forecast = false;
+#end if
+
+#if (to_bool($getVar('Extras.pages.' + $page + '.mqtt', True)) and to_bool($getVar('Extras.mqtt.enable', False)) or $page == 'debug' )
+    jasOptions.MQTTConfig = true;
+#else 
+    jasOptions.MQTTConfig = false;
+#end if
+
 #set $skin_data_binding = $getVar("$Extras.data_binding", $data_binding)
 ## Create time stamps by aggregation time for the end of interval
 ## For example: endTimestamp_min, endTimestamp_max
