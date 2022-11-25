@@ -260,6 +260,21 @@ This data is stored in a javascript object named 'current'.
     #end for
 #end if
 
+## Create an array of mqtt observations in charts
+mqttData2 = {};
+mqttData = {};
+#set page_series_type = $getVar('Extras.page_definition.' + $page + '.series_type', 'single')
+#for $chart in $getVar('$Extras.chart_definitions')
+    #set chart_series_type = $getVar('Extras.pages.' + $page + '.' + chart + '.series_type', $page_series_type)
+    #if $chart_series_type == 'mqtt'
+        #for $observation in $getVar('$Extras.chart_definitions.' + $chart + '.series')
+            mqttData2['$observation'] = {};
+            mqttData2['$observation'] = [];
+            mqttData.$observation = [];
+        #end for
+    #end if
+#end for  
+
 fieldMap = new Map()
 ## ToDo: optimize - only do if page uses MQTT
 #if $getVar('$Extras.mqtt', False)

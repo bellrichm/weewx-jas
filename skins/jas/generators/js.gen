@@ -48,7 +48,6 @@ updatelogLevel(logLevel);
 #set $skin_data_binding = $getVar("$Extras.data_binding", $data_binding)
 
 var pageCharts = [];
-var mqttData = {}
 
 // Update the chart's data
 function updateCharts() {
@@ -64,7 +63,7 @@ function updateCharts() {
 }
 
 // Ensure that the height of charts is consistent ratio of the width.
-function refreshSizes(){
+function refreshSizes() {
   #if not $getVar("$Extras.pages." + $page + '.radar', True)
     radarElem = document.getElementById("radar");
     radarElem.style.height = radarElem.offsetWidth / 1.618 + 17  +"px"; // adding is a hack
@@ -208,48 +207,31 @@ function handleMQTT(message) {
     #end if
 
     // Proof of concept, charting MQTT data
-    #set page_series_type = $getVar('Extras.page_definition.' + $page + '.series_type', 'single')
-    #for $chart in $getVar('$Extras.chart_definitions')
-        #set chart_series_type = $getVar('Extras.pages.' + $page + '.' + chart + '.series_type', $page_series_type)
-        #if $chart_series_type == 'mqtt'
-            #set $option_line = $chart + 'chart.setOption({\n'
-            #set $option_line += '            series: [\n'
-            #for $observation in $getVar('$Extras.chart_definitions.' + $chart + '.series')
-
-                obs = fieldMap.get('$observation');
-                if (obs === undefined) {
-                    obs = '$observation'
+    for (obs in test_obj) {
+        if (obs in mqttData2) {
+            if (mqttData2[obs].length >= 1800) {
+                mqttData2[obs].shift;
+            }
+            mqttData2[obs].push([parseInt(test_obj.dateTime) * 1000, parseFloat(test_obj[obs])]);
+        }
+    }
+    
+    pageCharts.forEach(function(pageChart) {
+        if (pageChart.option === null) {
+            console.log(pageChart);
+            echartSeries = [];
+            pageChart.series.forEach(function(series) {
+                seriesData = {};
+                seriesData.data = mqttData2[series.obs];
+                seriesData.name = series.name;
+                if (seriesData.name == null) {
+                    seriesData.name = observationLabels[lang][series.obs];
                 }
-
-                if (test_obj[obs]) {
-                    #set line = "if (!mqttData['" + $observation + "'])"
-                    $line
-                    {
-                        #set $line = "mqttData['" + $observation + "'] = []"
-                        $line
-                    }    
-                    
-                    #set $line = "if (mqttData['" + $observation + "'].length >= 1800) {mqttData['" + $observation + "'].shift();}"
-                    $line
-                    #set $line = "mqttData['" + $observation + "'].push([parseInt(test_obj.dateTime) * 1000, parseFloat(test_obj[obs])]);"
-                    $line
-                    
-                    ## .name seems to have 'magical' properties
-                    ## if is not in the dictionary, it returns the key
-                    #if 'name' in $getVar('$Extras.chart_definitions.' + $chart + '.series.' + $observation)
-                        #set name =  $getVar('$Extras.chart_definitions.' + $chart + '.series.' + $observation + '.name')
-                    #else
-                        #set name = "observationLabels[lang]['" + $observation + "']"
-                    #end if
-                    #set $option_line += "          {\n"
-                    #set $option_line += "            name: " + $name + ",\n"
-                    #set $option_line += "            data: mqttData['" + $observation + "']},\n"                    
-                }    
-            #end for
-            #set $option_line += '                ]});\n'
-            $option_line
-        #end if
-    #end for
+                echartSeries.push(seriesData);
+            });
+            pageChart.chart.setOption({series: echartSeries});
+        }
+    });
 }
 
 #if to_bool($getVar('$Extras.pages.' + $page + '.reload', False))
