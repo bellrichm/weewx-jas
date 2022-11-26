@@ -257,14 +257,14 @@ function handleMQTT(message) {
     #set $startTimestamp = $interval_long_name_global + "startTimestamp"
     #set $endTimestamp = $interval_long_name_global + "endTimestamp"
 
-    // Handle reset button
+    // Handle reset button of zoom control
     function resetRange() {
         dateRangePicker2.setStartDate($startDate);
         dateRangePicker2.setEndDate($endDate);
         pageCharts.forEach(function(pageChart) {
-             pageChart.chart.dispatchAction({type: 'dataZoom', startValue: last366days_startTimestamp, endValue: last366days_endTimestamp});
+             pageChart.chart.dispatchAction({type: 'dataZoom', startValue: $startTimestamp, endValue: $endTimestamp});
         });
-        #set line = "updateMinMax(" + $interval_long_name_global + "startTimestamp, " + $interval_long_name_global + "endTimestamp_min);\n"
+        #set line = "updateMinMax(" + $startTimestamp + ", " + $endTimestamp + ");\n"
         $line
     }
 #end if
