@@ -961,7 +961,17 @@ class JAS(SearchList):
                 chart2 += "pageChart = {};\n"
 
                 if series_type == 'mqtt':
-                    chart2 += "pageChart.option = null;\n"
+                    chart2 += 'pageChart.option = null;\n'
+                    chart2 += 'pageChart.series = [];\n'
+                    for obs in chart_def['series']:
+                        chart2 += 'seriesData = {};\n'  
+                        chart2 += 'seriesData.obs = "' + obs + '";\n'                         
+                        name = chart_def['series'][obs].get('name', None)
+                        if name is not None:
+                            chart2 += 'seriesData.name = "' + name + '";\n'
+                        else:
+                            chart2 += 'seriesData.name = null;\n'
+                        chart2 += 'pageChart.series.push(seriesData);\n'
                 elif series_type == 'multiple':
                     chart2 += "option = {\n"
                     chart2 += "  series: [\n"

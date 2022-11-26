@@ -14,6 +14,26 @@
     #end if
 #end def
 
+jasOptions = {};
+
+#if 'current' in $getVar('$Extras.pages.' + $page)
+    jasOptions.current = true;
+#else
+    jasOptions.current = false;
+#end if
+
+#if 'forecast' in $getVar('$Extras.pages.' + $page)
+    jasOptions.forecast = true;
+#else
+    jasOptions.forecast = false;
+#end if
+
+#if (to_bool($getVar('Extras.pages.' + $page + '.mqtt', True)) and to_bool($getVar('Extras.mqtt.enable', False)) or $page == 'debug' )
+    jasOptions.MQTTConfig = true;
+#else 
+    jasOptions.MQTTConfig = false;
+#end if
+
 #set $skin_data_binding = $getVar("$Extras.data_binding", $data_binding)
 ## Create time stamps by aggregation time for the end of interval
 ## For example: endTimestamp_min, endTimestamp_max
@@ -117,7 +137,7 @@ thisDateObsList = [];
             thisDateObsDetail = {};
             thisDateObsDetail.label = "$label";
             thisDateObsDetail.maxDecimals = maxDecimals;
-            #set value = $interval_name_global + '_min.' + $observation + "_" + $data_binding + $unit_suffix
+            #set value = $interval_long_name_global + 'min.' + $observation + "_" + $data_binding + $unit_suffix
             #set id = $observation + "_thisdate_min"
             thisDateObsDetail.dataArray = $value;
             thisDateObsDetail.id = "$id";
@@ -126,7 +146,7 @@ thisDateObsList = [];
             thisDateObsDetail = {};
             thisDateObsDetail.label = "$label";
             thisDateObsDetail.maxDecimals = maxDecimals;
-            #set value = $interval_name_global + '_max.' + $observation + "_" + $data_binding + $unit_suffix
+            #set value = $interval_long_name_global + 'max.' + $observation + "_" + $data_binding + $unit_suffix
             #set id = $observation + "_thisdate_max"
             thisDateObsDetail.dataArray = $value;
             thisDateObsDetail.id = "$id";
@@ -135,7 +155,7 @@ thisDateObsList = [];
             thisDateObsDetail = {};
             thisDateObsDetail.label = "$label";
             thisDateObsDetail.maxDecimals = maxDecimals;
-            #set value = $interval_name_global + '_' + $aggregation_type + '.' + $observation + "_" + $data_binding + $unit_suffix
+            #set value = $interval_long_name_global + $aggregation_type + '.' + $observation + "_" + $data_binding + $unit_suffix
             #set id = $observation + "_thisdate_" + $aggregation_type
             thisDateObsDetail.dataArray = $value;
             thisDateObsDetail.id = "$id";   
@@ -152,8 +172,8 @@ minMaxObs = [];
     #for $observation in $getVar('Extras.minmax.observations.sections')
         #set $data_binding = $getVar("$Extras.minmax.observations." + $observation + ".data_binding", minmax_data_binding)
         #set $unit_name = $getVar("$Extras.minmax.observations." + $observation + ".unit", "default")
-        #set min_name_prefix = $interval_name_global + "_min_" + $observation + "_" + $data_binding
-        #set max_name_prefix = $interval_name_global + "_max_" + $observation + "_" + $data_binding
+        #set min_name_prefix = $interval_long_name_global + "min_" + $observation + "_" + $data_binding
+        #set max_name_prefix = $interval_long_name_global + "max_" + $observation + "_" + $data_binding
         #if $unit_name != "default"
             #set $min_name_prefix += "_" + $unit_name
             #set $max_name_prefix += "_" + $unit_name
@@ -259,6 +279,21 @@ This data is stored in a javascript object named 'current'.
         current.observations.set("$observation", observation);
     #end for
 #end if
+
+## Create an array of mqtt observations in charts
+mqttData2 = {};
+mqttData = {};
+#set page_series_type = $getVar('Extras.page_definition.' + $page + '.series_type', 'single')
+#for $chart in $getVar('$Extras.chart_definitions')
+    #set chart_series_type = $getVar('Extras.pages.' + $page + '.' + chart + '.series_type', $page_series_type)
+    #if $chart_series_type == 'mqtt'
+        #for $observation in $getVar('$Extras.chart_definitions.' + $chart + '.series')
+            mqttData2['$observation'] = {};
+            mqttData2['$observation'] = [];
+            mqttData.$observation = [];
+        #end for
+    #end if
+#end for  
 
 fieldMap = new Map()
 ## ToDo: optimize - only do if page uses MQTT
