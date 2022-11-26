@@ -15,6 +15,7 @@
     #end if
 #end def
 
+#set $skin_data_binding = $getVar("$Extras.data_binding", $data_binding)
 #if 'minmax' in $getVar('$Extras.pages.' + $page)
     #set $minmax_data_binding = $getVar("$Extras.minmax.data_binding", $skin_data_binding)
 #end if
@@ -51,8 +52,6 @@ function updatelogLevel(logLevel) {
 }
 
 updatelogLevel(logLevel);
-
-#set $skin_data_binding = $getVar("$Extras.data_binding", $data_binding)
 
 var pageCharts = [];
 
