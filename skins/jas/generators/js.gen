@@ -23,6 +23,18 @@
     #set $thisdate_data_binding = $getVar("$Extras.thisdate.data_binding", $skin_data_binding)
 #end if
 
+#if $interval_long_name_global
+    #set $startDate = $interval_long_name_global + "startDate"
+    #set $endDate = $interval_long_name_global + "endDate"
+    #set $startTimestamp = $interval_long_name_global + "startTimestamp"
+    #set $endTimestamp = $interval_long_name_global + "endTimestamp"
+#else
+    #set $startDate = "null"
+    #set $endDate = "null"
+    #set $startTimestamp = "null"
+    #set $endTimestamp = "null"
+#end if
+
 logLevel = sessionStorage.getItem('logLevel');
 if (!logLevel) {
     logLevel = "$getVar('$Extras.jas_debug_level', '3')";
@@ -251,23 +263,16 @@ function handleMQTT(message) {
     setTimeout(function() { window.location.reload(true); }, timeout);
 #end if
 
-#if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
-    #set $startDate = $interval_long_name_global + "startDate"
-    #set $endDate = $interval_long_name_global + "endDate"
-    #set $startTimestamp = $interval_long_name_global + "startTimestamp"
-    #set $endTimestamp = $interval_long_name_global + "endTimestamp"
-
-    // Handle reset button of zoom control
-    function resetRange() {
-        dateRangePicker2.setStartDate($startDate);
-        dateRangePicker2.setEndDate($endDate);
-        pageCharts.forEach(function(pageChart) {
-             pageChart.chart.dispatchAction({type: 'dataZoom', startValue: $startTimestamp, endValue: $endTimestamp});
-        });
-        #set line = "updateMinMax(" + $startTimestamp + ", " + $endTimestamp + ");\n"
-        $line
-    }
-#end if
+// Handle reset button of zoom control
+function resetRange() {
+    dateRangePicker2.setStartDate($startDate);
+    dateRangePicker2.setEndDate($endDate);
+    pageCharts.forEach(function(pageChart) {
+            pageChart.chart.dispatchAction({type: 'dataZoom', startValue: $startTimestamp, endValue: $endTimestamp});
+    });
+    #set line = "updateMinMax(" + $startTimestamp + ", " + $endTimestamp + ");\n"
+    $line
+}
 
 function updateCurrentObservations() {
     #if $getVar('$Extras.current.observation', False)
