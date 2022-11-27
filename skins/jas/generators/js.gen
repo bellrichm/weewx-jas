@@ -35,6 +35,17 @@
     #set $endTimestamp = "null"
 #end if
 
+#set today = datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+#set selected_year = $today.year
+#if $year_global is not None
+    #set selected_year = $year_global
+#end if
+#set selected_month = $today.month
+#if $month_global is not None
+    #set selected_month = $month_global
+#end if
+#set offset_seconds = - $utcOffset * 60
+
 logLevel = sessionStorage.getItem('logLevel');
 if (!logLevel) {
     logLevel = "$getVar('$Extras.jas_debug_level', '3')";
@@ -251,7 +262,7 @@ function handleMQTT(message) {
     });
 }
 
-#if to_bool($getVar('$Extras.pages.' + $page + '.reload', False))
+function setupPageReload() {
     #set wait_milliseconds = int($getVar('$Extras.pages.' + $page + '.wait_seconds', 300)) * 1000
     #set delay_milliseconds = int($getVar('$Extras.pages.' + $page + '.delay_seconds', 60)) * 1000
     // Set a timer to reload the iframe/page.
@@ -261,7 +272,7 @@ function handleMQTT(message) {
     var futureTimestamp = Math.floor(futureDate.getTime()/$wait_milliseconds) * $wait_milliseconds;
     var timeout = futureTimestamp - currentDate.getTime() + $delay_milliseconds;
     setTimeout(function() { window.location.reload(true); }, timeout);
-#end if
+}
 
 // Handle reset button of zoom control
 function resetRange() {
@@ -426,8 +437,6 @@ window.addEventListener("load", function (event) {
 
     #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
         // Set up the date/time picker
-        #set $startDate = $interval_long_name_global + "startDate"
-        #set $endDate = $interval_long_name_global + "endDate"
         dateRangePicker2 = new DateRangePicker('datetimerange-input2',
                             {
                                 minDate: $startDate,
@@ -452,18 +461,10 @@ window.addEventListener("load", function (event) {
     #end if
 
     #if 'minmax' in $getVar('$Extras.pages.' + $page)
-        #if $getVar('Extras.page_definition.' + $page + '.aggregate_interval.min', None) is not None
-            #set $endTimestamp = $interval_long_name_global + "endTimestamp_min"
-        #else
-            #set $endTimestamp = $interval_long_name_global + "endTimestamp"
-        #end if
-        #set $startTimestamp = $interval_long_name_global + "startTimestamp"
         updateMinMax($startTimestamp, $endTimestamp);
     #end if
 
     #if 'thisdate' in $getVar('$Extras.pages.' + $page)
-        #set $startDate = $interval_long_name_global + "startDate"
-        #set $endDate = $interval_long_name_global + "endDate"
         var dateRangePicker = new DateRangePicker('datetimerange-input1',
                             {singleDatePicker: true,
                                 minDate: $startDate,
@@ -478,16 +479,6 @@ window.addEventListener("load", function (event) {
                                     updateThisDate(start.unix() * 1000);
                             }
         );
-        #set today = datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
-        #set selected_year = $today.year
-        #if $year_global is not None
-            #set selected_year = $year_global
-        #end if
-        #set selected_month = $today.month
-        #if $month_global is not None
-            #set selected_month = $month_global
-        #end if
-        #set offset_seconds = - $utcOffset * 60
 
         var lastDay = new Date($selected_year, $selected_month, 0).getDate();
         var selectedDay = new Date().getDate();
@@ -500,6 +491,10 @@ window.addEventListener("load", function (event) {
         dateRangePicker.setStartDate(moment.unix(selectedDate).utcOffset($utcOffset));
         dateRangePicker.setEndDate(moment.unix(selectedDate).utcOffset($utcOffset));
         updateThisDate(selectedDate * 1000);
+    #end if
+
+    #if to_bool($getVar('$Extras.pages.' + $page + '.reload', False))
+        setupPageReload();
     #end if
 
     if (jasOptions.current) {
