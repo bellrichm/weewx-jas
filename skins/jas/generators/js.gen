@@ -262,6 +262,59 @@ function handleMQTT(message) {
     });
 }
 
+function setupZoomDate() {
+    zoomDateRangePicker = new DateRangePicker('zoomdatetimerange-input',
+                        {
+                            minDate: $startDate,
+                            maxDate: $endDate,
+                            startDate: $startDate,
+                            endDate: $endDate,
+                            locale: {
+                                format: dateTimeFormat[lang].datePicker,
+                                applyLabel: textLabels[lang]["datepicker_apply_label"],
+                                cancelLabel: textLabels[lang]["datepicker_cancel_label"],
+                            },    
+                        },                                
+                        function(start, end, label) {
+                            // Update all charts with selected date/time and min/max values
+                            pageCharts.forEach(function(pageChart) {
+                                pageChart.chart.dispatchAction({type: 'dataZoom', startValue: start.unix() * 1000, endValue: end.unix() * 1000});
+                            });
+
+                            updateMinMax(start.unix() * 1000, end.startOf('day').unix() * 1000);
+                    }
+    );    
+}
+
+function setupThisDate() {
+    var thisDateRangePicker = new DateRangePicker('thisdatetimerange-input',
+                        {singleDatePicker: true,
+                            minDate: $startDate,
+                            maxDate: $endDate,
+                            locale: {
+                                format: dateTimeFormat[lang].datePicker,
+                                applyLabel: textLabels[lang]["datepicker_apply_label"],
+                                cancelLabel: textLabels[lang]["datepicker_cancel_label"],                         
+                            },
+                        },
+                            function(start, end, label) {
+                                updateThisDate(start.unix() * 1000);
+                        }
+    );
+
+    var lastDay = new Date($selected_year, $selected_month, 0).getDate();
+    var selectedDay = new Date().getDate();
+    if (selectedDay > lastDay) {
+        selectedDay = lastDay;
+    }
+
+    var selectedDate = Date.UTC($selected_year, $selected_month - 1, selectedDay) / 1000 + $offset_seconds;
+
+    thisDateRangePicker.setStartDate(moment.unix(selectedDate).utcOffset($utcOffset));
+    thisDateRangePicker.setEndDate(moment.unix(selectedDate).utcOffset($utcOffset));
+    updateThisDate(selectedDate * 1000);
+}
+
 function setupPageReload() {
     #set wait_milliseconds = int($getVar('$Extras.pages.' + $page + '.wait_seconds', 300)) * 1000
     #set delay_milliseconds = int($getVar('$Extras.pages.' + $page + '.delay_seconds', 60)) * 1000
@@ -437,27 +490,7 @@ window.addEventListener("load", function (event) {
 
     #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
         // Set up the date/time picker
-        zoomDateRangePicker = new DateRangePicker('zoomdatetimerange-input',
-                            {
-                                minDate: $startDate,
-                                maxDate: $endDate,
-                                startDate: $startDate,
-                                endDate: $endDate,
-                                locale: {
-                                    format: dateTimeFormat[lang].datePicker,
-                                    applyLabel: textLabels[lang]["datepicker_apply_label"],
-                                    cancelLabel: textLabels[lang]["datepicker_cancel_label"],
-                                },    
-                            },                                
-                            function(start, end, label) {
-                                // Update all charts with selected date/time and min/max values
-                                pageCharts.forEach(function(pageChart) {
-                                    pageChart.chart.dispatchAction({type: 'dataZoom', startValue: start.unix() * 1000, endValue: end.unix() * 1000});
-                                });
-
-                                updateMinMax(start.unix() * 1000, end.startOf('day').unix() * 1000);
-                        }
-        );
+        setupZoomDate();
     #end if
 
     #if 'minmax' in $getVar('$Extras.pages.' + $page)
@@ -465,32 +498,7 @@ window.addEventListener("load", function (event) {
     #end if
 
     #if 'thisdate' in $getVar('$Extras.pages.' + $page)
-        var thisDateRangePicker = new DateRangePicker('thisdatetimerange-input',
-                            {singleDatePicker: true,
-                                minDate: $startDate,
-                                maxDate: $endDate,
-                                locale: {
-                                    format: dateTimeFormat[lang].datePicker,
-                                    applyLabel: textLabels[lang]["datepicker_apply_label"],
-                                    cancelLabel: textLabels[lang]["datepicker_cancel_label"],                         
-                                },
-                            },
-                                function(start, end, label) {
-                                    updateThisDate(start.unix() * 1000);
-                            }
-        );
-
-        var lastDay = new Date($selected_year, $selected_month, 0).getDate();
-        var selectedDay = new Date().getDate();
-        if (selectedDay > lastDay) {
-            selectedDay = lastDay;
-        }
-
-        var selectedDate = Date.UTC($selected_year, $selected_month - 1, selectedDay) / 1000 + $offset_seconds;
-
-        thisDateRangePicker.setStartDate(moment.unix(selectedDate).utcOffset($utcOffset));
-        thisDateRangePicker.setEndDate(moment.unix(selectedDate).utcOffset($utcOffset));
-        updateThisDate(selectedDate * 1000);
+        setupThisDate();
     #end if
 
     #if to_bool($getVar('$Extras.pages.' + $page + '.reload', False))
