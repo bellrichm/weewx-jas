@@ -1,0 +1,47 @@
+#errorCatcher Echo
+##    Copyright (c) 2022 Rich Bell <bellrichm@gmail.com>
+##    See the file LICENSE.txt for your rights.
+
+#from weeutil.weeutil import to_bool
+
+jasOptions = {};
+
+jasOptions.pageMQTT = $getVar('Extras.pages.' + $page + '.mqtt', 'true').lower();
+jasOptions.displayAerisObservation = $getVar('$Extras.display_aeris_observation', 'false').lower()
+jasOptions.reload = $getVar('$Extras.pages.' + $page + '.reload', 'false').lower();
+jasOptions.zoomcontrol = $getVar('$Extras.pages.' + $page + '.zoomControl', 'false').lower();
+
+jasOptions.currentHeader = null;
+#if $getVar('$Extras.current.observation', 'False')
+    jasOptions.currentHeader = "$getVar('$Extras.current.observation')";
+#end if
+
+#if 'current' in $getVar('$Extras.pages.' + $page)
+    jasOptions.current = true;
+#else
+    jasOptions.current = false;
+#end if
+
+#if 'forecast' in $getVar('$Extras.pages.' + $page)
+    jasOptions.forecast = true;
+#else
+    jasOptions.forecast = false;
+#end if
+
+#if 'minmax' in $getVar('$Extras.pages.' + $page)
+    jasOptions.minmax = true;
+#else
+    jasOptions.minmax = false;
+#end if
+
+#if 'thisdate' in $getVar('$Extras.pages.' + $page)
+    jasOptions.thisdate = true;
+#else
+    jasOptions.thisdate = false;
+#end if
+
+#if (to_bool($getVar('Extras.pages.' + $page + '.mqtt', True)) and to_bool($getVar('Extras.mqtt.enable', False)) or $page == 'debug' )
+    jasOptions.MQTTConfig = true;
+#else 
+    jasOptions.MQTTConfig = false;
+#end if

@@ -15,6 +15,8 @@
     #end if
 #end def
 
+#include 'generators/jasoptions.gen'
+
 #set $skin_data_binding = $getVar("$Extras.data_binding", $data_binding)
 #if 'minmax' in $getVar('$Extras.pages.' + $page)
     #set $minmax_data_binding = $getVar("$Extras.minmax.data_binding", $skin_data_binding)
@@ -504,22 +506,22 @@ window.addEventListener("load", function (event) {
     updateLabels();
     updateCharts();
 
-    #if 'minmax' in $getVar('$Extras.pages.' + $page)
+    if (jasOptions.minmax) {
         updateMinMax($startTimestamp, $endTimestamp);
-    #end if
+    }
 
-    #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
-        // Set up the date/time picker
+    // Set up the date/time picker
+    if (jasOptions.zoomcontrol) {
         setupZoomDate();
-    #end if
-
-    #if 'thisdate' in $getVar('$Extras.pages.' + $page)
+    }
+    
+    if (jasOptions.thisdate) {
         setupThisDate();
-    #end if
+    }
 
-    #if to_bool($getVar('$Extras.pages.' + $page + '.reload', False))
+    if (jasOptions.reload) {
         setupPageReload();
-    #end if
+    }
 
     if (jasOptions.current) {
         updateCurrentObservations();
