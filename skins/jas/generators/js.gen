@@ -361,7 +361,7 @@ function updateCurrentObservations() {
             sessionStorage.setItem("header", JSON.stringify(current.header));
         }
         header = JSON.parse(sessionStorage.getItem("header"));
-        document.getElementById("$Extras.current.observation").innerHTML = header.value + header.unit;
+        document.getElementById(jasOptions.currentHeader).innerHTML = header.value + header.unit;
     }
 
     if (jasOptions.displayAerisObservation) {
