@@ -46,6 +46,14 @@
 #end if
 #set offset_seconds = - $utcOffset * 60
 
+#if $getVar("$Extras.display_aeris_observation", False)
+    current_observation = $current_observation['observation'];
+#else
+    current_observation = null;
+#end if
+
+headerMaxDecimals = $getVar('$Extras.current.header_max_decimals', 'null');
+
 logLevel = sessionStorage.getItem('logLevel');
 if (!logLevel) {
     logLevel = "$getVar('$Extras.jas_debug_level', '3')";
@@ -93,10 +101,10 @@ function updateCharts() {
 
 // Ensure that the height of charts is consistent ratio of the width.
 function refreshSizes() {
-  #if not $getVar("$Extras.pages." + $page + '.radar', True)
     radarElem = document.getElementById("radar");
-    radarElem.style.height = radarElem.offsetWidth / 1.618 + 17  +"px"; // adding is a hack
-  #end if
+    if (radarElem) {
+        radarElem.style.height = radarElem.offsetWidth / 1.618 + 17  +"px"; // adding is a hack
+    }
 
     for (var index in pageCharts) {
       chartElem = pageCharts[index].chart.getDom();
@@ -131,16 +139,7 @@ function handleLog(message) {
 
 // Handle event messages of type 'mqtt'.
 var test_obj = null; // Not a great idea to be global, but makes remote debugging easier.
-function handleMQTT(message) {
-    test_obj = JSON.parse(message.payload);
-    
-    jasLogDebug("test_obj: ", test_obj);
-    jasLogDebug("sessionStorage: ", sessionStorage);
-    jasLogDebug("fieldMap: ", Object.fromEntries(fieldMap));
-    // To Do - only exists on pages with 'current' section
-    //jasLogDebug("current.observations: ", Object.fromEntries(current.observations));
-
-    #if $getVar("$Extras.pages." + $page + ".current", None) is not None and to_bool($getVar('Extras.pages.' + $page + '.mqtt', True))
+function updateCurrentMQTT(test_obj) {
         // Handle the 'header' section of current observations.
         header = JSON.parse(sessionStorage.getItem("header"));
         if (header) {
@@ -153,10 +152,9 @@ function handleMQTT(message) {
             }
 
             if (mqttValue != undefined) {
-                #set header_max_decimals = $getVar('$Extras.current.header_max_decimals', False)
-                #if $header_max_decimals
-                    mqttValue = Number(mqttValue).toFixed($header_max_decimals);
-                #end if
+                if (headerMaxDecimals) {
+                    mqttValue = Number(mqttValue).toFixed(headerMaxDecimals);
+                }
                 if (!isNaN(mqttValue)) {
                     header.value = Number(mqttValue).toLocaleString(lang);
                 }      
@@ -187,7 +185,11 @@ function handleMQTT(message) {
         }
 
         // Process each observation in the 'current' section.
-        observations = sessionStorage.getItem("observations").split(",");
+        observations = [];
+        if (sessionStorage.getItem("observations")) {
+            observations = sessionStorage.getItem("observations").split(",");
+        }
+
         observations.forEach(function(observation) {
             obs = fieldMap.get(observation);
             if (obs === undefined) {
@@ -233,7 +235,21 @@ function handleMQTT(message) {
                 timeElem.innerHTML = moment.unix(test_obj.dateTime).utcOffset($utcOffset).format(dateTimeFormat[lang].current);
             }
         }
-    #end if
+}
+
+function handleMQTT(message) {
+    test_obj = JSON.parse(message.payload);
+    
+    jasLogDebug("test_obj: ", test_obj);
+    jasLogDebug("sessionStorage: ", sessionStorage);
+    jasLogDebug("fieldMap: ", Object.fromEntries(fieldMap));
+    // To Do - only exists on pages with 'current' section
+    //jasLogDebug("current.observations: ", Object.fromEntries(current.observations));
+
+    if (jasOptions.current && jasOptions.pageMQTT)
+    {
+        updateCurrentMQTT(test_obj);
+    }
 
     // Proof of concept, charting MQTT data
     for (obs in test_obj) {
@@ -339,18 +355,18 @@ function resetRange() {
 }
 
 function updateCurrentObservations() {
-    #if $getVar('$Extras.current.observation', False)
+    if (jasOptions.currentHeader) {
         ## ToDo: switch to allow non mqtt header data? similar to the observation section
         if(sessionStorage.getItem("header") === null || !jasOptions.MQTTConfig){
             sessionStorage.setItem("header", JSON.stringify(current.header));
         }
         header = JSON.parse(sessionStorage.getItem("header"));
         document.getElementById("$Extras.current.observation").innerHTML = header.value + header.unit;
-    #end if
+    }
 
-    #if $getVar("$Extras.display_aeris_observation", False)
-        document.getElementById("currentObservation").innerHTML = $current_observation['observation'];
-    #end if
+    if (jasOptions.displayAerisObservation) {
+        document.getElementById("currentObservation").innerHTML = current_observation;
+    }
 
     // ToDo: cleanup, perhaps put suffix data into an array and store that
     // ToDo: do a bit more in cheetah?
@@ -488,13 +504,13 @@ window.addEventListener("load", function (event) {
     updateLabels();
     updateCharts();
 
+    #if 'minmax' in $getVar('$Extras.pages.' + $page)
+        updateMinMax($startTimestamp, $endTimestamp);
+    #end if
+
     #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
         // Set up the date/time picker
         setupZoomDate();
-    #end if
-
-    #if 'minmax' in $getVar('$Extras.pages.' + $page)
-        updateMinMax($startTimestamp, $endTimestamp);
     #end if
 
     #if 'thisdate' in $getVar('$Extras.pages.' + $page)
