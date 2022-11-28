@@ -6,7 +6,7 @@
         <div class="card-body text-center">
                 <h5 class="h5-responsive indigo-text" text_label="thisdate_title">
                 </h5>     
-                <input type="text" id="datetimerange-input1" style="text-align:center">   
+                <input type="text" id="thisdatetimerange-input" style="text-align:center">   
                 <table class="table">
                   <tbody>
                     #for observation in $getVar('$Extras.thisdate.observations')

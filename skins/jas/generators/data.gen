@@ -16,6 +16,14 @@
 
 jasOptions = {};
 
+jasOptions.pageMQTT = $getVar('Extras.pages.' + $page + '.mqtt', 'true').lower();
+jasOptions.displayAerisObservation = $getVar('$Extras.display_aeris_observation', 'false').lower()
+
+jasOptions.currentHeader = null;
+#if $getVar('$Extras.current.observation', 'False')
+    jasOptions.currentHeader = "$getVar('$Extras.current.observation')";
+#end if
+
 #if 'current' in $getVar('$Extras.pages.' + $page)
     jasOptions.current = true;
 #else

@@ -15,12 +15,44 @@
     #end if
 #end def
 
+#set $skin_data_binding = $getVar("$Extras.data_binding", $data_binding)
 #if 'minmax' in $getVar('$Extras.pages.' + $page)
     #set $minmax_data_binding = $getVar("$Extras.minmax.data_binding", $skin_data_binding)
 #end if
 #if 'thisdate' in $getVar('$Extras.pages.' + $page)
     #set $thisdate_data_binding = $getVar("$Extras.thisdate.data_binding", $skin_data_binding)
 #end if
+
+#if $interval_long_name_global
+    #set $startDate = $interval_long_name_global + "startDate"
+    #set $endDate = $interval_long_name_global + "endDate"
+    #set $startTimestamp = $interval_long_name_global + "startTimestamp"
+    #set $endTimestamp = $interval_long_name_global + "endTimestamp"
+#else
+    #set $startDate = "null"
+    #set $endDate = "null"
+    #set $startTimestamp = "null"
+    #set $endTimestamp = "null"
+#end if
+
+#set today = datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+#set selected_year = $today.year
+#if $year_global is not None
+    #set selected_year = $year_global
+#end if
+#set selected_month = $today.month
+#if $month_global is not None
+    #set selected_month = $month_global
+#end if
+#set offset_seconds = - $utcOffset * 60
+
+#if $getVar("$Extras.display_aeris_observation", False)
+    current_observation = $current_observation['observation'];
+#else
+    current_observation = null;
+#end if
+
+headerMaxDecimals = $getVar('$Extras.current.header_max_decimals', 'null');
 
 logLevel = sessionStorage.getItem('logLevel');
 if (!logLevel) {
@@ -52,8 +84,6 @@ function updatelogLevel(logLevel) {
 
 updatelogLevel(logLevel);
 
-#set $skin_data_binding = $getVar("$Extras.data_binding", $data_binding)
-
 var pageCharts = [];
 
 // Update the chart's data
@@ -71,10 +101,10 @@ function updateCharts() {
 
 // Ensure that the height of charts is consistent ratio of the width.
 function refreshSizes() {
-  #if not $getVar("$Extras.pages." + $page + '.radar', True)
     radarElem = document.getElementById("radar");
-    radarElem.style.height = radarElem.offsetWidth / 1.618 + 17  +"px"; // adding is a hack
-  #end if
+    if (radarElem) {
+        radarElem.style.height = radarElem.offsetWidth / 1.618 + 17  +"px"; // adding is a hack
+    }
 
     for (var index in pageCharts) {
       chartElem = pageCharts[index].chart.getDom();
@@ -109,16 +139,7 @@ function handleLog(message) {
 
 // Handle event messages of type 'mqtt'.
 var test_obj = null; // Not a great idea to be global, but makes remote debugging easier.
-function handleMQTT(message) {
-    test_obj = JSON.parse(message.payload);
-    
-    jasLogDebug("test_obj: ", test_obj);
-    jasLogDebug("sessionStorage: ", sessionStorage);
-    jasLogDebug("fieldMap: ", Object.fromEntries(fieldMap));
-    // To Do - only exists on pages with 'current' section
-    //jasLogDebug("current.observations: ", Object.fromEntries(current.observations));
-
-    #if $getVar("$Extras.pages." + $page + ".current", None) is not None and to_bool($getVar('Extras.pages.' + $page + '.mqtt', True))
+function updateCurrentMQTT(test_obj) {
         // Handle the 'header' section of current observations.
         header = JSON.parse(sessionStorage.getItem("header"));
         if (header) {
@@ -131,10 +152,9 @@ function handleMQTT(message) {
             }
 
             if (mqttValue != undefined) {
-                #set header_max_decimals = $getVar('$Extras.current.header_max_decimals', False)
-                #if $header_max_decimals
-                    mqttValue = Number(mqttValue).toFixed($header_max_decimals);
-                #end if
+                if (headerMaxDecimals) {
+                    mqttValue = Number(mqttValue).toFixed(headerMaxDecimals);
+                }
                 if (!isNaN(mqttValue)) {
                     header.value = Number(mqttValue).toLocaleString(lang);
                 }      
@@ -165,7 +185,11 @@ function handleMQTT(message) {
         }
 
         // Process each observation in the 'current' section.
-        observations = sessionStorage.getItem("observations").split(",");
+        observations = [];
+        if (sessionStorage.getItem("observations")) {
+            observations = sessionStorage.getItem("observations").split(",");
+        }
+
         observations.forEach(function(observation) {
             obs = fieldMap.get(observation);
             if (obs === undefined) {
@@ -211,7 +235,21 @@ function handleMQTT(message) {
                 timeElem.innerHTML = moment.unix(test_obj.dateTime).utcOffset($utcOffset).format(dateTimeFormat[lang].current);
             }
         }
-    #end if
+}
+
+function handleMQTT(message) {
+    test_obj = JSON.parse(message.payload);
+    
+    jasLogDebug("test_obj: ", test_obj);
+    jasLogDebug("sessionStorage: ", sessionStorage);
+    jasLogDebug("fieldMap: ", Object.fromEntries(fieldMap));
+    // To Do - only exists on pages with 'current' section
+    //jasLogDebug("current.observations: ", Object.fromEntries(current.observations));
+
+    if (jasOptions.current && jasOptions.pageMQTT)
+    {
+        updateCurrentMQTT(test_obj);
+    }
 
     // Proof of concept, charting MQTT data
     for (obs in test_obj) {
@@ -240,7 +278,60 @@ function handleMQTT(message) {
     });
 }
 
-#if to_bool($getVar('$Extras.pages.' + $page + '.reload', False))
+function setupZoomDate() {
+    zoomDateRangePicker = new DateRangePicker('zoomdatetimerange-input',
+                        {
+                            minDate: $startDate,
+                            maxDate: $endDate,
+                            startDate: $startDate,
+                            endDate: $endDate,
+                            locale: {
+                                format: dateTimeFormat[lang].datePicker,
+                                applyLabel: textLabels[lang]["datepicker_apply_label"],
+                                cancelLabel: textLabels[lang]["datepicker_cancel_label"],
+                            },    
+                        },                                
+                        function(start, end, label) {
+                            // Update all charts with selected date/time and min/max values
+                            pageCharts.forEach(function(pageChart) {
+                                pageChart.chart.dispatchAction({type: 'dataZoom', startValue: start.unix() * 1000, endValue: end.unix() * 1000});
+                            });
+
+                            updateMinMax(start.unix() * 1000, end.startOf('day').unix() * 1000);
+                    }
+    );    
+}
+
+function setupThisDate() {
+    var thisDateRangePicker = new DateRangePicker('thisdatetimerange-input',
+                        {singleDatePicker: true,
+                            minDate: $startDate,
+                            maxDate: $endDate,
+                            locale: {
+                                format: dateTimeFormat[lang].datePicker,
+                                applyLabel: textLabels[lang]["datepicker_apply_label"],
+                                cancelLabel: textLabels[lang]["datepicker_cancel_label"],                         
+                            },
+                        },
+                            function(start, end, label) {
+                                updateThisDate(start.unix() * 1000);
+                        }
+    );
+
+    var lastDay = new Date($selected_year, $selected_month, 0).getDate();
+    var selectedDay = new Date().getDate();
+    if (selectedDay > lastDay) {
+        selectedDay = lastDay;
+    }
+
+    var selectedDate = Date.UTC($selected_year, $selected_month - 1, selectedDay) / 1000 + $offset_seconds;
+
+    thisDateRangePicker.setStartDate(moment.unix(selectedDate).utcOffset($utcOffset));
+    thisDateRangePicker.setEndDate(moment.unix(selectedDate).utcOffset($utcOffset));
+    updateThisDate(selectedDate * 1000);
+}
+
+function setupPageReload() {
     #set wait_milliseconds = int($getVar('$Extras.pages.' + $page + '.wait_seconds', 300)) * 1000
     #set delay_milliseconds = int($getVar('$Extras.pages.' + $page + '.delay_seconds', 60)) * 1000
     // Set a timer to reload the iframe/page.
@@ -250,39 +341,32 @@ function handleMQTT(message) {
     var futureTimestamp = Math.floor(futureDate.getTime()/$wait_milliseconds) * $wait_milliseconds;
     var timeout = futureTimestamp - currentDate.getTime() + $delay_milliseconds;
     setTimeout(function() { window.location.reload(true); }, timeout);
-#end if
+}
 
-#if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
-    #set $startDate = $interval_long_name_global + "startDate"
-    #set $endDate = $interval_long_name_global + "endDate"
-    #set $startTimestamp = $interval_long_name_global + "startTimestamp"
-    #set $endTimestamp = $interval_long_name_global + "endTimestamp"
-
-    // Handle reset button
-    function resetRange() {
-        dateRangePicker2.setStartDate($startDate);
-        dateRangePicker2.setEndDate($endDate);
-        pageCharts.forEach(function(pageChart) {
-             pageChart.chart.dispatchAction({type: 'dataZoom', startValue: last366days_startTimestamp, endValue: last366days_endTimestamp});
-        });
-        #set line = "updateMinMax(" + $interval_long_name_global + "startTimestamp, " + $interval_long_name_global + "endTimestamp_min);\n"
-        $line
-    }
-#end if
+// Handle reset button of zoom control
+function resetRange() {
+    zoomDateRangePicker.setStartDate($startDate);
+    zoomDateRangePicker.setEndDate($endDate);
+    pageCharts.forEach(function(pageChart) {
+            pageChart.chart.dispatchAction({type: 'dataZoom', startValue: $startTimestamp, endValue: $endTimestamp});
+    });
+    #set line = "updateMinMax(" + $startTimestamp + ", " + $endTimestamp + ");\n"
+    $line
+}
 
 function updateCurrentObservations() {
-    #if $getVar('$Extras.current.observation', False)
+    if (jasOptions.currentHeader) {
         ## ToDo: switch to allow non mqtt header data? similar to the observation section
         if(sessionStorage.getItem("header") === null || !jasOptions.MQTTConfig){
             sessionStorage.setItem("header", JSON.stringify(current.header));
         }
         header = JSON.parse(sessionStorage.getItem("header"));
         document.getElementById("$Extras.current.observation").innerHTML = header.value + header.unit;
-    #end if
+    }
 
-    #if $getVar("$Extras.display_aeris_observation", False)
-        document.getElementById("currentObservation").innerHTML = $current_observation['observation'];
-    #end if
+    if (jasOptions.displayAerisObservation) {
+        document.getElementById("currentObservation").innerHTML = current_observation;
+    }
 
     // ToDo: cleanup, perhaps put suffix data into an array and store that
     // ToDo: do a bit more in cheetah?
@@ -420,82 +504,21 @@ window.addEventListener("load", function (event) {
     updateLabels();
     updateCharts();
 
-    #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
-        // Set up the date/time picker
-        #set $startDate = $interval_long_name_global + "startDate"
-        #set $endDate = $interval_long_name_global + "endDate"
-        dateRangePicker2 = new DateRangePicker('datetimerange-input2',
-                            {
-                                minDate: $startDate,
-                                maxDate: $endDate,
-                                startDate: $startDate,
-                                endDate: $endDate,
-                                locale: {
-                                    format: dateTimeFormat[lang].datePicker,
-                                    applyLabel: textLabels[lang]["datepicker_apply_label"],
-                                    cancelLabel: textLabels[lang]["datepicker_cancel_label"],
-                                },    
-                            },                                
-                            function(start, end, label) {
-                                // Update all charts with selected date/time and min/max values
-                                pageCharts.forEach(function(pageChart) {
-                                    pageChart.chart.dispatchAction({type: 'dataZoom', startValue: start.unix() * 1000, endValue: end.unix() * 1000});
-                                });
-
-                                updateMinMax(start.unix() * 1000, end.startOf('day').unix() * 1000);
-                        }
-        );
-    #end if
-
     #if 'minmax' in $getVar('$Extras.pages.' + $page)
-        #if $getVar('Extras.page_definition.' + $page + '.aggregate_interval.min', None) is not None
-            #set $endTimestamp = $interval_long_name_global + "endTimestamp_min"
-        #else
-            #set $endTimestamp = $interval_long_name_global + "endTimestamp"
-        #end if
-        #set $startTimestamp = $interval_long_name_global + "startTimestamp"
         updateMinMax($startTimestamp, $endTimestamp);
     #end if
 
+    #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
+        // Set up the date/time picker
+        setupZoomDate();
+    #end if
+
     #if 'thisdate' in $getVar('$Extras.pages.' + $page)
-        #set $startDate = $interval_long_name_global + "startDate"
-        #set $endDate = $interval_long_name_global + "endDate"
-        var dateRangePicker = new DateRangePicker('datetimerange-input1',
-                            {singleDatePicker: true,
-                                minDate: $startDate,
-                                maxDate: $endDate,
-                                locale: {
-                                    format: dateTimeFormat[lang].datePicker,
-                                    applyLabel: textLabels[lang]["datepicker_apply_label"],
-                                    cancelLabel: textLabels[lang]["datepicker_cancel_label"],                         
-                                },
-                            },
-                                function(start, end, label) {
-                                    updateThisDate(start.unix() * 1000);
-                            }
-        );
-        #set today = datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
-        #set selected_year = $today.year
-        #if $year_global is not None
-            #set selected_year = $year_global
-        #end if
-        #set selected_month = $today.month
-        #if $month_global is not None
-            #set selected_month = $month_global
-        #end if
-        #set offset_seconds = - $utcOffset * 60
+        setupThisDate();
+    #end if
 
-        var lastDay = new Date($selected_year, $selected_month, 0).getDate();
-        var selectedDay = new Date().getDate();
-        if (selectedDay > lastDay) {
-            selectedDay = lastDay;
-        }
-
-        var selectedDate = Date.UTC($selected_year, $selected_month - 1, selectedDay) / 1000 + $offset_seconds;
-
-        dateRangePicker.setStartDate(moment.unix(selectedDate).utcOffset($utcOffset));
-        dateRangePicker.setEndDate(moment.unix(selectedDate).utcOffset($utcOffset));
-        updateThisDate(selectedDate * 1000);
+    #if to_bool($getVar('$Extras.pages.' + $page + '.reload', False))
+        setupPageReload();
     #end if
 
     if (jasOptions.current) {
