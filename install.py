@@ -12,7 +12,7 @@ except ImportError:
 import configobj
 from weecfg.extension import ExtensionInstaller
 
-VERSION = "0.3.1-rc03"
+VERSION = "0.3.1-rc04"
 
 EXTENSION_CONFIG = """
 [StdReport]
@@ -326,6 +326,7 @@ class JASInstaller(ExtensionInstaller):
                                       ]),
                    ('skins/jas/generators', ['skins/jas/generators/charts.gen',
                                             'skins/jas/generators/data.gen',
+                                            'skins/jas/generators/jasoptions.gen',
                                              'skins/jas/generators/js.gen',
                                              'skins/jas/generators/pages.gen',
                                              'skins/jas/generators/startEndHistorical.gen',
