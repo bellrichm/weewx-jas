@@ -122,6 +122,19 @@ function getLogLevel() {
   return "Index page log level: " + sessionStorage.getItem("indexPageLogLevel")
 }
 
+function manageNavbar() {
+  // This hack attempts to collapse the navbar when it doesn't fit width-wise
+  navBarWidth = document.getElementById('navbar').offsetWidth;
+  parentScrollWidth = document.getElementById('navbar').parentElement.scrollWidth
+  
+  if (navBarWidth < parentScrollWidth || window.innerWidth < $Extras.navbar_collapse) {
+    document.getElementById('navbar').classList.remove('navbar-expand')
+  }
+  else {
+    document.getElementById('navbar').classList.add('navbar-expand')
+  }
+}
+
 ## ToDo: thiscould be cleaned up
 function setIframeSrc(id, url) {
   // Set current page as the active page.
@@ -246,6 +259,8 @@ function setYear(year) {
 }
 
 window.addEventListener("load", function (event) {
+  manageNavbar();
+
   #if to_bool($getVar("$Extras.allow_user_language_selection", False))
     document.getElementById(lang).classList.add("active");
   #end if
@@ -326,6 +341,10 @@ window.addEventListener("load", function (event) {
   #if to_bool($Extras.mqtt.get('enable', False))
     MQTTConnect(); 
   #end if
+});
+
+addEventListener("resize", (event) => {
+  manageNavbar();
 });
 
 window.addEventListener("beforeunload", function (event) {
