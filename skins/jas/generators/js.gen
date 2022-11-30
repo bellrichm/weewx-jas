@@ -17,13 +17,13 @@
 
 #include 'generators/jasoptions.gen'
 
-#set $skin_data_binding = $getVar("$Extras.data_binding", $data_binding)
-#if 'minmax' in $getVar('$Extras.pages.' + $page)
-    #set $minmax_data_binding = $getVar("$Extras.minmax.data_binding", $skin_data_binding)
-#end if
-#if 'thisdate' in $getVar('$Extras.pages.' + $page)
-    #set $thisdate_data_binding = $getVar("$Extras.thisdate.data_binding", $skin_data_binding)
-#end if
+##set $skin_data_binding = $getVar("$Extras.data_binding", $data_binding)
+##if 'minmax' in $getVar('$Extras.pages.' + $page)
+    ##set $minmax_data_binding = $getVar("$Extras.minmax.data_binding", $skin_data_binding)
+##end if
+##if 'thisdate' in $getVar('$Extras.pages.' + $page)
+    ##set $thisdate_data_binding = $getVar("$Extras.thisdate.data_binding", $skin_data_binding)
+##end if
 
 #if $interval_long_name_global
     #set $startDate = $interval_long_name_global + "startDate"
