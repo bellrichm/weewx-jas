@@ -96,7 +96,7 @@ thisDateObsList = [];
 #if 'thisdate' in $getVar('$Extras.pages.' + $page)
     #set $thisdate_data_binding = $getVar("$Extras.minmax.data_binding", $skin_data_binding)
     #for observation in $Extras.thisdate.observations
-        #set $data_binding = $getVar("$Extras.thisdate.observations" + $observation + ".data_binding", $thisdate_data_binding)
+        #set $data_binding = $getVar("$Extras.thisdate.observations." + $observation + ".data_binding", $thisdate_data_binding)
         #set $unit_name = $getVar("$Extras.thisdate.observations." + $observation + ".unit", "default")
         #if $unit_name == "default"
             #set unit_suffix = ""
@@ -189,14 +189,16 @@ This data is stored in a javascript object named 'current'.
 'current.suffixes is also a map'. Its key is observation_suffix, for example 'outTemp_suffix'.
 *#
 #if $getVar("$Extras.pages." + $page_definition_name_global + ".current", None) is not None
+    #set $current_data_binding = $getVar("$Extras.current.data_binding", $skin_data_binding)
     #set $interval_current = $getVar("$Extras.current.interval", $interval_global)
     var mqtt_enabled = false;
-    var updateDate = $current($data_binding=$page_data_binding).dateTime.raw * 1000;
+    var updateDate = $current($data_binding=$current_data_binding).dateTime.raw * 1000;
     var current = {};
     #if $getVar('$Extras.current.observation', False)
         current.header = {};
         current.header.name = "$getVar('Extras.current.observation')";
-        #set line = '$current($data_binding=$page_data_binding).' + $getVar('Extras.current.observation') + '.format(add_label=False, localize=False)' + ';'
+        #set $data_binding = $getVar("$Extras.current.header_data_binding", $current_data_binding)
+        #set line = '$current($data_binding="' + $data_binding + '").' + $getVar('Extras.current.observation') + '.format(add_label=False, localize=False)' + ';'
         current.header.value = $evaluate($line)
         #set header_max_decimals = $getVar('$Extras.current.header_max_decimals', False)
         #if $header_max_decimals
@@ -212,6 +214,7 @@ This data is stored in a javascript object named 'current'.
     current.suffixes = new Map();
 
     #for observation in $Extras.current.observations
+            #set $data_binding = $getVar("$Extras.current.observations." + $observation + ".data_binding", $current_data_binding)
             #set type = $getVar("$Extras.current.observations" + "." + $observation + ".type", "")
             #set suffix = $getVar("$Extras.current.observations" + "." + $observation + ".suffix", "")
             #set unit_name = $getVar("$Extras.current.observations" + "." + $observation + ".unit", False)
@@ -228,9 +231,9 @@ This data is stored in a javascript object named 'current'.
                 #set observation_unit = " "
                 #set label = 'foo'
             #else if $type == 'sum'
-                #set observation_value = '$' + $interval_current + '($data_binding=$page_data_binding).' + $observation + $unit_conv + "." + $type + '.format(add_label=False, localize=False)'               
+                #set observation_value = '$' + $interval_current + '($data_binding="' + $data_binding + '").' + $observation + $unit_conv + "." + $type + '.format(add_label=False, localize=False)'               
             #else
-                #set observation_value = '$current($data_binding=$page_data_binding).' + $observation + $unit_conv + '.format(add_label=False, localize=False)'
+                #set observation_value = '$current($data_binding="' + $data_binding + '").' + $observation + $unit_conv + '.format(add_label=False, localize=False)'
             #end if
 
         var observation = {};
