@@ -433,8 +433,10 @@ function updateMinMax(startTimestamp, endTimestamp) {
 
         min = minMaxObsData.minDataArray[minIndex];
         max = minMaxObsData.maxDataArray[maxIndex];
-        min = min.toFixed(0);
-        max = max.toFixed(0);
+        if (minMaxObsData.maxDecimals) {
+            min = min.toFixed(minMaxObsData.maxDecimals);
+            max = max.toFixed(minMaxObsData.maxDecimals);
+        }
         min = Number(min).toLocaleString(lang);
         max = Number(max).toLocaleString(lang);
         min = min + minMaxObsData.label;

@@ -176,6 +176,7 @@ minMaxObs = [];
         minMaxObsData.label = "$label";
         minMaxObsData.minId = "$min_id";   
         minMaxObsData.maxId = "$max_id";
+        minMaxObsData.maxDecimals = $getVar('$Extras.minmax.observations.' + $observation + '.max_decimals', 'null')
         minMaxObs.push(minMaxObsData);
     #end for
 #end if
