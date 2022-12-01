@@ -466,9 +466,13 @@ function getObservation(timeStamp, observations) {
 function updateThisDate(timeStamp) {
     thisDateObsList.forEach(function(thisDateObs) {
         thisDateObs.forEach(function(thisDateObsDetail) {
-            obs = Number(getObservation(timeStamp, thisDateObsDetail.dataArray)).toLocaleString(lang);
+            obs = getObservation(timeStamp, thisDateObsDetail.dataArray);
+            if (thisDateObsDetail.maxDecimals) {
+                obs = obs.toFixed(thisDateObsDetail.maxDecimals);
+            }
+            obsValue = Number(obs).toLocaleString(lang);
             observation=document.getElementById(thisDateObsDetail.id);
-            observation.innerHTML = obs + thisDateObsDetail.label;                    
+            observation.innerHTML = obsValue + thisDateObsDetail.label;                    
         });
     });
 }
