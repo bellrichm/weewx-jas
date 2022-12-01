@@ -756,7 +756,7 @@ class JAS(SearchList):
 
         thisdate_observations = self.skin_dict.get('Extras', {}).get('thisdate', {}).get('observations', {})
         thisdate_data_binding = self.skin_dict.get('Extras', {}).get('thisdate', {}).get('data_binding', skin_data_binding)
-        for observation in thisdate_observations:
+        for observation in  self.skin_dict['Extras']['thisdate']['observations'].sections:
             data_binding = thisdate_observations[observation].get('data_binding', thisdate_data_binding)
             if observation not in self.wind_observations:
                 unit = thisdate_observations[observation].get('unit', 'default')
