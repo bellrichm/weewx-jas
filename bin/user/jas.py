@@ -743,11 +743,13 @@ class JAS(SearchList):
 
                 if 'min' not in observations[observation]['aggregate_types']:
                     observations[observation]['aggregate_types']['min'] = {}
+                if data_binding not in observations[observation]['aggregate_types']['min']:
                     observations[observation]['aggregate_types']['min'][data_binding] = {}
                 observations[observation]['aggregate_types']['min'][data_binding][unit] = {}
                 aggregate_types['min'] = {}
                 if 'max' not in observations[observation]['aggregate_types']:
                     observations[observation]['aggregate_types']['max'] = {}
+                if data_binding not in observations[observation]['aggregate_types']['max']:
                     observations[observation]['aggregate_types']['max'][data_binding] = {}
                 observations[observation]['aggregate_types']['max'][data_binding][unit] = {}
                 aggregate_types['max'] = {}
@@ -764,11 +766,13 @@ class JAS(SearchList):
 
                 if 'min' not in observations[observation]['aggregate_types']:
                     observations[observation]['aggregate_types']['min'] = {}
+                if data_binding not in observations[observation]['aggregate_types']['min']:
                     observations[observation]['aggregate_types']['min'][data_binding] = {}
                 observations[observation]['aggregate_types']['min'][data_binding][unit] = {}
                 aggregate_types['min'] = {}
                 if 'max' not in observations[observation]['aggregate_types']:
                     observations[observation]['aggregate_types']['max'] = {}
+                if data_binding not in observations[observation]['aggregate_types']['max']:
                     observations[observation]['aggregate_types']['max'][data_binding] = {}
                 observations[observation]['aggregate_types']['max'][data_binding][unit] = {}
                 aggregate_types['max'] = {}
