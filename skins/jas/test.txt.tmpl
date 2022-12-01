@@ -1,1 +1,9 @@
+#errorCatcher Echo
+#import time
+#set $start_time = time.time()
+
 test template
+
+#set elapsed_time = time.time() - $start_time
+#set log_msg = "Generated " + $HTML_ROOT + "/" + $filename + " in " + str($elapsed_time)
+$logdbg($log_msg)
