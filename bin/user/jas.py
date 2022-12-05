@@ -754,28 +754,29 @@ class JAS(SearchList):
                 observations[observation]['aggregate_types']['max'][data_binding][unit] = {}
                 aggregate_types['max'] = {}
 
-        thisdate_observations = self.skin_dict.get('Extras', {}).get('thisdate', {}).get('observations', {})
-        thisdate_data_binding = self.skin_dict.get('Extras', {}).get('thisdate', {}).get('data_binding', skin_data_binding)
-        for observation in  self.skin_dict['Extras']['thisdate']['observations'].sections:
-            data_binding = thisdate_observations[observation].get('data_binding', thisdate_data_binding)
-            if observation not in self.wind_observations:
-                unit = thisdate_observations[observation].get('unit', 'default')
-                if observation not in observations:
-                    observations[observation] = {}
-                    observations[observation]['aggregate_types'] = {}
+        if 'thisdate' in self.skin_dict['Extras']:
+            thisdate_observations = self.skin_dict.get('Extras', {}).get('thisdate', {}).get('observations', {})
+            thisdate_data_binding = self.skin_dict.get('Extras', {}).get('thisdate', {}).get('data_binding', skin_data_binding)
+            for observation in  self.skin_dict['Extras']['thisdate']['observations'].sections:
+                data_binding = thisdate_observations[observation].get('data_binding', thisdate_data_binding)
+                if observation not in self.wind_observations:
+                    unit = thisdate_observations[observation].get('unit', 'default')
+                    if observation not in observations:
+                        observations[observation] = {}
+                        observations[observation]['aggregate_types'] = {}
 
-                if 'min' not in observations[observation]['aggregate_types']:
-                    observations[observation]['aggregate_types']['min'] = {}
-                if data_binding not in observations[observation]['aggregate_types']['min']:
-                    observations[observation]['aggregate_types']['min'][data_binding] = {}
-                observations[observation]['aggregate_types']['min'][data_binding][unit] = {}
-                aggregate_types['min'] = {}
-                if 'max' not in observations[observation]['aggregate_types']:
-                    observations[observation]['aggregate_types']['max'] = {}
-                if data_binding not in observations[observation]['aggregate_types']['max']:
-                    observations[observation]['aggregate_types']['max'][data_binding] = {}
-                observations[observation]['aggregate_types']['max'][data_binding][unit] = {}
-                aggregate_types['max'] = {}
+                    if 'min' not in observations[observation]['aggregate_types']:
+                        observations[observation]['aggregate_types']['min'] = {}
+                    if data_binding not in observations[observation]['aggregate_types']['min']:
+                        observations[observation]['aggregate_types']['min'][data_binding] = {}
+                    observations[observation]['aggregate_types']['min'][data_binding][unit] = {}
+                    aggregate_types['min'] = {}
+                    if 'max' not in observations[observation]['aggregate_types']:
+                        observations[observation]['aggregate_types']['max'] = {}
+                    if data_binding not in observations[observation]['aggregate_types']['max']:
+                        observations[observation]['aggregate_types']['max'][data_binding] = {}
+                    observations[observation]['aggregate_types']['max'][data_binding][unit] = {}
+                    aggregate_types['max'] = {}
 
         return observations, aggregate_types
 
