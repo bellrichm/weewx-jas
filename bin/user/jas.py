@@ -293,6 +293,7 @@ class JAS(SearchList):
         if language not in self.skin_dicts:
             if language in self.languages:
                 self._get_skin_dict(language)
+                self.skin_dicts[language]['Labels']['Generic'].merge(self.skin_dict['Labels']['Generic'])
 
         return self.skin_dicts[language]['Labels']['Generic']
 
