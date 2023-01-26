@@ -12,8 +12,8 @@ jasOptions.reload = $getVar('$Extras.pages.' + $page + '.reload', 'false').lower
 jasOptions.zoomcontrol = $getVar('$Extras.pages.' + $page + '.zoomControl', 'false').lower();
 
 jasOptions.currentHeader = null;
-#if $getVar('$Extras.current.observation', 'False')
-    jasOptions.currentHeader = "$getVar('$Extras.current.observation')";
+#if $getVar('$Extras.current.observation', False)
+    jasOptions.currentHeader = "$getVar('Extras.current.observation')";
 #end if
 
 #if 'current' in $getVar('$Extras.pages.' + $page)
