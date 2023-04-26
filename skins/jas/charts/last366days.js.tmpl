@@ -3,9 +3,5 @@
 
 #from weeutil.weeutil import to_bool
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
-    #set interval_name = 'last366days'
-    #set page_name = 'last366days'
-    #set page_definition_name = 'last366days'
-    
-    $genCharts($filename, $page_definition_name, $interval_name, $page_name)
+    $genCharts($filename, 'last366days', 'last366days', 'last366days')
 #end if   

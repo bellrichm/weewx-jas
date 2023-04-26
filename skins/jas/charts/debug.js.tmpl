@@ -3,9 +3,8 @@
 
 #from weeutil.weeutil import to_bool
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
-    #set interval_name = $getVar("$Extras.pages.debug.simulate_interval", 'day')
-    #set page_name = 'debug'
-    #set page_definition_name = 'debug'
-    
-    $genCharts($filename, $page_definition_name, $interval_name, $page_name)
-#end if    
+    $genCharts($filename, 
+               'debug', 
+               $getVar("$Extras.pages.debug.simulate_interval", 'day'),
+               'debug')
+#end if

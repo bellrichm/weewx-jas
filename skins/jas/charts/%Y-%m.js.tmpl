@@ -4,9 +4,8 @@
 #from weeutil.weeutil import to_bool
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
     #set $data_binding = $getVar('Extras.pages.' + $page + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
-    #set interval_name = 'month' + $year($data_binding=$data_binding).start.format('%Y') + $month($data_binding=$data_binding).start.format('%m')
-    #set page_name = $year($data_binding=$data_binding).start.format('%Y') + '-' + $month($data_binding=$data_binding).start.format('%m')
-    #set page_definition_name = 'archive-month'
-    
-    $genCharts($filename, $page_definition_name, $interval_name, $page_name)
+    $genCharts($filename,
+               'archive-month',
+               'month' + $year($data_binding=$data_binding).start.format('%Y') + $month($data_binding=$data_binding).start.format('%m'),
+               $year($data_binding=$data_binding).start.format('%Y') + '-' + $month($data_binding=$data_binding).start.format('%m'))
 #end if
