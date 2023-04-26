@@ -1,23 +1,3 @@
-##    Copyright (c) 2022 Rich Bell <bellrichm@gmail.com>
+##    Copyright (c) 2022-2023 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
-
-#import time
-#from weeutil.weeutil import to_bool
-#set $start_time = time.time()
-
-#def evaluate(data)
-    #include source=$data
-    #if $getVar('Extras.debug_includes', False)
-    /* $data */
-    ##$logdbg($data)
-    #end if
-#end def
-
-#set charts = $genCharts($page_definition_name_global, $interval_name_global, $page_name_global)
-$evaluate($charts)
-
-#set elapsed_time = time.time() - $start_time
-#set log_msg = "Generated " + $HTML_ROOT + "/" + $filename + " in " + str($elapsed_time)
-#if to_bool($getVar("$Extras.log_times", True))
-    $logdbg($log_msg)
-#end if
+$genCharts($filename, $page_definition_name_global, $interval_name_global, $page_name_global)

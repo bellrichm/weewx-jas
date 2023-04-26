@@ -1,4 +1,4 @@
-#    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
+#    Copyright (c) 2021-2023 Rich Bell <bellrichm@gmail.com>
 #    See the file LICENSE.txt for your rights.
 
 """
@@ -869,11 +869,11 @@ class JAS(SearchList):
                             # set the aggregate_interval at the beginning of the chart definition, so it can be used in the chart
                             # Note, this means the last observation's aggregate type will be used to determine the aggregate interval
                             if series_type == 'multiple':
-                                chart2 = "#set global aggregate_interval_global = 'multiyear'\n" + chart2
+                                chart2 = "aggregate_interval = 'multiyear'\n" + chart2
                             elif series_type == 'mqtt':
-                                chart2 = "#set global aggregate_interval_global = 'mqtt'\n" + chart2
+                                chart2 = "aggregate_interval = 'mqtt'\n" + chart2
                             else:
-                                chart2 = "#set global aggregate_interval_global = '" + aggregate_interval + "'\n" + chart2
+                                chart2 = "aggregate_interval = '" + aggregate_interval + "'\n" + chart2
 
                             chart2 += indent + " {\n"
                             chart2 = self._iterdict(indent + '  ', page, chart, chart2, series_type, interval, value[obs], chart_data_binding)
@@ -889,12 +889,14 @@ class JAS(SearchList):
                 chart2 += indent + key + ": " + value + ",\n"
         return chart2
 
-    def _gen_charts(self, page, interval, page_name):
+    def _gen_charts(self, filename, page, interval, page_name):
+        start_time = time.time()
         skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
         page_series_type = self.skin_dict['Extras']['page_definition'][page].get('series_type', 'single')
 
         #chart_final = 'var pageCharts = [];\n'
-        chart_final = '## charts\n'
+        chart_final = 'utc_offset = ' + str(self.utc_offset) + ';\n'
+        chart_final += "ordinateNames = ['" + "', '".join(self.ordinate_names) + "'];\n"
         chart2 = ""
         charts = self.skin_dict['Extras']['chart_definitions']
         for chart in self.skin_dict['Extras']['pages'][page]:
@@ -938,17 +940,19 @@ class JAS(SearchList):
                         y_axis_default = copy.deepcopy(default_grid_properties['yAxis'])
                         if i_str in chart_def['weewx']['yAxis']:
                             y_axis_default.merge(chart_def['weewx']['yAxis'][str(i)])
+                            chart2 += '    {\n'
 
-                            unit_name = chart_def['weewx']['yAxis'][i_str]['weewx'].get('unit', None)
-                            if unit_name is not None:
-                                y_axis_label = self._get_unit_label(unit_name)
-                            else:
-                                y_axis_label = self._get_obs_unit_label( chart_def['weewx']['yAxis'][i_str]['weewx']['obs'])
+                            if 'name' in y_axis_default and y_axis_default['name'] == 'weewx_unit_label':
+                                unit_name = chart_def['weewx']['yAxis'][i_str]['weewx'].get('unit', None)
+                                if unit_name is not None:
+                                    y_axis_label = self._get_unit_label(unit_name)
+                                else:
+                                    y_axis_label = self._get_obs_unit_label( chart_def['weewx']['yAxis'][i_str]['weewx']['obs'])
 
-                            chart2 += "#set yAxisLabel = '" + y_axis_label + "'\n"
+                                chart2 += "      name:' " + y_axis_label + "',\n"
+                                del y_axis_default['name']
 
-                        chart2 += '  #set index = ' + i_str + '\n'
-                        chart2 += '    {\n'
+                        #chart2 += '  #set index = ' + i_str + '\n'
                         chart2 += self._iterdict('      ',
                                                  page, chart,
                                                  '',
@@ -1036,6 +1040,10 @@ class JAS(SearchList):
 
         chart_final += chart2
 
+        elapsed_time = time.time() - start_time
+        log_msg = "Generated " + self.html_root + "/" + filename + " in " + str(elapsed_time)
+        if to_bool(self.skin_dict['Extras'].get('log_times', True)):
+            logdbg(log_msg)
         return chart_final
 
     @staticmethod
