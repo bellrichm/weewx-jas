@@ -250,6 +250,7 @@ class JAS(SearchList):
     def get_extension_list(self, timespan, db_lookup):
         # save these for use when the template variable/function is evaluated
         #self.db_lookup = db_lookup
+        self.timespan = timespan
 
         search_list_extension = {'aggregate_types': self.aggregate_types,
                                  'current_observation': self.data_current,
@@ -257,6 +258,7 @@ class JAS(SearchList):
                                  'data_binding': self.data_binding,
                                  'forecasts': self.data_forecast,
                                  'genCharts': self._gen_charts,
+                                 'genData': self._gen_data,
                                  'getObsUnitLabel': self._get_obs_unit_label,
                                  'getRange': self._get_range,
                                  'getUnitLabel': self._get_unit_label,
@@ -277,6 +279,7 @@ class JAS(SearchList):
                                  'version': VERSION,
                                  'weewx_version': weewx.__version__,
                                  'windCompass': self._get_wind_compass,
+                                 '_get_series': self._get_series, # todo, temporary- remove
                                 }
 
         return [search_list_extension]
@@ -974,8 +977,8 @@ class JAS(SearchList):
                     chart2 += 'pageChart.option = null;\n'
                     chart2 += 'pageChart.series = [];\n'
                     for obs in chart_def['series']:
-                        chart2 += 'seriesData = {};\n'  
-                        chart2 += 'seriesData.obs = "' + obs + '";\n'                         
+                        chart2 += 'seriesData = {};\n'
+                        chart2 += 'seriesData.obs = "' + obs + '";\n'
                         name = chart_def['series'][obs].get('name', None)
                         if name is not None:
                             chart2 += 'seriesData.name = "' + name + '";\n'
@@ -1045,6 +1048,81 @@ class JAS(SearchList):
         if to_bool(self.skin_dict['Extras'].get('log_times', True)):
             logdbg(log_msg)
         return chart_final
+
+
+    def _gen_data(self, filename, observation, data_binding, time_period, aggregate_type, aggregate_interval, time_series, time_unit, unit_name, rounding, jsonize):
+        start_time = time.time()
+
+        data = self._get_series(observation, data_binding, time_period, aggregate_type, aggregate_interval, time_series, time_unit, unit_name, rounding, jsonize)
+
+        elapsed_time = time.time() - start_time
+        log_msg = "Generated " + self.html_root + "/" + filename + " in " + str(elapsed_time)
+        if to_bool(self.skin_dict['Extras'].get('log_times', True)):
+            logdbg(log_msg)
+        return data
+
+    def _get_series(self, observation, data_binding, time_period, aggregate_type=None, aggregate_interval=None, time_series='both', time_unit='unix_epoch', unit_name = None, rounding=2, jsonize=True):
+        data_timespan = self._get_timespan(time_period, self.timespan.stop)
+        obs_binder = weewx.tags.ObservationBinder(
+            observation,
+            self._get_timespan(time_period, self.timespan.stop),
+            self.generator.db_binder.bind_default(data_binding),
+            data_binding,
+            time_period,
+            self.generator.formatter,
+            self.generator.converter,
+        )
+
+        data_series_helper = obs_binder.series(aggregate_type=aggregate_type, aggregate_interval=aggregate_interval, time_series=time_series, time_unit=time_unit)
+        if unit_name != 'default':
+            data2 = getattr(data_series_helper, unit_name)
+        else:
+            data2 = data_series_helper
+
+        data3 = data2.round(rounding)
+        if jsonize:
+            return data3.json()
+
+        return data3
+
+    def _get_timespan(self, time_period, time_stamp):
+
+        if time_period == 'day':
+            return weeutil.weeutil.archiveDaySpan(time_stamp)
+
+        if time_period == 'week':
+            #week_start = to_int(self.option_dict.get('week_start', 6))
+            week_start = 6
+            return weeutil.weeutil.archiveWeekSpan(time_stamp, startOfWeek=week_start, weeks_ago=0)
+
+        if time_period == 'month':
+            return weeutil.weeutil.archiveMonthSpan(time_stamp)
+
+        if time_period == 'year':
+            return weeutil.weeutil.archiveYearSpan(time_stamp)
+
+        if time_period == 'yesterday':
+            return weeutil.weeutil.archiveDaySpan(time_stamp, days_ago=1)
+
+        if time_period == 'last24hours':
+            return TimeSpan(time_stamp - 86400, time_stamp)
+
+        if time_period == 'last7days':
+            start_date = datetime.date.fromtimestamp(time_stamp) - datetime.timedelta(days=7)
+            start_timestamp = time.mktime(start_date.timetuple())
+            return TimeSpan(start_timestamp, time_stamp)
+
+        if time_period == 'last366days':
+            start_date = datetime.date.fromtimestamp(time_stamp) - datetime.timedelta(days=366)
+            start_timestamp = time.mktime(start_date.timetuple())
+            return TimeSpan(start_timestamp, time_stamp)
+
+        if time_period == 'last31days':
+            start_date = datetime.date.fromtimestamp(time_stamp) - datetime.timedelta(days=31)
+            start_timestamp = time.mktime(start_date.timetuple())
+            return TimeSpan(start_timestamp, time_stamp)
+
+        raise AttributeError(time_period)
 
     @staticmethod
     def mkdir_p(path):

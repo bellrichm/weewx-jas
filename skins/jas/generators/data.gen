@@ -65,6 +65,7 @@
                 #set data_name = $name_prefix2 + "_data"
 
                 #if $aggregate_interval is not None
+                $array_name = $_get_series($observation, $data_binding, $interval_name_global, $aggregate_type, $aggregate_interval, 'start', 'unix_epoch_ms', $unit_name, 2, True);
                     #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='" + $data_binding + "')." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms')" + $unit_conv + ".round(2).json"
                 #else
                     ## wind 'observation' is special see #87
@@ -77,11 +78,9 @@
                     #else
                         #set weewx_observation = $observation
                     #end if
+                $array_name = $_get_series($weewx_observation, $data_binding, $interval_name_global, None, None, 'start', 'unix_epoch_ms', $unit_name, 2, True);
                     #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='" + $data_binding + "')." + $weewx_observation + ".series(time_series='start', time_unit='unix_epoch_ms')" + $unit_conv + ".round(2).json"
                 #end if
-                $skinDebug($obs)
-                #set line = $obs + ";\n"
-                $evaluate($line)
 
                 ## Cache the dateTimes into its own list variable
                 #echo $dateTime_name + " = [].concat(" + $array_name + ".map(arr => arr[0]));\n"
