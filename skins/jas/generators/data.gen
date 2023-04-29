@@ -198,8 +198,7 @@ This data is stored in a javascript object named 'current'.
         current.header = {};
         current.header.name = "$getVar('Extras.current.observation')";
         #set $data_binding = $getVar("$Extras.current.header_data_binding", $current_data_binding)
-        current.header.value = $_get_current($getVar('Extras.current.observation'), $data_binding);
-        ##current.header.value = $getattr($current(data_binding=$data_binding), $getVar('Extras.current.observation')).format(add_label=False, localize=False);
+        current.header.value = $_get_current($getVar('Extras.current.observation'), $data_binding, 'default', False);
         #set header_max_decimals = $getVar('$Extras.current.header_max_decimals', False)
         #if $header_max_decimals
             current.header.value = current.header.value.toFixed($header_max_decimals);
@@ -216,30 +215,29 @@ This data is stored in a javascript object named 'current'.
             #set $data_binding = $getVar("$Extras.current.observations." + $observation + ".data_binding", $current_data_binding)
             #set type = $getVar("$Extras.current.observations" + "." + $observation + ".type", "")
             #set suffix = $getVar("$Extras.current.observations" + "." + $observation + ".suffix", "")
-            #set unit_name = $getVar("$Extras.current.observations" + "." + $observation + ".unit", False)
-            #if $unit_name
+            #set unit_name = $getVar("$Extras.current.observations" + "." + $observation + ".unit", "default")
+            #if $unit_name != "default"
                 #set unit_conv = "." + $unit_name
                 #set observation_unit = $getUnitLabel($unit_name)
             #else
                 #set unit_conv = ""
-                #set observation_unit = '$unit.label.' + $observation
+                #set observation_unit = $getattr($unit.label, $observation)
             #end if
             
             #if $type == 'rise'    
-                #set observation_value = '"$' + 'almanac.' + $observation + 'rise"'
+                #set observation_value = '"' + str($getattr($almanac, $observation + 'rise')) + '";'
                 #set observation_unit = " "
                 #set label = 'foo'
             #else if $type == 'sum'
-                #set observation_value = '$' + $interval_current + '($data_binding="' + $data_binding + '").' + $observation + $unit_conv + "." + $type + '.format(add_label=False, localize=False)'               
+                #set observation_value = $_get_aggregate($observation, $data_binding, $interval_current, $type, $unit_name, False);
             #else
-                #set observation_value = '$current($data_binding="' + $data_binding + '").' + $observation + $unit_conv + '.format(add_label=False, localize=False)'
+                #set observation_value = $_get_current($observation, $data_binding, $unit_name, False);
             #end if
 
         var observation = {};
         observation.name = "$observation";
         observation.mqtt = $getVar('$Extras.current.observations.' + $observation + '.mqtt', 'true').lower();
-        #set source = $observation_value + ';'
-        observation.value = $evaluate($source)
+        observation.value = $observation_value
         #set max_decimals = $getVar('$Extras.current.observations.' + $observation + '.max_decimals', False)
         #if max_decimals
             observation.value = observation.value.toFixed($max_decimals);
@@ -248,7 +246,7 @@ This data is stored in a javascript object named 'current'.
             observation.value = Number(observation.value).toLocaleString(lang);
         }
         #set source = '"' + $observation_unit + '";'
-        observation.unit = $evaluate($source)
+        observation.unit = $source
         observation.maxDecimals = $getVar('$Extras.current.observations.' + $observation + '.max_decimals', 'null');
         #if $suffix
             observation.suffix = "$observation" + "_suffix";

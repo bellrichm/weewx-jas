@@ -1063,7 +1063,7 @@ class JAS(SearchList):
             logdbg(log_msg)
         return data
 
-    def _get_current(self, observation, data_binding, add_label=False, localize=False):
+    def _get_current(self, observation, data_binding, unit_name=None, rounding=2, add_label=False, localize=False):
         self.current_obj = weewx.tags.CurrentObj(
                     self.generator.db_binder.bind_default(data_binding),
                     data_binding,
@@ -1075,7 +1075,15 @@ class JAS(SearchList):
                 )
         current_value = getattr(self.current_obj, observation)
 
-        return current_value.format(add_label=add_label, localize=localize)
+        if unit_name != 'default':
+            data = getattr(current_value, unit_name)
+        else:
+            data = current_value
+
+        if rounding:
+            return data.round(rounding).format(add_label=add_label, localize=localize)
+
+        return data.format(add_label=add_label, localize=localize)
 
     def _get_aggregate(self, observation, data_binding, time_period, aggregate_type, unit_name = None, rounding=2, add_label=False, localize=False):
         obs_binder = weewx.tags.ObservationBinder(
