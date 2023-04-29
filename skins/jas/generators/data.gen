@@ -198,8 +198,8 @@ This data is stored in a javascript object named 'current'.
         current.header = {};
         current.header.name = "$getVar('Extras.current.observation')";
         #set $data_binding = $getVar("$Extras.current.header_data_binding", $current_data_binding)
-        #set line = '$current($data_binding="' + $data_binding + '").' + $getVar('Extras.current.observation') + '.format(add_label=False, localize=False)' + ';'
-        current.header.value = $evaluate($line)
+        current.header.value = $_get_current($getVar('Extras.current.observation'), $data_binding);
+        ##current.header.value = $getattr($current(data_binding=$data_binding), $getVar('Extras.current.observation')).format(add_label=False, localize=False);
         #set header_max_decimals = $getVar('$Extras.current.header_max_decimals', False)
         #if $header_max_decimals
             current.header.value = current.header.value.toFixed($header_max_decimals);
@@ -207,8 +207,7 @@ This data is stored in a javascript object named 'current'.
         if (!isNaN(current.header.value)) {
             current.header.value = Number(current.header.value).toLocaleString(lang);
         }
-        #set line = '$unit.label.' + $getVar('Extras.current.observation') +  '";'
-        current.header.unit = "$evaluate($line)
+        current.header.unit = "$getattr($getattr($unit, 'label'),  $getVar('Extras.current.observation'))"
     #end if
     current.observations = new Map();
     current.suffixes = new Map();

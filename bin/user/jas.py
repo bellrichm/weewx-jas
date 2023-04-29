@@ -245,7 +245,7 @@ class JAS(SearchList):
 
         self.data_current = None
         if to_bool(self.skin_dict['Extras'].get('display_aeris_observation', False)):
-            self.data_current = self._get_current()
+            self.data_current = self._get_current_obs()
 
     def get_extension_list(self, timespan, db_lookup):
         # save these for use when the template variable/function is evaluated
@@ -280,6 +280,7 @@ class JAS(SearchList):
                                  'weewx_version': weewx.__version__,
                                  'windCompass': self._get_wind_compass,
                                  '_get_series': self._get_series, # todo, temporary- remove
+                                 '_get_current': self._get_current, # todo, temporary- remove
                                 }
 
         return [search_list_extension]
@@ -637,7 +638,7 @@ class JAS(SearchList):
                 json.dump(forecast_data, forecast_fp, indent=2)
         return forecast_data
 
-    def _get_current(self):
+    def _get_current_obs(self):
         now = time.time()
         current_hour = int(now - now % 3600)
         if not os.path.isfile(self.current_filename):
@@ -1061,8 +1062,21 @@ class JAS(SearchList):
             logdbg(log_msg)
         return data
 
+    def _get_current(self, observation, data_binding, add_label=False, localize=False):
+        self.current_obj = weewx.tags.CurrentObj(
+                    self.generator.db_binder.bind_default(data_binding),
+                    data_binding,
+                    self.timespan.stop,
+                    self.generator.formatter,
+                    self.generator.converter,
+                    None,
+                    self.generator.record
+                )
+        current_value = getattr(self.current_obj, observation)
+
+        return current_value.format(add_label=add_label, localize=localize)
+
     def _get_series(self, observation, data_binding, time_period, aggregate_type=None, aggregate_interval=None, time_series='both', time_unit='unix_epoch', unit_name = None, rounding=2, jsonize=True):
-        data_timespan = self._get_timespan(time_period, self.timespan.stop)
         obs_binder = weewx.tags.ObservationBinder(
             observation,
             self._get_timespan(time_period, self.timespan.stop),
