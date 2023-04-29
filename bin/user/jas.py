@@ -280,6 +280,7 @@ class JAS(SearchList):
                                  'weewx_version': weewx.__version__,
                                  'windCompass': self._get_wind_compass,
                                  '_get_series': self._get_series, # todo, temporary- remove
+                                 '_get_aggregate': self._get_aggregate, # todo, temporary- remove
                                  '_get_current': self._get_current, # todo, temporary- remove
                                 }
 
@@ -1075,6 +1076,29 @@ class JAS(SearchList):
         current_value = getattr(self.current_obj, observation)
 
         return current_value.format(add_label=add_label, localize=localize)
+
+    def _get_aggregate(self, observation, data_binding, time_period, aggregate_type, unit_name = None, rounding=2, add_label=False, localize=False):
+        obs_binder = weewx.tags.ObservationBinder(
+            observation,
+            self._get_timespan(time_period, self.timespan.stop),
+            self.generator.db_binder.bind_default(data_binding),
+            data_binding,
+            time_period,
+            self.generator.formatter,
+            self.generator.converter,
+        )
+
+        data_aggregate_binder = getattr(obs_binder, aggregate_type)
+
+        if unit_name != 'default':
+            data = getattr(data_aggregate_binder, unit_name)
+        else:
+            data = data_aggregate_binder
+
+        if rounding:
+            return data.round(rounding).format(add_label=add_label, localize=localize)
+
+        return data.format(add_label=add_label, localize=localize)
 
     def _get_series(self, observation, data_binding, time_period, aggregate_type=None, aggregate_interval=None, time_series='both', time_unit='unix_epoch', unit_name = None, rounding=2, jsonize=True):
         obs_binder = weewx.tags.ObservationBinder(
