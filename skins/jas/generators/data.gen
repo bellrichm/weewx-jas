@@ -210,7 +210,6 @@ This data is stored in a javascript object named 'current'.
     #for observation in $Extras.current.observations
             #set $data_binding = $getVar("$Extras.current.observations." + $observation + ".data_binding", $current_data_binding)
             #set type = $getVar("$Extras.current.observations" + "." + $observation + ".type", "")
-            #set suffix = $getVar("$Extras.current.observations" + "." + $observation + ".suffix", "")
             #set unit_name = $getVar("$Extras.current.observations" + "." + $observation + ".unit", "default")
             #if $unit_name != "default"
                 #set unit_conv = "." + $unit_name
@@ -244,14 +243,6 @@ This data is stored in a javascript object named 'current'.
         #set source = '"' + $observation_unit + '";'
         observation.unit = $source
         observation.maxDecimals = $getVar('$Extras.current.observations.' + $observation + '.max_decimals', 'null');
-        #if $suffix
-            observation.suffix = "$observation" + "_suffix";
-            var suffix = {};
-            suffix.mqtt = $getVar('$Extras.current.observations.' + $observation + '.mqtt', 'true').lower();
-            #set source = '"' + $suffix + '";'
-            suffix.value = $evaluate($source)
-            current.suffixes.set(observation.suffix, suffix);
-        #end if
         current.observations.set("$observation", observation);
     #end for
 #end if
