@@ -6,13 +6,6 @@
 #from weeutil.weeutil import to_bool
 #set $start_time = time.time()
 ##$logdbg("Starting  " + $HTML_ROOT + "/" + $filename)
-#def evaluate(data)
-    #include source=$data
-    #if $getVar('Extras.debug_includes', False)
-    /* $data */
-    ##$logdbg($data)
-    #end if
-#end def
 
 #set $skin_data_binding = $getVar("$Extras.data_binding", $data_binding)
 ## Create time stamps by aggregation time for the end of interval
