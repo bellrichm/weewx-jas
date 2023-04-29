@@ -282,6 +282,7 @@ class JAS(SearchList):
                                  '_get_series': self._get_series, # todo, temporary- remove
                                  '_get_aggregate': self._get_aggregate, # todo, temporary- remove
                                  '_get_current': self._get_current, # todo, temporary- remove
+                                 '_get_TimeSpanBinder': self._get_TimeSpanBinder # todo, temporary- remove
                                 }
 
         return [search_list_extension]
@@ -1062,6 +1063,14 @@ class JAS(SearchList):
         if to_bool(self.skin_dict['Extras'].get('log_times', True)):
             logdbg(log_msg)
         return data
+
+    def _get_TimeSpanBinder(self, time_period, data_binding):
+        return TimespanBinder(self._get_timespan(time_period, self.timespan.stop),
+                                     self.generator.db_binder.bind_default(data_binding),
+                                     data_binding=data_binding,
+                                     context=time_period,
+                                     formatter=self.generator.formatter,
+                                     converter=self.generator.converter)
 
     def _get_current(self, observation, data_binding, unit_name=None, rounding=2, add_label=False, localize=False):
         self.current_obj = weewx.tags.CurrentObj(
