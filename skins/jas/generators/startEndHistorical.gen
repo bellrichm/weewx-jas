@@ -1,28 +1,20 @@
-##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
+##    Copyright (c) 2021-2023 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
 ## ToDo: document that skin data binding controls start/end of historical data
 ## ToDo: make start/end configurable
 
-#def evaluate(data)
-    #include source=$data
-    #if $getVar('Extras.debug_includes', False)
-    /* $data */
-    ##$logdbg($data)
-    #end if
-#end def
+#import datetime
+#import weeutil
 
 #set $data_binding = $getVar("$Extras.data_binding", $data_binding)
-#set source = "#import datetime\n"
-#set source += "#import weeutil\n"
-#set source += "#set startTimestamp = weeutil.weeutil.startOfDay($" + $interval_name_global + "($data_binding='" + $data_binding + "').usUnits.firsttime.raw)\n"
-#set source += "#set endTimestamp = weeutil.weeutil.startOfDay($" + $interval_name_global + "($data_binding='" + $data_binding + "').usUnits.lasttime.raw )\n"
-#set source += "#set startDate = datetime.datetime.fromtimestamp($startTimestamp).strftime('%Y-%m-%dT%H:%M:%S')\n"
-#set source += "#set endDate = datetime.datetime.fromtimestamp($endTimestamp).strftime('%Y-%m-%dT%H:%M:%S')\n"
+#set startTimestamp = $weeutil.weeutil.startOfDay($_get_TimeSpanBinder($interval_name_global, $data_binding).usUnits.firsttime.raw)
+#set endTimestamp = $weeutil.weeutil.startOfDay($_get_TimeSpanBinder($interval_name_global, $data_binding).usUnits.lasttime.raw)
+#set startDate = $datetime.datetime.fromtimestamp($startTimestamp).strftime('%Y-%m-%dT%H:%M:%S')
+#set endDate = $datetime.datetime.fromtimestamp($endTimestamp).strftime('%Y-%m-%dT%H:%M:%S')
 
-#set source += "var " + $interval_long_name_global + "startTimestamp = $startTimestamp * 1000;\n"
-#set source += "var  " + $interval_long_name_global + "startDate = moment('$startDate').utcOffset($utcOffset);\n"
-#set source += "var " + $interval_long_name_global + "endTimestamp = $endTimestamp * 1000;\n"
-#set source += "var " + $interval_long_name_global + "endDate = moment('$endDate').utcOffset($utcOffset);\n"
-
-$evaluate($source)
+#echo $startTimestamp #
+#echo "var " + $interval_long_name_global + "startTimestamp =  " + str($startTimestamp * 1000) + ";" #
+#echo "var " + $interval_long_name_global + "startDate = moment('" + $startDate + "').utcOffset(" + str($utcOffset) + ");" #
+#echo "var " + $interval_long_name_global + "endTimestamp =  " + str($endTimestamp * 1000) + ";" #
+#echo "var " + $interval_long_name_global + "endDate = moment('" + $endDate + "').utcOffset(" + str($utcOffset) + ");" #
