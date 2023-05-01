@@ -14,7 +14,7 @@
 #set global $page_data_binding = $getVar('Extras.pages.' + $page_definition_name_global + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
 
 #set $interval_start_seconds_global = $_get_TimeSpanBinder($interval_name_global, $page_data_binding).start.raw
-#set $interval_end_seconds_globa = $_get_TimeSpanBinder($interval_name_global, $page_data_binding).end.raw
+#set $interval_end_seconds_global = $_get_TimeSpanBinder($interval_name_global, $page_data_binding).end.raw
 
 #if $interval_type_global == 'active'
     #set $data_binding = $getVar('Extras.pages.' + $page_definition_name_global + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
