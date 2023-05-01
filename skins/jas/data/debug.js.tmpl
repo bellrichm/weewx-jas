@@ -8,6 +8,14 @@
 #set global page_definition_name_global = $getVar("$Extras.pages.debug.simulate_page", 'last24hours')
 #set global interval_long_name_global = $interval_name_global + "_" 
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
+    $genData($filename, 
+             $getVar("$Extras.pages.debug.simulate_interval", 'day'),
+             'active',
+             $getVar("$Extras.pages.debug.simulate_interval", 'day'),
+             $getVar("$Extras.pages.debug.simulate_page", 'last24hours'),
+             $interval_name_global + "_" 
+            )
+            
     #include 'generators/data.gen'
 #end if    
 #set global interval_global = None

@@ -1052,11 +1052,39 @@ class JAS(SearchList):
             logdbg(log_msg)
         return chart_final
 
-
-    def _gen_data(self, filename, observation, data_binding, time_period, aggregate_type, aggregate_interval, time_series, time_unit, unit_name, rounding, jsonize):
+    def _gen_data(self, filename, interval, interval_type, interval_name, page_definitiom_name, interval_long_name):
         start_time = time.time()
 
-        data = self._get_series(observation, data_binding, time_period, aggregate_type, aggregate_interval, time_series, time_unit, unit_name, rounding, jsonize)
+        skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
+        page_data_binding = self.skin_dict['Extras']['pages'][page_definitiom_name].get('data_binding', skin_data_binding)
+
+        skin_timespan_binder = self._get_TimeSpanBinder(interval_name, skin_data_binding)
+        page_timespan_binder = self._get_TimeSpanBinder(interval_name, page_data_binding)
+
+        data = ''
+        data += '// the start\n'
+
+        if interval_type == 'active':
+            data += "var " + interval_long_name + "startDate = moment('" + getattr(page_timespan_binder, 'start').format("%Y-%m-%dT%H:%M:%S") + "').utcOffset(" + str(self.utc_offset) + ");\n"
+            data += "var " + interval_long_name + "endDate = moment('" + getattr(page_timespan_binder, 'end').format("%Y-%m-%dT%H:%M:%S") + "').utcOffset(" + str(self.utc_offset) + ");\n"
+            data += "var " + interval_long_name + "startTimestamp = " + str(getattr(page_timespan_binder, 'start').raw * 1000) + ";\n"
+            data += "var " + interval_long_name + "endTimestamp = " + str(getattr(page_timespan_binder, 'end').raw * 1000) + ";\n"
+        else:
+            # ToDo: document that skin data binding controls start/end of historical data
+            # ToDo: make start/end configurable
+            start_timestamp = weeutil.weeutil.startOfDay(getattr(getattr(skin_timespan_binder, 'usUnits'), 'firsttime').raw)
+            end_timestamp = weeutil.weeutil.startOfDay(getattr(getattr(skin_timespan_binder, 'usUnits'), 'lasttime').raw)
+            start_date = datetime.datetime.fromtimestamp(start_timestamp).strftime('%Y-%m-%dT%H:%M:%S')
+            end_date = datetime.datetime.fromtimestamp(end_timestamp).strftime('%Y-%m-%dT%H:%M:%S')
+
+            data += "var " + interval_long_name + "startTimestamp =  " + str(start_timestamp * 1000) + ";\n"
+            data += "var " + interval_long_name + "startDate = moment('" + start_date + "').utcOffset(" + str(self.utc_offset) + ");\n"
+            data += "var " + interval_long_name + "endTimestamp =  " + str(end_timestamp * 1000) + ";\n"
+            data += "var " + interval_long_name + "endDate = moment('" + end_date + "').utcOffset(" + str(self.utc_offset) + ");\n"
+
+        #data = self._get_series(observation, data_binding, time_period, aggregate_type, aggregate_interval, time_series, time_unit, unit_name, rounding, jsonize)
+
+        data += '// the end\n'
 
         elapsed_time = time.time() - start_time
         log_msg = "Generated " + self.html_root + "/" + filename + " in " + str(elapsed_time)

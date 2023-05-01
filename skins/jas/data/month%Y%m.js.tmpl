@@ -9,6 +9,15 @@
 #set global interval_long_name_global = $interval_name_global + $year.start.format('%Y') + $month.start.format('%m') + "_" 
 
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
+    #set $data_binding = $getVar('Extras.pages.' + $page + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
+    $genData($filename, 
+             'month',
+             'historical',
+             'month',
+             'archive-month',
+             'month' + $year($data_binding=$data_binding).start.format('%Y') + $month.start.format('%m') + "_"
+            )
+
     #include 'generators/data.gen'
 #end if    
 #set global interval_global = None

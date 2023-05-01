@@ -7,7 +7,18 @@
 #set global interval_name_global = 'year'
 #set global page_definition_name_global = 'archive-year'
 #set global interval_long_name_global = $interval_name_global + $year.start.format('%Y') + "_"
+
+
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
+    #set $data_binding = $getVar('Extras.pages.' + $page + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
+    $genData($filename, 
+             'year',
+             'historical',
+             'year',
+             'archive-year',
+             'year' + $year($data_binding=$data_binding).start.format('%Y') + "_"
+            )
+
     #include 'generators/data.gen'
 #end if    
 #set global interval_global = None

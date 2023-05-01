@@ -16,27 +16,6 @@
 #set $interval_start_seconds_global = $_get_TimeSpanBinder($interval_name_global, $page_data_binding).start.raw
 #set $interval_end_seconds_global = $_get_TimeSpanBinder($interval_name_global, $page_data_binding).end.raw
 
-#if $interval_type_global == 'active'
-    #set $data_binding = $getVar('Extras.pages.' + $page_definition_name_global + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
-    #echo "var " + $interval_long_name_global + "startDate = moment('" +  str($_get_TimeSpanBinder($interval_name_global, $data_binding).start.format("%Y-%m-%dT%H:%M:%S")) + "').utcOffset(" + str($utcOffset) + ");" #
-    #echo "var " + $interval_long_name_global + "endDate = moment('" + str($_get_TimeSpanBinder($interval_name_global, $data_binding).end.format("%Y-%m-%dT%H:%M:%S")) + "').utcOffset(" + str($utcOffset) + ");" #
-    #echo "var " + $interval_long_name_global + "startTimestamp = " + str($_get_TimeSpanBinder($interval_name_global, $data_binding).start.raw * 1000) + ";" #
-    #echo "var " + $interval_long_name_global + "endTimestamp = " + str($_get_TimeSpanBinder($interval_name_global, $data_binding).end.raw * 1000) + ";" #
-#else
-    ## ToDo: document that skin data binding controls start/end of historical data
-    ## ToDo: make start/end configurable
-    #set startTimestamp = $weeutil.weeutil.startOfDay($_get_TimeSpanBinder($interval_name_global, $skin_data_binding).usUnits.firsttime.raw)
-    #set endTimestamp = $weeutil.weeutil.startOfDay($_get_TimeSpanBinder($interval_name_global, $skin_data_binding).usUnits.lasttime.raw)
-    #set startDate = $datetime.datetime.fromtimestamp($startTimestamp).strftime('%Y-%m-%dT%H:%M:%S')
-    #set endDate = $datetime.datetime.fromtimestamp($endTimestamp).strftime('%Y-%m-%dT%H:%M:%S')
-
-    #echo "var " + $interval_long_name_global + "startTimestamp =  " + str($startTimestamp * 1000) + ";" #
-    #echo "var " + $interval_long_name_global + "startDate = moment('" + $startDate + "').utcOffset(" + str($utcOffset) + ");" #
-    #echo "var " + $interval_long_name_global + "endTimestamp =  " + str($endTimestamp * 1000) + ";" #
-    #echo "var " + $interval_long_name_global + "endDate = moment('" + $endDate + "').utcOffset(" + str($utcOffset) + ");" #
-
-#end if
-
 ## Create time stamps by aggregation time for the end of interval
 ## For example: endTimestamp_min, endTimestamp_max
 #for $aggregate_type in $getVar('Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval')

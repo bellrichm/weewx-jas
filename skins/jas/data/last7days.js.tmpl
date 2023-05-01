@@ -8,6 +8,13 @@
 #set global page_definition_name_global = 'last7days'
 #set global interval_long_name_global = $interval_name_global + "_" 
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
+    $genData($filename, 
+             'last7days',
+             'active',
+             'last7days',
+             'last7days',
+             $interval_name_global + "_" 
+            )
     #include 'generators/data.gen'
 #end if    
 #set global interval_global = None
