@@ -7,9 +7,6 @@
 #set global interval_name_global = 'yesterday'
 #set global page_definition_name_global = 'yesterday'
 #set global interval_long_name_global = $interval_name_global + "_" 
-#set $data_binding = $getVar('Extras.pages.' + $page_definition_name_global + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
-#set global interval_start_seconds_global = $yesterday($data_binding=$data_binding).start.raw
-#set global interval_end_seconds_global = $yesterday($data_binding=$data_binding).end.raw
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
     #include 'generators/data.gen'
 #end if    
