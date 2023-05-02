@@ -1052,11 +1052,28 @@ class JAS(SearchList):
             logdbg(log_msg)
         return chart_final
 
-    def _gen_data(self, filename, interval, interval_type, interval_name, page_definitiom_name, interval_long_name):
+    # Create time stamps by aggregation time for the end of interval
+    # For example: endTimestamp_min, endTimestamp_max
+    def _gen_interval_end_timestamp(self, page_data_binding, interval_name, page_definition_name, interval_long_name):
+        data = ''
+        for aggregate_type in self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval']:
+            aggregate_interval = self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval'][aggregate_type]
+            if aggregate_interval == 'day':
+                endTimestamp =(self._get_TimeSpanBinder(interval_name, page_data_binding).end.raw // 86400 * 86400 - (self.utc_offset * 60)) * 1000        
+            elif aggregate_interval == 'hour':
+                endTimestamp =(self._get_TimeSpanBinder(interval_name, page_data_binding).end.raw // 3600 * 3600 - (self.utc_offset * 60)) * 1000        
+            else:
+                endTimestamp =(self._get_TimeSpanBinder(interval_name, page_data_binding).end.raw // 60 * 60 - (self.utc_offset * 60)) * 1000
+        
+            data +=  "var " + interval_long_name + "endTimestamp_" + aggregate_type + " = " + str(endTimestamp) + ";\n"
+
+        return data
+
+    def _gen_data(self, filename, interval, interval_type, interval_name, page_definition_name, interval_long_name):
         start_time = time.time()
 
         skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
-        page_data_binding = self.skin_dict['Extras']['pages'][page_definitiom_name].get('data_binding', skin_data_binding)
+        page_data_binding = self.skin_dict['Extras']['pages'][page_definition_name].get('data_binding', skin_data_binding)
 
         skin_timespan_binder = self._get_TimeSpanBinder(interval_name, skin_data_binding)
         page_timespan_binder = self._get_TimeSpanBinder(interval_name, page_data_binding)
@@ -1082,6 +1099,15 @@ class JAS(SearchList):
             data += "var " + interval_long_name + "endTimestamp =  " + str(end_timestamp * 1000) + ";\n"
             data += "var " + interval_long_name + "endDate = moment('" + end_date + "').utcOffset(" + str(self.utc_offset) + ");\n"
 
+        data += "\n"
+        data += self._gen_interval_end_timestamp(page_data_binding, interval_name, page_definition_name, interval_long_name)
+        
+        data += "\n"
+        # Define the 'aggegate' objects to hold the data
+        # For example: last7days_min = {}, last7days_max = {}
+        for aggregate_type in self.aggregate_types:
+            data += interval_long_name + aggregate_type + "{};\n"
+        
         #data = self._get_series(observation, data_binding, time_period, aggregate_type, aggregate_interval, time_series, time_unit, unit_name, rounding, jsonize)
 
         data += '// the end\n'
