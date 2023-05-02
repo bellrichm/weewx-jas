@@ -178,6 +178,8 @@ class JAS(SearchList):
     def __init__(self, generator):
         SearchList.__init__(self, generator)
 
+        self.unit = weewx.units.UnitInfoHelper(generator.formatter, generator.converter)
+
         now = time.time()
         self.utc_offset = (datetime.datetime.fromtimestamp(now) -
                            datetime.datetime.utcfromtimestamp(now)).total_seconds()/60
@@ -1114,8 +1116,96 @@ class JAS(SearchList):
                         data += "\n"
 
         return data
+    
+    def _gen_this_date(self, skin_data_binding, interval_long_name):
+        data = ""
 
-    def _gen_data(self, filename, interval, interval_type, interval_name, page_definition_name, interval_long_name):
+        thisdate_data_binding = self.skin_dict['Extras']['thisdate'].get('data_binding', skin_data_binding)
+        for observation in self.skin_dict['Extras']['thisdate']['observations']:
+            data_binding = self.skin_dict['Extras']['thisdate']['observations'][observation].get('data_binding', thisdate_data_binding)
+            unit_name = self.skin_dict['Extras']['thisdate']['observations'][observation].get('unit', "default")
+            if unit_name == "default":
+                unit_suffix = ""
+                label = getattr(self.unit.label, observation)
+            else:
+                unit_suffix = "_" + unit_name
+                label = self._get_unit_label(unit_name)
+
+            aggregation_type = self.skin_dict['Extras']['thisdate']['observations'][observation].get('type', None)
+            max_decimals = self.skin_dict['Extras']['thisdate']['observations'][observation].get('max_decimals', False)
+
+            data += "thisDateObs = [];\n"
+            data += "maxDecimals = null;\n"
+            if max_decimals:
+                data += "maxDecimals = $max_decimals;\n"
+
+            if aggregation_type is None:
+                data += 'thisDateObsDetail = {};\n'
+                data += 'thisDateObsDetail.label = "' + label + '";\n'
+                data += 'thisDateObsDetail.maxDecimals = maxDecimals;\n'
+                value = interval_long_name + 'min.' + observation + "_" + data_binding + unit_suffix
+                id = observation + "_thisdate_min"
+                data += 'thisDateObsDetail.dataArray = ' + value + ';\n'
+                data += 'thisDateObsDetail.id = "' + id + '";\n'
+                data += 'thisDateObs.push(thisDateObsDetail);\n'
+                data += '\n'
+
+                data += 'thisDateObsDetail = {};\n'
+                data += 'thisDateObsDetail.label = "' + label + '";\n'
+                data += 'thisDateObsDetail.maxDecimals = maxDecimals;\n'
+                value = interval_long_name + 'max.' + observation + "_" + data_binding + unit_suffix
+                id = observation + "_thisdate_max"
+                data += 'thisDateObsDetail.dataArray = ' + value + ';\n'
+                data += 'thisDateObsDetail.id = "' + id + '";\n'
+                data += 'thisDateObs.push(thisDateObsDetail);\n'
+                data += '\n'        
+            else:
+                data += 'thisDateObsDetail = {};\n'
+                data += 'thisDateObsDetail.label = "' + label + '";\n'
+                data += 'thisDateObsDetail.maxDecimals = maxDecimals;\n'
+                value = interval_long_name + aggregation_type + '.' + observation + "_" + data_binding + unit_suffix
+                id = observation + "_thisdate_" + aggregation_type
+                data += 'thisDateObsDetail.dataArray = ' + value + ';\n'
+                data += 'thisDateObsDetail.id = "' + id + '";\n'
+                data += 'thisDateObs.push(thisDateObsDetail);\n'
+                data += '\n'
+
+            data += 'thisDateObsList.push(thisDateObs);\n'
+
+        return data
+
+    def _gen_min_max(self, skin_data_binding, interval_long_name):
+        data = ''
+
+        minmax_data_binding = self.skin_dict['Extras']['minmax'].get('data_binding', skin_data_binding)
+        for observation in self.skin_dict['Extras']['minmax']['observations']:
+            data_binding = self.skin_dict['Extras']['minmax']['observations'][observation].get('data_binding', minmax_data_binding)
+            unit_name = self.skin_dict['Extras']['minmax']['observations'][observation].get('unit', "default")
+
+            min_name_prefix = interval_long_name + "min_" + observation + "_" + data_binding
+            max_name_prefix = interval_long_name + "max_" + observation + "_" + data_binding
+            if unit_name != "default":
+                min_name_prefix += "_" + unit_name
+                max_name_prefix += "_" + unit_name
+                label = self._get_unit_label(unit_name)
+            else:
+                label = getattr(self.unit.label, observation);
+
+            data += 'minMaxObsData = {};\n'
+            data += 'minMaxObsData.minDateTimeArray = ' + min_name_prefix + '_dateTime;\n'
+            data += 'minMaxObsData.minDataArray = ' +  min_name_prefix + '_data;\n'
+            data += 'minMaxObsData.maxDateTimeArray = ' + max_name_prefix + '_dateTime;\n'
+            data += 'minMaxObsData.maxDataArray = ' +  max_name_prefix + '_data;\n'
+            data += 'minMaxObsData.label = "' + label + '";\n'
+            data += 'minMaxObsData.minId =  "' + observation + '_minmax_min";\n'
+            data += 'minMaxObsData.maxId = "' + observation + '_minmax_max";\n'
+            data += 'minMaxObsData.maxDecimals = ' + self.skin_dict['Extras']['minmax']['observations'][observation].get('max_decimals', "null") +';\n'
+            data += 'minMaxObs.push(minMaxObsData);\n'
+            data += '\n'
+
+        return data
+
+    def _gen_data(self, filename, page, interval, interval_type, interval_name, page_definition_name, interval_long_name):
         start_time = time.time()
 
         skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
@@ -1156,7 +1246,17 @@ class JAS(SearchList):
         # For example: last7days_min = {}, last7days_max = {}
         for aggregate_type in self.aggregate_types:
             data += interval_long_name + aggregate_type + "{};\n"
+
+        data += "\n"
+        data += "thisDateObsList = [];\n"
+        if 'thisdate' in self.skin_dict['Extras']['pages'][page]:
+            data += self._gen_this_date(skin_data_binding, interval_long_name)
         
+        data += "\n"
+        data += "minMaxObs = [];\n"
+        if 'minmax' in self.skin_dict['Extras']['pages'][page]:
+            data += self._gen_min_max(skin_data_binding, interval_long_name)        
+
         #data = self._get_series(observation, data_binding, time_period, aggregate_type, aggregate_interval, time_series, time_unit, unit_name, rounding, jsonize)
 
         data += '// the end\n'
