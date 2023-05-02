@@ -16,54 +16,6 @@
 #set $interval_start_seconds_global = $_get_TimeSpanBinder($interval_name_global, $page_data_binding).start.raw
 #set $interval_end_seconds_global = $_get_TimeSpanBinder($interval_name_global, $page_data_binding).end.raw
 
-## Populate the 'aggegate' objects
-## Example: last7days_min.outTemp = [[dateTime1, outTemp1], [dateTime2, outTemp2]]
-#for $observation in $observations
-    #for aggregate_type in $observations[$observation]['aggregate_types']
-        #set aggregate_interval = $getVar('Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval.' + $aggregate_type, None)
-        #set interval_name = $interval_long_name_global + $aggregate_type
-        #for data_binding in $observations[$observation]['aggregate_types'][$aggregate_type]:
-            #for unit_name in $observations[$observation]['aggregate_types'][$aggregate_type][$data_binding]:
-                #set name_prefix = $interval_name + "." + $observation + "_"  + $data_binding
-                #set name_prefix2 = $interval_name + "_" + $observation + "_"  + $data_binding
-                #if $unit_name == "default"
-                    #set unit_conv = ""
-                #else
-                    #set unit_conv = "." + $unit_name
-                    #set name_prefix += "_" + $unit_name
-                    #set name_prefix2 += "_" + $unit_name
-                #end if
-                #set array_name = $name_prefix
-                #set dateTime_name = $name_prefix2 + "_dateTime"
-                #set data_name = $name_prefix2 + "_data"
-
-                #if $aggregate_interval is not None
-                $array_name = $_get_series($observation, $data_binding, $interval_name_global, $aggregate_type, $aggregate_interval, 'start', 'unix_epoch_ms', $unit_name, 2, True);
-                    #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='" + $data_binding + "')." + $observation + ".series(time_series='start', aggregate_type='" + $aggregate_type + "', aggregate_interval='" + $aggregate_interval + "', time_unit='unix_epoch_ms')" + $unit_conv + ".round(2).json"
-                #else
-                    ## wind 'observation' is special see #87
-                    #if $observation == 'wind'
-                        #if $aggregate_type == 'max'
-                            #set weewx_observation = 'windGust'
-                        #else
-                            #set weewx_observation = 'windSpeed'
-                        #end if
-                    #else
-                        #set weewx_observation = $observation
-                    #end if
-                $array_name = $_get_series($weewx_observation, $data_binding, $interval_name_global, None, None, 'start', 'unix_epoch_ms', $unit_name, 2, True);
-                    #set obs = $array_name + " = $" + $interval_name_global + "($data_binding='" + $data_binding + "')." + $weewx_observation + ".series(time_series='start', time_unit='unix_epoch_ms')" + $unit_conv + ".round(2).json"
-                #end if
-
-                ## Cache the dateTimes into its own list variable
-                #echo $dateTime_name + " = [].concat(" + $array_name + ".map(arr => arr[0]));\n"
-                ## Cache the values into its own list variable
-                #echo $data_name + " = [].concat(" + $array_name + ".map(arr => arr[1]));\n"
-            #end for
-        #end for
-    #end for
-#end for
-
 thisDateObsList = [];
 #if 'thisdate' in $getVar('$Extras.pages.' + $page)
     #set $thisdate_data_binding = $getVar("$Extras.minmax.data_binding", $skin_data_binding)

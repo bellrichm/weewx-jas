@@ -1069,6 +1069,52 @@ class JAS(SearchList):
 
         return data
 
+    # Populate the 'aggegate' objects
+    # Example: last7days_min.outTemp = [[dateTime1, outTemp1], [dateTime2, outTemp2]]
+    def _gen_aggregate_objects(self, interval, page_definition_name, interval_long_name):
+        data = ""
+
+        for observation in self.observations:
+            for aggregate_type in self.observations[observation]['aggregate_types']:
+                aggregate_interval = self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval'].get(aggregate_type, None)
+                interval_name = interval_long_name + aggregate_type
+                for data_binding in self.observations[observation]['aggregate_types'][aggregate_type]:
+                    for unit_name in self.observations[observation]['aggregate_types'][aggregate_type][data_binding]:
+                        name_prefix = interval_name + "." + observation + "_"  + data_binding
+                        name_prefix2 = interval_name + "_" + observation + "_"  + data_binding
+                        if unit_name == "default":
+                            pass
+                        else:
+                            name_prefix += "_" + unit_name
+                            name_prefix2 += "_" + unit_name
+
+                        array_name = name_prefix
+                        dateTime_name = name_prefix2 + "_dateTime"
+                        data_name = name_prefix2 + "_data"
+
+                        if aggregate_interval is not None:
+                            data += array_name + " = " + self._get_series(observation, data_binding, interval, aggregate_type, aggregate_interval, 'start', 'unix_epoch_ms', unit_name, 2, True) + ";\n"
+                        else:
+                            # wind 'observation' is special see #87
+                            if observation == 'wind':
+                                if aggregate_type == 'max':
+                                    weewx_observation = 'windGust'
+                                else:
+                                    weewx_observation = 'windSpeed'
+                                #end if
+                            else:
+                                weewx_observation = observation
+                            #end if
+                            data += array_name + " = " + self._get_series(weewx_observation, data_binding, interval, None, None, 'start', 'unix_epoch_ms', unit_name, 2, True) + ";\n"
+                        
+                        # Cache the dateTimes into its own list variable
+                        data += dateTime_name + " = [].concat(" + array_name + ".map(arr => arr[0]));\n"
+                        # Cache the values into its own list variable
+                        data += data_name + " = [].concat(" + array_name + ".map(arr => arr[1]));\n"
+                        data += "\n"
+
+        return data
+
     def _gen_data(self, filename, interval, interval_type, interval_name, page_definition_name, interval_long_name):
         start_time = time.time()
 
@@ -1101,6 +1147,9 @@ class JAS(SearchList):
 
         data += "\n"
         data += self._gen_interval_end_timestamp(page_data_binding, interval_name, page_definition_name, interval_long_name)
+
+        data += "\n"
+        data += self._gen_aggregate_objects(interval, page_definition_name, interval_long_name)
         
         data += "\n"
         # Define the 'aggegate' objects to hold the data
