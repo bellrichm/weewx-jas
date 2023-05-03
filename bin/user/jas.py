@@ -1,5 +1,6 @@
 #    Copyright (c) 2021-2023 Rich Bell <bellrichm@gmail.com>
 #    See the file LICENSE.txt for your rights.
+ # pylint: disable=line-too-long
 
 """
 This search list extension provides the following tags:
@@ -1057,12 +1058,12 @@ class JAS(SearchList):
         for aggregate_type in self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval']:
             aggregate_interval = self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval'][aggregate_type]
             if aggregate_interval == 'day':
-                endTimestamp =(self._get_TimeSpanBinder(interval_name, page_data_binding).end.raw // 86400 * 86400 - (self.utc_offset * 60)) * 1000        
+                endTimestamp =(self._get_TimeSpanBinder(interval_name, page_data_binding).end.raw // 86400 * 86400 - (self.utc_offset * 60)) * 1000
             elif aggregate_interval == 'hour':
-                endTimestamp =(self._get_TimeSpanBinder(interval_name, page_data_binding).end.raw // 3600 * 3600 - (self.utc_offset * 60)) * 1000        
+                endTimestamp =(self._get_TimeSpanBinder(interval_name, page_data_binding).end.raw // 3600 * 3600 - (self.utc_offset * 60)) * 1000
             else:
                 endTimestamp =(self._get_TimeSpanBinder(interval_name, page_data_binding).end.raw // 60 * 60 - (self.utc_offset * 60)) * 1000
-        
+
             data +=  "var " + interval_long_name + "endTimestamp_" + aggregate_type + " = " + str(endTimestamp) + ";\n"
 
         return data
@@ -1104,7 +1105,7 @@ class JAS(SearchList):
                                 weewx_observation = observation
                             #end if
                             data += array_name + " = " + self._get_series(weewx_observation, data_binding, interval, None, None, 'start', 'unix_epoch_ms', unit_name, 2, True) + ";\n"
-                        
+
                         # Cache the dateTimes into its own list variable
                         data += dateTime_name + " = [].concat(" + array_name + ".map(arr => arr[0]));\n"
                         # Cache the values into its own list variable
@@ -1112,7 +1113,7 @@ class JAS(SearchList):
                         data += "\n"
 
         return data
-    
+
     def _gen_this_date(self, skin_data_binding, interval_long_name):
         data = ""
 
@@ -1154,7 +1155,7 @@ class JAS(SearchList):
                 data += 'thisDateObsDetail.dataArray = ' + value + ';\n'
                 data += 'thisDateObsDetail.id = "' + id + '";\n'
                 data += 'thisDateObs.push(thisDateObsDetail);\n'
-                data += '\n'        
+                data += '\n'
             else:
                 data += 'thisDateObsDetail = {};\n'
                 data += 'thisDateObsDetail.label = "' + label + '";\n'
@@ -1185,7 +1186,7 @@ class JAS(SearchList):
                 max_name_prefix += "_" + unit_name
                 label = self._get_unit_label(unit_name)
             else:
-                label = getattr(self.unit.label, observation);
+                label = getattr(self.unit.label, observation)
 
             data += 'minMaxObsData = {};\n'
             data += 'minMaxObsData.minDateTimeArray = ' + min_name_prefix + '_dateTime;\n'
@@ -1200,15 +1201,13 @@ class JAS(SearchList):
             data += '\n'
 
         return data
-    
-    '''
-    Create the data used to display current conditions.
-    This data is only used when MQTT is not enabled.
-    This data is stored in a javascript object named 'current'.
-    'current.header' is an object with the data for the header portion of this section.
-    'current.observations' is a map. The key is the observation name, like 'outTemp'. The value is the data to populate the section.
-    'current.suffixes is also a map'. Its key is observation_suffix, for example 'outTemp_suffix'.
-    '''
+
+    # Create the data used to display current conditions.
+    # This data is only used when MQTT is not enabled.
+    # This data is stored in a javascript object named 'current'.
+    # 'current.header' is an object with the data for the header portion of this section.
+    # 'current.observations' is a map. The key is the observation name, like 'outTemp'. The value is the data to populate the section.
+    # 'current.suffixes is also a map'. Its key is observation_suffix, for example 'outTemp_suffix'.
     def _gen_current(self, skin_data_binding, interval):
         data = ''
 
@@ -1221,7 +1220,7 @@ class JAS(SearchList):
         if self.skin_dict['Extras']['current'].get('observation', False):
             data += 'current.header = {};\n'
             data += 'current.header.name = "' + self.skin_dict['Extras']['current']['observation'] +'";\n'
-            
+
             data_binding = self.skin_dict['Extras']['current'].get('header_data_binding', current_data_binding)
             data += 'current.header.value = ' + self._get_current(self.skin_dict['Extras']['current']['observation'], data_binding, 'default').format(add_label=False,localize=False) + ';\n'
             header_max_decimals = self.skin_dict['Extras']['current'].get('header_max_decimals', False)
@@ -1232,7 +1231,7 @@ class JAS(SearchList):
             data += '    current.header.value = Number(current.header.value).toLocaleString(lang);\n'
             data += '}\n'
             data += 'current.header.unit = "' + getattr(self.unit.label, self.skin_dict['Extras']['current']['observation']) + '";\n'
-        
+
         data += 'current.observations = new Map();\n'
         data += 'current.suffixes = new Map();\n'
 
@@ -1245,7 +1244,7 @@ class JAS(SearchList):
                 observation_unit = self._get_unit_label(unit_name)
             else:
                 observation_unit = getattr(self.unit.label, observation)
-            
+
             if type == 'rise':
                  # todo this is a place holder and needs work
                 #set observation_value = '"' + str($getattr($almanac, $observation + 'rise')) + '";'
@@ -1286,11 +1285,10 @@ class JAS(SearchList):
             if chart in self.skin_dict['Extras']['pages'][page]:
                 chart_series_type = self.skin_dict['Extras']['pages'][page][chart].get('series_type', page_series_type)
                 if chart_series_type == 'mqtt':
-                        for observation in self.skin_dict['Extras']['chart_definitions'][chart]['series']:
-                            data += "mqttData2['" + observation + "'] = {};\n"
-                            data += "mqttData2['" + observation + "'] = [];\n"
-                            data+= "mqttData." + observation + "= [];\n"
-
+                    for observation in self.skin_dict['Extras']['chart_definitions'][chart]['series']:
+                        data += "mqttData2['" + observation + "'] = {};\n"
+                        data += "mqttData2['" + observation + "'] = [];\n"
+                        data+= "mqttData." + observation + "= [];\n"
 
         data += "fieldMap = new Map();\n"
         # ToDo: optimize - only do if page uses MQTT
@@ -1299,7 +1297,6 @@ class JAS(SearchList):
                 fieldname = self.skin_dict['Extras']['mqtt']['fields'][field]['name']
                 data += "fieldMap.set('" + fieldname + "', '" + field + "');\n"
         return data
-
 
     # Proof of concept - wind rose
     # Create data for wind rose chart
@@ -1319,14 +1316,14 @@ class JAS(SearchList):
 
         return data
 
-    def _gen_data(self, filename, page, interval, interval_type, interval_name, page_definition_name, interval_long_name):
+    def _gen_data(self, filename, page, interval, interval_type, page_definition_name, interval_long_name):
         start_time = time.time()
 
         skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
         page_data_binding = self.skin_dict['Extras']['pages'][page_definition_name].get('data_binding', skin_data_binding)
 
-        skin_timespan_binder = self._get_TimeSpanBinder(interval_name, skin_data_binding)
-        page_timespan_binder = self._get_TimeSpanBinder(interval_name, page_data_binding)
+        skin_timespan_binder = self._get_TimeSpanBinder(interval, skin_data_binding)
+        page_timespan_binder = self._get_TimeSpanBinder(interval, page_data_binding)
 
         data = ''
         data += '// the start\n'
@@ -1350,8 +1347,8 @@ class JAS(SearchList):
             data += "var " + interval_long_name + "endDate = moment('" + end_date + "').utcOffset(" + str(self.utc_offset) + ");\n"
 
         data += "\n"
-        data += self._gen_interval_end_timestamp(page_data_binding, interval_name, page_definition_name, interval_long_name)
-        
+        data += self._gen_interval_end_timestamp(page_data_binding, interval, page_definition_name, interval_long_name)
+
         data += "\n"
         # Define the 'aggegate' objects to hold the data
         # For example: last7days_min = {}, last7days_max = {}
@@ -1360,12 +1357,12 @@ class JAS(SearchList):
 
         data += "\n"
         data += self._gen_aggregate_objects(interval, page_definition_name, interval_long_name)
-        
+
         data += "\n"
         data += "thisDateObsList = [];\n"
         if 'thisdate' in self.skin_dict['Extras']['pages'][page]:
             data += self._gen_this_date(skin_data_binding, interval_long_name)
-        
+
         data += "\n"
         data += "minMaxObs = [];\n"
         if 'minmax' in self.skin_dict['Extras']['pages'][page]:
@@ -1380,7 +1377,7 @@ class JAS(SearchList):
 
         data += "\n"
         if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
-            data += self._gen_windrose(page_data_binding, interval_name, page_definition_name, interval_long_name)
+            data += self._gen_windrose(page_data_binding, interval, page_definition_name, interval_long_name)
 
         data += '// the end\n'
 
