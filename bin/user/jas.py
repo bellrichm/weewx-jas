@@ -1204,6 +1204,79 @@ class JAS(SearchList):
             data += '\n'
 
         return data
+    
+    '''
+    Create the data used to display current conditions.
+    This data is only used when MQTT is not enabled.
+    This data is stored in a javascript object named 'current'.
+    'current.header' is an object with the data for the header portion of this section.
+    'current.observations' is a map. The key is the observation name, like 'outTemp'. The value is the data to populate the section.
+    'current.suffixes is also a map'. Its key is observation_suffix, for example 'outTemp_suffix'.
+    '''
+    def _gen_current(self, skin_data_binding, interval):
+        data = ''
+
+        current_data_binding = self.skin_dict['Extras']['current'].get('data_binding', skin_data_binding)
+        interval_current = self.skin_dict['Extras']['current'].get('interval', interval)
+
+        data += 'var mqtt_enabled = false;\n'
+        data += 'var updateDate = ' + str(self._get_current('dateTime', data_binding=current_data_binding, unit_name='default').raw * 1000) +';\n'
+        data += 'var current = {};\n'
+        if self.skin_dict['Extras']['current'].get('observation', False):
+            data += 'current.header = {};\n'
+            data += 'current.header.name = "' + self.skin_dict['Extras']['current']['observation'] +'";\n'
+            
+            data_binding = self.skin_dict['Extras']['current'].get('header_data_binding', current_data_binding)
+            data += 'current.header.value = ' + self._get_current(self.skin_dict['Extras']['current']['observation'], data_binding, 'default').format(add_label=False,localize=False) + ';\n'
+            header_max_decimals = self.skin_dict['Extras']['current'].get('header_max_decimals', False)
+            if header_max_decimals:
+                data += 'current.header.value = current.header.value.toFixed(' + header_max_decimals + ');\n'
+
+            data += 'if (!isNaN(current.header.value)) {\n'
+            data += '    current.header.value = Number(current.header.value).toLocaleString(lang);\n'
+            data += '}\n'
+            data += 'current.header.unit = ' + getattr(self.unit.label, self.skin_dict['Extras']['current']['observation']) + ';\n'
+        
+        data += 'current.observations = new Map();\n'
+        data += 'current.suffixes = new Map();\n'
+
+        for observation in self.skin_dict['Extras']['current']['observations']:
+            data_binding = self.skin_dict['Extras']['current']['observations'][observation].get('data_binding', current_data_binding)
+            type =  self.skin_dict['Extras']['current']['observations'][observation].get('type', "")
+            unit_name = self.skin_dict['Extras']['current']['observations'][observation].get('unit', "default")
+
+            if unit_name != "default":
+                observation_unit = self._get_unit_label(unit_name)
+            else:
+                observation_unit = getattr(self.unit.label, observation)
+            
+            if type == 'rise':
+                 # todo this is a place holder and needs work
+                #set observation_value = '"' + str($getattr($almanac, $observation + 'rise')) + '";'
+                observation_value = 'bar'
+                observation_unit = " "
+                #label = 'foo'
+            elif type == 'sum':
+                observation_value = self._get_aggregate(observation, data_binding, interval_current, type, unit_name, False)
+            else:
+                observation_value = self._get_current(observation, data_binding, unit_name).format(add_label=False,localize=False)
+
+            data += 'var observation = {};\n'
+            data += 'observation.name = "' + observation + '";\n'
+            data += 'observation.mqtt = ' + self.skin_dict['Extras']['current']['observations'][observation].get('mqtt', 'true').lower() + ';\n'
+            data += 'observation.value = ' + observation_value +';\n'
+            max_decimals = self.skin_dict['Extras']['current']['observations'][observation].get('max_decimals', False)
+            if max_decimals:
+                data += 'observation.value = observation.value.toFixed(' + max_decimals + ');\n'
+            data += 'if (!isNaN(observation.value)) {\n'
+            data += '    observation.value = Number(observation.value).toLocaleString(lang);\n'
+            data += '}\n'
+            data += 'observation.unit = "' + observation_unit + '";\n'
+            data += 'observation.maxDecimals = ' + self.skin_dict['Extras']['current']['observations'][observation].get('max_decimals', 'null') +';\n'
+            data += 'current.observations.set("' + observation + '", observation);\n'
+            data += '\n'
+
+        return data
 
     def _gen_data(self, filename, page, interval, interval_type, interval_name, page_definition_name, interval_long_name):
         start_time = time.time()
@@ -1255,9 +1328,11 @@ class JAS(SearchList):
         data += "\n"
         data += "minMaxObs = [];\n"
         if 'minmax' in self.skin_dict['Extras']['pages'][page]:
-            data += self._gen_min_max(skin_data_binding, interval_long_name)        
+            data += self._gen_min_max(skin_data_binding, interval_long_name)
 
-        #data = self._get_series(observation, data_binding, time_period, aggregate_type, aggregate_interval, time_series, time_unit, unit_name, rounding, jsonize)
+        data += "\n"
+        if self.skin_dict['Extras']['pages'][page_definition_name].get('current', None) is not None:
+            data += self._gen_current(skin_data_binding, interval)
 
         data += '// the end\n'
 
@@ -1275,7 +1350,7 @@ class JAS(SearchList):
                                      formatter=self.generator.formatter,
                                      converter=self.generator.converter)
 
-    def _get_current(self, observation, data_binding, unit_name=None, rounding=2, add_label=False, localize=False):
+    def _get_current(self, observation, data_binding, unit_name=None):
         self.current_obj = weewx.tags.CurrentObj(
                     self.generator.db_binder.bind_default(data_binding),
                     data_binding,
@@ -1288,14 +1363,9 @@ class JAS(SearchList):
         current_value = getattr(self.current_obj, observation)
 
         if unit_name != 'default':
-            data = getattr(current_value, unit_name)
+            return getattr(current_value, unit_name)
         else:
-            data = current_value
-
-        if rounding:
-            return data.round(rounding).format(add_label=add_label, localize=localize)
-
-        return data.format(add_label=add_label, localize=localize)
+            return current_value
 
     def _get_aggregate(self, observation, data_binding, time_period, aggregate_type, unit_name = None, rounding=2, add_label=False, localize=False):
         obs_binder = weewx.tags.ObservationBinder(
