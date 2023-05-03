@@ -1278,6 +1278,33 @@ class JAS(SearchList):
 
         return data
 
+    def _gen_mqtt(self, page):
+        data = ''
+
+        ## Create an array of mqtt observations in charts
+        data += 'mqttData2 = {};\n'
+        data += 'mqttData = {};\n'
+
+        page_series_type = self.skin_dict['Extras']['page_definition'].get('series_type', 'single')
+        for chart in self.skin_dict['Extras']['chart_definitions']:
+            if chart in self.skin_dict['Extras']['pages'][page]:
+                chart_series_type = self.skin_dict['Extras']['pages'][page][chart].get('series_type', page_series_type)
+                if chart_series_type == 'mqtt':
+                        for observation in self.skin_dict['Extras']['chart_definitions'][chart]['series']:
+                            data += "mqttData2['" + observation + "'] = {};\n"
+                            data += "mqttData2['" + observation + "'] = [];\n"
+                            data+= "mqttData." + observation + "= [];\n"
+
+
+        data += "fieldMap = new Map();\n"
+        # ToDo: optimize - only do if page uses MQTT
+        if self.skin_dict['Extras'].get('mqtt', False):
+            for field in self.skin_dict['Extras']['mqtt'].get('fields', []):
+                fieldname = self.skin_dict['Extras']['mqtt']['fields'][field]['name']
+                data += "fieldMap.set('" + fieldname + "', '" + field + "');\n"
+
+        return data
+
     def _gen_data(self, filename, page, interval, interval_type, interval_name, page_definition_name, interval_long_name):
         start_time = time.time()
 
@@ -1333,6 +1360,9 @@ class JAS(SearchList):
         data += "\n"
         if self.skin_dict['Extras']['pages'][page_definition_name].get('current', None) is not None:
             data += self._gen_current(skin_data_binding, interval)
+
+        data += "\n"
+        data += self._gen_mqtt(page)
 
         data += '// the end\n'
 

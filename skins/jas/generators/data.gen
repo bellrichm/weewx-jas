@@ -16,30 +16,6 @@
 #set $interval_start_seconds_global = $_get_TimeSpanBinder($interval_name_global, $page_data_binding).start.raw
 #set $interval_end_seconds_global = $_get_TimeSpanBinder($interval_name_global, $page_data_binding).end.raw
 
-## Create an array of mqtt observations in charts
-mqttData2 = {};
-mqttData = {};
-#set page_series_type = $getVar('Extras.page_definition.' + $page + '.series_type', 'single')
-#for $chart in $getVar('$Extras.chart_definitions')
-    #set chart_series_type = $getVar('Extras.pages.' + $page + '.' + chart + '.series_type', $page_series_type)
-    #if $chart_series_type == 'mqtt'
-        #for $observation in $getVar('$Extras.chart_definitions.' + $chart + '.series')
-            mqttData2['$observation'] = {};
-            mqttData2['$observation'] = [];
-            mqttData.$observation = [];
-        #end for
-    #end if
-#end for  
-
-fieldMap = new Map()
-## ToDo: optimize - only do if page uses MQTT
-#if $getVar('$Extras.mqtt', False)
-    #for $field in $getVar('$Extras.mqtt.fields', [])
-        #set $fieldname = $getVar('$Extras.mqtt.fields.' + $field + '.name')
-        fieldMap.set('$fieldname', '$field')
-    #end for
-#end if
-
 ## Proof of concept - wind rose
 ## Create data for wind rose chart
 #if $getVar('Extras.pages.' + $page_definition_name_global + '.windRose',None) is not None
