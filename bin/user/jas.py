@@ -1137,7 +1137,7 @@ class JAS(SearchList):
             data += "thisDateObs = [];\n"
             data += "maxDecimals = null;\n"
             if max_decimals:
-                data += "maxDecimals = $max_decimals;\n"
+                data += "maxDecimals = " + max_decimals + ";\n"
 
             if aggregation_type is None:
                 data += 'thisDateObsDetail = {};\n'
@@ -1235,7 +1235,7 @@ class JAS(SearchList):
             data += 'if (!isNaN(current.header.value)) {\n'
             data += '    current.header.value = Number(current.header.value).toLocaleString(lang);\n'
             data += '}\n'
-            data += 'current.header.unit = ' + getattr(self.unit.label, self.skin_dict['Extras']['current']['observation']) + ';\n'
+            data += 'current.header.unit = "' + getattr(self.unit.label, self.skin_dict['Extras']['current']['observation']) + '";\n'
         
         data += 'current.observations = new Map();\n'
         data += 'current.suffixes = new Map();\n'
@@ -1253,7 +1253,7 @@ class JAS(SearchList):
             if type == 'rise':
                  # todo this is a place holder and needs work
                 #set observation_value = '"' + str($getattr($almanac, $observation + 'rise')) + '";'
-                observation_value = 'bar'
+                observation_value = '"bar"'
                 observation_unit = " "
                 #label = 'foo'
             elif type == 'sum':
@@ -1355,16 +1355,16 @@ class JAS(SearchList):
 
         data += "\n"
         data += self._gen_interval_end_timestamp(page_data_binding, interval_name, page_definition_name, interval_long_name)
-
-        data += "\n"
-        data += self._gen_aggregate_objects(interval, page_definition_name, interval_long_name)
         
         data += "\n"
         # Define the 'aggegate' objects to hold the data
         # For example: last7days_min = {}, last7days_max = {}
         for aggregate_type in self.aggregate_types:
-            data += interval_long_name + aggregate_type + "{};\n"
+            data += interval_long_name + aggregate_type + " = {};\n"
 
+        data += "\n"
+        data += self._gen_aggregate_objects(interval, page_definition_name, interval_long_name)
+        
         data += "\n"
         data += "thisDateObsList = [];\n"
         if 'thisdate' in self.skin_dict['Extras']['pages'][page]:
