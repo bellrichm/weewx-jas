@@ -281,10 +281,6 @@ class JAS(SearchList):
                                  'version': VERSION,
                                  'weewx_version': weewx.__version__,
                                  'windCompass': self._get_wind_compass,
-                                 '_get_series': self._get_series, # todo, temporary- remove
-                                 '_get_aggregate': self._get_aggregate, # todo, temporary- remove
-                                 '_get_current': self._get_current, # todo, temporary- remove
-                                 '_get_TimeSpanBinder': self._get_TimeSpanBinder # todo, temporary- remove
                                 }
 
         return [search_list_extension]
