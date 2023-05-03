@@ -1141,9 +1141,9 @@ class JAS(SearchList):
                 data += 'thisDateObsDetail.label = "' + label + '";\n'
                 data += 'thisDateObsDetail.maxDecimals = maxDecimals;\n'
                 value = interval_long_name + 'min.' + observation + "_" + data_binding + unit_suffix
-                id = observation + "_thisdate_min"
+                id_value = observation + "_thisdate_min"
                 data += 'thisDateObsDetail.dataArray = ' + value + ';\n'
-                data += 'thisDateObsDetail.id = "' + id + '";\n'
+                data += 'thisDateObsDetail.id = "' + id_value + '";\n'
                 data += 'thisDateObs.push(thisDateObsDetail);\n'
                 data += '\n'
 
@@ -1151,9 +1151,9 @@ class JAS(SearchList):
                 data += 'thisDateObsDetail.label = "' + label + '";\n'
                 data += 'thisDateObsDetail.maxDecimals = maxDecimals;\n'
                 value = interval_long_name + 'max.' + observation + "_" + data_binding + unit_suffix
-                id = observation + "_thisdate_max"
+                id_value = observation + "_thisdate_max"
                 data += 'thisDateObsDetail.dataArray = ' + value + ';\n'
-                data += 'thisDateObsDetail.id = "' + id + '";\n'
+                data += 'thisDateObsDetail.id = "' + id_value + '";\n'
                 data += 'thisDateObs.push(thisDateObsDetail);\n'
                 data += '\n'
             else:
@@ -1161,9 +1161,9 @@ class JAS(SearchList):
                 data += 'thisDateObsDetail.label = "' + label + '";\n'
                 data += 'thisDateObsDetail.maxDecimals = maxDecimals;\n'
                 value = interval_long_name + aggregation_type + '.' + observation + "_" + data_binding + unit_suffix
-                id = observation + "_thisdate_" + aggregation_type
+                id_value = observation + "_thisdate_" + aggregation_type
                 data += 'thisDateObsDetail.dataArray = ' + value + ';\n'
-                data += 'thisDateObsDetail.id = "' + id + '";\n'
+                data += 'thisDateObsDetail.id = "' + id_value + '";\n'
                 data += 'thisDateObs.push(thisDateObsDetail);\n'
                 data += '\n'
 
@@ -1237,7 +1237,7 @@ class JAS(SearchList):
 
         for observation in self.skin_dict['Extras']['current']['observations']:
             data_binding = self.skin_dict['Extras']['current']['observations'][observation].get('data_binding', current_data_binding)
-            type =  self.skin_dict['Extras']['current']['observations'][observation].get('type', "")
+            type_value =  self.skin_dict['Extras']['current']['observations'][observation].get('type', "")
             unit_name = self.skin_dict['Extras']['current']['observations'][observation].get('unit', "default")
 
             if unit_name != "default":
@@ -1245,14 +1245,14 @@ class JAS(SearchList):
             else:
                 observation_unit = getattr(self.unit.label, observation)
 
-            if type == 'rise':
+            if type_value == 'rise':
                  # todo this is a place holder and needs work
                 #set observation_value = '"' + str($getattr($almanac, $observation + 'rise')) + '";'
                 observation_value = '"bar"'
                 observation_unit = " "
                 #label = 'foo'
-            elif type == 'sum':
-                observation_value = self._get_aggregate(observation, data_binding, interval_current, type, unit_name, False)
+            elif type_value == 'sum':
+                observation_value = self._get_aggregate(observation, data_binding, interval_current, type_value, unit_name, False)
             else:
                 observation_value = self._get_current(observation, data_binding, unit_name).format(add_label=False,localize=False)
 
@@ -1307,7 +1307,7 @@ class JAS(SearchList):
         interval_end_seconds_global = self._get_TimeSpanBinder(interval_name, page_data_binding).end.raw
 
         if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
-            avg, max, wind_directions, wind_range_legend = self._get_wind_compass(data_binding=page_data_binding, start_time=interval_start_seconds_global, end_time=interval_end_seconds_global)
+            avg_value, max_value, wind_directions, wind_range_legend = self._get_wind_compass(data_binding=page_data_binding, start_time=interval_start_seconds_global, end_time=interval_end_seconds_global)
             data += "var windRangeLegend = " + wind_range_legend + ";\n"
             i = 0
             for wind in wind_directions:
