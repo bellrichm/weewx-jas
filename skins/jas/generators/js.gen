@@ -7,14 +7,6 @@
 #set $start_time = time.time()
  /* jshint esversion: 6 */
 
-#def evaluate(data)
-    #include source=$data
-    #if $getVar('Extras.debug_includes', False)
-    /* $data */
-    ##$logdbg($data)
-    #end if
-#end def
-
 #include 'generators/jasoptions.gen'
 
 ##set $skin_data_binding = $getVar("$Extras.data_binding", $data_binding)

@@ -324,12 +324,9 @@ class JASInstaller(ExtensionInstaller):
                                        'skins/jas/data/year%Y.js.tmpl',
                                        'skins/jas/data/month%Y%m.js.tmpl'
                                       ]),
-                   ('skins/jas/generators', ['skins/jas/generators/data.gen',
-                                            'skins/jas/generators/jasoptions.gen',
+                   ('skins/jas/generators', ['skins/jas/generators/jasoptions.gen',
                                              'skins/jas/generators/js.gen',
-                                             'skins/jas/generators/pages.gen',
-                                             'skins/jas/generators/startEndHistorical.gen',
-                                             'skins/jas/generators/startEndActive.gen'
+                                             'skins/jas/generators/pages.gen'
                                             ]),
                    ('skins/jas/javascript', ['skins/jas/javascript/day.js.tmpl',
                                              'skins/jas/javascript/debug.js.tmpl',
