@@ -1302,6 +1302,24 @@ class JAS(SearchList):
             for field in self.skin_dict['Extras']['mqtt'].get('fields', []):
                 fieldname = self.skin_dict['Extras']['mqtt']['fields'][field]['name']
                 data += "fieldMap.set('" + fieldname + "', '" + field + "');\n"
+        return data
+
+
+    # Proof of concept - wind rose
+    # Create data for wind rose chart
+    def _gen_windrose(self, page_data_binding, interval_name, page_definition_name, interval_long_name):
+        data = ''
+
+        interval_start_seconds_global = self._get_TimeSpanBinder(interval_name, page_data_binding).start.raw
+        interval_end_seconds_global = self._get_TimeSpanBinder(interval_name, page_data_binding).end.raw
+
+        if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
+            avg, max, wind_directions, wind_range_legend = self._get_wind_compass(data_binding=page_data_binding, start_time=interval_start_seconds_global, end_time=interval_end_seconds_global)
+            data += "var windRangeLegend = " + wind_range_legend + ";\n"
+            i = 0
+            for wind in wind_directions:
+                data += interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + " = "  + str(wind) +  ";\n"
+                i += 1
 
         return data
 
@@ -1363,6 +1381,10 @@ class JAS(SearchList):
 
         data += "\n"
         data += self._gen_mqtt(page)
+
+        data += "\n"
+        if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
+            data += self._gen_windrose(page_data_binding, interval_name, page_definition_name, interval_long_name)
 
         data += '// the end\n'
 

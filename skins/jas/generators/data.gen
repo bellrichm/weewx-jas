@@ -7,28 +7,7 @@
 #import weeutil
 #from weeutil.weeutil import to_bool
 #set $start_time = time.time()
-##$logdbg("Starting  " + $HTML_ROOT + "/" + $filename)
 
-/* jshint esversion: 6 */
-#set $skin_data_binding = $getVar("$Extras.data_binding", $data_binding)
-#set global $page_data_binding = $getVar('Extras.pages.' + $page_definition_name_global + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
-
-#set $interval_start_seconds_global = $_get_TimeSpanBinder($interval_name_global, $page_data_binding).start.raw
-#set $interval_end_seconds_global = $_get_TimeSpanBinder($interval_name_global, $page_data_binding).end.raw
-
-## Proof of concept - wind rose
-## Create data for wind rose chart
-#if $getVar('Extras.pages.' + $page_definition_name_global + '.windRose',None) is not None
-    #set avg, max, wind_directions, wind_range_legend = $windCompass(data_binding=$page_data_binding, start_time=$interval_start_seconds_global, end_time=$interval_end_seconds_global)
-    #set line = "var windRangeLegend = " + $wind_range_legend
-    $line;
-    #set i = 0
-    #for $wind in $wind_directions
-        #set line = $interval_long_name_global + "avg.windCompassRange"  + str($i) + "_" + $data_binding + " = "  + str($wind) +  ";"
-        $line
-        #set $i += 1
-    #end for
-#end if
 
 #set elapsed_time = time.time() - $start_time
 #set log_msg = "Generated " + $HTML_ROOT + "/" + $filename + " in " + str($elapsed_time)
