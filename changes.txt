@@ -107,3 +107,17 @@ Fixes:
 Internal:
 - Ability to output cheetah statements before they are evaluated.
 - Dynamic logging/debugging infrastructure added.
+
+V0.3.1
+Enhancements:
+- Dynamically collapse navbar. (#75)
+- Support unit conversion for individual observations. (#77)
+- Support multiple y axis in user defined charts. (#78)
+- Support data binding for current observations. (#88)
+- Allow label overrides in weewx.conf. (#95)
+Fixes:
+- Calculation of wind min and max. (#87)
+- Add jasOptions.gen to install.py. (#89)
+- Memory 'leak' due to Chetah processing of #include. (#96, #98)
+Internal:
+- Move looping from Cheetah to javascript. (#85)
