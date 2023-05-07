@@ -1,6 +1,7 @@
 #    Copyright (c) 2021-2023 Rich Bell <bellrichm@gmail.com>
 #    See the file LICENSE.txt for your rights.
- # pylint: disable=line-too-long
+
+# pylint: disable=line-too-long, too-many-lines
 
 """
 This search list extension provides the following tags:
@@ -257,7 +258,7 @@ class JAS(SearchList):
 
         search_list_extension = {'aggregate_types': self.aggregate_types,
                                  'current_observation': self.data_current,
-                                 'dateTimeFormats': self.get_date_time_formats,
+                                 'dateTimeFormats': self._get_date_time_formats,
                                  'data_binding': self.data_binding,
                                  'forecasts': self.data_forecast,
                                  'genCharts': self._gen_charts,
@@ -275,10 +276,10 @@ class JAS(SearchList):
                                  'loginf': loginf,
                                  'logerr': logerr,
                                  'observations': self.observations,
-                                 'observationLabels': self.get_observation_labels,
+                                 'observationLabels': self._get_observation_labels,
                                  'ordinateNames': self.ordinate_names,
                                  'skinDebug': self._skin_debug,
-                                 'textLabels': self.get_text_labels,
+                                 'textLabels': self._get_text_labels,
                                  'utcOffset': self.utc_offset,
                                  'version': VERSION,
                                  'weewx_version': weewx.__version__,
@@ -295,7 +296,7 @@ class JAS(SearchList):
         self.skin_dicts[language] = copy.deepcopy(self.skin_dict)
         merge_lang(language, self.generator.config_dict, self.skin_dict['REPORT_NAME'], self.skin_dicts[language])
 
-    def get_observation_labels(self, language):
+    def _get_observation_labels(self, language):
         if language not in self.skin_dicts:
             if language in self.languages:
                 self._get_skin_dict(language)
@@ -303,14 +304,14 @@ class JAS(SearchList):
 
         return self.skin_dicts[language]['Labels']['Generic']
 
-    def get_text_labels(self, language):
+    def _get_text_labels(self, language):
         if language not in self.skin_dicts:
             if language in self.languages:
                 self._get_skin_dict(language)
 
         return self.skin_dicts[language]['Texts']
 
-    def get_date_time_formats(self, language):
+    def _get_date_time_formats(self, language):
         if language not in self.skin_dicts:
             if language in self.languages:
                 self._get_skin_dict(language)
