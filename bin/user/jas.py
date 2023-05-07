@@ -123,10 +123,10 @@ import weewx
 import weecfg
 try:
     # Python 3
-    from urllib.request import Request, urlopen, HTTPError # pyright: reportMissingImports=false
+    from urllib.request import Request, urlopen, HTTPError # pyright: ignore reportMissingImports=false
 except ImportError:
     # Python 2
-    from urllib2 import Request, urlopen, HTTPError # pyright: reportMissingImports=false
+    from urllib2 import Request, urlopen, HTTPError # pyright: ignore reportMissingImports=false
 
 from weewx.cheetahgenerator import SearchList
 from weewx.reportengine import merge_lang
@@ -262,6 +262,7 @@ class JAS(SearchList):
                                  'forecasts': self.data_forecast,
                                  'genCharts': self._gen_charts,
                                  'genData': self._gen_data,
+                                 'genJasOptions': self._gen_jas_options,
                                  'getObsUnitLabel': self._get_obs_unit_label,
                                  'getRange': self._get_range,
                                  'getUnitLabel': self._get_unit_label,
@@ -1380,6 +1381,55 @@ class JAS(SearchList):
             data += self._gen_windrose(page_data_binding, interval, page_definition_name, interval_long_name)
 
         data += '// the end\n'
+
+        elapsed_time = time.time() - start_time
+        log_msg = "Generated " + self.html_root + "/" + filename + " in " + str(elapsed_time)
+        if to_bool(self.skin_dict['Extras'].get('log_times', True)):
+            logdbg(log_msg)
+        return data
+
+    def _gen_jas_options(self, filename, page):
+        start_time = time.time()
+        data = ''
+
+        data += "jasOptions = {};\n"
+
+        data += "jasOptions.pageMQTT = " + self.skin_dict['Extras']['pages'][page].get('mqtt', 'true').lower() + ";\n"
+        data += "jasOptions.displayAerisObservation = " + self.skin_dict['Extras'].get('display_aeris_observation', 'false').lower() + ";\n"
+        data += "jasOptions.reload = " + self.skin_dict['Extras']['pages'][page].get('reload', 'false').lower() + ";\n"
+        data += "jasOptions.zoomcontrol = " + self.skin_dict['Extras']['pages'][page].get('zoomControl', 'false').lower() + ";\n"
+
+        data += "jasOptions.currentHeader = null;\n"
+
+        if self.skin_dict['Extras']['current'].get('observation', False):
+            data += "jasOptions.currentHeader = '" + self.skin_dict['Extras']['current']['observation'] + "';\n"
+
+        if "current" in self.skin_dict['Extras']['pages'][page]:
+            data += "jasOptions.current = true;\n"
+        else:
+            data += "jasOptions.current = false;\n"
+
+        if "forecast" in self.skin_dict['Extras']['pages'][page]:
+            data += "jasOptions.forecast = true;\n"
+        else:
+            data += "jasOptions.forecast = false;\n"
+
+        if "minmax" in self.skin_dict['Extras']['pages'][page]:
+            data += "jasOptions.minmax = true;\n"
+        else:
+            data += "jasOptions.minmax = false;\n"
+
+        if "thisdate" in self.skin_dict['Extras']['pages'][page]:
+            data += "jasOptions.thisdate = true;\n"
+        else:
+            data += "jasOptions.thisdate = false;\n"
+
+        if to_bool(self.skin_dict['Extras']['pages'][page].get('mqtt', True)) and to_bool(self.skin_dict['Extras']['mqtt'].get('enable', False)) or page == "debug":
+            data += "jasOptions.MQTTConfig = true;\n"
+        else:
+            data += "jasOptions.MQTTConfig = false;\n"
+
+        data += "\n"
 
         elapsed_time = time.time() - start_time
         log_msg = "Generated " + self.html_root + "/" + filename + " in " + str(elapsed_time)
