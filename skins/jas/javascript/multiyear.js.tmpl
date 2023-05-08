@@ -1,4 +1,4 @@
-##    Copyright (c) 2022 Rich Bell <bellrichm@gmail.com>
+##    Copyright (c) 2022-2023 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
 #from weeutil.weeutil import to_bool
@@ -9,7 +9,7 @@
 
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
     $genJasOptions($filename, $page)
-    #include 'generators/js.gen'
+    $genJs($filename, $page, $year_global, $month_global, $interval_long_name_global)
 #end if        
 
 #set global interval_name_global = None

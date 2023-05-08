@@ -7,7 +7,7 @@
 #set $start_time = time.time()
  /* jshint esversion: 6 */
 
- $genJs($filename, $page, $year_global, $month_global, $interval_long_name_global)
+$genJs($filename, $page, $year_global, $month_global, $interval_long_name_global)
 
 #set elapsed_time = time.time() - $start_time
 #set log_msg = "Generated " + $HTML_ROOT + "/" + $filename + " in " + str($elapsed_time)
