@@ -263,6 +263,7 @@ class JAS(SearchList):
                                  'forecasts': self.data_forecast,
                                  'genCharts': self._gen_charts,
                                  'genData': self._gen_data,
+                                 'genJs': self._gen_js,
                                  'genJasOptions': self._gen_jas_options,
                                  'getObsUnitLabel': self._get_obs_unit_label,
                                  'getRange': self._get_range,
@@ -1389,6 +1390,263 @@ class JAS(SearchList):
             logdbg(log_msg)
         return data
 
+    def _gen_js(self, filename, interval_name, year, month, interval_long_name):
+        start_time = time.time()
+        data = ''
+
+        data += '// start\n'
+
+        if interval_long_name:
+            startDate = interval_long_name + "startDate"
+            endDate = interval_long_name + "endDate"
+            startTimestamp = interval_long_name + "startTimestamp"
+            endTimestamp = interval_long_name + "endTimestamp"
+        else:
+            startDate = "null"
+            endDate = "null"
+            startTimestamp = "null"
+            endTimestamp = "null"
+
+        today = datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+
+        selected_year = today.year
+        if year is not None:
+            selected_year = year
+
+        selected_month = today.month
+        if month is not None:
+            selected_month = month
+
+        offset_seconds = - self.utc_offset * 60
+
+        if self.skin_dict['Extras'].get('display_aeris_observation', False):
+            data += 'current_observation = ' + self.data_current['observation'] + ';\n'
+        else:
+            data += 'current_observation = null;\n'
+
+        data += 'headerMaxDecimals = ' + self.skin_dict['Extras']['current'].get('header_max_decimals', 'null') + ';\n'
+        data += "logLevel = sessionStorage.getItem('logLevel');\n"
+
+        data += 'if (!logLevel) {\n'
+        data += '    logLevel = "' + self.skin_dict['Extras'].get('jas_debug_level', '3') + '";\n'
+        data += "    sessionStorage.setItem('logLevel', logLevel);\n"
+        data += '}\n'
+
+
+        javascript = '''
+function jasShow(data) {
+    return window[data]
+}
+
+function updatelogLevel(logLevel) {
+    jasLogDebug = () => {};
+    jasLogInfo = () => {};
+    jasLogWarn= () => {};
+    jasLogError = () => {};
+
+    switch(logLevel) {
+        case "1":
+            jasLogDebug = (prefix, info) => {console.debug(prefix + JSON.stringify(info));};
+        case "2":
+            jasLogInfo = (prefix, info) => {console.info(prefix + JSON.stringify(info));};
+        case "3":
+            jasLogWarn = (prefix, info) => {console.warn(prefix + JSON.stringify(info));};
+        case "4":
+            jasLogError = (prefix, info) => {console.error(prefix + JSON.stringify(info));};
+        }
+}
+
+updatelogLevel(logLevel);
+
+var pageCharts = [];
+
+// Update the chart data
+function updateCharts() {
+    currTime = Date.now();
+    startTime = currTime
+    for (var index in pageCharts) {
+        if (pageCharts[index].option) {
+            pageCharts[index].chart.setOption(pageCharts[index].option);
+        }
+        prevTime = currTime;
+        currTime = Date.now();
+    }
+}
+
+// Ensure that the height of charts is consistent ratio of the width.
+function refreshSizes() {
+    radarElem = document.getElementById("radar");
+    if (radarElem) {
+        radarElem.style.height = radarElem.offsetWidth / 1.618 + 17  +"px"; // adding is a hack
+    }
+
+    for (var index in pageCharts) {
+      chartElem = pageCharts[index].chart.getDom();
+      height = chartElem.offsetWidth / 1.618 + 17  +"px"; // adding is a hack
+      pageCharts[index].chart.resize({width: null, height: height});
+    }
+}
+
+function getLogLevel() {
+    return "Sub-page log level: " + sessionStorage.getItem("logLevel")
+}
+
+function setLogLevel(logLevel) {
+    sessionStorage.setItem("logLevel", logLevel);
+    updatelogLevel(logLevel.toString());
+    return "Sub-page log level: " + sessionStorage.getItem("logLevel")
+}
+
+// Handle event messages of type "lang".
+function handleLang(lang) {
+    sessionStorage.setItem("currentLanguage", lang);
+    window.location.reload(true);
+}
+
+
+// Handle event messages of type "log".
+function handleLog(message) {
+    var logDisplayElem = document.getElementById("logDisplay");
+    if (logDisplayElem) {
+        logDisplayElem.innerHTML = message + "\\n<br>" + logDisplayElem.innerHTML;
+    }
+}
+
+
+function handleMQTT(message) {
+    test_obj = JSON.parse(message.payload);
+    
+    jasLogDebug("test_obj: ", test_obj);
+    jasLogDebug("sessionStorage: ", sessionStorage);
+    jasLogDebug("fieldMap: ", Object.fromEntries(fieldMap));
+    // To Do - only exists on pages with "current" section
+    //jasLogDebug("current.observations: ", Object.fromEntries(current.observations));
+
+    if (jasOptions.current && jasOptions.pageMQTT)
+    {
+        updateCurrentMQTT(test_obj);
+    }
+
+    // Proof of concept, charting MQTT data
+    for (obs in test_obj) {
+        if (obs in mqttData2) {
+            if (mqttData2[obs].length >= 1800) {
+                mqttData2[obs].shift;
+            }
+            mqttData2[obs].push([parseInt(test_obj.dateTime) * 1000, parseFloat(test_obj[obs])]);
+        }
+    }
+    
+    pageCharts.forEach(function(pageChart) {
+        if (pageChart.option === null) {
+            echartSeries = [];
+            pageChart.series.forEach(function(series) {
+                seriesData = {};
+                seriesData.data = mqttData2[series.obs];
+                seriesData.name = series.name;
+                if (seriesData.name == null) {
+                    seriesData.name = observationLabels[lang][series.obs];
+                }
+                echartSeries.push(seriesData);
+            });
+            pageChart.chart.setOption({series: echartSeries});
+        }
+    });
+}
+
+// Get the observation for timeSramp
+function getObservation(timeStamp, observations) {
+    var array_result = observations.filter(function(v,i) { return v[0] === timeStamp; });
+    if (array_result.length > 0)     {
+        return array_result[0][1];
+    }
+
+    return observations[0][1];
+}
+
+// Update the "on this date" observations with observations at timeStamp
+function updateThisDate(timeStamp) {
+    thisDateObsList.forEach(function(thisDateObs) {
+        thisDateObs.forEach(function(thisDateObsDetail) {
+            obs = getObservation(timeStamp, thisDateObsDetail.dataArray);
+            if (thisDateObsDetail.maxDecimals) {
+                obs = obs.toFixed(thisDateObsDetail.maxDecimals);
+            }
+            obsValue = Number(obs).toLocaleString(lang);
+            observation=document.getElementById(thisDateObsDetail.id);
+            observation.innerHTML = obsValue + thisDateObsDetail.label;                    
+        });
+    });
+}
+
+function updateForecasts() {
+    i = 0;
+    forecasts.forEach(function(forecast)
+    {
+        observationId = "forecastObservation" + i;
+        document.getElementById("forecastDate" + i).innerHTML = forecast["day"]  + " " + forecast["date"];
+        document.getElementById("forecastObservation" + i).innerHTML = forecast["observation"];
+        document.getElementById("forecastTemp" + i).innerHTML = forecast["temp_min"] + " | " + forecast["temp_max"];
+        document.getElementById("forecastRain" + i).innerHTML = '<i class="wi wi-raindrop"></i>' + ' ' + forecast['rain'] + '%';
+        document.getElementById('forecastWind' + i).innerHTML = '<i class="wi wi-strong-wind"></i>' + ' ' + forecast['wind_min'] + ' | ' + forecast['wind_max'] + ' ' + forecast['wind_unit'];
+        i += 1;
+    });
+}
+window.addEventListener("onresize", function() {
+    let message = { height: document.body.scrollHeight, width: document.body.scrollWidth };	
+
+    // window.top refers to parent window
+    window.top.postMessage(message, "*");
+});
+
+window.addEventListener("message",
+                        function(e) {
+                        // Running directly from the file system has some strangeness
+                        if (window.location.origin != "file://" && e.origin !== window.location.origin)
+                        return;
+
+                        message = e.data;
+                        if (message.kind == undefined) {
+                            return;
+                        }
+                        if (message.kind == "jasShow")
+                        {
+                            console.log(jasShow(message.message));
+                        }       
+                        if (message.kind == "getLogLevel")
+                        {
+                            console.log(getLogLevel());
+                        }                                           
+                        if (message.kind == "setLogLevel")
+                        {
+                            console.log(setLogLevel(message.message.logLevel));
+                        }                        
+                        if (message.kind == "lang")
+                        {
+                            handleLang(message.message);
+                        }
+                        if (message.kind == "mqtt")
+                        {
+                            handleMQTT(message.message);
+                        }
+                        if (message.kind == "log")
+                        {
+                            handleLog(message.message);
+                        }},
+                        false
+                       );
+        '''
+
+        data += javascript + "\n"
+
+        data += '// end\n'
+
+        elapsed_time = time.time() - start_time
+        log_msg = "Generated " + self.html_root + "/" + filename + " in " + str(elapsed_time)
+        if to_bool(self.skin_dict['Extras'].get('log_times', True)):
+            logdbg(log_msg)
+        return data
+
     def _gen_jas_options(self, filename, page):
         start_time = time.time()
         data = ''
@@ -1396,7 +1654,7 @@ class JAS(SearchList):
         data += "jasOptions = {};\n"
 
         data += "jasOptions.pageMQTT = " + self.skin_dict['Extras']['pages'][page].get('mqtt', 'true').lower() + ";\n"
-        data += "jasOptions.displayAerisObservation = " + self.skin_dict['Extras'].get('display_aeris_observation', 'false').lower() + ";\n"
+        data += "jasOptions.displayAerisObservation = -" + self.skin_dict['Extras'].get('display_aeris_observation', 'false').lower() + ";\n"
         data += "jasOptions.reload = " + self.skin_dict['Extras']['pages'][page].get('reload', 'false').lower() + ";\n"
         data += "jasOptions.zoomcontrol = " + self.skin_dict['Extras']['pages'][page].get('zoomControl', 'false').lower() + ";\n"
 
