@@ -6,7 +6,6 @@
 #import time
 #set $start_time = time.time()
  /* jshint esversion: 6 */
-$genJasOptions($filename, $page)
 
 ##set $skin_data_binding = $getVar("$Extras.data_binding", $data_binding)
 ##if 'minmax' in $getVar('$Extras.pages.' + $page)

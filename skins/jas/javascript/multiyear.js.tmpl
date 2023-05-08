@@ -8,6 +8,7 @@
 #set global interval_long_name_global = None
 
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
+    $genJasOptions($filename, $page)
     #include 'generators/js.gen'
 #end if        
 
