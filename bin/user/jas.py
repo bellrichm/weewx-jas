@@ -263,6 +263,7 @@ class JAS(SearchList):
                                  'forecasts': self.data_forecast,
                                  'genCharts': self._gen_charts,
                                  'genData': self._gen_data,
+                                 'genJs': self._gen_js,
                                  'genJasOptions': self._gen_jas_options,
                                  'getObsUnitLabel': self._get_obs_unit_label,
                                  'getRange': self._get_range,
@@ -1389,6 +1390,580 @@ class JAS(SearchList):
             logdbg(log_msg)
         return data
 
+    def _gen_js(self, filename, page, year, month, interval_long_name):
+        start_time = time.time()
+        data = ''
+
+        data += '// start\n'
+
+        if interval_long_name:
+            startDate = interval_long_name + "startDate"
+            endDate = interval_long_name + "endDate"
+            startTimestamp = interval_long_name + "startTimestamp"
+            endTimestamp = interval_long_name + "endTimestamp"
+        else:
+            startDate = "null"
+            endDate = "null"
+            startTimestamp = "null"
+            endTimestamp = "null"
+
+        today = datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
+
+        selected_year = str(today.year)
+        if year is not None:
+            selected_year = str(year)
+
+        selected_month = str(today.month)
+        if month is not None:
+            selected_month = str(month)
+
+        offset_seconds = str(self.utc_offset * 60)
+
+        if self.skin_dict['Extras'].get('display_aeris_observation', False):
+            data += 'current_observation = ' + self.data_current['observation'] + ';\n'
+        else:
+            data += 'current_observation = null;\n'
+
+        data += 'headerMaxDecimals = ' + self.skin_dict['Extras']['current'].get('header_max_decimals', 'null') + ';\n'
+        data += "logLevel = sessionStorage.getItem('logLevel');\n"
+
+        data += 'if (!logLevel) {\n'
+        data += '    logLevel = "' + self.skin_dict['Extras'].get('jas_debug_level', '3') + '";\n'
+        data += "    sessionStorage.setItem('logLevel', logLevel);\n"
+        data += '}\n'
+
+
+        data += 'function setupZoomDate() {\n'
+        data += '    zoomDateRangePicker = new DateRangePicker("zoomdatetimerange-input",\n'
+        data += '                        {\n'
+        data += '                            minDate: ' + startDate + ',\n'
+        data += '                            maxDate: '+ endDate + ',\n'
+        data += '                            startDate: '+ startDate + ',\n'
+        data += '                            endDate: ' + endDate + ',\n'
+        data += '                            locale: {\n'
+        data += '                                format: dateTimeFormat[lang].datePicker,\n'
+        data += '                                applyLabel: textLabels[lang]["datepicker_apply_label"],\n'
+        data += '                                cancelLabel: textLabels[lang]["datepicker_cancel_label"],\n'
+        data += '                            },\n'
+        data += '                        },\n'
+        data += '                        function(start, end, label) {\n'
+        data += '                            // Update all charts with selected date/time and min/max values\n'
+        data += '                            pageCharts.forEach(function(pageChart) {\n'
+        data += '                                pageChart.chart.dispatchAction({type: "dataZoom", startValue: start.unix() * 1000, endValue: end.unix() * 1000});\n'
+        data += '                            });\n'
+        data += '\n'
+        data += '                            updateMinMax(start.unix() * 1000, end.startOf("day").unix() * 1000);\n'
+        data += '                    }\n'
+        data += '    );\n'
+        data += '}\n'
+        data += '\n'
+        data += 'function setupThisDate() {\n'
+        data += '    var thisDateRangePicker = new DateRangePicker("thisdatetimerange-input",\n'
+        data += '                        {singleDatePicker: true,\n'
+        data += '                            minDate: ' + startDate + ',\n'
+        data += '                            maxDate: ' + endDate + ',\n'
+        data += '                            locale: {\n'
+        data += '                                format: dateTimeFormat[lang].datePicker,\n'
+        data += '                                applyLabel: textLabels[lang]["datepicker_apply_label"],\n'
+        data += '                                cancelLabel: textLabels[lang]["datepicker_cancel_label"],\n'          
+        data += '                            },\n'
+        data += '                        },\n'
+        data += '                            function(start, end, label) {\n'
+        data += '                                updateThisDate(start.unix() * 1000);\n'
+        data += '                        }\n'
+        data += '    );\n'
+        data += '\n'
+        data += '    var lastDay = new Date(' + selected_year + ', ' + selected_month + ', 0).getDate();\n'
+        data += '    var selectedDay = new Date().getDate();\n'
+        data += '    if (selectedDay > lastDay) {\n'
+        data += '        selectedDay = lastDay;\n'
+        data += '    }\n'
+        data += '\n'
+        data += '    var selectedDate = Date.UTC(' + selected_year + ', ' + selected_month + ' - 1, selectedDay) / 1000 - ' + offset_seconds + ';\n'
+        data += '\n'
+        data += '    thisDateRangePicker.setStartDate(moment.unix(selectedDate).utcOffset(' + str(self.utc_offset) + '));\n'
+        data += '    thisDateRangePicker.setEndDate(moment.unix(selectedDate).utcOffset(' + str(self.utc_offset) + '));\n'
+        data += '    updateThisDate(selectedDate * 1000);\n'
+        data += '}\n'
+        data += '\n'
+        wait_milliseconds = str(int(self.skin_dict['Extras']['pages'][page].get('wait_seconds', 300)) * 1000)
+        delay_milliseconds = str(int(self.skin_dict['Extras']['pages'][page].get('delay_seconds', 60)) * 1000)
+        data += 'function setupPageReload() {\n'
+        data += '    // Set a timer to reload the iframe/page.\n'
+        data += '    var currentDate = new Date();\n'
+        data += '    var futureDate = new Date();\n'
+        data += '    futureDate.setTime(futureDate.getTime() + ' + wait_milliseconds + ');\n'
+        data += '    var futureTimestamp = Math.floor(futureDate.getTime()/' + wait_milliseconds + ') * '+ wait_milliseconds + ';\n'
+        data += '    var timeout = futureTimestamp - currentDate.getTime() + ' + delay_milliseconds + ';\n'
+        data += '    setTimeout(function() { window.location.reload(true); }, timeout);\n'
+        data += '}\n'
+        data += '\n'
+        data += '// Handle reset button of zoom control\n'
+        data += 'function resetRange() {\n'
+        data += '    zoomDateRangePicker.setStartDate(' + startDate + ');\n'
+        data += '    zoomDateRangePicker.setEndDate(' + endDate + ');\n'
+        data += '    pageCharts.forEach(function(pageChart) {\n'
+        data += '            pageChart.chart.dispatchAction({type: "dataZoom", startValue: ' + startTimestamp + ', endValue: ' + endTimestamp + '});\n'
+        data += '    });\n'
+        data += '    updateMinMax(' + startTimestamp + ', ' + endTimestamp + ');\n'
+        data += '}\n'
+        data += '// Handle event messages of type "mqtt".\n'
+        data += 'var test_obj = null; // Not a great idea to be global, but makes remote debugging easier.\n'
+        data += 'function updateCurrentMQTT(test_obj) {\n'
+        data += '        // Handle the "header" section of current observations.\n'
+        data +='        header = JSON.parse(sessionStorage.getItem("header"));\n'
+        data +='        if (header) {\n'
+        data +='            observation = fieldMap.get(header.name);\n'
+        data +='            if (observation === undefined) {\n'
+        data +='                mqttValue = test_obj[header.name];\n'
+        data +='            }\n'
+        data +='            else {\n'
+        data +='                mqttValue = test_obj[observation];\n'
+        data +='            }\n'
+        data += '\n'
+        data +='            if (mqttValue != undefined) {\n'
+        data +='                if (headerMaxDecimals) {\n'
+        data +='                    mqttValue = Number(mqttValue).toFixed(headerMaxDecimals);\n'
+        data +='                }\n'
+        data +='                if (!isNaN(mqttValue)) {\n'
+        data +='                    header.value = Number(mqttValue).toLocaleString(lang);\n'
+        data +='                }\n'      
+        data +='            }\n'  
+        data += '\n'
+        data += '            if (test_obj[header.unit]) {\n'
+        data +='                header.unit = test_obj[header.unit];\n'
+        data +='            }\n'
+        data +='            sessionStorage.setItem("header", JSON.stringify(header));\n'
+        data +='            headerElem = document.getElementById(header.name);\n'
+        data +='            if (headerElem) {\n'
+        data +='                headerElem.innerHTML = header.value + header.unit;\n'
+        data +='            }\n'  
+        data +='        }\n'
+        data += '\n'
+        data +='        // Handle information that will be appended to the observation value.\n'
+        data +='        suffix_list = sessionStorage.getItem("suffixes");\n'
+        data +='        if (suffix_list) {\n'
+        data +='            suffixes = suffix_list.split(",");\n'
+        data +='            suffixes.forEach(function(suffix) {\n'
+        data +='                suffixInfo = current.suffixes.get(suffix);\n'
+        data +='                if (suffixInfo && suffixInfo.mqtt && test_obj[suffix]) {\n'
+        data +='                    data = JSON.parse(sessionStorage.getItem(suffix));\n'
+        data +='                    data.value = test_obj[suffix];\n'
+        data +='                    sessionStorage.setItem(suffix, JSON.stringify(data));\n'
+        data +='                }\n'
+        data +='            });\n'
+        data +='        }\n'
+        data += '\n'
+        data +='        // Process each observation in the "current" section.\n'
+        data +='        observations = [];\n'
+        data +='        if (sessionStorage.getItem("observations")) {\n'
+        data +='            observations = sessionStorage.getItem("observations").split(",");\n'
+        data +='        }\n'
+        data += '\n'
+        data +='        observations.forEach(function(observation) {\n'
+        data +='            obs = fieldMap.get(observation);\n'
+        data +='            if (obs === undefined) {\n'
+        data +='                obs = observation;\n'
+        data +='            }\n'
+        data +='\n'
+        data +='            observationInfo = current.observations.get(observation);\n'
+        data +='            if (observationInfo.mqtt && test_obj[obs]) {\n'
+        data +='                data = JSON.parse(sessionStorage.getItem(observation));\n'
+        data +='                data.value = Number(test_obj[obs]);\n'
+        data +='                if (observationInfo.maxDecimals != null) {\n'
+        data +='                   data.value = data.value.toFixed(observationInfo.maxDecimals);\n'
+        data +='                }\n'
+        data +='                if (!isNaN(data.value)) {\n'
+        data +='                    data.value = Number(data.value).toLocaleString(lang);\n'
+        data +='                }\n'
+        data +='                sessionStorage.setItem(observation, JSON.stringify(data));\n'
+        data += '\n'
+        data +='                suffix = JSON.parse(sessionStorage.getItem(data.suffix));\n'
+        data +='                if ( suffix=== null) {\n'
+        data +='                    suffixText = "";\n'
+        data +='                }\n'
+        data +='                else {\n'
+        data +='                    suffixText = " " + suffix.value;\n'
+        data +='                }\n'
+        data += '\n'
+        data +='                labelElem = document.getElementById(observation + "_label");\n'
+        data +='                if (labelElem) {\n'
+        data +='                    labelElem.innerHTML = data.label;\n'
+        data +='                }\n'
+        data +='                dataElem = document.getElementById(data.name + "_value");\n'
+        data +='                if (dataElem) {\n'
+        data +='                    dataElem.innerHTML = data.value + data.unit + suffixText;\n'
+        data +='                }\n'
+        data +='            }\n'
+        data +='        });\n'
+        data += '\n'
+        data +='        // And the "current" section date/time.\n'
+        data +='        if (test_obj.dateTime) {\n'
+        data +='            sessionStorage.setItem("updateDate", test_obj.dateTime*1000);\n'
+        data +='            timeElem = document.getElementById("updateDate");\n'
+        data +='            if (timeElem) {\n'
+        data +='                timeElem.innerHTML = moment.unix(test_obj.dateTime).utcOffset(' + str(self.utc_offset) + ').format(dateTimeFormat[lang].current);\n'
+        data +='            }\n'
+        data +='        }\n'
+        data += '}\n'
+        data += '\n'
+        data += 'function updateCurrentObservations() {\n'
+        data += '    if (jasOptions.currentHeader) {\n'
+        data +='        //ToDo: switch to allow non mqtt header data? similar to the observation section\n'
+        data +='        if(sessionStorage.getItem("header") === null || !jasOptions.MQTTConfig){\n'
+        data +='            sessionStorage.setItem("header", JSON.stringify(current.header));\n'
+        data +='        }\n'
+        data +='        header = JSON.parse(sessionStorage.getItem("header"));\n'
+        data +='        document.getElementById(jasOptions.currentHeader).innerHTML = header.value + header.unit;\n'
+        data += '    }\n'
+        data += '\n'
+        data += '    if (jasOptions.displayAerisObservation) {\n'
+        data +='        document.getElementById("currentObservation").innerHTML = current_observation;\n'
+        data += '    }\n'
+        data += '\n'
+        data += '    // ToDo: cleanup, perhaps put suffix data into an array and store that\n'
+        data += '    // ToDo: do a bit more in cheetah?\n'
+        data += '    suffixes = [];\n'
+        data += '    for (var [suffix, data] of current.suffixes) {\n'
+        data +='        suffixes.push(suffix);\n'
+        data +='        if (sessionStorage.getItem(suffix) === null || !jasOptions.MQTTConfig){\n'
+        data +='            sessionStorage.setItem(suffix, JSON.stringify(data));\n'
+        data +='        }\n'
+        data += '    }\n'
+        data += '    sessionStorage.setItem("suffixes", suffixes.join(","));\n'
+        data += '\n'
+        data += '    // ToDo: cleanup, perhaps put observation data into an array and store that\n'
+        data += '    // ToDo: do a bit more in cheetah?\n'
+        data += '    observations = [];\n'
+        data += '    for (var [observation, data] of current.observations) {\n'
+        data +='        observations.push(observation);\n'
+        data +='        if (sessionStorage.getItem(observation) === null || !jasOptions.MQTTConfig || ! data.mqtt){\n'
+        data +='            sessionStorage.setItem(observation, JSON.stringify(data));\n'
+        data +='        }\n'
+        data +='        obs = JSON.parse(sessionStorage.getItem(observation));\n'
+        data += '\n'
+        data +='        suffix = JSON.parse(sessionStorage.getItem(data.suffix));\n'
+        data +='        if ( suffix=== null) {\n'
+        data +='            suffixText = "";\n'
+        data +='        }\n'
+        data +='        else {\n'
+        data +='            suffixText = " " + suffix.value;\n'
+        data +='        }\n'
+        data += '\n'
+        data +='        document.getElementById(obs.name + "_value").innerHTML = obs.value + obs.unit + suffixText;\n'
+        data += '    }\n'
+        data += '    sessionStorage.setItem("observations", observations.join(","));\n'
+        data += '\n'
+        data += '    if(sessionStorage.getItem("updateDate") === null || !jasOptions.MQTTConfig){\n'
+        data +='        sessionStorage.setItem("updateDate", updateDate);\n'
+        data += '    }\n'
+        data += '    document.getElementById("updateDate").innerHTML = moment.unix(sessionStorage.getItem("updateDate")/1000).utcOffset(' + str(self.utc_offset) +').format(dateTimeFormat[lang].current);\n'       
+        data += '}\n'
+        data += '\n'
+        data += '// Update the min/max observations\n'
+        data += 'function updateMinMax(startTimestamp, endTimestamp) {\n'
+        data += '    jasLogDebug("Min start: ", startTimestamp);\n'
+        data += '    jasLogDebug("Max start: ", endTimestamp);\n'
+        data += '    // ToDo: optimize to only get index once for all observations?\n'
+        data += '    minMaxObs.forEach(function(minMaxObsData) {\n'
+        data +='        startIndex = minMaxObsData.minDateTimeArray.findIndex(element => element == startTimestamp);\n'
+        data +='        endIndex = minMaxObsData.minDateTimeArray.findIndex(element => element == endTimestamp);\n'
+        data +='        if (startIndex < 0) {\n'
+        data +='            startIndex = 0;\n'
+        data +='        }\n'
+        data +='        if (endIndex < 0) {\n'
+        data +='            endIndex  = minMaxObsData.minDateTimeArray.length - 1;\n'
+        data +='        }\n'
+        data +='        if (startIndex == endIndex) {\n'
+        data +='            minIndex = startIndex;\n'
+        data +='            maxIndex = endIndex;\n'
+        data +='        } else {\n'
+        data +='            minIndex = minMaxObsData.minDataArray.indexOf(Math.min(...minMaxObsData.minDataArray.slice(startIndex, endIndex + 1).filter(obs => obs != null)));\n'
+        data +='            maxIndex = minMaxObsData.maxDataArray.indexOf(Math.max(...minMaxObsData.maxDataArray.slice(startIndex, endIndex + 1)));\n'
+        data +='        }\n'
+        data += '\n'
+        data +='        min = minMaxObsData.minDataArray[minIndex];\n'
+        data +='        max = minMaxObsData.maxDataArray[maxIndex];\n'
+        data +='        if (minMaxObsData.maxDecimals) {\n'
+        data +='            min = min.toFixed(minMaxObsData.maxDecimals);\n'
+        data +='            max = max.toFixed(minMaxObsData.maxDecimals);\n'
+        data +='        }\n'
+        data +='        min = Number(min).toLocaleString(lang);\n'
+        data +='        max = Number(max).toLocaleString(lang);\n'
+        data +='        min = min + minMaxObsData.label;\n'
+        data +='        max = max + minMaxObsData.label;\n'
+        data +='\n'
+        data +='        minDate = moment.unix(minMaxObsData.minDateTimeArray[minIndex]/1000).utcOffset(-300.0).format(dateTimeFormat[lang].chart["none"].label);\n'
+        data +='        maxDate = moment.unix(minMaxObsData.maxDateTimeArray[maxIndex]/1000).utcOffset(-300.0).format(dateTimeFormat[lang].chart["none"].label);\n'
+        data += '\n'
+        data +='        observation_element=document.getElementById(minMaxObsData.minId);\n'
+        data +='        observation_element.innerHTML = min + "<br>" + minDate;\n'
+        data +='        observation_element=document.getElementById(minMaxObsData.maxId);\n'
+        data +='        observation_element.innerHTML = max + "<br>" + maxDate;\n'
+        data += '    });\n'
+        data += '}\n'
+        data += '\n'
+        data += 'window.addEventListener("load", function (event) {\n'
+        data += '    // Todo: create functions for code in the if statements\n'
+        data += '    // Tell the parent page the iframe size\n'
+        data += '    let message = { height: document.body.scrollHeight, width: document.body.scrollWidth };\n'
+        data += '    // window.top refers to parent window\n'
+        data += '    window.top.postMessage(message, "*");\n'
+        data += '\n'
+        data += '    // When the iframe size changes, let the parent page know\n'
+        data += '    const myObserver = new ResizeObserver(entries => {\n'
+        data +='        entries.forEach(entry => {\n'
+        data +='        let message = { height: document.body.scrollHeight, width: document.body.scrollWidth };\n'
+        data +='        // window.top refers to parent window\n'
+        data +='        window.top.postMessage(message, "*");\n'
+        data +='        });\n'
+        data += '    });\n'
+        data += '    myObserver.observe(document.body);\n'
+        data += '\n'
+        data += '    updateTexts();\n'
+        data += '    updateLabels();\n'
+        data += '    updateCharts();\n'
+        data += '\n'
+        data += '    if (jasOptions.minmax) {\n'
+        data +='        updateMinMax(' + startTimestamp + ', ' + endTimestamp + ');\n'
+        data += '    }\n'
+        data += '\n'
+        data += '    // Set up the date/time picker\n'
+        data += '    if (jasOptions.zoomcontrol) {\n'
+        data +='        setupZoomDate();\n'
+        data += '    }\n'
+        data += '\n'    
+        data += '    if (jasOptions.thisdate) {\n'
+        data +='        setupThisDate();\n'
+        data += '    }\n'
+        data += '\n'
+        data += '    if (jasOptions.reload) {\n'
+        data +='        setupPageReload();\n'
+        data += '    }\n'
+        data += '\n'
+        data += '    if (jasOptions.current) {\n'
+        data +='        updateCurrentObservations();\n'
+        data += '    }\n'
+        data +='\n'
+        data += '    if (jasOptions.forecast) {\n'
+        data +='        updateForecasts();\n'
+        data += '    }\n'
+        data += '});\n'
+
+        javascript = '''
+function jasShow(data) {
+    return window[data]
+}
+
+function updatelogLevel(logLevel) {
+    jasLogDebug = () => {};
+    jasLogInfo = () => {};
+    jasLogWarn= () => {};
+    jasLogError = () => {};
+
+    switch(logLevel) {
+        case "1":
+            jasLogDebug = (prefix, info) => {console.debug(prefix + JSON.stringify(info));};
+        case "2":
+            jasLogInfo = (prefix, info) => {console.info(prefix + JSON.stringify(info));};
+        case "3":
+            jasLogWarn = (prefix, info) => {console.warn(prefix + JSON.stringify(info));};
+        case "4":
+            jasLogError = (prefix, info) => {console.error(prefix + JSON.stringify(info));};
+        }
+}
+
+updatelogLevel(logLevel);
+
+var pageCharts = [];
+
+// Update the chart data
+function updateCharts() {
+    currTime = Date.now();
+    startTime = currTime
+    for (var index in pageCharts) {
+        if (pageCharts[index].option) {
+            pageCharts[index].chart.setOption(pageCharts[index].option);
+        }
+        prevTime = currTime;
+        currTime = Date.now();
+    }
+}
+
+// Ensure that the height of charts is consistent ratio of the width.
+function refreshSizes() {
+    radarElem = document.getElementById("radar");
+    if (radarElem) {
+        radarElem.style.height = radarElem.offsetWidth / 1.618 + 17  +"px"; // adding is a hack
+    }
+
+    for (var index in pageCharts) {
+      chartElem = pageCharts[index].chart.getDom();
+      height = chartElem.offsetWidth / 1.618 + 17  +"px"; // adding is a hack
+      pageCharts[index].chart.resize({width: null, height: height});
+    }
+}
+
+function getLogLevel() {
+    return "Sub-page log level: " + sessionStorage.getItem("logLevel")
+}
+
+function setLogLevel(logLevel) {
+    sessionStorage.setItem("logLevel", logLevel);
+    updatelogLevel(logLevel.toString());
+    return "Sub-page log level: " + sessionStorage.getItem("logLevel")
+}
+
+// Handle event messages of type "lang".
+function handleLang(lang) {
+    sessionStorage.setItem("currentLanguage", lang);
+    window.location.reload(true);
+}
+
+
+// Handle event messages of type "log".
+function handleLog(message) {
+    var logDisplayElem = document.getElementById("logDisplay");
+    if (logDisplayElem) {
+        logDisplayElem.innerHTML = message + "\\n<br>" + logDisplayElem.innerHTML;
+    }
+}
+
+
+function handleMQTT(message) {
+    test_obj = JSON.parse(message.payload);
+    
+    jasLogDebug("test_obj: ", test_obj);
+    jasLogDebug("sessionStorage: ", sessionStorage);
+    jasLogDebug("fieldMap: ", Object.fromEntries(fieldMap));
+    // To Do - only exists on pages with "current" section
+    //jasLogDebug("current.observations: ", Object.fromEntries(current.observations));
+
+    if (jasOptions.current && jasOptions.pageMQTT)
+    {
+        updateCurrentMQTT(test_obj);
+    }
+
+    // Proof of concept, charting MQTT data
+    for (obs in test_obj) {
+        if (obs in mqttData2) {
+            if (mqttData2[obs].length >= 1800) {
+                mqttData2[obs].shift;
+            }
+            mqttData2[obs].push([parseInt(test_obj.dateTime) * 1000, parseFloat(test_obj[obs])]);
+        }
+    }
+    
+    pageCharts.forEach(function(pageChart) {
+        if (pageChart.option === null) {
+            echartSeries = [];
+            pageChart.series.forEach(function(series) {
+                seriesData = {};
+                seriesData.data = mqttData2[series.obs];
+                seriesData.name = series.name;
+                if (seriesData.name == null) {
+                    seriesData.name = observationLabels[lang][series.obs];
+                }
+                echartSeries.push(seriesData);
+            });
+            pageChart.chart.setOption({series: echartSeries});
+        }
+    });
+}
+
+// Get the observation for timeSramp
+function getObservation(timeStamp, observations) {
+    var array_result = observations.filter(function(v,i) { return v[0] === timeStamp; });
+    if (array_result.length > 0)     {
+        return array_result[0][1];
+    }
+
+    return observations[0][1];
+}
+
+// Update the "on this date" observations with observations at timeStamp
+function updateThisDate(timeStamp) {
+    thisDateObsList.forEach(function(thisDateObs) {
+        thisDateObs.forEach(function(thisDateObsDetail) {
+            obs = getObservation(timeStamp, thisDateObsDetail.dataArray);
+            if (thisDateObsDetail.maxDecimals) {
+                obs = obs.toFixed(thisDateObsDetail.maxDecimals);
+            }
+            obsValue = Number(obs).toLocaleString(lang);
+            observation=document.getElementById(thisDateObsDetail.id);
+            observation.innerHTML = obsValue + thisDateObsDetail.label;                    
+        });
+    });
+}
+
+function updateForecasts() {
+    i = 0;
+    forecasts.forEach(function(forecast)
+    {
+        observationId = "forecastObservation" + i;
+        document.getElementById("forecastDate" + i).innerHTML = forecast["day"]  + " " + forecast["date"];
+        document.getElementById("forecastObservation" + i).innerHTML = forecast["observation"];
+        document.getElementById("forecastTemp" + i).innerHTML = forecast["temp_min"] + " | " + forecast["temp_max"];
+        document.getElementById("forecastRain" + i).innerHTML = '<i class="wi wi-raindrop"></i>' + ' ' + forecast['rain'] + '%';
+        document.getElementById('forecastWind' + i).innerHTML = '<i class="wi wi-strong-wind"></i>' + ' ' + forecast['wind_min'] + ' | ' + forecast['wind_max'] + ' ' + forecast['wind_unit'];
+        i += 1;
+    });
+}
+window.addEventListener("onresize", function() {
+    let message = { height: document.body.scrollHeight, width: document.body.scrollWidth };	
+
+    // window.top refers to parent window
+    window.top.postMessage(message, "*");
+});
+
+window.addEventListener("message",
+                        function(e) {
+                        // Running directly from the file system has some strangeness
+                        if (window.location.origin != "file://" && e.origin !== window.location.origin)
+                        return;
+
+                        message = e.data;
+                        if (message.kind == undefined) {
+                            return;
+                        }
+                        if (message.kind == "jasShow")
+                        {
+                            console.log(jasShow(message.message));
+                        }       
+                        if (message.kind == "getLogLevel")
+                        {
+                            console.log(getLogLevel());
+                        }                                           
+                        if (message.kind == "setLogLevel")
+                        {
+                            console.log(setLogLevel(message.message.logLevel));
+                        }                        
+                        if (message.kind == "lang")
+                        {
+                            handleLang(message.message);
+                        }
+                        if (message.kind == "mqtt")
+                        {
+                            handleMQTT(message.message);
+                        }
+                        if (message.kind == "log")
+                        {
+                            handleLog(message.message);
+                        }},
+                        false
+                       );
+        '''
+
+        data += javascript + "\n"
+
+        data += '// end\n'
+
+        elapsed_time = time.time() - start_time
+        log_msg = "Generated " + self.html_root + "/" + filename + " in " + str(elapsed_time)
+        if to_bool(self.skin_dict['Extras'].get('log_times', True)):
+            logdbg(log_msg)
+        return data
+
     def _gen_jas_options(self, filename, page):
         start_time = time.time()
         data = ''
@@ -1396,7 +1971,7 @@ class JAS(SearchList):
         data += "jasOptions = {};\n"
 
         data += "jasOptions.pageMQTT = " + self.skin_dict['Extras']['pages'][page].get('mqtt', 'true').lower() + ";\n"
-        data += "jasOptions.displayAerisObservation = " + self.skin_dict['Extras'].get('display_aeris_observation', 'false').lower() + ";\n"
+        data += "jasOptions.displayAerisObservation = -" + self.skin_dict['Extras'].get('display_aeris_observation', 'false').lower() + ";\n"
         data += "jasOptions.reload = " + self.skin_dict['Extras']['pages'][page].get('reload', 'false').lower() + ";\n"
         data += "jasOptions.zoomcontrol = " + self.skin_dict['Extras']['pages'][page].get('zoomControl', 'false').lower() + ";\n"
 

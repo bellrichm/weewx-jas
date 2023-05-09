@@ -1,18 +1,13 @@
-##    Copyright (c) 2021 Rich Bell <bellrichm@gmail.com>
+##    Copyright (c) 2021-2023 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
-
 #from weeutil.weeutil import to_bool
-#set $data_binding = $getVar('Extras.pages.' + $page + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
-#set global interval_name_global = 'year' + $year($data_binding=$data_binding).start.format('%Y')
-#set global year_global = $year_name
-#set global month_global = None
-#set global interval_long_name_global = $interval_name_global + "_" 
 
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
-    #include 'generators/js.gen'
+    #set $data_binding = $getVar('Extras.pages.' + $page + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
+    $genJasOptions($filename, $page)
+    $genJs($filename, 
+           $page, 
+           $year_name, 
+           None, 
+           'year' + $year($data_binding=$data_binding).start.format('%Y') + '_')
 #end if        
-
-#set global interval_name_global = None
-#set global year_global = None
-#set global month_global = None
-#set global interval_long_name_global = None
