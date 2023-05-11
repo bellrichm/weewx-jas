@@ -296,12 +296,13 @@ class JAS(SearchList):
     def _get_skin_dict(self, language):
         self.skin_dicts[language] = copy.deepcopy(self.skin_dict)
         merge_lang(language, self.generator.config_dict, self.skin_dict['REPORT_NAME'], self.skin_dicts[language])
+        self.skin_dicts[language]['Labels']['Generic'].merge((self.skin_dict['Extras'].get('lang', {}).get(language, {}).get('Labels', {}).get('Generic', {})))
+        self.skin_dicts[language]['Texts'].merge((self.skin_dict['Extras'].get('lang', {}).get(language, {}).get('Texts', {})))
 
     def _get_observation_labels(self, language):
         if language not in self.skin_dicts:
             if language in self.languages:
                 self._get_skin_dict(language)
-                self.skin_dicts[language]['Labels']['Generic'].merge(self.skin_dict['Labels']['Generic'])
 
         return self.skin_dicts[language]['Labels']['Generic']
 
@@ -520,24 +521,24 @@ class JAS(SearchList):
 
         if weather_code in cloud_codes:
             cloud_code_key = 'cloud_code_' + weather_code
-            observation_text = "textLabels[lang]['" + cloud_code_key + "']"
+            observation_text = "getText('" + cloud_code_key + "')"
         else:
             observation_text = ''
             if coverage_code:
                 coverage_code_key = 'coverage_code_' + coverage_code
                 if observation_text != "":
                     observation_text +=  " + ' ' + "
-                observation_text += "textLabels[lang]['" + coverage_code_key + "']"
+                observation_text += "getText('" + coverage_code_key + "')"
             if intensity_code:
                 intensity_code_key = 'intensity_code_' + intensity_code
                 if observation_text != "":
                     observation_text +=  " + ' ' + "
-                observation_text += "textLabels[lang]['" + intensity_code_key + "']"
+                observation_text += "getText('" + intensity_code_key + "')"
 
             weather_code_key = 'weather_code_' + weather_code
             if observation_text != "":
                 observation_text +=  " + ' ' + "
-            observation_text += "textLabels[lang]['" + weather_code_key + "']"
+            observation_text += "getText('" + weather_code_key + "')"
 
         return observation_text
 
@@ -625,7 +626,7 @@ class JAS(SearchList):
                 forecast['timestamp'] = period['timestamp']
                 day_of_week = (int(datetime.datetime.fromtimestamp(period['timestamp']).strftime("%w")) + 6) % 7
                 day_of_week_key = 'forecast_week_day' + str(day_of_week)
-                forecast['day'] = "textLabels[lang]['" + day_of_week_key + "']"
+                forecast['day'] = "getText('" + day_of_week_key + "')"
                 forecast['temp_min'] = period[forecast_observations[self.unit_system]['temp_min']]
                 forecast['temp_max'] = period[forecast_observations[self.unit_system]['temp_max']]
                 forecast['temp_unit'] = forecast_observations[self.unit_system]['temp_unit']
@@ -996,7 +997,7 @@ class JAS(SearchList):
                     for obs in chart_def['series']:
                         aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
                         obs_data_binding = chart_def['series'][obs].get('weewx', {}).get('data_binding', chart_data_binding)
-                        chart2 += "    {name: " + chart_def['series'][obs].get('name', 'observationLabels[lang][' + "'" + obs + "']") + ",\n"
+                        chart2 += "    {name: " + chart_def['series'][obs].get('name', 'getLabel(' + "'" + obs + "')") + ",\n"
                         chart2 += "     data: [\n"
                         (start_year, end_year) = self._get_range(self.skin_dict['Extras']['pages'][page].get('start', None),
                                                                  self.skin_dict['Extras']['pages'][page].get('end', None),
@@ -1035,7 +1036,7 @@ class JAS(SearchList):
                         obs_data_unit = ""
                         if unit_name is not None:
                             obs_data_unit = "_" + unit_name
-                        chart2 += "    {name: " + chart_def['series'][obs].get('name', "observationLabels[lang]['" + obs + "']") + ",\n"
+                        chart2 += "    {name: " + chart_def['series'][obs].get('name', "getLabel('" + obs + "')") + ",\n"
                         chart2 += "    data: " \
                                 + interval + "_" + aggregate_type \
                                 + "." + chart_def['series'][obs]['weewx']['observation'] + "_"  + obs_data_binding + obs_data_unit \
@@ -1442,8 +1443,8 @@ class JAS(SearchList):
         data += '                            endDate: ' + endDate + ',\n'
         data += '                            locale: {\n'
         data += '                                format: dateTimeFormat[lang].datePicker,\n'
-        data += '                                applyLabel: textLabels[lang]["datepicker_apply_label"],\n'
-        data += '                                cancelLabel: textLabels[lang]["datepicker_cancel_label"],\n'
+        data += '                                applyLabel: getText("datepicker_apply_label"),\n'
+        data += '                                cancelLabel: getText("datepicker_cancel_label"),\n'
         data += '                            },\n'
         data += '                        },\n'
         data += '                        function(start, end, label) {\n'
@@ -1464,8 +1465,8 @@ class JAS(SearchList):
         data += '                            maxDate: ' + endDate + ',\n'
         data += '                            locale: {\n'
         data += '                                format: dateTimeFormat[lang].datePicker,\n'
-        data += '                                applyLabel: textLabels[lang]["datepicker_apply_label"],\n'
-        data += '                                cancelLabel: textLabels[lang]["datepicker_cancel_label"],\n'          
+        data += '                                applyLabel: getText("datepicker_apply_label"),\n'
+        data += '                                cancelLabel: getText("datepicker_cancel_label"),\n'          
         data += '                            },\n'
         data += '                        },\n'
         data += '                            function(start, end, label) {\n'
@@ -1862,7 +1863,7 @@ function handleMQTT(message) {
                 seriesData.data = mqttData2[series.obs];
                 seriesData.name = series.name;
                 if (seriesData.name == null) {
-                    seriesData.name = observationLabels[lang][series.obs];
+                    seriesData.name = getLabel(series.obs);
                 }
                 echartSeries.push(seriesData);
             });

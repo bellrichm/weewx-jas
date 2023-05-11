@@ -3,30 +3,37 @@
 
 #from weeutil.weeutil import to_list
 
+function getLabel(observation) {
+    if (observation in observationLabels[lang]) {
+        return observationLabels[lang][observation];
+    }
+    else {
+        return observation;
+    }        
+}
+
 function updateLabels() {
     document.querySelectorAll("[obs_label]").forEach(function(element) {
         observation = element.getAttribute("obs_label");
-        if (observation in observationLabels[lang]) {
-            element.innerText = observationLabels[lang][observation];
-        }
-        else {
-            element.innerText = observation;
-        }        
+        element.innerText = getLabel(observation)
     })
+}
+
+function getText(observation) {
+    if (observation in textLabels[lang]) {
+        return textLabels[lang][observation];
+    }
+    else {
+        return observation;
+    }
 }
 
 function updateTexts() {
     document.querySelectorAll("[text_label]").forEach(function(element) {
         observation = element.getAttribute("text_label");
-        if (observation in textLabels[lang]) {
-            element.innerText = textLabels[lang][observation];
-        }
-        else {
-            element.innerText = observation;
-        }
+        element.innerText = getText(observation)
     });
 }
-
 
 ## ToDo: Init dictionary via cheetah and not javascript
 languages = {};
