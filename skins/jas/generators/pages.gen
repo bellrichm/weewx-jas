@@ -110,6 +110,7 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
     #set charts = $getVar('Extras.chart_definitions')
     #set processing_grid = False
     #for $section in $getVar('Extras.pages.' + $page)
+      #set include_name = $getVar('Extras.pages.' + $page + '.' + $section + '.filename', None)
       ## ToDo: cleanup to not use continue
       #if not isinstance($Extras.pages[$page][$section],dict)
         #continue
@@ -128,7 +129,11 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
         #end if
       #end if
       #if $section in $charts
-        #inclufe 'sections/chart.inc'
+        #set global section_global = $section
+        #include 'sections/chart.inc'
+        #set global section_global = None
+      #else if $include_name is not None
+        #include $include_name
       #else
         #include 'sections/' + $section + '.inc'
       #end if

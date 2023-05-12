@@ -242,6 +242,9 @@ EXTENSION_CONFIG = """
                     [[[[[[ET]]]]]]                                   
                     [[[[[[UVMax]]]]]]
                     [[[[[[radiationMax]]]]]]
+                [[[[[about]]]]]   
+                    [[[[[[about]]]]]]     
+                        filename = sections/basic_about.inc         
                 [[[[[debug]]]]]   
                     enable = false
                     [[[[[[outTemp]]]]]]   
@@ -275,7 +278,9 @@ class JASInstaller(ExtensionInstaller):
                                   'skins/jas/icon/favicon-16x16.png',
                                   'skins/jas/icon/favicon-32x32.png'
                                 ]),
-                   ('skins/jas/pages', ['skins/jas/pages/debug.html.tmpl',
+                   ('skins/jas/pages', [
+                                        'skins/jas/pages/about.html.tmpl',
+                                        'skins/jas/pages/debug.html.tmpl',
                                         'skins/jas/pages/day.html.tmpl',
                                         'skins/jas/index.html.tmpl',
                                         'skins/jas/pages/last7days.html.tmpl',
@@ -345,6 +350,8 @@ class JASInstaller(ExtensionInstaller):
                                              ]),
                    ('skins/jas/lang', ['skins/jas/lang/en.conf']),
                    ('skins/jas/sections', [
+                                           'skins/jas/sections/basic_about.inc',
+                                           'skins/jas/sections/chart.inc',
                                            'skins/jas/sections/current.inc',
                                            'skins/jas/sections/debug.inc',
                                            'skins/jas/sections/forecast.inc',
