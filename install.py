@@ -1,4 +1,4 @@
-#    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
+#    Copyright (c) 2021-2023 Rich Bell <bellrichm@gmail.com>
 #    See the file LICENSE.txt for your rights.
 
 """ Installer for the jas skin. """
@@ -331,7 +331,9 @@ class JASInstaller(ExtensionInstaller):
                                       ]),
                    ('skins/jas/generators', ['skins/jas/generators/pages.gen'
                                             ]),
-                   ('skins/jas/javascript', ['skins/jas/javascript/day.js.tmpl',
+                   ('skins/jas/javascript', [
+                                             'skins/jas/javascript/about.js.tmpl',
+                                             'skins/jas/javascript/day.js.tmpl',
                                              'skins/jas/javascript/debug.js.tmpl',
                                              'skins/jas/javascript/index.js.tmpl',
                                              'skins/jas/javascript/last7days.js.tmpl',

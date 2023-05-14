@@ -1,3 +1,6 @@
+##    Copyright (c) 2023 Rich Bell <bellrichm@gmail.com>
+##    See the file LICENSE.txt for your rights.
+
 #set id = $section_global + $page_name_global
 <div class="col-12 col-xl-6 mb-4">
     <div class="card">

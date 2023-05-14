@@ -19,8 +19,12 @@ function updateLabels() {
     })
 }
 
-function getText(observation) {
+function getText(observation, n=0) {
     if (observation in textLabels[lang]) {
+        if (n > 0) {
+            i = Math.min(n, textLabels[lang][observation].length) - 1;
+            return textLabels[lang][observation][i];
+        }
         return textLabels[lang][observation];
     }
     else {
@@ -75,6 +79,8 @@ textLabels = {};
         #if isinstance($texts[$observation], str)
             ## Todo: fix keys to not have '-', '.' 
             #echo 'textLabels.' + $language + '["' + $observation + '"] = "' + $texts[$observation] + '";\n'
+        #else if isinstance($texts[$observation], list)
+            #echo 'textLabels.' + $language + '["' + $observation + '"] = Array("' + '", "'.join($texts[$observation]) + '");\n'
         #end if
     #end for
 
