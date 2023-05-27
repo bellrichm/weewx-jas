@@ -1,4 +1,4 @@
-##    Copyright (c) 2021-2022 Rich Bell <bellrichm@gmail.com>
+##    Copyright (c) 2021-2023 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
 #import time
@@ -39,6 +39,8 @@
 
       <!-- Bootstrap CSS -->
       #echo '<link href="https://cdn.jsdelivr.net/npm/bootstrap@' + $bootstrap_version + '/dist/css/bootstrap' + $bootstrap_minified + '.css" rel="stylesheet">'
+      #echo '<link rel="stylesheet" type="text/css" href="jas.css">'
+      #echo '<link rel="stylesheet" type="text/css" href="user.css">'
 
       #echo '<script src="https://cdn.jsdelivr.net/npm/paho-mqtt@' + $paho_mqtt_version+ '/paho-mqtt' + $paho_mqtt_minified + '.js"></script>'
 
@@ -61,13 +63,6 @@
    </head>      
     
    <body>
-      ## ToDo: move?
-      <style>
-         .pre-scrollable {
-         max-height: 340px;
-         overflow-y: scroll;
-         }
-      </style>
 
       <script src="data/index.js"> </script>
 

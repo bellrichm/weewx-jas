@@ -276,7 +276,9 @@ class JASInstaller(ExtensionInstaller):
                                   'skins/jas/icon/apple-touch-icon.png',
                                   'skins/jas/icon/favicon.ico',
                                   'skins/jas/icon/favicon-16x16.png',
-                                  'skins/jas/icon/favicon-32x32.png'
+                                  'skins/jas/icon/favicon-32x32.png',
+                                  'skins/jas/jas.css.tmpl',
+                                  'skins/jas/user.css.tmpl'
                                 ]),
                    ('skins/jas/pages', [
                                         'skins/jas/pages/about.html.tmpl',
