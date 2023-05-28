@@ -10,10 +10,10 @@
         #set text_label = $getVar('$Extras.chart_definitions.' + $section_global + '.weewx.title', False)
         #end if
         #if $text_label
-        <h5 class="h5-responsive indigo-text">
+            <h5 class="card-title">
             $text_label
         #else
-        #echo '               <h5 class="h5-responsive indigo-text" text_label="' + $section_global + '_title">\n'
+            #echo '               <h5 class="card-title" text_label="' + $section_global + '_title">\n'
         #end if
         </h5>
         <div id="$id"></div>

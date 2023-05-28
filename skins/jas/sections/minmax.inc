@@ -4,7 +4,7 @@
 <div class="col-12 col-xl-6 mb-4">
     <div class="card">
         <div class="card-body text-center">
-                <h5 class="h5-responsive indigo-text" text_label="minmax_title">
+                <h5 class="card-title"  text_label="minmax_title"></h5>
                 </h5>        
                 ## ToDo: move to style sheet, resize observation table to match?
                 <table class="table">
