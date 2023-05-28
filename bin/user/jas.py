@@ -1795,12 +1795,23 @@ function updateCharts() {
 function refreshSizes() {
     radarElem = document.getElementById("radar");
     if (radarElem) {
-        radarElem.style.height = radarElem.offsetWidth / 1.618 + 17  +"px"; // adding is a hack
+        // Match the height of charts 
+        height = radarElem.offsetWidth / 1.618;
+        if (height < 415) {
+            height = 415;
+        }
+        height = height + "px";    
+        radarElem.style.height = height; 
     }
 
     for (var index in pageCharts) {
       chartElem = pageCharts[index].chart.getDom();
-      height = chartElem.offsetWidth / 1.618 + 17  +"px"; // adding is a hack
+      // If the height is too small, chart sections overlap  
+      height = chartElem.offsetWidth / 1.618;
+      if (height < 415) {
+        height = 415;
+      }
+      height = height + "px";
       pageCharts[index].chart.resize({width: null, height: height});
     }
 }
