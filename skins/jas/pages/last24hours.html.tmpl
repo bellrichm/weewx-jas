@@ -5,13 +5,9 @@
 #set global interval_global = 'last24hours'
 #set global interval_name_global = 'last24hours'
 #set global page_name_global = 'last24hours'
-#set global year_global = None
-#set global month_global = None
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
     #include 'generators/pages.gen'
 #end if    
 #set global interval_global = None
 #set global interval_name_global = None
 #set global page_name_global = None
-#set global year_global = None
-#set global month_global = None

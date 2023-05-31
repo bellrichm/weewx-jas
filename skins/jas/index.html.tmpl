@@ -4,8 +4,6 @@
 #import time
 #from weeutil.weeutil import to_bool
 #set $start_time = time.time()
-#set global year_global = None
-#set global month_global = None
 
 #set bootstrap_version = $getVar("$Extras.bootstrap_version", "latest")
 #set popperjs_core_version = $getVar("$Extras.popperjs_core_version", "latest")
@@ -91,11 +89,7 @@
                      #if ($getVar("$Extras.pages.archive-year", None) and to_bool($getVar("$Extras.pages.archive-year.enable", True))) \
                         or ($getVar("$Extras.pages.archive-month", None) and to_bool($getVar("$Extras.pages.archive-month.enable", True)))
                         <li class="nav-item dropdown">
-                        #if $year_global is not None
-                        <a class="nav-link dropdown-toggle active" aria-current="page" href="#" id="dropdownYear" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" text_label="year_dropdown_label">
-                        #else
                         <a class="nav-link dropdown-toggle" href="#" id="dropdownYear" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" text_label="year_dropdown_label">
-                        #end if
                         </a>
                         <div class="dropdown-menu" aria-labelledby="dropdownYear" id="dropdownYearMenu">
                         </li>
@@ -104,11 +98,7 @@
                      #if $getVar("$Extras.pages.archive-month", None) and to_bool($getVar("$Extras.pages.archive-month.enable", True))
                         <li class="nav-item dropdown">
                         <div class="dropdown">
-                        #if $month_global is not None
-                           <a class="nav-link dropdown-toggle active" aria-current="page" href="#" role="button" id="dropdownYearMonth" data-bs-toggle="dropdown" aria-expanded="false" text_label="yearMonth_dropdown_label">
-                        #else
                            <a class="nav-link dropdown-toggle" href="#" role="button" id="dropdownYearMonth" data-bs-toggle="dropdown" aria-expanded="false" text_label="yearMonth_dropdown_label">
-                        #end if
                            </a>
                            <ul class="dropdown-menu pre-scrollable" aria-labelledby="dropdownYearMonth" id="dropdownYearMonthMenu">
                            </ul>
@@ -142,9 +132,6 @@
       </div>
    </body>
 </html>
-
-#set global year_global = None
-#set global month_global = None
 
 #set elapsed_time = time.time() - $start_time
 #set log_msg = "Generated " + $HTML_ROOT + "/" + $filename + " in " + str($elapsed_time)

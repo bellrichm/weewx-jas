@@ -6,13 +6,9 @@
 #set global interval_global = 'year'
 #set global interval_name_global = 'year' + $year($data_binding=$data_binding).start.format('%Y')
 #set global page_name_global = $year($data_binding=$data_binding).start.format('%Y')
-#set global year_global = $year_name
-#set global month_global = None
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
     #include 'generators/pages.gen'
 #end if    
 #set global interval_global = None
 #set global interval_name_global = None
 #set global page_name_global = None
-#set global year_global = None
-#set global month_global = None

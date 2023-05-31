@@ -23,5 +23,3 @@ $interval_name_global - used to generate unique javascript names.
 $interval_long_name_global - used to generate unique javascript names.
 $page_definition_name_global -the name of the page that this data is for.
 $page_name_global = used to name the javascript and chart files.
-$year_global - used to populate the year dropdown.
-$month_global - used to populate the month dropdown.
