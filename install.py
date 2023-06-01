@@ -364,15 +364,6 @@ class JASInstaller(ExtensionInstaller):
                                            'skins/jas/sections/radar.inc',
                                            'skins/jas/sections/thisdate.inc',
                                            'skins/jas/sections/zoomControl.inc'
-                                           ]),
-                   ('skins/jas/weather-icons/css', ['skins/jas/weather-icons/css/weather-icons.min.css',
-                                                    'skins/jas/weather-icons/css/weather-icons-wind.min.css'
-                                                   ]),
-                   ('skins/jas/weather-icons/font', ['skins/jas/weather-icons/font/weathericons-regular-webfont.eot',
-                                                     'skins/jas/weather-icons/font/weathericons-regular-webfont.svg',
-                                                     'skins/jas/weather-icons/font/weathericons-regular-webfont.ttf',
-                                                     'skins/jas/weather-icons/font/weathericons-regular-webfont.woff',
-                                                     'skins/jas/weather-icons/font/weathericons-regular-webfont.woff2'
-                                                    ])
+                                           ])
                    ]
         )
