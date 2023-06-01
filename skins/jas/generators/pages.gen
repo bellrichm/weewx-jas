@@ -9,6 +9,7 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
 'scoping' I couldn't get it to work. So, I resorted to a global variable and a simple include.
 *#
 #set bootstrap_version = $getVar("$Extras.bootstrap_version", "latest")
+#set bootstrap_icons_version = $getVar("$Extras.bootstrap_icons_version", "latest")
 #set popperjs_core_version = $getVar("$Extras.popperjs_core_version", "latest")
 #set paho_mqtt_version = $getVar("$Extras.paho_mqtt_version", "latest")
 #set momentjs_version = $getVar("$Extras.momentjs_version", "latest")
@@ -17,6 +18,10 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
 #set bootstrap_minified = ""
 #if $getVar("$Extras.bootstrap_minified", True)
   #set bootstrap_minified = ".min"
+#end if
+#set bootstrap_icons_minified = ""
+#if $getVar("$Extras.bootstrap_icons_minified", True)
+  #set bootstrap_icons_minified = ".min"
 #end if
 #set popperjs_core_minified = ""
 #if $getVar("$Extras.popperjs_core_minified", True)
@@ -46,6 +51,7 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
       
       <!-- Bootstrap CSS -->
       #echo '<link href="https://cdn.jsdelivr.net/npm/bootstrap@' + $bootstrap_version + '/dist/css/bootstrap' + $bootstrap_minified + '.css" rel="stylesheet">\n'
+      #echo '<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@' + $bootstrap_icons_version + '/font/bootstrap-icons' + $bootstrap_icons_minified + '.css" rel="stylesheet">\n'
       #echo '<link rel="stylesheet" type="text/css" href="../jas.css">\n'
       #echo '<link rel="stylesheet" type="text/css" href="../user.css">\n'
 

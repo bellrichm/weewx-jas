@@ -1916,8 +1916,8 @@ function updateForecasts() {
         document.getElementById("forecastDate" + i).innerHTML = forecast["day"]  + " " + forecast["date"];
         document.getElementById("forecastObservation" + i).innerHTML = forecast["observation"];
         document.getElementById("forecastTemp" + i).innerHTML = forecast["temp_min"] + " | " + forecast["temp_max"];
-        document.getElementById("forecastRain" + i).innerHTML = '<i class="wi wi-raindrop"></i>' + ' ' + forecast['rain'] + '%';
-        document.getElementById('forecastWind' + i).innerHTML = '<i class="wi wi-strong-wind"></i>' + ' ' + forecast['wind_min'] + ' | ' + forecast['wind_max'] + ' ' + forecast['wind_unit'];
+        document.getElementById("forecastRain" + i).innerHTML = '<i class="bi bi-droplet"></i>' + ' ' + forecast['rain'] + '%';
+        document.getElementById('forecastWind' + i).innerHTML = '<i class="bi bi-wind"></i>' + ' ' + forecast['wind_min'] + ' | ' + forecast['wind_max'] + ' ' + forecast['wind_unit'];
         i += 1;
     });
 }
