@@ -133,7 +133,7 @@ from weewx.cheetahgenerator import SearchList
 from weewx.reportengine import merge_lang
 from weewx.units import get_label_string
 from weewx.tags import TimespanBinder
-from weeutil.weeutil import to_bool, to_int, TimeSpan
+from weeutil.weeutil import to_bool, to_int, to_list, TimeSpan
 
 try:
     import weeutil.logger # pylint: disable=unused-import
@@ -1704,17 +1704,29 @@ class JAS(SearchList):
         data += '    });\n'
         data += '}\n'
         data += '\n'
+        default_theme = to_list(self.skin_dict['Extras'].get('themes', 'light'))[0]
         data += 'window.addEventListener("load", function (event) {\n'
+        data += '    theme = sessionStorage.getItem("theme");\n'
+        data += '    if (!theme) {\n'
+        data += '        theme = "' + default_theme + '";\n'
+        data += '    }\n'
+        data += '    setTheme(theme);\n'      
         data += '    // Todo: create functions for code in the if statements\n'
         data += '    // Tell the parent page the iframe size\n'
-        data += '    let message = { height: document.body.scrollHeight, width: document.body.scrollWidth };\n'
+        data += '    message = {};\n'
+        data += '    message.kind = "resize";\n'
+        data += '    message.message = {};\n'
+        data += '    message.message = { height: document.body.scrollHeight, width: document.body.scrollWidth };\n'
         data += '    // window.top refers to parent window\n'
         data += '    window.top.postMessage(message, "*");\n'
         data += '\n'
         data += '    // When the iframe size changes, let the parent page know\n'
         data += '    const myObserver = new ResizeObserver(entries => {\n'
         data +='        entries.forEach(entry => {\n'
-        data +='        let message = { height: document.body.scrollHeight, width: document.body.scrollWidth };\n'
+        data += '       message = {};\n'
+        data += '       message.kind = "resize";\n'
+        data += '       message.message = {};\n'        
+        data +='        message.message = { height: document.body.scrollHeight, width: document.body.scrollWidth };\n'
         data +='        // window.top refers to parent window\n'
         data +='        window.top.postMessage(message, "*");\n'
         data +='        });\n'
@@ -1749,6 +1761,11 @@ class JAS(SearchList):
         data += '    if (jasOptions.forecast) {\n'
         data +='        updateForecasts();\n'
         data += '    }\n'
+        data += '    message = {};\n'
+        data += '    message.kind = "loaded";\n'
+        data += '    message.message = {};\n'
+        data += '    // window.top refers to parent window\n'
+        data += '    window.top.postMessage(message, "*");\n'
         data += '});\n'
 
         javascript = '''
@@ -1824,6 +1841,12 @@ function setLogLevel(logLevel) {
     sessionStorage.setItem("logLevel", logLevel);
     updatelogLevel(logLevel.toString());
     return "Sub-page log level: " + sessionStorage.getItem("logLevel")
+}
+
+// Handle event messages of type "setTheme".
+function setTheme(theme) {
+    sessionStorage.setItem('theme', theme);
+    document.documentElement.setAttribute('data-bs-theme', theme);
 }
 
 // Handle event messages of type "lang".
@@ -1922,7 +1945,10 @@ function updateForecasts() {
     });
 }
 window.addEventListener("onresize", function() {
-    let message = { height: document.body.scrollHeight, width: document.body.scrollWidth };	
+    message = {};
+    message.kind = "resize";
+    message.message = {};
+    message.message = { height: document.body.scrollHeight, width: document.body.scrollWidth };	
 
     // window.top refers to parent window
     window.top.postMessage(message, "*");
@@ -1958,6 +1984,10 @@ window.addEventListener("message",
                         {
                             handleMQTT(message.message);
                         }
+                        if (message.kind == "setTheme")
+                        {
+                            setTheme(message.message);
+                        }                        
                         if (message.kind == "log")
                         {
                             handleLog(message.message);
