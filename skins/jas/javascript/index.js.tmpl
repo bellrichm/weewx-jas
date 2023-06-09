@@ -161,7 +161,7 @@ function manageNavbar() {
 
 ## ToDo: thiscould be cleaned up
 function setIframeSrc(id, url) {
-  document.querySelector("#child-iframe").style.display = 'none';
+  document.querySelector("#child-iframe").style.visibility = 'hidden';
   // Set current page as the active page.
   currentPage = sessionStorage.getItem('currentPage');
   if (currentPage != url) {
@@ -284,7 +284,6 @@ function setYear(year) {
 }
 
 window.addEventListener("load", function (event) {
-  //document.querySelector("#child-iframe").style.display = 'none';   
   #set themes = to_list($getVar("$Extras.themes", "light"))
   #echo "  var themes = ['" + "', '".join($themes) + "'];\n"
   theme = sessionStorage.getItem('theme');
@@ -375,7 +374,7 @@ window.addEventListener("load", function (event) {
   #if to_bool($Extras.mqtt.get('enable', False))
     MQTTConnect(); 
   #end if
-  document.body.style.display = "block";
+  document.body.style.viewport = "visible";
 });
 
 addEventListener("resize", (event) => {
@@ -403,12 +402,9 @@ window.addEventListener('message',
                               //iframe.style.width = message.width + 'px';
                           }
                           if (kind == 'loaded') {
-                            //document.body.style.display = "block";
-                            document.querySelector("#child-iframe").style.display = 'block';
+                            document.querySelector("#child-iframe").style.visibility = 'visible';
                           }
-                          //iframe.style.display = 'block';   
                           
-                          //document.body.style.display = "block";
                         }, 
                         false);       
 
