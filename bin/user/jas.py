@@ -904,7 +904,8 @@ class JAS(SearchList):
         page_series_type = self.skin_dict['Extras']['page_definition'][page].get('series_type', 'single')
 
         #chart_final = 'var pageCharts = [];\n'
-        chart_final = 'utc_offset = ' + str(self.utc_offset) + ';\n'
+        chart_final = ''
+        chart_final += 'utc_offset = ' + str(self.utc_offset) + ';\n'
         chart_final += "ordinateNames = ['" + "', '".join(self.ordinate_names) + "'];\n"
         chart2 = ""
         charts = self.skin_dict['Extras']['chart_definitions']
@@ -1847,6 +1848,52 @@ function setLogLevel(logLevel) {
 function setTheme(theme) {
     sessionStorage.setItem('theme', theme);
     document.documentElement.setAttribute('data-bs-theme', theme);
+    const style = getComputedStyle(document.body);
+    bsBodyColor =  style.getPropertyValue("--bs-body-color");
+
+    textColor = {
+        textStyle: {
+            color: bsBodyColor
+        }
+    }
+    toolboxColor = {
+        toolbox: {
+            iconStyle: {
+                borderColor: bsBodyColor
+            }        
+        }
+    }
+    xAxisColor = {
+        xAxis: {
+            axisLine: {
+                lineStyle: {
+                    color: bsBodyColor
+                }
+            }
+        }
+    } 
+    angleAxisColor = {
+        angleAxis: {
+            axisLine: {
+                lineStyle: {
+                    color: bsBodyColor
+                }
+            }
+        }
+    }     
+
+    for (var index in pageCharts) {
+        options = pageCharts[index].chart.getOption();
+        pageCharts[index].chart.setOption(textColor);
+        pageCharts[index].chart.setOption(toolboxColor);
+        if ('xAxis' in options) {
+            pageCharts[index].chart.setOption(xAxisColor);
+        }
+        if ('angleAxis' in options) {
+            pageCharts[index].chart.setOption(angleAxisColor);
+        }            
+    }
+
 }
 
 // Handle event messages of type "lang".
