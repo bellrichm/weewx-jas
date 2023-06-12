@@ -5,6 +5,8 @@
 #import time
 #set $start_time = time.time()
 
+fullNavBarWidth = 0;
+
 indexPageLogLevel = sessionStorage.getItem('indexPageLogLevel');
 if (!indexPageLogLevel) {
     indexPageLogLevel = "$getVar('$Extras.jas_debug_level', '3')";
@@ -147,11 +149,8 @@ function setTheme(theme) {
 }
 
 function manageNavbar() {
-  // This hack attempts to collapse the navbar when it doesn't fit width-wise
-  navBarWidth = document.getElementById('navbar').offsetWidth;
-  parentScrollWidth = document.getElementById('navbar').parentElement.scrollWidth
-  
-  if (navBarWidth < parentScrollWidth || window.innerWidth < $Extras.navbar_collapse) {
+  parentWidth = document.getElementById('navbar').parentElement.offsetWidth
+  if (fullNavBarWidth >= parentWidth) {
     document.getElementById('navbar').classList.remove('navbar-expand')
   }
   else {
@@ -292,7 +291,6 @@ window.addEventListener("load", function (event) {
   }
   setTheme(theme);
 
-  manageNavbar();
 
   #if to_bool($getVar("$Extras.allow_user_language_selection", False))
     document.getElementById(lang).classList.add("active");
@@ -374,6 +372,13 @@ window.addEventListener("load", function (event) {
   #if to_bool($Extras.mqtt.get('enable', False))
     MQTTConnect(); 
   #end if
+  
+  // Get the actual navbar width and then reset the auto sizing of its width
+  navContainer = document.getElementById('navContainer');
+  fullNavBarWidth = navContainer.offsetWidth;
+  navContainer.classList.remove('w-auto');
+
+  manageNavbar();
   document.body.style.viewport = "visible";
 });
 
