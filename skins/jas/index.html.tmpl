@@ -81,7 +81,7 @@
                         #if not to_bool($getVar("$Extras.pages." + $page_data + ".enable", True))
                         #continue
                         #end if
-                        #if to_bool($getVar('Extras.pages.' + $page_data + '.in_navbar', True))
+                        #if $getVar('Extras.pages.' + $page_data + '.navbar', 'primary') == 'primary'
                         <li class="nav-item">
                            #set navItem = '<a id= "pages/' + $page_data + '.html" class="nav-link text-nowrap" onclick="setIframeSrc(\'child-iframe\', \'' + 'pages/' + $page_data + '.html\')" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" text_label="' + $page_data + '_navbarText' + '"></a>'
                            $navItem

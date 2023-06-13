@@ -353,7 +353,7 @@ window.addEventListener("load", function (event) {
       #if not $landing_page in $getVar("$Extras.pages")
         #for $page_name in $getVar("$Extras.pages")
           #if to_bool($getVar("$Extras.pages." + $page_name + ".enable", True)) and \
-              to_bool($getVar("$Extras.pages." + $page_name + ".in_navbar", True))
+              $getVar("$Extras.pages." + $page_name + ".navbar", 'primary') =='primary'
             #set landing_page = $page_name
             #break
           #end if

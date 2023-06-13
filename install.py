@@ -217,7 +217,7 @@ EXTENSION_CONFIG = """
                     [[[[[[radiationMax]]]]]]                    
                 [[[[[archive-month]]]]]
                     enable = false
-                    in_navbar = false
+                    navbar = None
                     zoomControl = True
                     [[[[[[minmax]]]]]]
                     [[[[[[thisdate]]]]]]
@@ -230,7 +230,7 @@ EXTENSION_CONFIG = """
                     [[[[[[UVMax]]]]]]
                     [[[[[[radiationMax]]]]]]                
                 [[[[[archive-year]]]]]   
-                    in_navbar = false
+                    navbar = None
                     zoomControl = True
                     [[[[[[minmax]]]]]]
                     [[[[[[thisdate]]]]]]
