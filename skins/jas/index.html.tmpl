@@ -77,17 +77,38 @@
                <div class="collapse navbar-collapse" id="navbarCollapse">
                   <ul class="navbar-nav me-auto mb-2 mb-md-0 navbar-nav-scroll">
                      ## Navigation for the congigured 'pages'
+                     #set processing_secondary = False
                      #for $page_data in $getVar('Extras.pages')
                         #if not to_bool($getVar("$Extras.pages." + $page_data + ".enable", True))
-                        #continue
+                           #continue
                         #end if
-                        #if $getVar('Extras.pages.' + $page_data + '.navbar', 'primary') == 'primary'
-                        <li class="nav-item">
-                           #set navItem = '<a id= "pages/' + $page_data + '.html" class="nav-link text-nowrap" onclick="setIframeSrc(\'child-iframe\', \'' + 'pages/' + $page_data + '.html\')" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" text_label="' + $page_data + '_navbarText' + '"></a>'
+                        #set nav_location = $getVar('Extras.pages.' + $page_data + '.navbar', 'primary') 
+                        #if $nav_location == 'primary'
+                           #if $processing_secondary
+                                 </ul>
+                              </li>                        
+                           #end if
+                           #set processing_secondary = False
+                           <li class="nav-item">
+                              #set navItem = '<a id= "pages/' + $page_data + '.html" class="nav-link text-nowrap" onclick="setIframeSrc(\'child-iframe\', \'' + 'pages/' + $page_data + '.html\')" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" text_label="' + $page_data + '_navbarText' + '"></a>'
+                              $navItem
+                           </li>
+                        #else if $nav_location == 'secondary'
+                           #if not $processing_secondary
+                              <li class="nav-item dropdown">
+                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" text_label="more_dropdown_label">
+                                 </a>
+                                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                           #end if
+                           #set processing_secondary = True
+                           #set navItem = '<a id= "pages/' + $page_data + '.html" class="dropdown-item nav-link text-nowrap" onclick="setIframeSrc(\'child-iframe\', \'' + 'pages/' + $page_data + '.html\')" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" text_label="' + $page_data + '_navbarText' + '"></a>'
                            $navItem
-                        </li>
                         #end if
                      #end for
+                     #if $processing_secondary
+                              </ul>
+                           </li>                        
+                     #end if
                      ## Year dropdown
                      #if ($getVar("$Extras.pages.archive-year", None) and to_bool($getVar("$Extras.pages.archive-year.enable", True))) \
                         or ($getVar("$Extras.pages.archive-month", None) and to_bool($getVar("$Extras.pages.archive-month.enable", True)))
