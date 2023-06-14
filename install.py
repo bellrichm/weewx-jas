@@ -214,10 +214,21 @@ EXTENSION_CONFIG = """
                     [[[[[[wind]]]]]]
                     [[[[[[ET]]]]]]
                     [[[[[[UVMax]]]]]]
-                    [[[[[[radiationMax]]]]]]                    
+                    [[[[[[radiationMax]]]]]]
+                [[[[[archive-year]]]]]   
+                    zoomControl = True
+                    [[[[[[minmax]]]]]]
+                    [[[[[[thisdate]]]]]]
+                    [[[[[[outTempMinMax]]]]]]
+                    [[[[[[outHumidityMinMax]]]]]]  
+                    [[[[[[barometer]]]]]]  
+                    [[[[[[rain]]]]]]  
+                    [[[[[[wind]]]]]]   
+                    [[[[[[ET]]]]]]                                   
+                    [[[[[[UVMax]]]]]]
+                    [[[[[[radiationMax]]]]]]                                     
                 [[[[[archive-month]]]]]
                     enable = false
-                    navbar = None
                     zoomControl = True
                     [[[[[[minmax]]]]]]
                     [[[[[[thisdate]]]]]]
@@ -229,19 +240,6 @@ EXTENSION_CONFIG = """
                     [[[[[[ET]]]]]]                                   
                     [[[[[[UVMax]]]]]]
                     [[[[[[radiationMax]]]]]]                
-                [[[[[archive-year]]]]]   
-                    navbar = None
-                    zoomControl = True
-                    [[[[[[minmax]]]]]]
-                    [[[[[[thisdate]]]]]]
-                    [[[[[[outTempMinMax]]]]]]
-                    [[[[[[outHumidityMinMax]]]]]]  
-                    [[[[[[barometer]]]]]]  
-                    [[[[[[rain]]]]]]  
-                    [[[[[[wind]]]]]]   
-                    [[[[[[ET]]]]]]                                   
-                    [[[[[[UVMax]]]]]]
-                    [[[[[[radiationMax]]]]]]
                 [[[[[about]]]]]   
                     [[[[[[about]]]]]]     
                         filename = sections/basic_about.inc         

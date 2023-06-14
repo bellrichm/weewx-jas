@@ -76,58 +76,73 @@
                </button>
                <div class="collapse navbar-collapse" id="navbarCollapse">
                   <ul class="navbar-nav me-auto mb-2 mb-md-0 navbar-nav-scroll">
-                     ## Navigation for the congigured 'pages'
+                     ## Navigation for the configured 'pages'
                      #set processing_secondary = False
                      #for $page_data in $getVar('Extras.pages')
                         #if not to_bool($getVar("$Extras.pages." + $page_data + ".enable", True))
                            #continue
                         #end if
                         #set nav_location = $getVar('Extras.pages.' + $page_data + '.navbar', 'primary') 
-                        #if $nav_location == 'primary'
-                           #if $processing_secondary
+                        #if $page_data == 'archive-year'                        
+                            #if $processing_secondary
                                  </ul>
                               </li>                        
                            #end if
                            #set processing_secondary = False
-                           <li class="nav-item">
-                              #set navItem = '<a id= "pages/' + $page_data + '.html" class="nav-link text-nowrap" onclick="setIframeSrc(\'child-iframe\', \'' + 'pages/' + $page_data + '.html\')" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" text_label="' + $page_data + '_navbarText' + '"></a>'
-                              $navItem
-                           </li>
-                        #else if $nav_location == 'secondary'
-                           #if not $processing_secondary
+                           $yearDropdown()
+                           ## Year dropdown
+                           #if ($getVar("$Extras.pages.archive-year", None) and to_bool($getVar("$Extras.pages.archive-year.enable", True))) \
+                              or ($getVar("$Extras.pages.archive-month", None) and to_bool($getVar("$Extras.pages.archive-month.enable", True)))
                               <li class="nav-item dropdown">
-                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" text_label="more_dropdown_label">
-                                 </a>
-                                 <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                              <a class="nav-link dropdown-toggle" href="#" id="dropdownYear" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" text_label="year_dropdown_label">
+                              </a>
+                              <div class="dropdown-menu" aria-labelledby="dropdownYear" id="dropdownYearMenu">
+                              </li>
+                              #end if                           
+                        #else if  $page_data == 'archive-month'                         
+                          #if $processing_secondary
+                                 </ul>
+                              </li>                        
                            #end if
-                           #set processing_secondary = True
-                           #set navItem = '<a id= "pages/' + $page_data + '.html" class="dropdown-item nav-link text-nowrap" onclick="setIframeSrc(\'child-iframe\', \'' + 'pages/' + $page_data + '.html\')" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" text_label="' + $page_data + '_navbarText' + '"></a>'
-                           $navItem
+                           #set processing_secondary = False
+                           ## Month dropdown
+                           #if $getVar("$Extras.pages.archive-month", None) and to_bool($getVar("$Extras.pages.archive-month.enable", True))
+                              <li class="nav-item dropdown">
+                              <div class="dropdown">
+                                 <a class="nav-link dropdown-toggle" href="#" role="button" id="dropdownYearMonth" data-bs-toggle="dropdown" aria-expanded="false" text_label="yearMonth_dropdown_label">
+                                 </a>
+                                 <ul class="dropdown-menu pre-scrollable" aria-labelledby="dropdownYearMonth" id="dropdownYearMonthMenu">
+                                 </ul>
+                              </div>
+                              </li>
+                           #end if
+                        #else
+                          #if $nav_location == 'primary'
+                             #if $processing_secondary
+                                   </ul>
+                                </li>                        
+                             #end if
+                             #set processing_secondary = False
+                             <li class="nav-item">
+                                #set navItem = '<a id= "pages/' + $page_data + '.html" class="nav-link text-nowrap" onclick="setIframeSrc(\'child-iframe\', \'' + 'pages/' + $page_data + '.html\')" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" text_label="' + $page_data + '_navbarText' + '"></a>'
+                                $navItem
+                             </li>
+                          #else if $nav_location == 'secondary'
+                             #if not $processing_secondary
+                                <li class="nav-item dropdown">
+                                   <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" text_label="more_dropdown_label">
+                                   </a>
+                                   <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                             #end if
+                             #set processing_secondary = True
+                             #set navItem = '<a id= "pages/' + $page_data + '.html" class="dropdown-item nav-link text-nowrap" onclick="setIframeSrc(\'child-iframe\', \'' + 'pages/' + $page_data + '.html\')" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" text_label="' + $page_data + '_navbarText' + '"></a>'
+                             $navItem
+                          #end if
                         #end if
                      #end for
                      #if $processing_secondary
                               </ul>
                            </li>                        
-                     #end if
-                     ## Year dropdown
-                     #if ($getVar("$Extras.pages.archive-year", None) and to_bool($getVar("$Extras.pages.archive-year.enable", True))) \
-                        or ($getVar("$Extras.pages.archive-month", None) and to_bool($getVar("$Extras.pages.archive-month.enable", True)))
-                        <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="dropdownYear" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" text_label="year_dropdown_label">
-                        </a>
-                        <div class="dropdown-menu" aria-labelledby="dropdownYear" id="dropdownYearMenu">
-                        </li>
-                     #end if
-                     ## Month dropdown
-                     #if $getVar("$Extras.pages.archive-month", None) and to_bool($getVar("$Extras.pages.archive-month.enable", True))
-                        <li class="nav-item dropdown">
-                        <div class="dropdown">
-                           <a class="nav-link dropdown-toggle" href="#" role="button" id="dropdownYearMonth" data-bs-toggle="dropdown" aria-expanded="false" text_label="yearMonth_dropdown_label">
-                           </a>
-                           <ul class="dropdown-menu pre-scrollable" aria-labelledby="dropdownYearMonth" id="dropdownYearMonthMenu">
-                           </ul>
-                        </div>
-                        </li>
                      #end if
                      ## Language dropdown
                      #if to_bool($getVar("$Extras.use_browser_language_preference", False)) and to_bool($getVar("$Extras.allow_user_language_selection", False))
