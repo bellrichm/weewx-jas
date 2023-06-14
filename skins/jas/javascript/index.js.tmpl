@@ -124,9 +124,23 @@ function getLogLevel() {
   return "Index page log level: " + sessionStorage.getItem("indexPageLogLevel")
 }
 
+function updateTheme(themeSelection) {
+  if (themeSelection.checked) {
+    setTheme("dark");
+  } else {
+    setTheme("light");
+  }
+}
+
 function setTheme(theme) {
   sessionStorage.setItem('theme', theme);
   document.documentElement.setAttribute('data-bs-theme', theme);
+  if (theme == 'dark') {
+    document.getElementById("themeSelection").checked = true;
+  }
+  else {
+    document.getElementById("themeSelection").checked = false;
+  }
 
   message = {};
   message.kind = 'setTheme';
@@ -287,7 +301,12 @@ window.addEventListener("load", function (event) {
   #echo "  var themes = ['" + "', '".join($themes) + "'];\n"
   theme = sessionStorage.getItem('theme');
   if (!theme) {
-    theme = themes[0];
+    if (window.matchMedia('(prefers-color-scheme: dark)').media === 'not all') {
+      theme = themes[0];
+    }
+    else {
+      theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    }
   }
   setTheme(theme);
 
