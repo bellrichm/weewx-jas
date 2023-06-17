@@ -294,8 +294,9 @@ class JAS(SearchList):
             logdbg(msg)
 
     def _get_skin_dict(self, language):
-        self.skin_dicts[language] = copy.deepcopy(self.skin_dict)
+        self.skin_dicts[language] = configobj.ConfigObj()
         merge_lang(language, self.generator.config_dict, self.skin_dict['REPORT_NAME'], self.skin_dicts[language])
+        self.skin_dicts[language].merge(self.skin_dict)
         self.skin_dicts[language]['Labels']['Generic'].merge((self.skin_dict['Extras'].get('lang', {}).get(language, {}).get('Labels', {}).get('Generic', {})))
         self.skin_dicts[language]['Texts'].merge((self.skin_dict['Extras'].get('lang', {}).get(language, {}).get('Texts', {})))
 
