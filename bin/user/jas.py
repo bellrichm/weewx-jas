@@ -906,6 +906,16 @@ class JAS(SearchList):
 
         #chart_final = 'var pageCharts = [];\n'
         chart_final = ''
+        chart_final += 'function simpleTooltipFormatter(args) {\n'
+        chart_final += '  dateTime = moment.unix(args[0].axisValue/1000).utcOffset(utc_offset).format(dateTimeFormat[lang].chart[aggregate_interval].toolTipX);\n'
+        chart_final += '  let tooltip = `<div>${dateTime}</div> `;\n'
+        chart_final += '\n'
+        chart_final += '  args.forEach(({ color, seriesName, value }) => {\n'
+        chart_final += '    value = value[1] ? Number(value[1]).toLocaleString(lang) : value[1];\n'        
+        chart_final += '    tooltip += `<div style="color: ${color};">${seriesName} ${value}</div>`;\n'
+        chart_final += '  });\n'
+        chart_final += '  return tooltip;\n'
+        chart_final += '}\n'
         chart_final += 'utc_offset = ' + str(self.utc_offset) + ';\n'
         chart_final += "ordinateNames = ['" + "', '".join(self.ordinate_names) + "'];\n"
         chart2 = ""
