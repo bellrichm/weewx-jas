@@ -295,8 +295,17 @@ class JAS(SearchList):
 
     def _get_skin_dict(self, language):
         self.skin_dicts[language] = configobj.ConfigObj()
+        # Get the 'lang' file data.
         merge_lang(language, self.generator.config_dict, self.skin_dict['REPORT_NAME'], self.skin_dicts[language])
-        self.skin_dicts[language].merge(self.skin_dict)
+
+        # Get the data from the documented report locations in weewx.conf
+        # WeeWX does a good job merging this into the skin dict
+        # But it merges too much for our use. So pull directly from the 'source'
+        self.skin_dicts[language]['Labels']['Generic'].merge(self.generator.config_dict['StdReport']['Defaults'].get('Labels', {}).get('Generic', {}))
+        self.skin_dicts[language]['Labels']['Generic'].merge(self.generator.config_dict['StdReport'][self.skin_dict['REPORT_NAME']].get('Labels', {}).get('Generic', {}))
+        self.skin_dicts[language]['Texts'].merge(self.generator.config_dict['StdReport'][self.skin_dict['REPORT_NAME']].get('Texts', {}))
+
+        # Now get the jas specific data
         self.skin_dicts[language]['Labels']['Generic'].merge((self.skin_dict['Extras'].get('lang', {}).get(language, {}).get('Labels', {}).get('Generic', {})))
         self.skin_dicts[language]['Texts'].merge((self.skin_dict['Extras'].get('lang', {}).get(language, {}).get('Texts', {})))
 
