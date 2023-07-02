@@ -121,3 +121,28 @@ Fixes:
 - Memory 'leak' due to Chetah processing of #include. (#96, #98)
 Internal:
 - Move looping from Cheetah to javascript. (#85)
+
+V0.4.0
+
+Fixes
+- Provide default values for labels with missing translations.
+- Fix missing translations.
+- Chart information overlapping.
+- Fixed navbar collapse on certain tablets.
+
+New
+- Support bootstrap dark theme.
+- Added an ‘about’ page.
+- Support for user overriding the CSS.
+- Support for custom page layouts.
+- Ability to place pages in a ‘more’ dropdown in the navbar.
+- Ability to position archive year and archive archive month in navbar.
+- Removed markers from tooltip and update text to match chart
+
+Enhancements
+- Use bootstrap icons instead of weather-icons.
+
+Internal
+- Javascript is generated with Python instead of with Cheetah.
+- Data is generated with Python instead of with Cheetah.
+- Bootstrap version updated to 5.3.0.
