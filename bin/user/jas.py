@@ -2130,17 +2130,32 @@ window.addEventListener("message",
                                      formatter=self.generator.formatter,
                                      converter=self.generator.converter)
 
-    def _get_current(self, observation, data_binding, unit_name=None):
-        self.current_obj = weewx.tags.CurrentObj(
-                    self.generator.db_binder.bind_default(data_binding),
-                    data_binding,
-                    self.timespan.stop,
-                    self.generator.formatter,
-                    self.generator.converter,
-                    None,
-                    self.generator.record
-                )
-        current_value = getattr(self.current_obj, observation)
+    def _get_current(self, obs_type, data_binding, unit_name=None):
+        db_manager = self.generator.db_binder.get_manager(data_binding=data_binding)
+
+        # Start of code stolen from tags.py CurrentObj __getattr__
+        # The WeeWx method was using the 'current' record to perform the XType calculation.
+        # It does not gave the necessary data.
+        # This always uses data from the database.
+        # Get the record for this timestamp from the database
+        record = db_manager.getRecord(self.timespan.stop, max_delta=None)
+        # If there was no record at that timestamp, it will be None. If there was a record,
+        # check to see if the type is in it.
+        if not record or obs_type in record:
+            # If there was no record, then the value of the ValueTuple will be None.
+            # Otherwise, it will be value stored in the database.
+            vt = weewx.units.as_value_tuple(record, obs_type)
+        else:
+            # Couldn't get the value out of the record. Try the XTypes system.
+            try:
+                vt = weewx.xtypes.get_scalar(obs_type, record, db_manager)
+            except (weewx.UnknownType, weewx.CannotCalculate):
+                # Nothing seems to be working. It's an unknown type.
+                vt = weewx.units.UnknownType(obs_type)
+
+        # Finally, return a ValueHelper
+        current_value =  weewx.units.ValueHelper(vt, 'current', self.generator.formatter, self.generator.converter)
+        # End of stolen code
 
         if unit_name != 'default':
             return getattr(current_value, unit_name)
