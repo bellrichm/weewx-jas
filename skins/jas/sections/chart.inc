@@ -2,7 +2,10 @@
 ##    See the file LICENSE.txt for your rights.
 
 #set id = $section_global + $page_name_global
-<div class="col-12 col-xl-6 mb-4">
+#set grid_cols = $getVar('$Extras.pages.' + $page + '.' + $section_global + '.grid_cols', 
+                            $getVar('$Extras.pages.' + $page + '.grid_cols',
+                                $getVar('$Extras.grid_cols')))
+<div class="$grid_cols">
     <div class="card">
     <div class="card-body text-center">
         #set text_label = False
