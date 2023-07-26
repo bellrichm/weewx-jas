@@ -27,15 +27,15 @@
           <div class="row">
         #end if
       #end if
+      #set global section_global = $section
       #if $section in $charts
-        #set global section_global = $section
         #include 'sections/chart.inc'
-        #set global section_global = None
       #else if $include_name is not None
         #include $include_name
       #else
         #include 'sections/' + $section + '.inc'
       #end if
+      #set global section_global = None
       #if $layout != 'grid'
         </div>
       #end if
