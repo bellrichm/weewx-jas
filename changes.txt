@@ -146,3 +146,14 @@ Internal
 - Javascript is generated with Python instead of with Cheetah.
 - Data is generated with Python instead of with Cheetah.
 - Bootstrap version updated to 5.3.0.
+
+V0.4.1
+
+Fixes:
+- jas always gets ‘current’ data from the db.
+  This fixes the case where a current xtype is in an alternate binding.
+  In this case the data to calculate the xtype will never be in the archive record.
+
+Enhancements:
+- Responsiveness of charts is improved, resulting in small sized charts looking better.
+- Added option to configure the number of columns a section should use.
