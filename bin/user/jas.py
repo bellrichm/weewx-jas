@@ -909,7 +909,7 @@ class JAS(SearchList):
                 chart2 += indent + key + ": " + value + ",\n"
         return chart2
 
-    def _iterdict(self, indent, chart, chart_js, series_type, interval, dictionary, chart_data_binding):
+    def _iterdict(self, indent, chart_js, dictionary):
         chart2 = chart_js
         for key, value in dictionary.items():
             if isinstance(value, dict):
@@ -917,42 +917,9 @@ class JAS(SearchList):
                     continue
                 if key == 'series':
                     continue
-                    chart2 += indent + "series: [\n"
-
-                    if series_type == 'comparison':
-                        obs = next(iter(value))
-                        (start_year, end_year) = self._get_range(self.skin_dict['Extras']['pages'][page].get('start', None),
-                                                                 self.skin_dict['Extras']['pages'][page].get('end', None),
-                                                                 chart_data_binding)
-                        for year in range(start_year, end_year):
-                            chart2 += indent + " {\n"
-                            chart2 += "    name: '" + str(year) + "',\n"
-                            chart2 = self._iterdict(indent + '  ', page, chart, chart2, series_type, interval, value[obs], chart_data_binding)
-                            chart2 += indent + "  },\n"
-                    else:
-                        for obs in value:
-                            aggregate_type = self.chart_defs[chart]['series'][obs]['weewx']['aggregate_type']
-                            aggregate_interval = self.skin_dict['Extras']['page_definition'][page].get('aggregate_interval', {}) \
-                                                .get(aggregate_type, 'none')
-
-                            # set the aggregate_interval at the beginning of the chart definition, so it can be used in the chart
-                            # Note, this means the last observation's aggregate type will be used to determine the aggregate interval
-                            if series_type == 'multiple':
-                                chart2 = "aggregate_interval = 'multiyear'\n" + chart2
-                            elif series_type == 'mqtt':
-                                chart2 = "aggregate_interval = 'mqtt'\n" + chart2
-                            else:
-                                chart2 = "aggregate_interval = '" + aggregate_interval + "'\n" + chart2
-
-                            chart2 += indent + " {\n"
-                            chart2 = self._iterdict(indent + '  ', page, chart, chart2, series_type, interval, value[obs], chart_data_binding)
-
-                            chart2 += indent + "},\n"
-
-                    chart2 += indent +"],\n"
                 else:
                     chart2 += indent + key + ":" + " {\n"
-                    chart2 = self._iterdict(indent + '  ', chart, chart2, series_type, interval, value, chart_data_binding)
+                    chart2 = self._iterdict(indent + '  ', chart2, value)
                     chart2 += indent + "},\n"
             else:
                 chart2 += indent + key + ": " + value + ",\n"
@@ -1008,7 +975,7 @@ class JAS(SearchList):
                 chart2 += self._iterdict_series('  ', page, chart, chart_js, series_type, interval, chart_def, chart_data_binding)
                 
                 chart_js =''
-                chart2 += self._iterdict('  ', chart, chart_js, series_type, interval, chart_def, chart_data_binding)
+                chart2 += self._iterdict('  ', chart_js, chart_def)
 
                 # ToDo: do not hard code 'grid'
                 if 'polar' in self.skin_dict['Extras']['chart_definitions'][chart]:
@@ -1038,13 +1005,7 @@ class JAS(SearchList):
                                 del y_axis_default['name']
 
                         #chart2 += '  #set index = ' + i_str + '\n'
-                        chart2 += self._iterdict('      ',
-                                                 chart,
-                                                 '',
-                                                 series_type,
-                                                 interval,
-                                                 y_axis_default,
-                                                 chart_data_binding)
+                        chart2 += self._iterdict('      ', '', y_axis_default)
                         chart2 += '    },\n'
                     chart2 += '  ],\n'
 
