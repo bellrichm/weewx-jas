@@ -861,7 +861,7 @@ class JAS(SearchList):
                     self.chart_defs[chart]['series'][value]['weewx'] = {}
                 weeutil.config.conditional_merge(self.chart_defs[chart]['series'][value]['weewx'], weewx_options)
 
-    def _iterdict_series(self, indent, page, chart, chart_js, series_type, interval, value, chart_data_binding):
+    def _gen_series(self, indent, page, chart, chart_js, series_type, value, chart_data_binding):
         chart2 = chart_js
         #key = 'series'
         if isinstance(value, dict):
@@ -918,7 +918,6 @@ class JAS(SearchList):
                 chart2 += indent + key + ": " + value + ",\n"
         return chart2
 
-
     def _gen_chart_common(self, chart, chart_def):
         chart_js =''
         chart2 = ''
@@ -960,7 +959,6 @@ class JAS(SearchList):
             
         return chart2
 
-
     def _gen_charts(self, filename, page, interval, page_name):
         start_time = time.time()
         skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
@@ -999,6 +997,9 @@ class JAS(SearchList):
                     weeutil.config.conditional_merge(chart_def, self.skin_dict['Extras']['chart_defaults']['series_type'].get(series_type, {}))
 
                 # for now, do not support overriding chart options by page
+                # If this was supported, this would make caching the javascript more complicated
+                # And possibly less useful
+                # The workaround is to define a specific chart for the page
                 #self.charts_def[chart].merge(self.skin_dict['Extras']['pages'][page][chart])
                 for observation in chart_def['series']:
                     obs = chart_def['series'][observation].get('weewx', {}).get('observation', observation)
@@ -1006,8 +1007,7 @@ class JAS(SearchList):
                 #
 
                 chart_js = "var option = {\n"
-                # This uses information that is found in the page definition.
-                chart2 += self._iterdict_series('  ', page, chart, chart_js, series_type, interval, chart_def['series'], chart_data_binding)
+                chart2 += self._gen_series('  ', page, chart, chart_js, series_type, chart_def['series'], chart_data_binding)
                 
                 if chart not in self.charts_javascript:
                     self.charts_javascript[chart] = {}
