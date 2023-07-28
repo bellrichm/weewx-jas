@@ -909,7 +909,7 @@ class JAS(SearchList):
                 chart2 += indent + key + ": " + value + ",\n"
         return chart2
 
-    def _iterdict(self, indent, page, chart, chart_js, series_type, interval, dictionary, chart_data_binding):
+    def _iterdict(self, indent, chart, chart_js, series_type, interval, dictionary, chart_data_binding):
         chart2 = chart_js
         for key, value in dictionary.items():
             if isinstance(value, dict):
@@ -952,7 +952,7 @@ class JAS(SearchList):
                     chart2 += indent +"],\n"
                 else:
                     chart2 += indent + key + ":" + " {\n"
-                    chart2 = self._iterdict(indent + '  ', page, chart, chart2, series_type, interval, value, chart_data_binding)
+                    chart2 = self._iterdict(indent + '  ', chart, chart2, series_type, interval, value, chart_data_binding)
                     chart2 += indent + "},\n"
             else:
                 chart2 += indent + key + ": " + value + ",\n"
@@ -1008,7 +1008,7 @@ class JAS(SearchList):
                 chart2 += self._iterdict_series('  ', page, chart, chart_js, series_type, interval, chart_def, chart_data_binding)
                 
                 chart_js =''
-                chart2 += self._iterdict('  ', page, chart, chart_js, series_type, interval, chart_def, chart_data_binding)
+                chart2 += self._iterdict('  ', chart, chart_js, series_type, interval, chart_def, chart_data_binding)
 
                 # ToDo: do not hard code 'grid'
                 if 'polar' in self.skin_dict['Extras']['chart_definitions'][chart]:
@@ -1039,7 +1039,7 @@ class JAS(SearchList):
 
                         #chart2 += '  #set index = ' + i_str + '\n'
                         chart2 += self._iterdict('      ',
-                                                 page, chart,
+                                                 chart,
                                                  '',
                                                  series_type,
                                                  interval,
