@@ -208,6 +208,7 @@ class JAS(SearchList):
 
         self.chart_defaults = self.skin_dict['Extras']['chart_defaults'].get('global', {})
         self.chart_series_defaults = self.skin_dict['Extras']['chart_defaults'].get('chart_type', {}).get('series', {})
+        self.charts_javascript = {}
 
         self.skin_dicts = {}
         skin_path = os.path.join(self.generator.config_dict['WEEWX_ROOT'], self.skin_dict['SKIN_ROOT'], self.skin_dict['skin'])
@@ -1013,8 +1014,13 @@ class JAS(SearchList):
                 # This uses information that is found in the page definition.
                 chart2 += self._iterdict_series('  ', page, chart, chart_js, series_type, interval, chart_def, chart_data_binding)
                 
-                chart_temp2 = self._gen_chart_common(chart, chart_def)
-                chart2 += chart_temp2
+                if chart not in self.charts_javascript:
+                    self.charts_javascript[chart] = {}
+                    self.charts_javascript[chart][series_type] = self._gen_chart_common(chart, chart_def)
+                elif series_type not in self.charts_javascript[chart]:
+                    self.charts_javascript[chart][series_type] = self._gen_chart_common(chart, chart_def)
+
+                chart2 += self.charts_javascript[chart][series_type]
 
                 chart2 += "};\n"
                 chart2 += "var telem = document.getElementById('" + chart + page_name + "');\n"
