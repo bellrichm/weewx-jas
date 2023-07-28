@@ -902,9 +902,6 @@ class JAS(SearchList):
                     chart2 += indent +"],\n"
                 else:
                     continue
-                    chart2 += indent + key + ":" + " {\n"
-                    chart2 = self._iterdict(indent + '  ', page, chart, chart2, series_type, interval, value, chart_data_binding)
-                    chart2 += indent + "},\n"
             else:
                 chart2 += indent + key + ": " + value + ",\n"
         return chart2
