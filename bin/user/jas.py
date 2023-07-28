@@ -861,50 +861,45 @@ class JAS(SearchList):
                     self.chart_defs[chart]['series'][value]['weewx'] = {}
                 weeutil.config.conditional_merge(self.chart_defs[chart]['series'][value]['weewx'], weewx_options)
 
-    def _iterdict_series(self, indent, page, chart, chart_js, series_type, interval, dictionary, chart_data_binding):
+    def _iterdict_series(self, indent, page, chart, chart_js, series_type, interval, value, chart_data_binding):
         chart2 = chart_js
-        for key, value in dictionary.items():
-            if isinstance(value, dict):
-                if key == 'weewx':
-                    continue
-                if key == 'series':
-                    chart2 += indent + "series: [\n"
+        #key = 'series'
+        if isinstance(value, dict):
+            chart2 += indent + "series: [\n"
 
-                    if series_type == 'comparison':
-                        obs = next(iter(value))
-                        (start_year, end_year) = self._get_range(self.skin_dict['Extras']['pages'][page].get('start', None),
-                                                                 self.skin_dict['Extras']['pages'][page].get('end', None),
-                                                                 chart_data_binding)
-                        for year in range(start_year, end_year):
-                            chart2 += indent + " {\n"
-                            chart2 += "    name: '" + str(year) + "',\n"
-                            chart2 = self._iterdict_series(indent + '  ', page, chart, chart2, series_type, interval, value[obs], chart_data_binding)
-                            chart2 += indent + "  },\n"
-                    else:
-                        for obs in value:
-                            aggregate_type = self.chart_defs[chart]['series'][obs]['weewx']['aggregate_type']
-                            aggregate_interval = self.skin_dict['Extras']['page_definition'][page].get('aggregate_interval', {}) \
-                                                .get(aggregate_type, 'none')
-
-                            # set the aggregate_interval at the beginning of the chart definition, so it can be used in the chart
-                            # Note, this means the last observation's aggregate type will be used to determine the aggregate interval
-                            if series_type == 'multiple':
-                                chart2 = "aggregate_interval = 'multiyear'\n" + chart2
-                            elif series_type == 'mqtt':
-                                chart2 = "aggregate_interval = 'mqtt'\n" + chart2
-                            else:
-                                chart2 = "aggregate_interval = '" + aggregate_interval + "'\n" + chart2
-
-                            chart2 += indent + " {\n"
-                            chart2 = self._iterdict_series(indent + '  ', page, chart, chart2, series_type, interval, value[obs], chart_data_binding)
-
-                            chart2 += indent + "},\n"
-
-                    chart2 += indent +"],\n"
-                else:
-                    continue
+            if series_type == 'comparison':
+                obs = next(iter(value))
+                (start_year, end_year) = self._get_range(self.skin_dict['Extras']['pages'][page].get('start', None),
+                                                            self.skin_dict['Extras']['pages'][page].get('end', None),
+                                                            chart_data_binding)
+                for year in range(start_year, end_year):
+                    chart2 += indent + " {\n"
+                    chart2 += "    name: '" + str(year) + "',\n"
+                    chart2 = self._iterdict(indent + '  ', chart2, value[obs])
+                    chart2 += indent + "  },\n"
             else:
-                chart2 += indent + key + ": " + value + ",\n"
+                for obs in value:
+                    aggregate_type = self.chart_defs[chart]['series'][obs]['weewx']['aggregate_type']
+                    aggregate_interval = self.skin_dict['Extras']['page_definition'][page].get('aggregate_interval', {}) \
+                                        .get(aggregate_type, 'none')
+
+                    # set the aggregate_interval at the beginning of the chart definition, so it can be used in the chart
+                    # Note, this means the last observation's aggregate type will be used to determine the aggregate interval
+                    if series_type == 'multiple':
+                        chart2 = "aggregate_interval = 'multiyear'\n" + chart2
+                    elif series_type == 'mqtt':
+                        chart2 = "aggregate_interval = 'mqtt'\n" + chart2
+                    else:
+                        chart2 = "aggregate_interval = '" + aggregate_interval + "'\n" + chart2
+
+                    chart2 += indent + " {\n"
+                    chart2 = self._iterdict(indent + '  ', chart2, value[obs])
+
+                    chart2 += indent + "},\n"
+
+            chart2 += indent +"],\n"
+        else:
+            chart2 += indent + 'series' + ": " + value + ",\n"
         return chart2
 
     def _iterdict(self, indent, chart_js, dictionary):
@@ -1012,7 +1007,7 @@ class JAS(SearchList):
 
                 chart_js = "var option = {\n"
                 # This uses information that is found in the page definition.
-                chart2 += self._iterdict_series('  ', page, chart, chart_js, series_type, interval, chart_def, chart_data_binding)
+                chart2 += self._iterdict_series('  ', page, chart, chart_js, series_type, interval, chart_def['series'], chart_data_binding)
                 
                 if chart not in self.charts_javascript:
                     self.charts_javascript[chart] = {}
