@@ -923,6 +923,48 @@ class JAS(SearchList):
         return chart2
 
 
+    def _gen_chart_common(self, chart, chart_def):
+        chart_js =''
+        chart2 = ''
+        chart_temp = self._iterdict('  ', chart_js, chart_def)
+        chart2 += chart_temp
+
+        # ToDo: do not hard code 'grid'
+        if 'polar' in self.skin_dict['Extras']['chart_definitions'][chart]:
+            coordinate_type = 'polar'
+        elif 'grid' in self.skin_dict['Extras']['chart_definitions'][chart]:
+            coordinate_type = 'grid'
+        else:
+            coordinate_type = 'grid'
+        default_grid_properties = self.skin_dict['Extras']['chart_defaults'].get('properties', {}).get('grid', None)
+        if 'yAxis' not in chart_def and coordinate_type == 'grid':
+            chart2 += '  yAxis: [\n'
+            for i in range(0, len(chart_def['weewx']['yAxis'])):
+                i_str = str(i)
+                y_axis_default = copy.deepcopy(default_grid_properties['yAxis'])
+                if i_str in chart_def['weewx']['yAxis']:
+                    y_axis_default.merge(chart_def['weewx']['yAxis'][str(i)])
+                    chart2 += '    {\n'
+
+                    if 'name' in y_axis_default and y_axis_default['name'] == 'weewx_unit_label':
+                        unit_name = chart_def['weewx']['yAxis'][i_str]['weewx'].get('unit', None)
+                        if unit_name is not None:
+                            y_axis_label = self._get_unit_label(unit_name)
+                        else:
+                            y_axis_label = self._get_obs_unit_label( chart_def['weewx']['yAxis'][i_str]['weewx']['obs'])
+
+                        chart2 += "      name:' " + y_axis_label + "',\n"
+                        del y_axis_default['name']
+
+                #chart2 += '  #set index = ' + i_str + '\n'
+                chart_temp = self._iterdict('      ', '', y_axis_default) 
+                chart2 += chart_temp
+                chart2 += '    },\n'
+            chart2 += '  ],\n'
+            
+        return chart2
+
+
     def _gen_charts(self, filename, page, interval, page_name):
         start_time = time.time()
         skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
@@ -971,40 +1013,8 @@ class JAS(SearchList):
                 # This uses information that is found in the page definition.
                 chart2 += self._iterdict_series('  ', page, chart, chart_js, series_type, interval, chart_def, chart_data_binding)
                 
-                chart_js =''
-                chart2 += self._iterdict('  ', chart_js, chart_def)
-
-                # ToDo: do not hard code 'grid'
-                if 'polar' in self.skin_dict['Extras']['chart_definitions'][chart]:
-                    coordinate_type = 'polar'
-                elif 'grid' in self.skin_dict['Extras']['chart_definitions'][chart]:
-                    coordinate_type = 'grid'
-                else:
-                    coordinate_type = 'grid'
-                default_grid_properties = self.skin_dict['Extras']['chart_defaults'].get('properties', {}).get('grid', None)
-                if 'yAxis' not in chart_def and coordinate_type == 'grid':
-                    chart2 += '  yAxis: [\n'
-                    for i in range(0, len(chart_def['weewx']['yAxis'])):
-                        i_str = str(i)
-                        y_axis_default = copy.deepcopy(default_grid_properties['yAxis'])
-                        if i_str in chart_def['weewx']['yAxis']:
-                            y_axis_default.merge(chart_def['weewx']['yAxis'][str(i)])
-                            chart2 += '    {\n'
-
-                            if 'name' in y_axis_default and y_axis_default['name'] == 'weewx_unit_label':
-                                unit_name = chart_def['weewx']['yAxis'][i_str]['weewx'].get('unit', None)
-                                if unit_name is not None:
-                                    y_axis_label = self._get_unit_label(unit_name)
-                                else:
-                                    y_axis_label = self._get_obs_unit_label( chart_def['weewx']['yAxis'][i_str]['weewx']['obs'])
-
-                                chart2 += "      name:' " + y_axis_label + "',\n"
-                                del y_axis_default['name']
-
-                        #chart2 += '  #set index = ' + i_str + '\n'
-                        chart2 += self._iterdict('      ', '', y_axis_default)
-                        chart2 += '    },\n'
-                    chart2 += '  ],\n'
+                chart_temp2 = self._gen_chart_common(chart, chart_def)
+                chart2 += chart_temp2
 
                 chart2 += "};\n"
                 chart2 += "var telem = document.getElementById('" + chart + page_name + "');\n"
