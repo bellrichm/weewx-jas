@@ -208,6 +208,7 @@ class JAS(SearchList):
 
         self.chart_defaults = self.skin_dict['Extras']['chart_defaults'].get('global', {})
         self.chart_series_defaults = self.skin_dict['Extras']['chart_defaults'].get('chart_type', {}).get('series', {})
+        self.charts_javascript = {}
 
         self.skin_dicts = {}
         skin_path = os.path.join(self.generator.config_dict['WEEWX_ROOT'], self.skin_dict['SKIN_ROOT'], self.skin_dict['skin'])
@@ -860,52 +861,100 @@ class JAS(SearchList):
                     self.chart_defs[chart]['series'][value]['weewx'] = {}
                 weeutil.config.conditional_merge(self.chart_defs[chart]['series'][value]['weewx'], weewx_options)
 
-    def _iterdict(self, indent, page, chart, chart_js, series_type, interval, dictionary, chart_data_binding):
+    def _gen_series(self, indent, page, chart, chart_js, series_type, value, chart_data_binding):
+        chart2 = chart_js
+        if isinstance(value, dict):
+            chart2 += indent + "series: [\n"
+
+            if series_type == 'comparison':
+                obs = next(iter(value))
+                (start_year, end_year) = self._get_range(self.skin_dict['Extras']['pages'][page].get('start', None),
+                                                            self.skin_dict['Extras']['pages'][page].get('end', None),
+                                                            chart_data_binding)
+                for year in range(start_year, end_year):
+                    chart2 += indent + " {\n"
+                    chart2 += "    name: '" + str(year) + "',\n"
+                    chart2 = self._iterdict(indent + '  ', chart2, value[obs])
+                    chart2 += indent + "  },\n"
+            else:
+                for obs in value:
+                    aggregate_type = self.chart_defs[chart]['series'][obs]['weewx']['aggregate_type']
+                    aggregate_interval = self.skin_dict['Extras']['page_definition'][page].get('aggregate_interval', {}) \
+                                        .get(aggregate_type, 'none')
+
+                    # set the aggregate_interval at the beginning of the chart definition, so it can be used in the chart
+                    # Note, this means the last observation's aggregate type will be used to determine the aggregate interval
+                    if series_type == 'multiple':
+                        chart2 = "aggregate_interval = 'multiyear'\n" + chart2
+                    elif series_type == 'mqtt':
+                        chart2 = "aggregate_interval = 'mqtt'\n" + chart2
+                    else:
+                        chart2 = "aggregate_interval = '" + aggregate_interval + "'\n" + chart2
+
+                    chart2 += indent + " {\n"
+                    chart2 = self._iterdict(indent + '  ', chart2, value[obs])
+
+                    chart2 += indent + "},\n"
+
+            chart2 += indent +"],\n"
+        else:
+            chart2 += indent + 'series' + ": " + value + ",\n"
+        return chart2
+
+    def _iterdict(self, indent, chart_js, dictionary):
         chart2 = chart_js
         for key, value in dictionary.items():
             if isinstance(value, dict):
                 if key == 'weewx':
                     continue
                 if key == 'series':
-                    chart2 += indent + "series: [\n"
-
-                    if series_type == 'comparison':
-                        obs = next(iter(value))
-                        (start_year, end_year) = self._get_range(self.skin_dict['Extras']['pages'][page].get('start', None),
-                                                                 self.skin_dict['Extras']['pages'][page].get('end', None),
-                                                                 chart_data_binding)
-                        for year in range(start_year, end_year):
-                            chart2 += indent + " {\n"
-                            chart2 += "    name: '" + str(year) + "',\n"
-                            chart2 = self._iterdict(indent + '  ', page, chart, chart2, series_type, interval, value[obs], chart_data_binding)
-                            chart2 += indent + "  },\n"
-                    else:
-                        for obs in value:
-                            aggregate_type = self.chart_defs[chart]['series'][obs]['weewx']['aggregate_type']
-                            aggregate_interval = self.skin_dict['Extras']['page_definition'][page].get('aggregate_interval', {}) \
-                                                .get(aggregate_type, 'none')
-
-                            # set the aggregate_interval at the beginning of the chart definition, so it can be used in the chart
-                            # Note, this means the last observation's aggregate type will be used to determine the aggregate interval
-                            if series_type == 'multiple':
-                                chart2 = "aggregate_interval = 'multiyear'\n" + chart2
-                            elif series_type == 'mqtt':
-                                chart2 = "aggregate_interval = 'mqtt'\n" + chart2
-                            else:
-                                chart2 = "aggregate_interval = '" + aggregate_interval + "'\n" + chart2
-
-                            chart2 += indent + " {\n"
-                            chart2 = self._iterdict(indent + '  ', page, chart, chart2, series_type, interval, value[obs], chart_data_binding)
-
-                            chart2 += indent + "},\n"
-
-                    chart2 += indent +"],\n"
+                    continue
                 else:
                     chart2 += indent + key + ":" + " {\n"
-                    chart2 = self._iterdict(indent + '  ', page, chart, chart2, series_type, interval, value, chart_data_binding)
+                    chart2 = self._iterdict(indent + '  ', chart2, value)
                     chart2 += indent + "},\n"
             else:
                 chart2 += indent + key + ": " + value + ",\n"
+        return chart2
+
+    def _gen_chart_common(self, chart, chart_def):
+        chart_js =''
+        chart2 = ''
+        chart_temp = self._iterdict('  ', chart_js, chart_def)
+        chart2 += chart_temp
+
+        # ToDo: do not hard code 'grid'
+        if 'polar' in self.skin_dict['Extras']['chart_definitions'][chart]:
+            coordinate_type = 'polar'
+        elif 'grid' in self.skin_dict['Extras']['chart_definitions'][chart]:
+            coordinate_type = 'grid'
+        else:
+            coordinate_type = 'grid'
+
+        default_grid_properties = self.skin_dict['Extras']['chart_defaults'].get('properties', {}).get('grid', None)
+        if 'yAxis' not in chart_def and coordinate_type == 'grid':
+            chart2 += '  yAxis: [\n'
+            for i in range(0, len(chart_def['weewx']['yAxis'])):
+                i_str = str(i)
+                y_axis_default = copy.deepcopy(default_grid_properties['yAxis'])
+                if i_str in chart_def['weewx']['yAxis']:
+                    y_axis_default.merge(chart_def['weewx']['yAxis'][str(i)])
+                    chart2 += '    {\n'
+
+                    if 'name' in y_axis_default and y_axis_default['name'] == 'weewx_unit_label':
+                        unit_name = chart_def['weewx']['yAxis'][i_str]['weewx'].get('unit', None)
+                        if unit_name is not None:
+                            y_axis_label = self._get_unit_label(unit_name)
+                        else:
+                            y_axis_label = self._get_obs_unit_label( chart_def['weewx']['yAxis'][i_str]['weewx']['obs'])
+
+                        chart2 += "      name:' " + y_axis_label + "',\n"
+                        del y_axis_default['name']
+
+                chart2 += self._iterdict('      ', '', y_axis_default)
+                chart2 += '    },\n'
+            chart2 += '  ],\n'
+
         return chart2
 
     def _gen_charts(self, filename, page, interval, page_name):
@@ -913,14 +962,13 @@ class JAS(SearchList):
         skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
         page_series_type = self.skin_dict['Extras']['page_definition'][page].get('series_type', 'single')
 
-        #chart_final = 'var pageCharts = [];\n'
         chart_final = ''
         chart_final += 'function simpleTooltipFormatter(args) {\n'
         chart_final += '  dateTime = moment.unix(args[0].axisValue/1000).utcOffset(utc_offset).format(dateTimeFormat[lang].chart[aggregate_interval].toolTipX);\n'
         chart_final += '  let tooltip = `<div>${dateTime}</div> `;\n'
         chart_final += '\n'
         chart_final += '  args.forEach(({ color, seriesName, value }) => {\n'
-        chart_final += '    value = value[1] ? Number(value[1]).toLocaleString(lang) : value[1];\n'        
+        chart_final += '    value = value[1] ? Number(value[1]).toLocaleString(lang) : value[1];\n'
         chart_final += '    tooltip += `<div style="color: ${color};">${seriesName} ${value}</div>`;\n'
         chart_final += '  });\n'
         chart_final += '  return tooltip;\n'
@@ -946,52 +994,21 @@ class JAS(SearchList):
                     weeutil.config.conditional_merge(chart_def, self.skin_dict['Extras']['chart_defaults']['series_type'].get(series_type, {}))
 
                 # for now, do not support overriding chart options by page
+                # If this was supported, this would make caching the javascript more complicated
+                # And possibly less useful
+                # The workaround is to define a specific chart for the page
                 #self.charts_def[chart].merge(self.skin_dict['Extras']['pages'][page][chart])
-                for observation in chart_def['series']:
-                    obs = chart_def['series'][observation].get('weewx', {}).get('observation', observation)
-
-                #
 
                 chart_js = "var option = {\n"
-                chart2 += self._iterdict('  ', page, chart, chart_js, series_type, interval, chart_def, chart_data_binding)
+                chart2 += self._gen_series('  ', page, chart, chart_js, series_type, chart_def['series'], chart_data_binding)
 
-                # ToDo: do not hard code 'grid'
-                if 'polar' in self.skin_dict['Extras']['chart_definitions'][chart]:
-                    coordinate_type = 'polar'
-                elif 'grid' in self.skin_dict['Extras']['chart_definitions'][chart]:
-                    coordinate_type = 'grid'
-                else:
-                    coordinate_type = 'grid'
-                default_grid_properties = self.skin_dict['Extras']['chart_defaults'].get('properties', {}).get('grid', None)
-                if 'yAxis' not in chart_def and coordinate_type == 'grid':
-                    chart2 += '  yAxis: [\n'
-                    for i in range(0, len(chart_def['weewx']['yAxis'])):
-                        i_str = str(i)
-                        y_axis_default = copy.deepcopy(default_grid_properties['yAxis'])
-                        if i_str in chart_def['weewx']['yAxis']:
-                            y_axis_default.merge(chart_def['weewx']['yAxis'][str(i)])
-                            chart2 += '    {\n'
+                if chart not in self.charts_javascript:
+                    self.charts_javascript[chart] = {}
+                    self.charts_javascript[chart][series_type] = self._gen_chart_common(chart, chart_def)
+                elif series_type not in self.charts_javascript[chart]:
+                    self.charts_javascript[chart][series_type] = self._gen_chart_common(chart, chart_def)
 
-                            if 'name' in y_axis_default and y_axis_default['name'] == 'weewx_unit_label':
-                                unit_name = chart_def['weewx']['yAxis'][i_str]['weewx'].get('unit', None)
-                                if unit_name is not None:
-                                    y_axis_label = self._get_unit_label(unit_name)
-                                else:
-                                    y_axis_label = self._get_obs_unit_label( chart_def['weewx']['yAxis'][i_str]['weewx']['obs'])
-
-                                chart2 += "      name:' " + y_axis_label + "',\n"
-                                del y_axis_default['name']
-
-                        #chart2 += '  #set index = ' + i_str + '\n'
-                        chart2 += self._iterdict('      ',
-                                                 page, chart,
-                                                 '',
-                                                 series_type,
-                                                 interval,
-                                                 y_axis_default,
-                                                 chart_data_binding)
-                        chart2 += '    },\n'
-                    chart2 += '  ],\n'
+                chart2 += self.charts_javascript[chart][series_type]
 
                 chart2 += "};\n"
                 chart2 += "var telem = document.getElementById('" + chart + page_name + "');\n"
@@ -1083,13 +1100,13 @@ class JAS(SearchList):
         for aggregate_type in self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval']:
             aggregate_interval = self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval'][aggregate_type]
             if aggregate_interval == 'day':
-                endTimestamp =(self._get_TimeSpanBinder(interval_name, page_data_binding).end.raw // 86400 * 86400 - (self.utc_offset * 60)) * 1000
+                end_timestamp =(self._get_timespan_binder(interval_name, page_data_binding).end.raw // 86400 * 86400 - (self.utc_offset * 60)) * 1000
             elif aggregate_interval == 'hour':
-                endTimestamp =(self._get_TimeSpanBinder(interval_name, page_data_binding).end.raw // 3600 * 3600 - (self.utc_offset * 60)) * 1000
+                end_timestamp =(self._get_timespan_binder(interval_name, page_data_binding).end.raw // 3600 * 3600 - (self.utc_offset * 60)) * 1000
             else:
-                endTimestamp =(self._get_TimeSpanBinder(interval_name, page_data_binding).end.raw // 60 * 60 - (self.utc_offset * 60)) * 1000
+                end_timestamp =(self._get_timespan_binder(interval_name, page_data_binding).end.raw // 60 * 60 - (self.utc_offset * 60)) * 1000
 
-            data +=  "var " + interval_long_name + "endTimestamp_" + aggregate_type + " = " + str(endTimestamp) + ";\n"
+            data +=  "var " + interval_long_name + "endTimestamp_" + aggregate_type + " = " + str(end_timestamp) + ";\n"
 
         return data
 
@@ -1098,12 +1115,12 @@ class JAS(SearchList):
     def _gen_aggregate_objects(self, interval, page_definition_name, interval_long_name):
         data = ""
 
-        for observation in self.observations:
-            for aggregate_type in self.observations[observation]['aggregate_types']:
+        for observation, observation_items in self.observations.items():
+            for aggregate_type, aggregate_type_items in observation_items['aggregate_types'].items():
                 aggregate_interval = self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval'].get(aggregate_type, None)
                 interval_name = interval_long_name + aggregate_type
-                for data_binding in self.observations[observation]['aggregate_types'][aggregate_type]:
-                    for unit_name in self.observations[observation]['aggregate_types'][aggregate_type][data_binding]:
+                for data_binding, data_binding_items in aggregate_type_items.items():
+                    for unit_name in data_binding_items:
                         name_prefix = interval_name + "." + observation + "_"  + data_binding
                         name_prefix2 = interval_name + "_" + observation + "_"  + data_binding
                         if unit_name == "default":
@@ -1113,7 +1130,7 @@ class JAS(SearchList):
                             name_prefix2 += "_" + unit_name
 
                         array_name = name_prefix
-                        dateTime_name = name_prefix2 + "_dateTime"
+                        datetime_name = name_prefix2 + "_dateTime"
                         data_name = name_prefix2 + "_data"
 
                         if aggregate_interval is not None:
@@ -1132,7 +1149,7 @@ class JAS(SearchList):
                             data += array_name + " = " + self._get_series(weewx_observation, data_binding, interval, None, None, 'start', 'unix_epoch_ms', unit_name, 2, True) + ";\n"
 
                         # Cache the dateTimes into its own list variable
-                        data += dateTime_name + " = [].concat(" + array_name + ".map(arr => arr[0]));\n"
+                        data += datetime_name + " = [].concat(" + array_name + ".map(arr => arr[0]));\n"
                         # Cache the values into its own list variable
                         data += data_name + " = [].concat(" + array_name + ".map(arr => arr[1]));\n"
                         data += "\n"
@@ -1328,11 +1345,11 @@ class JAS(SearchList):
     def _gen_windrose(self, page_data_binding, interval_name, page_definition_name, interval_long_name):
         data = ''
 
-        interval_start_seconds_global = self._get_TimeSpanBinder(interval_name, page_data_binding).start.raw
-        interval_end_seconds_global = self._get_TimeSpanBinder(interval_name, page_data_binding).end.raw
+        interval_start_seconds_global = self._get_timespan_binder(interval_name, page_data_binding).start.raw
+        interval_end_seconds_global = self._get_timespan_binder(interval_name, page_data_binding).end.raw
 
         if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
-            avg_value, max_value, wind_directions, wind_range_legend = self._get_wind_compass(data_binding=page_data_binding, start_time=interval_start_seconds_global, end_time=interval_end_seconds_global)
+            avg_value, max_value, wind_directions, wind_range_legend = self._get_wind_compass(data_binding=page_data_binding, start_time=interval_start_seconds_global, end_time=interval_end_seconds_global) # need to match function signature pylint: disable=unused-variable
             data += "var windRangeLegend = " + wind_range_legend + ";\n"
             i = 0
             for wind in wind_directions:
@@ -1347,8 +1364,8 @@ class JAS(SearchList):
         skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
         page_data_binding = self.skin_dict['Extras']['pages'][page_definition_name].get('data_binding', skin_data_binding)
 
-        skin_timespan_binder = self._get_TimeSpanBinder(interval, skin_data_binding)
-        page_timespan_binder = self._get_TimeSpanBinder(interval, page_data_binding)
+        skin_timespan_binder = self._get_timespan_binder(interval, skin_data_binding)
+        page_timespan_binder = self._get_timespan_binder(interval, page_data_binding)
 
         data = ''
         data += '// the start\n'
@@ -1419,15 +1436,15 @@ class JAS(SearchList):
         data += '// start\n'
 
         if interval_long_name:
-            startDate = interval_long_name + "startDate"
-            endDate = interval_long_name + "endDate"
-            startTimestamp = interval_long_name + "startTimestamp"
-            endTimestamp = interval_long_name + "endTimestamp"
+            start_date = interval_long_name + "startDate"
+            end_date = interval_long_name + "endDate"
+            start_timestamp = interval_long_name + "startTimestamp"
+            end_timestamp = interval_long_name + "endTimestamp"
         else:
-            startDate = "null"
-            endDate = "null"
-            startTimestamp = "null"
-            endTimestamp = "null"
+            start_date = "null"
+            end_date = "null"
+            start_timestamp = "null"
+            end_timestamp = "null"
 
         today = datetime.datetime.today().replace(hour=0, minute=0, second=0, microsecond=0)
 
@@ -1458,10 +1475,10 @@ class JAS(SearchList):
         data += 'function setupZoomDate() {\n'
         data += '    zoomDateRangePicker = new DateRangePicker("zoomdatetimerange-input",\n'
         data += '                        {\n'
-        data += '                            minDate: ' + startDate + ',\n'
-        data += '                            maxDate: '+ endDate + ',\n'
-        data += '                            startDate: '+ startDate + ',\n'
-        data += '                            endDate: ' + endDate + ',\n'
+        data += '                            minDate: ' + start_date + ',\n'
+        data += '                            maxDate: '+ end_date + ',\n'
+        data += '                            startDate: '+ start_date + ',\n'
+        data += '                            endDate: ' + end_date + ',\n'
         data += '                            locale: {\n'
         data += '                                format: dateTimeFormat[lang].datePicker,\n'
         data += '                                applyLabel: getText("datepicker_apply_label"),\n'
@@ -1482,12 +1499,12 @@ class JAS(SearchList):
         data += 'function setupThisDate() {\n'
         data += '    var thisDateRangePicker = new DateRangePicker("thisdatetimerange-input",\n'
         data += '                        {singleDatePicker: true,\n'
-        data += '                            minDate: ' + startDate + ',\n'
-        data += '                            maxDate: ' + endDate + ',\n'
+        data += '                            minDate: ' + start_date + ',\n'
+        data += '                            maxDate: ' + end_date + ',\n'
         data += '                            locale: {\n'
         data += '                                format: dateTimeFormat[lang].datePicker,\n'
         data += '                                applyLabel: getText("datepicker_apply_label"),\n'
-        data += '                                cancelLabel: getText("datepicker_cancel_label"),\n'          
+        data += '                                cancelLabel: getText("datepicker_cancel_label"),\n'
         data += '                            },\n'
         data += '                        },\n'
         data += '                            function(start, end, label) {\n'
@@ -1522,12 +1539,12 @@ class JAS(SearchList):
         data += '\n'
         data += '// Handle reset button of zoom control\n'
         data += 'function resetRange() {\n'
-        data += '    zoomDateRangePicker.setStartDate(' + startDate + ');\n'
-        data += '    zoomDateRangePicker.setEndDate(' + endDate + ');\n'
+        data += '    zoomDateRangePicker.setStartDate(' + start_date + ');\n'
+        data += '    zoomDateRangePicker.setEndDate(' + end_date + ');\n'
         data += '    pageCharts.forEach(function(pageChart) {\n'
-        data += '            pageChart.chart.dispatchAction({type: "dataZoom", startValue: ' + startTimestamp + ', endValue: ' + endTimestamp + '});\n'
+        data += '            pageChart.chart.dispatchAction({type: "dataZoom", startValue: ' + start_timestamp + ', endValue: ' + end_timestamp + '});\n'
         data += '    });\n'
-        data += '    updateMinMax(' + startTimestamp + ', ' + endTimestamp + ');\n'
+        data += '    updateMinMax(' + start_timestamp + ', ' + end_timestamp + ');\n'
         data += '}\n'
         data += '// Handle event messages of type "mqtt".\n'
         data += 'var test_obj = null; // Not a great idea to be global, but makes remote debugging easier.\n'
@@ -1549,8 +1566,8 @@ class JAS(SearchList):
         data +='                }\n'
         data +='                if (!isNaN(mqttValue)) {\n'
         data +='                    header.value = Number(mqttValue).toLocaleString(lang);\n'
-        data +='                }\n'      
-        data +='            }\n'  
+        data +='                }\n'
+        data +='            }\n'
         data += '\n'
         data += '            if (test_obj[header.unit]) {\n'
         data +='                header.unit = test_obj[header.unit];\n'
@@ -1559,7 +1576,7 @@ class JAS(SearchList):
         data +='            headerElem = document.getElementById(header.name);\n'
         data +='            if (headerElem) {\n'
         data +='                headerElem.innerHTML = header.value + header.unit;\n'
-        data +='            }\n'  
+        data +='            }\n'
         data +='        }\n'
         data += '\n'
         data +='        // Handle information that will be appended to the observation value.\n'
@@ -1679,7 +1696,7 @@ class JAS(SearchList):
         data += '    if(sessionStorage.getItem("updateDate") === null || !jasOptions.MQTTConfig){\n'
         data +='        sessionStorage.setItem("updateDate", updateDate);\n'
         data += '    }\n'
-        data += '    document.getElementById("updateDate").innerHTML = moment.unix(sessionStorage.getItem("updateDate")/1000).utcOffset(' + str(self.utc_offset) +').format(dateTimeFormat[lang].current);\n'       
+        data += '    document.getElementById("updateDate").innerHTML = moment.unix(sessionStorage.getItem("updateDate")/1000).utcOffset(' + str(self.utc_offset) +').format(dateTimeFormat[lang].current);\n'
         data += '}\n'
         data += '\n'
         data += '// Update the min/max observations\n'
@@ -1731,7 +1748,7 @@ class JAS(SearchList):
         data += '    if (!theme) {\n'
         data += '        theme = "' + default_theme + '";\n'
         data += '    }\n'
-        data += '    setTheme(theme);\n'      
+        data += '    setTheme(theme);\n'
         data += '    // Todo: create functions for code in the if statements\n'
         data += '    // Tell the parent page the iframe size\n'
         data += '    message = {};\n'
@@ -1746,7 +1763,7 @@ class JAS(SearchList):
         data +='        entries.forEach(entry => {\n'
         data += '       message = {};\n'
         data += '       message.kind = "resize";\n'
-        data += '       message.message = {};\n'        
+        data += '       message.message = {};\n'
         data +='        message.message = { height: document.body.scrollHeight, width: document.body.scrollWidth };\n'
         data +='        // window.top refers to parent window\n'
         data +='        window.top.postMessage(message, "*");\n'
@@ -1759,14 +1776,14 @@ class JAS(SearchList):
         data += '    updateCharts();\n'
         data += '\n'
         data += '    if (jasOptions.minmax) {\n'
-        data +='        updateMinMax(' + startTimestamp + ', ' + endTimestamp + ');\n'
+        data +='        updateMinMax(' + start_timestamp + ', ' + end_timestamp + ');\n'
         data += '    }\n'
         data += '\n'
         data += '    // Set up the date/time picker\n'
         data += '    if (jasOptions.zoomcontrol) {\n'
         data +='        setupZoomDate();\n'
         data += '    }\n'
-        data += '\n'    
+        data += '\n'
         data += '    if (jasOptions.thisdate) {\n'
         data +='        setupThisDate();\n'
         data += '    }\n'
@@ -2184,7 +2201,7 @@ window.addEventListener("message",
             logdbg(log_msg)
         return data
 
-    def _get_TimeSpanBinder(self, time_period, data_binding):
+    def _get_timespan_binder(self, time_period, data_binding):
         return TimespanBinder(self._get_timespan(time_period, self.timespan.stop),
                                      self.generator.db_binder.bind_default(data_binding),
                                      data_binding=data_binding,
@@ -2206,17 +2223,17 @@ window.addEventListener("message",
         if not record or obs_type in record:
             # If there was no record, then the value of the ValueTuple will be None.
             # Otherwise, it will be value stored in the database.
-            vt = weewx.units.as_value_tuple(record, obs_type)
+            value_tuple = weewx.units.as_value_tuple(record, obs_type)
         else:
             # Couldn't get the value out of the record. Try the XTypes system.
             try:
-                vt = weewx.xtypes.get_scalar(obs_type, record, db_manager)
+                value_tuple = weewx.xtypes.get_scalar(obs_type, record, db_manager)
             except (weewx.UnknownType, weewx.CannotCalculate):
                 # Nothing seems to be working. It's an unknown type.
-                vt = weewx.units.UnknownType(obs_type)
+                value_tuple = weewx.units.UnknownType(obs_type)
 
         # Finally, return a ValueHelper
-        current_value =  weewx.units.ValueHelper(vt, 'current', self.generator.formatter, self.generator.converter)
+        current_value =  weewx.units.ValueHelper(value_tuple, 'current', self.generator.formatter, self.generator.converter)
         # End of stolen code
 
         if unit_name != 'default':
