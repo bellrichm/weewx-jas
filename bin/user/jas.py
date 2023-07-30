@@ -1164,10 +1164,8 @@ class JAS(SearchList):
             data_binding = self.skin_dict['Extras']['thisdate']['observations'][observation].get('data_binding', thisdate_data_binding)
             unit_name = self.skin_dict['Extras']['thisdate']['observations'][observation].get('unit', "default")
             if unit_name == "default":
-                unit_suffix = ""
                 label = getattr(self.unit.label, observation)
             else:
-                unit_suffix = "_" + unit_name
                 label = self._get_unit_label(unit_name)
 
             aggregation_type = self.skin_dict['Extras']['thisdate']['observations'][observation].get('type', None)
@@ -1182,7 +1180,7 @@ class JAS(SearchList):
                 data += 'thisDateObsDetail = {};\n'
                 data += 'thisDateObsDetail.label = "' + label + '";\n'
                 data += 'thisDateObsDetail.maxDecimals = maxDecimals;\n'
-                value = interval_long_name + 'min.' + observation + "_" + data_binding + unit_suffix
+                value = interval_long_name + 'min.' + observation + "_" + data_binding
                 id_value = observation + "_thisdate_min"
                 data += 'thisDateObsDetail.dataArray = ' + value + ';\n'
                 data += 'thisDateObsDetail.id = "' + id_value + '";\n'
@@ -1192,7 +1190,7 @@ class JAS(SearchList):
                 data += 'thisDateObsDetail = {};\n'
                 data += 'thisDateObsDetail.label = "' + label + '";\n'
                 data += 'thisDateObsDetail.maxDecimals = maxDecimals;\n'
-                value = interval_long_name + 'max.' + observation + "_" + data_binding + unit_suffix
+                value = interval_long_name + 'max.' + observation + "_" + data_binding
                 id_value = observation + "_thisdate_max"
                 data += 'thisDateObsDetail.dataArray = ' + value + ';\n'
                 data += 'thisDateObsDetail.id = "' + id_value + '";\n'
@@ -1202,7 +1200,7 @@ class JAS(SearchList):
                 data += 'thisDateObsDetail = {};\n'
                 data += 'thisDateObsDetail.label = "' + label + '";\n'
                 data += 'thisDateObsDetail.maxDecimals = maxDecimals;\n'
-                value = interval_long_name + aggregation_type + '.' + observation + "_" + data_binding + unit_suffix
+                value = interval_long_name + aggregation_type + '.' + observation + "_" + data_binding
                 id_value = observation + "_thisdate_" + aggregation_type
                 data += 'thisDateObsDetail.dataArray = ' + value + ';\n'
                 data += 'thisDateObsDetail.id = "' + id_value + '";\n'
@@ -1249,7 +1247,6 @@ class JAS(SearchList):
     # This data is stored in a javascript object named 'current'.
     # 'current.header' is an object with the data for the header portion of this section.
     # 'current.observations' is a map. The key is the observation name, like 'outTemp'. The value is the data to populate the section.
-    # 'current.suffixes is also a map'. Its key is observation_suffix, for example 'outTemp_suffix'.
     def _gen_current(self, skin_data_binding, interval):
         data = ''
 
@@ -1275,7 +1272,6 @@ class JAS(SearchList):
             data += 'current.header.unit = "' + getattr(self.unit.label, self.skin_dict['Extras']['current']['observation']) + '";\n'
 
         data += 'current.observations = new Map();\n'
-        data += 'current.suffixes = new Map();\n'
 
         for observation in self.skin_dict['Extras']['current']['observations']:
             data_binding = self.skin_dict['Extras']['current']['observations'][observation].get('data_binding', current_data_binding)
@@ -1579,20 +1575,6 @@ class JAS(SearchList):
         data +='            }\n'
         data +='        }\n'
         data += '\n'
-        data +='        // Handle information that will be appended to the observation value.\n'
-        data +='        suffix_list = sessionStorage.getItem("suffixes");\n'
-        data +='        if (suffix_list) {\n'
-        data +='            suffixes = suffix_list.split(",");\n'
-        data +='            suffixes.forEach(function(suffix) {\n'
-        data +='                suffixInfo = current.suffixes.get(suffix);\n'
-        data +='                if (suffixInfo && suffixInfo.mqtt && test_obj[suffix]) {\n'
-        data +='                    data = JSON.parse(sessionStorage.getItem(suffix));\n'
-        data +='                    data.value = test_obj[suffix];\n'
-        data +='                    sessionStorage.setItem(suffix, JSON.stringify(data));\n'
-        data +='                }\n'
-        data +='            });\n'
-        data +='        }\n'
-        data += '\n'
         data +='        // Process each observation in the "current" section.\n'
         data +='        observations = [];\n'
         data +='        if (sessionStorage.getItem("observations")) {\n'
@@ -1617,21 +1599,13 @@ class JAS(SearchList):
         data +='                }\n'
         data +='                sessionStorage.setItem(observation, JSON.stringify(data));\n'
         data += '\n'
-        data +='                suffix = JSON.parse(sessionStorage.getItem(data.suffix));\n'
-        data +='                if ( suffix=== null) {\n'
-        data +='                    suffixText = "";\n'
-        data +='                }\n'
-        data +='                else {\n'
-        data +='                    suffixText = " " + suffix.value;\n'
-        data +='                }\n'
-        data += '\n'
         data +='                labelElem = document.getElementById(observation + "_label");\n'
         data +='                if (labelElem) {\n'
         data +='                    labelElem.innerHTML = data.label;\n'
         data +='                }\n'
         data +='                dataElem = document.getElementById(data.name + "_value");\n'
         data +='                if (dataElem) {\n'
-        data +='                    dataElem.innerHTML = data.value + data.unit + suffixText;\n'
+        data +='                    dataElem.innerHTML = data.value + data.unit;\n'
         data +='                }\n'
         data +='            }\n'
         data +='        });\n'
@@ -1660,17 +1634,6 @@ class JAS(SearchList):
         data +='        document.getElementById("currentObservation").innerHTML = current_observation;\n'
         data += '    }\n'
         data += '\n'
-        data += '    // ToDo: cleanup, perhaps put suffix data into an array and store that\n'
-        data += '    // ToDo: do a bit more in cheetah?\n'
-        data += '    suffixes = [];\n'
-        data += '    for (var [suffix, data] of current.suffixes) {\n'
-        data +='        suffixes.push(suffix);\n'
-        data +='        if (sessionStorage.getItem(suffix) === null || !jasOptions.MQTTConfig){\n'
-        data +='            sessionStorage.setItem(suffix, JSON.stringify(data));\n'
-        data +='        }\n'
-        data += '    }\n'
-        data += '    sessionStorage.setItem("suffixes", suffixes.join(","));\n'
-        data += '\n'
         data += '    // ToDo: cleanup, perhaps put observation data into an array and store that\n'
         data += '    // ToDo: do a bit more in cheetah?\n'
         data += '    observations = [];\n'
@@ -1681,15 +1644,7 @@ class JAS(SearchList):
         data +='        }\n'
         data +='        obs = JSON.parse(sessionStorage.getItem(observation));\n'
         data += '\n'
-        data +='        suffix = JSON.parse(sessionStorage.getItem(data.suffix));\n'
-        data +='        if ( suffix=== null) {\n'
-        data +='            suffixText = "";\n'
-        data +='        }\n'
-        data +='        else {\n'
-        data +='            suffixText = " " + suffix.value;\n'
-        data +='        }\n'
-        data += '\n'
-        data +='        document.getElementById(obs.name + "_value").innerHTML = obs.value + obs.unit + suffixText;\n'
+        data +='        document.getElementById(obs.name + "_value").innerHTML = obs.value + obs.unit;\n'
         data += '    }\n'
         data += '    sessionStorage.setItem("observations", observations.join(","));\n'
         data += '\n'
