@@ -1115,12 +1115,12 @@ class JAS(SearchList):
     def _gen_aggregate_objects(self, interval, page_definition_name, interval_long_name):
         data = ""
 
-        for observation in self.observations:
-            for aggregate_type in self.observations[observation]['aggregate_types']:
+        for observation, observation_items in self.observations.items():
+            for aggregate_type, aggregate_type_items in observation_items['aggregate_types'].items():
                 aggregate_interval = self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval'].get(aggregate_type, None)
                 interval_name = interval_long_name + aggregate_type
-                for data_binding in self.observations[observation]['aggregate_types'][aggregate_type]:
-                    for unit_name in self.observations[observation]['aggregate_types'][aggregate_type][data_binding]:
+                for data_binding, data_binding_items in aggregate_type_items.items():
+                    for unit_name in data_binding_items:
                         name_prefix = interval_name + "." + observation + "_"  + data_binding
                         name_prefix2 = interval_name + "_" + observation + "_"  + data_binding
                         if unit_name == "default":
