@@ -4,8 +4,10 @@
 <button id="connectButton" class="btn btn-outline-success d-none" type="button" text_label="connect_button_label" onclick="MQTTConnect()"></button>
 <button id="disconnectButton" class="btn btn-outline-success d-none" type="button" text_label="disconnect_button_label" onclick="MQTTDisconnect()"></button>
 
-<input TYPE="button" name="copyLog" value="Copy Log" onclick="copyLog()">
-<input TYPE="button" name="clearLog" value="Clear Log" onclick="clearLog()">
+<div class="col-sm-10 mb-4">
+  <input TYPE="button" name="copyLog" value="Copy Log" onclick="copyLog()">
+  <input TYPE="button" name="clearLog" value="Clear Log" onclick="clearLog()">
+</div>
 
 <div class="col-sm-10 mb-4">
   <div class="text-wrap" id="logDisplay"
