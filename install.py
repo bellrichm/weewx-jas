@@ -58,8 +58,10 @@ EXTENSION_CONFIG = """
                 
                 username = REPLACE_ME
                 password = REPLACE_ME
+
+                [[[[[topics]]]]]
+                    [[[[[[weather/loop]]]]]]
                 
-                topic = REPLACE_ME
                 
             # Define an additional chart.
             # Once a chart is defined, it can be added to pages.
