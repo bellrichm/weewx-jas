@@ -403,6 +403,11 @@ window.addEventListener("load", function (event) {
 
 addEventListener("resize", (event) => {
   manageNavbar();
+  width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+  // width/100 is like the css variable vw
+  fontSize = width/100 * 1.5;
+  // Max is 18px and min is 10px
+  document.getElementsByTagName("html")[0].style.fontSize = Math.min(18, Math.max(10, fontSize)) + "px";
 });
 
 window.addEventListener("beforeunload", function (event) {
