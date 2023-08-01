@@ -33,7 +33,10 @@ function onConnect() {
     #if $getVar("$Extras.pages.debug", False)
         logIt("In onConnect");
     #end if    
-    client.subscribe("$Extras.mqtt.topic");
+    #for $topic in $getVar('Extras.mqtt.topics', [])
+        client.subscribe("$topic")
+    #end for
+
     ## ToDo: log or display on GUI
     #set disconnect_seconds = $getVar('$Extras.mqtt.disconnect', None)
     #if $disconnect_seconds
