@@ -161,8 +161,8 @@
                   <div class="form-check form-switch">
                   <input class="form-check-input" type="checkbox" role="switch" id="themeSelection"  data-bs-toggle="collapse" data-bs-target=".navbar-collapse" onchange="updateTheme(this)">
                   </div>
-                  <button id="connectButton" class="btn btn-outline-success d-none" type="button" text_label="connect_button_label" onclick="MQTTConnect()"></button>
-                  <button id="disconnectButton" class="btn btn-outline-success d-none" type="button" text_label="disconnect_button_label" onclick="MQTTDisconnect()"></button>
+                  <button id="connectButton" class="btn btn-outline-success d-none" type="button" text_label="connect_button_label" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" onclick="MQTTConnect()"></button>
+                  <button id="disconnectButton" class="btn btn-outline-success d-none" type="button" text_label="disconnect_button_label" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" onclick="MQTTDisconnect()"></button>
                </div>
                <button class="btn btn-outline-success" type="button" onclick="setIframeSrc('child-iframe', sessionStorage.getItem('currentPage'))" text_label="refresh_button_label"></button>
             </div>
