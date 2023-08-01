@@ -173,7 +173,7 @@ except ImportError:
         logmsg(syslog.LOG_ERR, msg)
 
 
-VERSION = "0.4.1-rc01"
+VERSION = "1.0.0-rc01"
 
 class JAS(SearchList):
     """ Implement tags used by templates in the skin. """
@@ -251,6 +251,12 @@ class JAS(SearchList):
         self.data_current = None
         if to_bool(self.skin_dict['Extras'].get('display_aeris_observation', False)):
             self.data_current = self._get_current_obs()
+
+        if 'topic' in self.skin_dict['Extras']['mqtt']:
+            logerr("'topic' is deprecated, use '[[[[[topics]]]]]'")
+
+        if 'fields' in self.skin_dict['Extras']['mqtt']:
+            logerr("'[[[[[fields.unused]]]]]' is deprecated, use '[[[[[topics]]]]] [[[[[[[fields]]]]]]]'")
 
     def get_extension_list(self, timespan, db_lookup):
         # save these for use when the template variable/function is evaluated
@@ -1328,12 +1334,15 @@ class JAS(SearchList):
                         data += "mqttData2['" + observation + "'] = [];\n"
                         data+= "mqttData." + observation + "= [];\n"
 
-        data += "fieldMap = new Map();\n"
         # ToDo: optimize - only do if page uses MQTT
         if self.skin_dict['Extras'].get('mqtt', False):
-            for field in self.skin_dict['Extras']['mqtt'].get('fields', []):
-                fieldname = self.skin_dict['Extras']['mqtt']['fields'][field]['name']
-                data += "fieldMap.set('" + fieldname + "', '" + field + "');\n"
+            data += "topics = new Map();\n"
+            for topic in self.skin_dict['Extras']['mqtt'].get('topics', []):
+                data += "topics.set('" + topic + "', new Map());\n"
+                for field in self.skin_dict['Extras']['mqtt']['topics'][topic].get('fields', []):
+                    fieldname = self.skin_dict['Extras']['mqtt']['topics'][topic]['fields'][field]['name']
+                    data += "topics.get('" + topic + "').set('" + fieldname + "', '" + field + "');\n"
+
         return data
 
     # Proof of concept - wind rose
@@ -1544,7 +1553,8 @@ class JAS(SearchList):
         data += '}\n'
         data += '// Handle event messages of type "mqtt".\n'
         data += 'var test_obj = null; // Not a great idea to be global, but makes remote debugging easier.\n'
-        data += 'function updateCurrentMQTT(test_obj) {\n'
+        data += 'function updateCurrentMQTT(topic, test_obj) {\n'
+        data += '        fieldMap = topics.get(topic);\n'
         data += '        // Handle the "header" section of current observations.\n'
         data +='        header = JSON.parse(sessionStorage.getItem("header"));\n'
         data +='        if (header) {\n'
@@ -1971,13 +1981,13 @@ function handleMQTT(message) {
     
     jasLogDebug("test_obj: ", test_obj);
     jasLogDebug("sessionStorage: ", sessionStorage);
-    jasLogDebug("fieldMap: ", Object.fromEntries(fieldMap));
+    jasLogDebug("topics: ", Object.fromEntries(topics));
     // To Do - only exists on pages with "current" section
     //jasLogDebug("current.observations: ", Object.fromEntries(current.observations));
 
     if (jasOptions.current && jasOptions.pageMQTT)
     {
-        updateCurrentMQTT(test_obj);
+        updateCurrentMQTT(message.topic, test_obj);
     }
 
     // Proof of concept, charting MQTT data
