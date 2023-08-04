@@ -1017,6 +1017,7 @@ class JAS(SearchList):
                 chart2 += self.charts_javascript[chart][series_type]
 
                 chart2 += "};\n"
+                chart2 += "pageIndex['" + chart + page_name + "'] = Object.keys(pageIndex).length;\n"
                 chart2 += "var telem = document.getElementById('" + chart + page_name + "');\n"
                 chart2 += "var " + chart + "chart = echarts.init(document.getElementById('" + chart + page_name + "'));\n"
                 chart2 += chart + "chart.setOption(option);\n"
@@ -1036,7 +1037,7 @@ class JAS(SearchList):
                             chart2 += 'seriesData.name = null;\n'
                         chart2 += 'pageChart.series.push(seriesData);\n'
                 elif series_type == 'multiple':
-                    chart2 += "option = {\n"
+                    chart2 += "series_option = {\n"
                     chart2 += "  series: [\n"
                     for obs in chart_def['series']:
                         aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
@@ -1051,9 +1052,10 @@ class JAS(SearchList):
                                       + "." + chart_def['series'][obs]['weewx']['observation'] + "_"  + obs_data_binding + ",\n"
                         chart2 += "          ]},\n"
                     chart2 += "]};\n"
-                    chart2 += "pageChart.option = option;\n"
+                    chart2 += "pageChart.option = series_option;\n"
+                    chart2 += "pageChart.def = option;\n"
                 elif series_type == 'comparison':
-                    chart2 += "option = {\n"
+                    chart2 += "series_option = {\n"
                     chart2 += "  series: [\n"
                     obs = next(iter(chart_def['series']))
                     obs_data_binding = chart_def['series'][obs].get('weewx', {}).get('data_binding', chart_data_binding)
@@ -1069,9 +1071,10 @@ class JAS(SearchList):
                                 + ").format(dateTimeFormat[lang].chart.yearToYearXaxis), arr[1]]),\n" \
                                 + "},\n"
                     chart2 += "]};\n"
-                    chart2 += "pageChart.option = option;\n"
+                    chart2 += "pageChart.option = series_option;\n"
+                    chart2 += "pageChart.def = option;\n"
                 else:
-                    chart2 += "option = {\n"
+                    chart2 += "series_option = {\n"
                     chart2 += "  series: [\n"
                     for obs in chart_def['series']:
                         aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
@@ -1086,7 +1089,8 @@ class JAS(SearchList):
                                 + "." + chart_def['series'][obs]['weewx']['observation'] + "_"  + obs_data_binding + obs_data_unit \
                                 + "},\n"
                     chart2 += "]};\n"
-                    chart2 += "pageChart.option = option;\n"
+                    chart2 += "pageChart.option = series_option;\n"
+                    chart2 += "pageChart.def = option;\n"
 
                 chart2 += "pageChart.chart = " + chart + "chart;\n"
                 chart2 += "pageCharts.push(pageChart);\n"
@@ -1796,7 +1800,9 @@ function updatelogLevel(logLevel) {
 
 updatelogLevel(logLevel);
 
+// ToDo: make a dictionary of dictionaries
 var pageCharts = [];
+var pageIndex = {};
 
 // Update the chart data
 function updateCharts() {
@@ -1975,6 +1981,11 @@ function handleLog(message) {
     }
 }
 
+// Handle event messages of type "scroll".
+function handleScroll(message) {
+    document.getElementById('chartModal').style.top = message.currentScroll + 'px';
+}
+
 
 function handleMQTT(message) {
     test_obj = JSON.parse(message.payload);
@@ -2098,7 +2109,11 @@ window.addEventListener("message",
                         if (message.kind == "setTheme")
                         {
                             setTheme(message.message);
-                        }                        
+                        }
+                        if (message.kind == "scroll")
+                        {
+                            handleScroll(message.message);
+                        }                                                
                         if (message.kind == "log")
                         {
                             handleLog(message.message);

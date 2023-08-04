@@ -310,6 +310,34 @@ window.addEventListener("load", function (event) {
   }
   setTheme(theme);
 
+  window.addEventListener('scroll', function(event){
+    iframe = document.getElementById('child-iframe')
+    topOffset = iframe.getBoundingClientRect().top + window.scrollY;
+    currentScroll = document.scrollingElement.scrollTop;
+
+
+    message = {};
+    message.kind = 'scroll';
+    message.message = {};
+    message.message.topOffset = topOffset;
+    message.message.currentScroll = currentScroll;
+   
+    // When running without a webserver, there is a lot of 'strangeness'
+    if (window.location.protocol == "file:") {
+        targetOrigin = "*";
+    }
+    else {
+        targetOrigin = window.location.origin;
+    }      
+
+    if (iframe) {
+      iframe.contentWindow.postMessage(message, targetOrigin);
+    }
+    else {
+      window.self.postMessage(message, targetOrigin);
+    }
+});
+
 
   #if to_bool($getVar("$Extras.allow_user_language_selection", False))
     document.getElementById(lang).classList.add("active");

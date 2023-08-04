@@ -13,10 +13,10 @@
         #set text_label = $getVar('$Extras.chart_definitions.' + $section_global + '.weewx.title', False)
         #end if
         #if $text_label
-            <h5 class="card-title">
+            #echo '               <h5 class="card-title" data-bs-toggle="modal" data-bs-target="#chartModal" data-bs-chart="' + id + '">'
             $text_label
         #else
-            #echo '               <h5 class="card-title" text_label="' + $section_global + '_title">\n'
+            #echo '               <h5 class="card-title" text_label="' + $section_global + '_title" data-bs-toggle="modal" data-bs-target="#chartModal" data-bs-chart="' + id + '">\n'
         #end if
         </h5>
         <div id="$id"></div>

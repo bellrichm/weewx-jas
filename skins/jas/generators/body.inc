@@ -47,3 +47,48 @@
     #set data = '<script src="../charts/' + $page_name_global + '.js"></script>'
     $data
     
+    <!-- Modal -->
+<div class="modal" id="chartModal" tabindex="-1" role="dialog" aria-labelledby="chartModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-xl" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="chartModalTitle">Modal title</h5>
+        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="foo">
+        ...
+      </div>
+      <div class="modal-footer"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+modalChart = null;
+var chartModal = document.getElementById('chartModal')
+chartModal.addEventListener('show.bs.modal', function (event) {
+  var chartId = event.relatedTarget.getAttribute('data-bs-chart')
+  
+  var divelem = document.getElementById('foo')
+  height = '300px'
+  divelem.style.height=height
+  modalChart = echarts.init(divelem);
+  index = pageIndex[chartId];
+  option = pageCharts[index]['def'];
+  modalChart.setOption(option);
+  modalChart.setOption(pageCharts[index]['option']);
+  height = '300px'
+  divelem.style.height=height
+  modalChart.resize({width: height, height: height});
+
+})
+
+chartModal.addEventListener('hidden.bs.modal', function (event) {
+  modalChart.dispose();
+  modalChart = null;
+
+  bootstrap.Modal.getInstance(document.getElementById("chartModal")).dispose();
+})
+</script>
