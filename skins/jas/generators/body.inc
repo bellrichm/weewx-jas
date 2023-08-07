@@ -68,22 +68,18 @@
 <script>
 modalChart = null;
 var chartModal = document.getElementById('chartModal')
-chartModal.addEventListener('show.bs.modal', function (event) {
-  var chartId = event.relatedTarget.getAttribute('data-bs-chart')
-  
-  var divelem = document.getElementById('foo')
-  height = '300px'
-  divelem.style.height=height
+
+chartModal.addEventListener('shown.bs.modal', function (event) {
+  var divelem = document.getElementById('foo');
   modalChart = echarts.init(divelem);
+
+  var chartId = event.relatedTarget.getAttribute('data-bs-chart')
   index = pageIndex[chartId];
   option = pageCharts[index]['def'];
   modalChart.setOption(option);
   modalChart.setOption(pageCharts[index]['option']);
-  height = '300px'
-  divelem.style.height=height
-  modalChart.resize({width: height, height: height});
-
-})
+  resizeChart(modalChart);  
+})  
 
 chartModal.addEventListener('hidden.bs.modal', function (event) {
   modalChart.dispose();

@@ -1828,80 +1828,88 @@ function refreshSizes() {
     }
 
     for (var index in pageCharts) {
-        chartElem = pageCharts[index].chart.getDom();
-        height = chartElem.offsetWidth / 1.618;
-        width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-        // width/100 is like the css variable vw
-        fontSize = width/100 * 1.5;
-        // Max is 18px and min is 10px
-        document.getElementsByTagName("html")[0].style.fontSize = Math.min(18, Math.max(10, fontSize)) + "px";
-        height = height + "px";
-        pageCharts[index].chart.resize({width: null, height: height});
-        options = pageCharts[index].chart.getOption();
-        updatedOptions = {};
-        if (chartElem.offsetWidth > 505) {
-            percent = 1;
-            legendTextStyleWidth = 70;
-            legendIcon = 'roundRect';
-        }
-        else if (chartElem.offsetWidth > 350) {
-            percent = 2/3;
-            legendTextStyleWidth = 70;
-            legendIcon = 'roundRect';
-        }
-        else if (chartElem.offsetWidth > 300) {
-            percent = 1/2;
-            legendTextStyleWidth = 70;
-            legendIcon = 'roundRect';
-        }
-        else {
-            percent = 1/2;
-            legendTextStyleWidth = 20;
-            legendIcon = 'none';    
-        }
-
-        updatedOptions.toolbox = {};
-        updatedOptions.toolbox.itemSize = Math.round(15 * percent);
-        updatedOptions.toolbox.showTitle = false
-        updatedOptions.tooltip = {};
-        updatedOptions.tooltip.textStyle = {};
-        updatedOptions.tooltip.textStyle.fontSize = Math.round(14 * percent); 
-        updatedOptions.axisPointer = {};
-        updatedOptions.axisPointer.label = {};
-        updatedOptions.axisPointer.label.fontSize = Math.round(12 * percent); 
-        updatedOptions.legend = {};
-        updatedOptions.legend.itemHeight = Math.round(14 * percent); 
-        updatedOptions.legend.itemWidth = Math.round(25 * percent); 
-        updatedOptions.legend.textStyle = {};
-        updatedOptions.legend.textStyle.fontSize = Math.round(12 * percent);
-        if (options.legend[0].type == 'scroll') {
-            updatedOptions.legend.pageIconSize = Math.round(15 * percent); 
-            updatedOptions.legend.pageTextStyle = {};
-            updatedOptions.legend.pageTextStyle.fontSize = Math.round(12 * percent); 
-        }
-        if ('xAxis' in options) {
-            updatedOptions.xAxis = {};
-            updatedOptions.xAxis.axisLabel = {};
-            updatedOptions.xAxis.axisLabel.fontSize = Math.round(12 * percent); 
-            updatedOptions.yAxis = [];
-            for (let i = 0; i < options.yAxis.length; i++) {
-                updatedOptions.yAxis[i] = {};
-                updatedOptions.yAxis[i].axisLabel = {};
-                updatedOptions.yAxis[i].axisLabel.fontSize = Math.round(12 * percent); 
-                updatedOptions.yAxis[i].nameTextStyle = {};
-                updatedOptions.yAxis[i].nameTextStyle.fontSize = Math.round(12 * percent); 
-            }      
-        }
-        if ('angleAxis' in options) {
-            updatedOptions.legend.textStyle.width = legendTextStyleWidth;    
-            updatedOptions.legend.icon = legendIcon;
-            updatedOptions.angleAxis = {};
-            updatedOptions.angleAxis.axisLabel = {};
-            updatedOptions.angleAxis.axisLabel.fontSize = Math.round(12 * percent);
-        }
-    
-      pageCharts[index].chart.setOption(updatedOptions);
+        resizeChart(pageCharts[index].chart);
     }
+
+    if (modalChart) {
+        resizeChart(modalChart)
+    }    
+}
+
+function resizeChart(chart) {
+    chartElem = chart.getDom();
+    height = chartElem.offsetWidth / 1.618;
+    width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+    // width/100 is like the css variable vw
+    fontSize = width/100 * 1.5;
+    // Max is 18px and min is 10px
+    document.getElementsByTagName("html")[0].style.fontSize = Math.min(18, Math.max(10, fontSize)) + "px";
+    height = height + "px";
+    chart.resize({width: null, height: height});
+    options = chart.getOption();
+    updatedOptions = {};
+    if (chartElem.offsetWidth > 505) {
+        percent = 1;
+        legendTextStyleWidth = 70;
+        legendIcon = 'roundRect';
+    }
+    else if (chartElem.offsetWidth > 350) {
+        percent = 2/3;
+        legendTextStyleWidth = 70;
+        legendIcon = 'roundRect';
+    }
+    else if (chartElem.offsetWidth > 300) {
+        percent = 1/2;
+        legendTextStyleWidth = 70;
+        legendIcon = 'roundRect';
+    }
+    else {
+        percent = 1/2;
+        legendTextStyleWidth = 20;
+        legendIcon = 'none';    
+    }
+
+    updatedOptions.toolbox = {};
+    updatedOptions.toolbox.itemSize = Math.round(15 * percent);
+    updatedOptions.toolbox.showTitle = false
+    updatedOptions.tooltip = {};
+    updatedOptions.tooltip.textStyle = {};
+    updatedOptions.tooltip.textStyle.fontSize = Math.round(14 * percent); 
+    updatedOptions.axisPointer = {};
+    updatedOptions.axisPointer.label = {};
+    updatedOptions.axisPointer.label.fontSize = Math.round(12 * percent); 
+    updatedOptions.legend = {};
+    updatedOptions.legend.itemHeight = Math.round(14 * percent); 
+    updatedOptions.legend.itemWidth = Math.round(25 * percent); 
+    updatedOptions.legend.textStyle = {};
+    updatedOptions.legend.textStyle.fontSize = Math.round(12 * percent);
+    if (options.legend[0].type == 'scroll') {
+        updatedOptions.legend.pageIconSize = Math.round(15 * percent); 
+        updatedOptions.legend.pageTextStyle = {};
+        updatedOptions.legend.pageTextStyle.fontSize = Math.round(12 * percent); 
+    }
+    if ('xAxis' in options) {
+        updatedOptions.xAxis = {};
+        updatedOptions.xAxis.axisLabel = {};
+        updatedOptions.xAxis.axisLabel.fontSize = Math.round(12 * percent); 
+        updatedOptions.yAxis = [];
+        for (let i = 0; i < options.yAxis.length; i++) {
+            updatedOptions.yAxis[i] = {};
+            updatedOptions.yAxis[i].axisLabel = {};
+            updatedOptions.yAxis[i].axisLabel.fontSize = Math.round(12 * percent); 
+            updatedOptions.yAxis[i].nameTextStyle = {};
+            updatedOptions.yAxis[i].nameTextStyle.fontSize = Math.round(12 * percent); 
+        }      
+    }
+    if ('angleAxis' in options) {
+        updatedOptions.legend.textStyle.width = legendTextStyleWidth;    
+        updatedOptions.legend.icon = legendIcon;
+        updatedOptions.angleAxis = {};
+        updatedOptions.angleAxis.axisLabel = {};
+        updatedOptions.angleAxis.axisLabel.fontSize = Math.round(12 * percent);
+    }
+
+    chart.setOption(updatedOptions);
 }
 
 function getLogLevel() {
@@ -1972,6 +1980,17 @@ function handleLang(lang) {
     window.location.reload(true);
 }
 
+// Handle event messages of type "resize".
+function handleResize(message) {
+  var divelem = document.getElementById('foo');
+  // ToDo: refine -> for example navbar height is in message.height, but modal cannot overlay navbar
+  if (message.width / 1.618 > message.height) {
+    divelem.style.height=height;
+  }
+  else {
+    divelem.style.height=message.width / 1.618
+  }
+}
 
 // Handle event messages of type "log".
 function handleLog(message) {
@@ -2110,10 +2129,14 @@ window.addEventListener("message",
                         {
                             setTheme(message.message);
                         }
+                        if (message.kind == "resize")
+                        {
+                            handleResize(message.message);
+                        }                        
                         if (message.kind == "scroll")
                         {
                             handleScroll(message.message);
-                        }                                                
+                        }       
                         if (message.kind == "log")
                         {
                             handleLog(message.message);
