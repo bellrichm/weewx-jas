@@ -70,6 +70,8 @@ modalChart = null;
 var chartModal = document.getElementById('chartModal')
 
 chartModal.addEventListener('shown.bs.modal', function (event) {
+  var titleElem = document.getElementById('chartModalTitle');
+  titleElem.innerText = getText(event.relatedTarget.getAttribute('data-bs-title'));
   var divelem = document.getElementById('foo');
   modalChart = echarts.init(divelem);
 
