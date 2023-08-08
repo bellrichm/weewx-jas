@@ -1719,7 +1719,7 @@ class JAS(SearchList):
         data += '    chartModal.addEventListener("shown.bs.modal", function (event) {\n'
         data += '      var titleElem = document.getElementById("chartModalTitle");\n'
         data += '      titleElem.innerText = getText(event.relatedTarget.getAttribute("data-bs-title"));\n'
-        data += '      var divelem = document.getElementById("foo");\n'
+        data += '      var divelem = document.getElementById("chartModalBody");\n'
         data += '      modalChart = echarts.init(divelem);\n'
 
         data += '      var chartId = event.relatedTarget.getAttribute("data-bs-chart");\n'
@@ -2009,7 +2009,7 @@ function handleLang(lang) {
 
 // Handle event messages of type "resize".
 function handleResize(message) {
-  var divelem = document.getElementById('foo');
+  var divelem = document.getElementById('chartModalBody');
   divelem.setAttribute('jasHeight', message.height)
   if (modalChart) {
      resizeChart(modalChart, elemHeight = message.height -

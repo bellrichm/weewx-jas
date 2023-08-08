@@ -57,7 +57,7 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <div class="modal-body" id="foo">
+      <div class="modal-body" id="chartModalBody">
         ...
       </div>
       <div class="modal-footer" id="chartModalFooter"></div>
