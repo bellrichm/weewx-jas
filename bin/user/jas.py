@@ -1017,6 +1017,7 @@ class JAS(SearchList):
                 chart2 += self.charts_javascript[chart][series_type]
 
                 chart2 += "};\n"
+                chart2 += "pageIndex['" + chart + page_name + "'] = Object.keys(pageIndex).length;\n"
                 chart2 += "var telem = document.getElementById('" + chart + page_name + "');\n"
                 chart2 += "var " + chart + "chart = echarts.init(document.getElementById('" + chart + page_name + "'));\n"
                 chart2 += chart + "chart.setOption(option);\n"
@@ -1036,7 +1037,7 @@ class JAS(SearchList):
                             chart2 += 'seriesData.name = null;\n'
                         chart2 += 'pageChart.series.push(seriesData);\n'
                 elif series_type == 'multiple':
-                    chart2 += "option = {\n"
+                    chart2 += "series_option = {\n"
                     chart2 += "  series: [\n"
                     for obs in chart_def['series']:
                         aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
@@ -1051,9 +1052,10 @@ class JAS(SearchList):
                                       + "." + chart_def['series'][obs]['weewx']['observation'] + "_"  + obs_data_binding + ",\n"
                         chart2 += "          ]},\n"
                     chart2 += "]};\n"
-                    chart2 += "pageChart.option = option;\n"
+                    chart2 += "pageChart.option = series_option;\n"
+                    chart2 += "pageChart.def = option;\n"
                 elif series_type == 'comparison':
-                    chart2 += "option = {\n"
+                    chart2 += "series_option = {\n"
                     chart2 += "  series: [\n"
                     obs = next(iter(chart_def['series']))
                     obs_data_binding = chart_def['series'][obs].get('weewx', {}).get('data_binding', chart_data_binding)
@@ -1069,9 +1071,10 @@ class JAS(SearchList):
                                 + ").format(dateTimeFormat[lang].chart.yearToYearXaxis), arr[1]]),\n" \
                                 + "},\n"
                     chart2 += "]};\n"
-                    chart2 += "pageChart.option = option;\n"
+                    chart2 += "pageChart.option = series_option;\n"
+                    chart2 += "pageChart.def = option;\n"
                 else:
-                    chart2 += "option = {\n"
+                    chart2 += "series_option = {\n"
                     chart2 += "  series: [\n"
                     for obs in chart_def['series']:
                         aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
@@ -1086,7 +1089,8 @@ class JAS(SearchList):
                                 + "." + chart_def['series'][obs]['weewx']['observation'] + "_"  + obs_data_binding + obs_data_unit \
                                 + "},\n"
                     chart2 += "]};\n"
-                    chart2 += "pageChart.option = option;\n"
+                    chart2 += "pageChart.option = series_option;\n"
+                    chart2 += "pageChart.def = option;\n"
 
                 chart2 += "pageChart.chart = " + chart + "chart;\n"
                 chart2 += "pageCharts.push(pageChart);\n"
@@ -1709,6 +1713,32 @@ class JAS(SearchList):
         data += '\n'
         default_theme = to_list(self.skin_dict['Extras'].get('themes', 'light'))[0]
         data += 'window.addEventListener("load", function (event) {\n'
+        data += '     modalChart = null;\n'
+        data += '    var chartModal = document.getElementById("chartModal");\n'
+
+        data += '    chartModal.addEventListener("shown.bs.modal", function (event) {\n'
+        data += '      var titleElem = document.getElementById("chartModalTitle");\n'
+        data += '      titleElem.innerText = getText(event.relatedTarget.getAttribute("data-bs-title"));\n'
+        data += '      var divelem = document.getElementById("chartModalBody");\n'
+        data += '      modalChart = echarts.init(divelem);\n'
+
+        data += '      var chartId = event.relatedTarget.getAttribute("data-bs-chart");\n'
+        data += '      index = pageIndex[chartId];\n'
+        data += '      option = pageCharts[index]["def"];\n'
+        data += '      modalChart.setOption(option);\n'
+        data += '      modalChart.setOption(pageCharts[index]["option"]);\n'
+        data += '      resizeChart(modalChart, elemHeight = divelem.getAttribute("jasHeight") -\n'
+        data += '                                      4* document.getElementById("chartModalHeader").clietHeight -\n'
+        data += '                                      document.getElementById("chartModalFooter").clientHeight);\n'
+        data += '    })\n'
+
+        data += '    chartModal.addEventListener("hidden.bs.modal", function (event) {\n'
+        data += '      modalChart.dispose();\n'
+        data += '      modalChart = null;\n'
+
+        data += '      bootstrap.Modal.getInstance(document.getElementById("chartModal")).dispose();\n'
+        data += '    })\n'
+
         data += '    theme = sessionStorage.getItem("theme");\n'
         data += '    if (!theme) {\n'
         data += '        theme = "' + default_theme + '";\n'
@@ -1796,7 +1826,9 @@ function updatelogLevel(logLevel) {
 
 updatelogLevel(logLevel);
 
+// ToDo: make a dictionary of dictionaries
 var pageCharts = [];
+var pageIndex = {};
 
 // Update the chart data
 function updateCharts() {
@@ -1822,80 +1854,89 @@ function refreshSizes() {
     }
 
     for (var index in pageCharts) {
-        chartElem = pageCharts[index].chart.getDom();
-        height = chartElem.offsetWidth / 1.618;
-        width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-        // width/100 is like the css variable vw
-        fontSize = width/100 * 1.5;
-        // Max is 18px and min is 10px
-        document.getElementsByTagName("html")[0].style.fontSize = Math.min(18, Math.max(10, fontSize)) + "px";
-        height = height + "px";
-        pageCharts[index].chart.resize({width: null, height: height});
-        options = pageCharts[index].chart.getOption();
-        updatedOptions = {};
-        if (chartElem.offsetWidth > 505) {
-            percent = 1;
-            legendTextStyleWidth = 70;
-            legendIcon = 'roundRect';
-        }
-        else if (chartElem.offsetWidth > 350) {
-            percent = 2/3;
-            legendTextStyleWidth = 70;
-            legendIcon = 'roundRect';
-        }
-        else if (chartElem.offsetWidth > 300) {
-            percent = 1/2;
-            legendTextStyleWidth = 70;
-            legendIcon = 'roundRect';
-        }
-        else {
-            percent = 1/2;
-            legendTextStyleWidth = 20;
-            legendIcon = 'none';    
-        }
-
-        updatedOptions.toolbox = {};
-        updatedOptions.toolbox.itemSize = Math.round(15 * percent);
-        updatedOptions.toolbox.showTitle = false
-        updatedOptions.tooltip = {};
-        updatedOptions.tooltip.textStyle = {};
-        updatedOptions.tooltip.textStyle.fontSize = Math.round(14 * percent); 
-        updatedOptions.axisPointer = {};
-        updatedOptions.axisPointer.label = {};
-        updatedOptions.axisPointer.label.fontSize = Math.round(12 * percent); 
-        updatedOptions.legend = {};
-        updatedOptions.legend.itemHeight = Math.round(14 * percent); 
-        updatedOptions.legend.itemWidth = Math.round(25 * percent); 
-        updatedOptions.legend.textStyle = {};
-        updatedOptions.legend.textStyle.fontSize = Math.round(12 * percent);
-        if (options.legend[0].type == 'scroll') {
-            updatedOptions.legend.pageIconSize = Math.round(15 * percent); 
-            updatedOptions.legend.pageTextStyle = {};
-            updatedOptions.legend.pageTextStyle.fontSize = Math.round(12 * percent); 
-        }
-        if ('xAxis' in options) {
-            updatedOptions.xAxis = {};
-            updatedOptions.xAxis.axisLabel = {};
-            updatedOptions.xAxis.axisLabel.fontSize = Math.round(12 * percent); 
-            updatedOptions.yAxis = [];
-            for (let i = 0; i < options.yAxis.length; i++) {
-                updatedOptions.yAxis[i] = {};
-                updatedOptions.yAxis[i].axisLabel = {};
-                updatedOptions.yAxis[i].axisLabel.fontSize = Math.round(12 * percent); 
-                updatedOptions.yAxis[i].nameTextStyle = {};
-                updatedOptions.yAxis[i].nameTextStyle.fontSize = Math.round(12 * percent); 
-            }      
-        }
-        if ('angleAxis' in options) {
-            updatedOptions.legend.textStyle.width = legendTextStyleWidth;    
-            updatedOptions.legend.icon = legendIcon;
-            updatedOptions.angleAxis = {};
-            updatedOptions.angleAxis.axisLabel = {};
-            updatedOptions.angleAxis.axisLabel.fontSize = Math.round(12 * percent);
-        }
-    
-      pageCharts[index].chart.setOption(updatedOptions);
+        resizeChart(pageCharts[index].chart);
     }
+}
+
+function resizeChart(chart, elemHeight = null) {
+    chartElem = chart.getDom();
+    if (!elemHeight){ 
+        height = chartElem.offsetWidth / 1.618;
+    }
+    else {
+        height = Math.min(height = chartElem.offsetWidth / 1.618, elemHeight);
+    }
+    width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+    // width/100 is like the css variable vw
+    fontSize = width/100 * 1.5;
+    // Max is 18px and min is 10px
+    document.getElementsByTagName("html")[0].style.fontSize = Math.min(18, Math.max(10, fontSize)) + "px";
+    height = height + "px";
+    chart.resize({width: null, height: height});
+    options = chart.getOption();
+    updatedOptions = {};
+    if (chartElem.offsetWidth > 505) {
+        percent = 1;
+        legendTextStyleWidth = 70;
+        legendIcon = 'roundRect';
+    }
+    else if (chartElem.offsetWidth > 350) {
+        percent = 2/3;
+        legendTextStyleWidth = 70;
+        legendIcon = 'roundRect';
+    }
+    else if (chartElem.offsetWidth > 300) {
+        percent = 1/2;
+        legendTextStyleWidth = 70;
+        legendIcon = 'roundRect';
+    }
+    else {
+        percent = 1/2;
+        legendTextStyleWidth = 20;
+        legendIcon = 'none';    
+    }
+
+    updatedOptions.toolbox = {};
+    updatedOptions.toolbox.itemSize = Math.round(15 * percent);
+    updatedOptions.toolbox.showTitle = false
+    updatedOptions.tooltip = {};
+    updatedOptions.tooltip.textStyle = {};
+    updatedOptions.tooltip.textStyle.fontSize = Math.round(14 * percent); 
+    updatedOptions.axisPointer = {};
+    updatedOptions.axisPointer.label = {};
+    updatedOptions.axisPointer.label.fontSize = Math.round(12 * percent); 
+    updatedOptions.legend = {};
+    updatedOptions.legend.itemHeight = Math.round(14 * percent); 
+    updatedOptions.legend.itemWidth = Math.round(25 * percent); 
+    updatedOptions.legend.textStyle = {};
+    updatedOptions.legend.textStyle.fontSize = Math.round(12 * percent);
+    if (options.legend[0].type == 'scroll') {
+        updatedOptions.legend.pageIconSize = Math.round(15 * percent); 
+        updatedOptions.legend.pageTextStyle = {};
+        updatedOptions.legend.pageTextStyle.fontSize = Math.round(12 * percent); 
+    }
+    if ('xAxis' in options) {
+        updatedOptions.xAxis = {};
+        updatedOptions.xAxis.axisLabel = {};
+        updatedOptions.xAxis.axisLabel.fontSize = Math.round(12 * percent); 
+        updatedOptions.yAxis = [];
+        for (let i = 0; i < options.yAxis.length; i++) {
+            updatedOptions.yAxis[i] = {};
+            updatedOptions.yAxis[i].axisLabel = {};
+            updatedOptions.yAxis[i].axisLabel.fontSize = Math.round(12 * percent); 
+            updatedOptions.yAxis[i].nameTextStyle = {};
+            updatedOptions.yAxis[i].nameTextStyle.fontSize = Math.round(12 * percent); 
+        }      
+    }
+    if ('angleAxis' in options) {
+        updatedOptions.legend.textStyle.width = legendTextStyleWidth;    
+        updatedOptions.legend.icon = legendIcon;
+        updatedOptions.angleAxis = {};
+        updatedOptions.angleAxis.axisLabel = {};
+        updatedOptions.angleAxis.axisLabel.fontSize = Math.round(12 * percent);
+    }
+
+    chart.setOption(updatedOptions);
 }
 
 function getLogLevel() {
@@ -1966,6 +2007,16 @@ function handleLang(lang) {
     window.location.reload(true);
 }
 
+// Handle event messages of type "resize".
+function handleResize(message) {
+  var divelem = document.getElementById('chartModalBody');
+  divelem.setAttribute('jasHeight', message.height)
+  if (modalChart) {
+     resizeChart(modalChart, elemHeight = message.height -
+                            4 * document.getElementById('chartModalHeader').clientHeight - 
+                            document.getElementById('chartModalFooter').clientHeight)
+  }    
+}
 
 // Handle event messages of type "log".
 function handleLog(message) {
@@ -1973,6 +2024,11 @@ function handleLog(message) {
     if (logDisplayElem) {
         logDisplayElem.innerHTML = message + "\\n<br>" + logDisplayElem.innerHTML;
     }
+}
+
+// Handle event messages of type "scroll".
+function handleScroll(message) {
+    document.getElementById('chartModal').style.top = message.currentScroll + 'px';
 }
 
 
@@ -2055,6 +2111,7 @@ function updateForecasts() {
         i += 1;
     });
 }
+
 window.addEventListener("onresize", function() {
     message = {};
     message.kind = "resize";
@@ -2098,7 +2155,15 @@ window.addEventListener("message",
                         if (message.kind == "setTheme")
                         {
                             setTheme(message.message);
+                        }
+                        if (message.kind == "resize")
+                        {
+                            handleResize(message.message);
                         }                        
+                        if (message.kind == "scroll")
+                        {
+                            handleScroll(message.message);
+                        }       
                         if (message.kind == "log")
                         {
                             handleLog(message.message);

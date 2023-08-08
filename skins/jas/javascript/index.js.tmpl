@@ -296,6 +296,33 @@ function setYear(year) {
   #end if
 }
 
+function resizeModal() {
+  width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+  height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+
+  message = {};
+  message.kind = 'resize';
+  message.message = {};
+  message.message.width = width;
+  message.message.height = height - document.getElementById('navbar').clientHeight;
+
+  // When running without a webserver, there is a lot of 'strangeness'
+  if (window.location.protocol == "file:") {
+      targetOrigin = "*";
+  }
+  else {
+      targetOrigin = window.location.origin;
+  }      
+
+  iframe = document.getElementById('child-iframe')
+  if (iframe) {
+    iframe.contentWindow.postMessage(message, targetOrigin);
+  }
+  else {
+    window.self.postMessage(message, targetOrigin);
+  }
+}
+
 window.addEventListener("load", function (event) {
   #set themes = to_list($getVar("$Extras.themes", "light"))
   #echo "  var themes = ['" + "', '".join($themes) + "'];\n"
@@ -309,6 +336,34 @@ window.addEventListener("load", function (event) {
     }
   }
   setTheme(theme);
+
+  window.addEventListener('scroll', function(event){
+    iframe = document.getElementById('child-iframe')
+    topOffset = iframe.getBoundingClientRect().top + window.scrollY;
+    currentScroll = document.scrollingElement.scrollTop;
+
+
+    message = {};
+    message.kind = 'scroll';
+    message.message = {};
+    message.message.topOffset = topOffset;
+    message.message.currentScroll = currentScroll;
+   
+    // When running without a webserver, there is a lot of 'strangeness'
+    if (window.location.protocol == "file:") {
+        targetOrigin = "*";
+    }
+    else {
+        targetOrigin = window.location.origin;
+    }      
+
+    if (iframe) {
+      iframe.contentWindow.postMessage(message, targetOrigin);
+    }
+    else {
+      window.self.postMessage(message, targetOrigin);
+    }
+});
 
 
   #if to_bool($getVar("$Extras.allow_user_language_selection", False))
@@ -408,6 +463,8 @@ addEventListener("resize", (event) => {
   fontSize = width/100 * 1.5;
   // Max is 18px and min is 10px
   document.getElementsByTagName("html")[0].style.fontSize = Math.min(18, Math.max(10, fontSize)) + "px";
+
+  resizeModal();
 });
 
 window.addEventListener("beforeunload", function (event) {
@@ -432,6 +489,7 @@ window.addEventListener('message',
                           }
                           if (kind == 'loaded') {
                             document.querySelector("#child-iframe").style.visibility = 'visible';
+                            resizeModal();
                           }
                           
                         }, 
