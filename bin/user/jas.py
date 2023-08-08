@@ -1830,15 +1830,16 @@ function refreshSizes() {
     for (var index in pageCharts) {
         resizeChart(pageCharts[index].chart);
     }
-
-    if (modalChart) {
-        resizeChart(modalChart)
-    }    
 }
 
-function resizeChart(chart) {
+function resizeChart(chart, elemHeight = null) {
     chartElem = chart.getDom();
-    height = chartElem.offsetWidth / 1.618;
+    if (!elemHeight){ 
+        height = chartElem.offsetWidth / 1.618;
+    }
+    else {
+        height = Math.min(height = chartElem.offsetWidth / 1.618, elemHeight);
+    }
     width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
     // width/100 is like the css variable vw
     fontSize = width/100 * 1.5;
@@ -1984,12 +1985,12 @@ function handleLang(lang) {
 function handleResize(message) {
   var divelem = document.getElementById('foo');
   // ToDo: refine -> for example navbar height is in message.height, but modal cannot overlay navbar
-  if (message.width / 1.618 > message.height) {
-    divelem.style.height=height;
-  }
-  else {
-    divelem.style.height=message.width / 1.618
-  }
+  divelem.setAttribute('jasHeight', message.height)
+  if (modalChart) {
+     resizeChart(modalChart, elemHeight = message.height -
+                            4 * document.getElementById('chartModalHeader').clientHeight - 
+                            document.getElementById('chartModalFooter').clientHeight)
+  }    
 }
 
 // Handle event messages of type "log".

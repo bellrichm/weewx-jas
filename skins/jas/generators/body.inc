@@ -51,7 +51,7 @@
 <div class="modal" id="chartModal" tabindex="-1" role="dialog" aria-labelledby="chartModalTitle" aria-hidden="true">
   <div class="modal-dialog modal-xl" role="document">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header" id="chartModalHeader">
         <h5 class="modal-title" id="chartModalTitle">Modal title</h5>
         <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
@@ -60,7 +60,7 @@
       <div class="modal-body" id="foo">
         ...
       </div>
-      <div class="modal-footer"></div>
+      <div class="modal-footer" id="chartModalFooter"></div>
     </div>
   </div>
 </div>
@@ -80,7 +80,9 @@ chartModal.addEventListener('shown.bs.modal', function (event) {
   option = pageCharts[index]['def'];
   modalChart.setOption(option);
   modalChart.setOption(pageCharts[index]['option']);
-  resizeChart(modalChart);  
+  resizeChart(modalChart, elemHeight = divelem.getAttribute('jasHeight') -
+                                  4* document.getElementById('chartModalHeader').clientHeight -
+                                  document.getElementById('chartModalFooter').clientHeight);  
 })  
 
 chartModal.addEventListener('hidden.bs.modal', function (event) {

@@ -304,7 +304,7 @@ function resizeModal() {
   message.kind = 'resize';
   message.message = {};
   message.message.width = width;
-  message.message.height = height;
+  message.message.height = height - document.getElementById('navbar').clientHeight;
 
   // When running without a webserver, there is a lot of 'strangeness'
   if (window.location.protocol == "file:") {
@@ -363,8 +363,6 @@ window.addEventListener("load", function (event) {
     else {
       window.self.postMessage(message, targetOrigin);
     }
-
-    resizeModal();
 });
 
 
@@ -491,6 +489,7 @@ window.addEventListener('message',
                           }
                           if (kind == 'loaded') {
                             document.querySelector("#child-iframe").style.visibility = 'visible';
+                            resizeModal();
                           }
                           
                         }, 
