@@ -64,31 +64,3 @@
     </div>
   </div>
 </div>
-
-<script>
-modalChart = null;
-var chartModal = document.getElementById('chartModal')
-
-chartModal.addEventListener('shown.bs.modal', function (event) {
-  var titleElem = document.getElementById('chartModalTitle');
-  titleElem.innerText = getText(event.relatedTarget.getAttribute('data-bs-title'));
-  var divelem = document.getElementById('foo');
-  modalChart = echarts.init(divelem);
-
-  var chartId = event.relatedTarget.getAttribute('data-bs-chart')
-  index = pageIndex[chartId];
-  option = pageCharts[index]['def'];
-  modalChart.setOption(option);
-  modalChart.setOption(pageCharts[index]['option']);
-  resizeChart(modalChart, elemHeight = divelem.getAttribute('jasHeight') -
-                                  4* document.getElementById('chartModalHeader').clientHeight -
-                                  document.getElementById('chartModalFooter').clientHeight);  
-})  
-
-chartModal.addEventListener('hidden.bs.modal', function (event) {
-  modalChart.dispose();
-  modalChart = null;
-
-  bootstrap.Modal.getInstance(document.getElementById("chartModal")).dispose();
-})
-</script>

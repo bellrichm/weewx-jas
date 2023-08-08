@@ -1713,6 +1713,32 @@ class JAS(SearchList):
         data += '\n'
         default_theme = to_list(self.skin_dict['Extras'].get('themes', 'light'))[0]
         data += 'window.addEventListener("load", function (event) {\n'
+        data += '     modalChart = null;\n'
+        data += '    var chartModal = document.getElementById("chartModal");\n'
+
+        data += '    chartModal.addEventListener("shown.bs.modal", function (event) {\n'
+        data += '      var titleElem = document.getElementById("chartModalTitle");\n'
+        data += '      titleElem.innerText = getText(event.relatedTarget.getAttribute("data-bs-title"));\n'
+        data += '      var divelem = document.getElementById("foo");\n'
+        data += '      modalChart = echarts.init(divelem);\n'
+
+        data += '      var chartId = event.relatedTarget.getAttribute("data-bs-chart");\n'
+        data += '      index = pageIndex[chartId];\n'
+        data += '      option = pageCharts[index]["def"];\n'
+        data += '      modalChart.setOption(option);\n'
+        data += '      modalChart.setOption(pageCharts[index]["option"]);\n'
+        data += '      resizeChart(modalChart, elemHeight = divelem.getAttribute("jasHeight") -\n'
+        data += '                                      4* document.getElementById("chartModalHeader").clietHeight -\n'
+        data += '                                      document.getElementById("chartModalFooter").clientHeight);\n'
+        data += '    })\n'
+
+        data += '    chartModal.addEventListener("hidden.bs.modal", function (event) {\n'
+        data += '      modalChart.dispose();\n'
+        data += '      modalChart = null;\n'
+
+        data += '      bootstrap.Modal.getInstance(document.getElementById("chartModal")).dispose();\n'
+        data += '    })\n'
+
         data += '    theme = sessionStorage.getItem("theme");\n'
         data += '    if (!theme) {\n'
         data += '        theme = "' + default_theme + '";\n'
@@ -1984,7 +2010,6 @@ function handleLang(lang) {
 // Handle event messages of type "resize".
 function handleResize(message) {
   var divelem = document.getElementById('foo');
-  // ToDo: refine -> for example navbar height is in message.height, but modal cannot overlay navbar
   divelem.setAttribute('jasHeight', message.height)
   if (modalChart) {
      resizeChart(modalChart, elemHeight = message.height -
@@ -2086,6 +2111,7 @@ function updateForecasts() {
         i += 1;
     });
 }
+
 window.addEventListener("onresize", function() {
     message = {};
     message.kind = "resize";
