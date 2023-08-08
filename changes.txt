@@ -164,6 +164,11 @@ Breaking Change:
 The 'topics = ' and '[[[[[fields]]]]]' have been moved under a [[[[[topics]]]]] section.
 See https://github.com/bellrichm/weewx-jas/wiki/MQTT for additional information.
 
+Enhancements:
+- Ability to subscribe to multiple MQTT topics.
+- Improved look of navigation bar.
+- Charts can be opened in a modal/pop-up window.
+
 Internal:
 - Improved performance of generating charts by caching data across page generation (#107).
 - Removed unused 'suffix' code.
