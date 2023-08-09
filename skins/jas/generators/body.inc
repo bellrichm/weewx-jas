@@ -43,9 +43,11 @@
     #if $processing_grid
       </div>
     #end if
-    </div>     
-    #set data = '<script src="../charts/' + $page_name_global + '.js"></script>'
-    $data
+    </div>
+    #if $page_name_global != 'about'
+      #set data = '<script src="../charts/' + $page_name_global + '.js"></script>'
+      $data
+  #end if
     
     <!-- Modal -->
 <div class="modal" id="chartModal" tabindex="-1" role="dialog" aria-labelledby="chartModalTitle" aria-hidden="true">
