@@ -1733,7 +1733,7 @@ class JAS(SearchList):
         data += '      modalChart.setOption(option);\n'
         data += '      modalChart.setOption(pageCharts[index]["option"]);\n'
         data += '      resizeChart(modalChart, elemHeight = divelem.getAttribute("jasHeight") -\n'
-        data += '                                      4* document.getElementById("chartModalHeader").clietHeight -\n'
+        data += '                                      4* document.getElementById("chartModalHeader").clientHeight -\n'
         data += '                                      document.getElementById("chartModalFooter").clientHeight);\n'
         data += '    })\n'
 
