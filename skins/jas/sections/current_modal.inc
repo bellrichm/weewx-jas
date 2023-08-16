@@ -5,7 +5,7 @@
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header" id="currentModalHeader">
-                <h5 class="modal-title" id="currentModalTitle">Modal title</h5>
+                <h5 class="modal-title text-center w-100" id="currentModalTitle"></h5>
                 <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
