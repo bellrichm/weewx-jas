@@ -32,7 +32,7 @@
                         #end for
                     </tbody>
                 </table>
-                <div id="updateDate"></div>
+                <div id="updateModalDate" class="text-center"></div>
             </div>
             <div class="modal-footer" id="currentModalFooter"></div>
         </div>
