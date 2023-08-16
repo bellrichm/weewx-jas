@@ -354,6 +354,7 @@ class JASInstaller(ExtensionInstaller):
                                            'skins/jas/sections/basic_about.inc',
                                            'skins/jas/sections/chart.inc',
                                            'skins/jas/sections/current.inc',
+                                           'skins/jas/sections/current_modal.inc',
                                            'skins/jas/sections/debug.inc',
                                            'skins/jas/sections/forecast.inc',
                                            'skins/jas/sections/minmax.inc',
