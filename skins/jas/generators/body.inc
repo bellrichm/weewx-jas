@@ -1,6 +1,14 @@
 ##    Copyright (c) 2023 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
+#set global current_modal_global = False
+#for observation in $Extras.current.observations
+    #if 'modal' in $getVar('$Extras.current.observations.' + observation + '.display', ['page', 'modal'])
+        #set global current_modal_global = True
+        #break
+    #end if
+#end for 
+
     <div class="container">
     #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
       #include "sections/zoomControl.inc"
@@ -66,3 +74,7 @@
     </div>
   </div>
 </div>
+
+#if $current_modal_global
+    #include 'sections/current_modal.inc'
+#end if
