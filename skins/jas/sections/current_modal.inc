@@ -5,20 +5,19 @@
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
             <div class="modal-header" id="currentModalHeader">
-                <h5 class="modal-title text-center w-100" id="currentModalTitle"></h5>
+                <h5 class="modal-title"></h5>
                 <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body" id="currentModalBody">
-            #*
                 #if $getVar('$Extras.current.observation', False)
-                    <h1 id="$Extras.current.observation"></h1>
+                <h5 class="text-center w-100" id="currentModalTitle"></h5>
                 #end if
                 #if $getVar("$Extras.display_aeris_observation", False)
-                    <div id="currentObservation"></div>
+                <p id='currentObservationModal' class="text-center">
+                </p>
                 #end if
-            *#
                 #set i = 0
                 <table class="table">
                     <tbody>
@@ -33,6 +32,7 @@
                     </tbody>
                 </table>
                 <div id="updateModalDate" class="text-center"></div>
+          
             </div>
             <div class="modal-footer" id="currentModalFooter"></div>
         </div>
