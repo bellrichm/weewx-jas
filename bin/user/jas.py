@@ -1317,7 +1317,7 @@ class JAS(SearchList):
             data += 'observation.unit = "' + observation_unit + '";\n'
             data += 'observation.maxDecimals = ' + self.skin_dict['Extras']['current']['observations'][observation].get('max_decimals', 'null') +';\n'
             data += 'observation.modalLabel = null;\n'
-            if 'modal' in self.skin_dict['Extras']['current']['observations'][observation].get('display', ['page', 'modal']):
+            if 'modal' in to_list(self.skin_dict['Extras']['current']['observations'][observation].get('display', ['page', 'modal'])):
                 data += 'observation.modalLabel = observation.name + "_value_modal";\n'
             data += 'current.observations.set("' + observation + '", observation);\n'
             data += '\n'

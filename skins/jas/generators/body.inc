@@ -1,9 +1,11 @@
 ##    Copyright (c) 2023 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
+#from weeutil.weeutil import to_list
+
 #set global current_modal_global = False
 #for observation in $Extras.current.observations
-    #if 'modal' in $getVar('$Extras.current.observations.' + observation + '.display', ['page', 'modal'])
+    #if 'modal' in to_list($getVar('$Extras.current.observations.' + observation + '.display', ['page', 'modal']))
         #set global current_modal_global = True
         #break
     #end if

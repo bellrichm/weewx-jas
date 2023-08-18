@@ -168,6 +168,7 @@ Enhancements:
 - Ability to subscribe to multiple MQTT topics.
 - Improved look of navigation bar.
 - Charts can be opened in a modal/pop-up window.
+- Current observations can be opened in a modal/pop-up window.
 
 Internal:
 - Improved performance of generating charts by caching data across page generation (#107).
