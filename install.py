@@ -44,6 +44,8 @@ EXTENSION_CONFIG = """
             # If not set, the first/left most page is used.
             # landing_page = last24hours
 
+            chart_modal = True
+
             # The client id abd secret for Aeris APIs
             client_id = REPLACE_ME
             client_secret = REPLACE_ME       

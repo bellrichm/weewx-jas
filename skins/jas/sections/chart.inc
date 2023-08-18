@@ -14,7 +14,7 @@
 #set modal_classes = ''
 #if to_bool($getVar('$Extras.pages.' + $page + '.' + $section_global + '.chart_modal', 
                     $getVar('$Extras.pages.' + $page + '.chart_modal',
-                              $getVar('$Extras.chart_modal', False))))
+                              $getVar('$Extras.chart_modal', True))))
                               
     #if $series_type != 'mqtt'
         #set modal_classes = 'data-bs-toggle="modal" data-bs-target="#chartModal"'
