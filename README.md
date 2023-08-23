@@ -43,6 +43,10 @@ Prior to making any updates/changes, always make a backup.
 
 2. Install weewx-jas
 
+    ```
+    wee_extension --install=$DOWNLOAD_ROOT/vX.Y.Z.tar.gz
+    ```
+
 3. Restart WeeWX
 
     ```
