@@ -760,26 +760,27 @@ class JAS(SearchList):
 
         minmax_observations = self.skin_dict.get('Extras', {}).get('minmax', {}).get('observations', {})
         minmax_data_binding = self.skin_dict.get('Extras', {}).get('minmax', {}).get('data_binding', skin_data_binding)
-        for observation in self.skin_dict['Extras']['minmax']['observations'].sections:
-            data_binding = minmax_observations[observation].get('data_binding', minmax_data_binding)
-            if observation not in self.wind_observations:
-                unit = minmax_observations[observation].get('unit', 'default')
-                if observation not in observations:
-                    observations[observation] = {}
-                    observations[observation]['aggregate_types'] = {}
+        if minmax_observations:
+            for observation in self.skin_dict['Extras']['minmax']['observations'].sections:
+                data_binding = minmax_observations[observation].get('data_binding', minmax_data_binding)
+                if observation not in self.wind_observations:
+                    unit = minmax_observations[observation].get('unit', 'default')
+                    if observation not in observations:
+                        observations[observation] = {}
+                        observations[observation]['aggregate_types'] = {}
 
-                if 'min' not in observations[observation]['aggregate_types']:
-                    observations[observation]['aggregate_types']['min'] = {}
-                if data_binding not in observations[observation]['aggregate_types']['min']:
-                    observations[observation]['aggregate_types']['min'][data_binding] = {}
-                observations[observation]['aggregate_types']['min'][data_binding][unit] = {}
-                aggregate_types['min'] = {}
-                if 'max' not in observations[observation]['aggregate_types']:
-                    observations[observation]['aggregate_types']['max'] = {}
-                if data_binding not in observations[observation]['aggregate_types']['max']:
-                    observations[observation]['aggregate_types']['max'][data_binding] = {}
-                observations[observation]['aggregate_types']['max'][data_binding][unit] = {}
-                aggregate_types['max'] = {}
+                    if 'min' not in observations[observation]['aggregate_types']:
+                        observations[observation]['aggregate_types']['min'] = {}
+                    if data_binding not in observations[observation]['aggregate_types']['min']:
+                        observations[observation]['aggregate_types']['min'][data_binding] = {}
+                    observations[observation]['aggregate_types']['min'][data_binding][unit] = {}
+                    aggregate_types['min'] = {}
+                    if 'max' not in observations[observation]['aggregate_types']:
+                        observations[observation]['aggregate_types']['max'] = {}
+                    if data_binding not in observations[observation]['aggregate_types']['max']:
+                        observations[observation]['aggregate_types']['max'][data_binding] = {}
+                    observations[observation]['aggregate_types']['max'][data_binding][unit] = {}
+                    aggregate_types['max'] = {}
 
         if 'thisdate' in self.skin_dict['Extras']:
             thisdate_observations = self.skin_dict.get('Extras', {}).get('thisdate', {}).get('observations', {})
