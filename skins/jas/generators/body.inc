@@ -4,12 +4,14 @@
 #from weeutil.weeutil import to_list
 
 #set global current_modal_global = False
-#for observation in $Extras.current.observations
-    #if 'modal' in to_list($getVar('$Extras.current.observations.' + observation + '.display', ['page', 'modal']))
-        #set global current_modal_global = True
-        #break
-    #end if
-#end for 
+#if $getVar('$Extras.current', False)
+  #for observation in $getVar('$Extras.current.observations', {})
+      #if 'modal' in to_list($getVar('$Extras.current.observations.' + observation + '.display', ['page', 'modal']))
+          #set global current_modal_global = True
+          #break
+      #end if
+  #end for
+#end if
 
     <div class="container">
     #if $getVar('$Extras.pages.' + $page + '.zoomControl', False)
