@@ -1476,7 +1476,7 @@ class JAS(SearchList):
         else:
             data += 'current_observation = null;\n'
 
-        data += 'headerMaxDecimals = ' + self.skin_dict['Extras']['current'].get('header_max_decimals', 'null') + ';\n'
+        data += 'headerMaxDecimals = ' + self.skin_dict['Extras'].get('current', {}).get('header_max_decimals', 'null') + ';\n'
         data += "logLevel = sessionStorage.getItem('logLevel');\n"
 
         data += 'if (!logLevel) {\n'
@@ -2249,7 +2249,7 @@ window.addEventListener("message",
 
         data += "jasOptions.currentHeader = null;\n"
 
-        if self.skin_dict['Extras']['current'].get('observation', False):
+        if self.skin_dict['Extras'].get('current', {}).get('observation', False):
             data += "jasOptions.currentHeader = '" + self.skin_dict['Extras']['current']['observation'] + "';\n"
 
         if "current" in self.skin_dict['Extras']['pages'][page]:
