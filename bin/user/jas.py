@@ -2284,7 +2284,7 @@ window.addEventListener("message",
         data += "\n"
 
         elapsed_time = time.time() - start_time
-        log_msg = "Generated " + self.html_root + "/" + filename + " in " + str(elapsed_time)
+        log_msg = "Generated jasOptions for " + self.html_root + "/" + filename + " in " + str(elapsed_time)
         if to_bool(self.skin_dict['Extras'].get('log_times', True)):
             logdbg(log_msg)
         return data
