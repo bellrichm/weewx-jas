@@ -221,7 +221,7 @@ class JAS(SearchList):
 
         self.skin_debug = to_bool(self.skin_dict['Extras'].get('debug', False))
         self.data_binding = self.skin_dict['data_binding']
-        self.unit_system = self.skin_dict['unit_system'].upper()
+        self.unit_system = self.skin_dict.get('unit_system', 'us').upper()
 
         self.chart_defaults = self.skin_dict['Extras']['chart_defaults'].get('global', {})
         self.chart_series_defaults = self.skin_dict['Extras']['chart_defaults'].get('chart_type', {}).get('series', {})
