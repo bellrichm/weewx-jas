@@ -173,3 +173,15 @@ Enhancements:
 Internal:
 - Improved performance of generating charts by caching data across page generation (#107).
 - Removed unused 'suffix' code.
+
+V1.0.1
+
+Fixes:
+- 'Current' and 'Min/Max' sections are now optional.
+- 'Landing page' is now optional.
+- Handle the case where the WeeWX default value for 'unit_system' is missing.
+- Raise an exception during generation if the WeeWX default value for 'lang' is missing.
+- Correct UTC offset used for min/max date time display.
+
+Enhancements:
+- Additional debug logging.
