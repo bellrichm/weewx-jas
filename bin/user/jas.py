@@ -114,7 +114,10 @@ But, if they depend on things only known farther down the list, in particular, a
 import copy
 import datetime
 import errno
+import locale
 import os
+import platform
+import sys
 import time
 import json
 
@@ -179,6 +182,20 @@ class JAS(SearchList):
     """ Implement tags used by templates in the skin. """
     def __init__(self, generator):
         SearchList.__init__(self, generator)
+        self.skin_dict = generator.skin_dict
+
+        logdbg(F"Using weewx version {weewx.__version__}")
+        logdbg(F"Using Python {sys.version}")
+        logdbg(F"Platform {platform.platform()}")
+        logdbg(F"Locale is '{locale.setlocale(locale.LC_ALL)}'")
+        logdbg(F"jas version is {VERSION}")
+        logdbg(F"First run: {self.generator.first_run}")
+        delta_time = time.time() - weewx.launchtime_ts if weewx.launchtime_ts else None
+        logdbg(F"WeeWX uptime (seconds): {delta_time}")
+        #logdbg(self.skin_dict)
+
+        if 'lang' not in self.skin_dict:
+            raise AttributeError("'lang' setting is required.")
 
         self.unit = weewx.units.UnitInfoHelper(generator.formatter, generator.converter)
 
@@ -1790,7 +1807,6 @@ class JAS(SearchList):
         data +='            timeElem.innerHTML = moment.unix(updateDate).utcOffset(' + str(self.utc_offset) + ').format(dateTimeFormat[lang].current);\n'
         data +='         }\n'
         data += '    })\n'
-        
 
         data += '    currentModal.addEventListener("hidden.bs.modal", function (event) {\n'
         data += '      bootstrap.Modal.getInstance(document.getElementById("currentModal")).dispose();\n'
