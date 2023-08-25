@@ -1738,8 +1738,8 @@ class JAS(SearchList):
             data +='\n'
             min_format = self.skin_dict['Extras']['page_definition'][page].get('aggregate_interval', {}).get('min', 'none')
             max_format = self.skin_dict['Extras']['page_definition'][page].get('aggregate_interval', {}).get('max', 'none')
-            data +='        minDate = moment.unix(minMaxObsData.minDateTimeArray[minIndex]/1000).utcOffset(-300.0).format(dateTimeFormat[lang].chart["' + min_format + '"].label);\n'
-            data +='        maxDate = moment.unix(minMaxObsData.maxDateTimeArray[maxIndex]/1000).utcOffset(-300.0).format(dateTimeFormat[lang].chart["' +max_format + '"].label);\n'
+            data +='        minDate = moment.unix(minMaxObsData.minDateTimeArray[minIndex]/1000).utcOffset(' + str(self.utc_offset) + ').format(dateTimeFormat[lang].chart["' + min_format + '"].label);\n'
+            data +='        maxDate = moment.unix(minMaxObsData.maxDateTimeArray[maxIndex]/1000).utcOffset(' + str(self.utc_offset) + ').format(dateTimeFormat[lang].chart["' +max_format + '"].label);\n'
             data += '\n'
             data +='        observation_element=document.getElementById(minMaxObsData.minId);\n'
             data +='        observation_element.innerHTML = min + "<br>" + minDate;\n'
