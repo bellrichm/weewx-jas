@@ -67,14 +67,14 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
       <script src="../data/internationalization.js"></script>
       #if $interval_name_global
         #set data = $interval_name_global + ".js"
-        <script src="../data/$data"></script>
+        <script src="../data/$data?ts=$current.dateTime.raw"></script>
       #end if
       #set series_type = $getVar('$Extras.page_definition.' + $page + '.series_type', None)
       #if $series_type == 'comparison' or $series_type == 'multiple'
         #set $data_binding = $getVar('Extras.pages.' + $page + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
         #set (year_start,year_end) = $getRange($getVar('$Extras.pages.' + $page + '.start', None), $getVar('$Extras.pages.' + $page + '.end', None), $data_binding)
         #for $year in range($year_start, $year_end)
-          #set $line = '<script src="../data/year' + str($year) + '.js"></script>'
+          #set $line = '<script src="../data/year' + str($year) + '.js?ts=$current.dateTime.raw"></script>'
           $line
         #end for
       #end if
