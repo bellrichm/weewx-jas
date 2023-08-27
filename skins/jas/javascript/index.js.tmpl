@@ -185,7 +185,8 @@ function setIframeSrc(id, url) {
     sessionStorage.setItem('currentPage', url);
   }
   document.getElementById(url).classList.add("active");
-  document.getElementById(id).src = url;
+  // use query string so that iframe is not cached
+  document.getElementById(id).src = url + "?ts=" + Date.now();
 
   ## ToDo: better way/location?
   // When on the debug iframe, add the connect/disconnect buttons to the header.
