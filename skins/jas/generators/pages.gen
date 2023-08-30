@@ -2,7 +2,7 @@
 ##    See the file LICENSE.txt for your rights.
 
 #import time
-#from weeutil.weeutil import to_bool
+#from weeutil.weeutil import to_bool, to_list
 #set $start_time = time.time()
 #*
 Ideally this would be a routine that takes a parameter, interval. But, with Cheetah
@@ -40,6 +40,12 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
   #set echarts__minified = ".min"
 #end if
 
+#if 'data' in to_list($getVar("$Extras.pages." + $page + ".query_string_on", $getVar("$Extras.pages.query_string_on", [])))
+  #set query_string = "?ts=" + str($current.dateTime.raw)
+#else
+  #set query_string = ""
+#end if
+
 <!doctype html>
 <html lang="$lang" data-bs-theme="light">
    <head>
@@ -67,14 +73,14 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
       <script src="../data/internationalization.js"></script>
       #if $interval_name_global
         #set data = $interval_name_global + ".js"
-        <script src="../data/$data"></script>
+        <script src="../data/$data$query_string"></script>
       #end if
       #set series_type = $getVar('$Extras.page_definition.' + $page + '.series_type', None)
       #if $series_type == 'comparison' or $series_type == 'multiple'
         #set $data_binding = $getVar('Extras.pages.' + $page + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
         #set (year_start,year_end) = $getRange($getVar('$Extras.pages.' + $page + '.start', None), $getVar('$Extras.pages.' + $page + '.end', None), $data_binding)
         #for $year in range($year_start, $year_end)
-          #set $line = '<script src="../data/year' + str($year) + '.js"></script>'
+          #set $line = '<script src="../data/year' + str($year) + '.js' + $query_string + '"></script>'
           $line
         #end for
       #end if
