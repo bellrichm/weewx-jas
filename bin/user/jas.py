@@ -1464,6 +1464,11 @@ class JAS(SearchList):
         data = ''
 
         data += '// start\n'
+        data += 'traceStart = Date.now();\n'
+        data += 'function logTime(text) {\n'
+        data += '  console.log(text + ": " + (Date.now() - traceStart).toString());\n'
+        data += '}\n'
+        data += 'logTime("Starting");\n'
 
         if interval_long_name:
             start_date = interval_long_name + "startDate"
@@ -1750,7 +1755,50 @@ class JAS(SearchList):
 
         data += '\n'
         default_theme = to_list(self.skin_dict['Extras'].get('themes', 'light'))[0]
+        data += 'document.addEventListener("DOMContentLoaded", function (event) {\n'
+        data += '    logTime("DOMContentLoaded  Start");\n'
+        data += '    theme = sessionStorage.getItem("theme");\n'
+        data += '    if (!theme) {\n'
+        data += '        theme = "' + default_theme + '";\n'
+        data += '    }\n'
+        data += '    logTime("DOMContentLoaded  getTheme");\n'
+        data += '    setTheme(theme);\n'
+        data += '    logTime("DOMContentLoaded  setTheme");\n'
+        data += '    updateTexts();\n'
+        data += '    logTime("DOMContentLoaded  updateTexts");\n'
+        data += '    updateLabels();\n'
+        data += '    logTime("DOMContentLoaded  updateLabels");\n'
+        data += '    updateCharts();\n'
+        data += '    logTime("DOMContentLoaded  updateCharts");\n'
+        data += '\n'
+        data += '    if (jasOptions.minmax) {\n'
+        data +='        updateMinMax(' + start_timestamp + ', ' + end_timestamp + ');\n'
+        data += '    }\n'
+        data += '\n'
+        data += '    // Set up the date/time picker\n'
+        data += '    if (jasOptions.zoomcontrol) {\n'
+        data +='        setupZoomDate();\n'
+        data += '    }\n'
+        data += '\n'
+        data += '    if (jasOptions.thisdate) {\n'
+        data +='        setupThisDate();\n'
+        data += '    }\n'
+        data += '\n'
+        data += '    if (jasOptions.reload) {\n'
+        data +='        setupPageReload();\n'
+        data += '    }\n'
+        data += '\n'
+        data += '    if (jasOptions.current) {\n'
+        data +='        updateCurrentObservations();\n'
+        data += '    }\n'
+        data +='\n'
+        data += '    if (jasOptions.forecast) {\n'
+        data +='        updateForecasts();\n'
+        data += '    }\n'        
+        data += '    logTime("DOMContentLoaded  End");\n'
+        data += '});\n'
         data += 'window.addEventListener("load", function (event) {\n'
+        data += '    logTime("onLoad Start");\n'
         data += '     modalChart = null;\n'
         data += '    var chartModal = document.getElementById("chartModal");\n'
 
@@ -1813,11 +1861,6 @@ class JAS(SearchList):
         data += '    })\n'
         data +='   }\n'
 
-        data += '    theme = sessionStorage.getItem("theme");\n'
-        data += '    if (!theme) {\n'
-        data += '        theme = "' + default_theme + '";\n'
-        data += '    }\n'
-        data += '    setTheme(theme);\n'
         data += '    // Todo: create functions for code in the if statements\n'
         data += '    // Tell the parent page the iframe size\n'
         data += '    message = {};\n'
@@ -1840,39 +1883,12 @@ class JAS(SearchList):
         data += '    });\n'
         data += '    myObserver.observe(document.body);\n'
         data += '\n'
-        data += '    updateTexts();\n'
-        data += '    updateLabels();\n'
-        data += '    updateCharts();\n'
-        data += '\n'
-        data += '    if (jasOptions.minmax) {\n'
-        data +='        updateMinMax(' + start_timestamp + ', ' + end_timestamp + ');\n'
-        data += '    }\n'
-        data += '\n'
-        data += '    // Set up the date/time picker\n'
-        data += '    if (jasOptions.zoomcontrol) {\n'
-        data +='        setupZoomDate();\n'
-        data += '    }\n'
-        data += '\n'
-        data += '    if (jasOptions.thisdate) {\n'
-        data +='        setupThisDate();\n'
-        data += '    }\n'
-        data += '\n'
-        data += '    if (jasOptions.reload) {\n'
-        data +='        setupPageReload();\n'
-        data += '    }\n'
-        data += '\n'
-        data += '    if (jasOptions.current) {\n'
-        data +='        updateCurrentObservations();\n'
-        data += '    }\n'
-        data +='\n'
-        data += '    if (jasOptions.forecast) {\n'
-        data +='        updateForecasts();\n'
-        data += '    }\n'
         data += '    message = {};\n'
         data += '    message.kind = "loaded";\n'
         data += '    message.message = {};\n'
         data += '    // window.top refers to parent window\n'
         data += '    window.top.postMessage(message, "*");\n'
+        data += '    logTime("onLoad end");\n'
         data += '});\n'
 
         javascript = '''
@@ -2025,7 +2041,9 @@ function setLogLevel(logLevel) {
 
 // Handle event messages of type "setTheme".
 function setTheme(theme) {
-    sessionStorage.setItem('theme', theme);
+    if (document.documentElement.getAttribute('data-bs-theme') == theme) {
+        return;
+    }
     document.documentElement.setAttribute('data-bs-theme', theme);
     const style = getComputedStyle(document.body);
     bsBodyColor =  style.getPropertyValue("--bs-body-color");
@@ -2248,6 +2266,7 @@ window.addEventListener("message",
 
         data += javascript + "\n"
 
+        data += 'logTime("Ending");\n'
         data += '// end\n'
 
         elapsed_time = time.time() - start_time
