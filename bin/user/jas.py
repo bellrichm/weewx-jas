@@ -1130,7 +1130,6 @@ class JAS(SearchList):
         data = ''
         data += '// the start\n'
 
-        data += 'function loadPageData() {\n'
         data += self._gen_data_load2(interval, interval_type, page_definition_name, interval_long_name, skin_data_binding, page_data_binding)
 
         data += self._gen_aggregate_objects(interval, page_definition_name, interval_long_name)
@@ -1145,7 +1144,7 @@ class JAS(SearchList):
         if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
             data += self._gen_windrose(page_data_binding, interval, page_definition_name, interval_long_name)
 
-        data += "};\n"
+        data += "\n"
 
         elapsed_time = time.time() - start_time
         log_msg = "Generated " + self.html_root + "/" + filename + " in " + str(elapsed_time)
@@ -1165,7 +1164,7 @@ class JAS(SearchList):
         interval_current = self.skin_dict['Extras']['current'].get('interval', interval)
 
         #data += 'var mqtt_enabled = false;\n'
-        data += '  sessionStorage.setItem(updateDate, ' + str(self._get_current('dateTime', data_binding=current_data_binding, unit_name='default').raw * 1000) + ');\n'
+        data += '  sessionStorage.setItem("updateDate", ' + str(self._get_current('dateTime', data_binding=current_data_binding, unit_name='default').raw * 1000) + ');\n'
         if self.skin_dict['Extras']['current'].get('observation', False):
             data_binding = self.skin_dict['Extras']['current'].get('header_data_binding', current_data_binding)
             data += '  sessionStorage.setItem("currentHeaderValue", ' + self._get_current(self.skin_dict['Extras']['current']['observation'], data_binding, 'default').format(add_label=False,localize=False) + ');\n'
@@ -1241,7 +1240,6 @@ class JAS(SearchList):
     # Example: last7days_min.outTemp = [[dateTime1, outTemp1], [dateTime2, outTemp2]]
     def _gen_aggregate_objects2(self, interval, page_definition_name, interval_long_name):
         data = ""
-        data += "loadPageData();\n"
 
         data += "var " + interval_long_name + "startDate = sessionStorage.getItem('startDate');\n"
         data += "var " + interval_long_name + "endDate = sessionStorage.getItem('endDate');\n"
@@ -1560,7 +1558,6 @@ class JAS(SearchList):
         data += self._gen_aggregate_objects2(interval, page_definition_name, interval_long_name)
 
         data += self._gen_aggregate_cache(interval_long_name)
-
         data += "\n"
         data += "thisDateObsList = [];\n"
         if 'thisdate' in self.skin_dict['Extras']['pages'][page]:

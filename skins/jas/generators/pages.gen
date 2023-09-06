@@ -73,7 +73,6 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
       <script src="../data/internationalization.js"></script>
       #if $interval_name_global
         #set data = $interval_name_global + ".js"
-        <script src="../dataload/$data$query_string"></script>
         <script src="../data/$data$query_string"></script>
       #end if
       #set series_type = $getVar('$Extras.page_definition.' + $page + '.series_type', None)
@@ -81,8 +80,6 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
         #set $data_binding = $getVar('Extras.pages.' + $page + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
         #set (year_start,year_end) = $getRange($getVar('$Extras.pages.' + $page + '.start', None), $getVar('$Extras.pages.' + $page + '.end', None), $data_binding)
         #for $year in range($year_start, $year_end)
-          #set $line = '<script src="../dataload/year' + str($year) + '.js' + $query_string + '"></script>'
-          $line
           #set $line = '<script src="../data/year' + str($year) + '.js' + $query_string + '"></script>'
           $line
         #end for
@@ -115,6 +112,10 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
    </head>
 
     <body onresize="refreshSizes()" onload="refreshSizes()">
+      <div style="display: none;">
+        #set line = '<iframe id="data-iframe" src="../dataload/' + $page_name_global + '.html"></iframe>'
+        $line
+      </div>
       #include $getVar('Extras.pages.layout', 'generators/body.inc')
     </body> 
 
