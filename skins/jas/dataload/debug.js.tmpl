@@ -1,0 +1,15 @@
+##    Copyright (c) 2023 Rich Bell <bellrichm@gmail.com>
+##    See the file LICENSE.txt for your rights.
+
+#from weeutil.weeutil import to_bool
+
+#if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
+    $genDataLoad($filename, 
+             $page,
+             $getVar("$Extras.pages.debug.simulate_interval", 'day'),
+             'active',
+             $getVar("$Extras.pages.debug.simulate_page", 'last24hours'),
+             $getVar("$Extras.pages.debug.simulate_interval", 'day') +'_'
+            )
+#end if    
+

@@ -287,6 +287,7 @@ class JAS(SearchList):
                                  'forecasts': self.data_forecast,
                                  'genCharts': self._gen_charts,
                                  'genData': self._gen_data,
+                                 'genDataLoad': self._gen_data_load,
                                  'genJs': self._gen_js,
                                  'genJasOptions': self._gen_jas_options,
                                  'getObsUnitLabel': self._get_obs_unit_label,
@@ -1121,6 +1122,104 @@ class JAS(SearchList):
             logdbg(log_msg)
         return chart_final
 
+    def _gen_data_load(self, filename, page, interval, interval_type, page_definition_name, interval_long_name):
+        start_time = time.time()
+
+        skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
+        page_data_binding = self.skin_dict['Extras']['pages'][page_definition_name].get('data_binding', skin_data_binding)
+        data = ''
+        data += '// the start\n'
+
+        data += 'function loadPageData() {\n'
+        data += self._gen_data_load2(interval, interval_type, page_definition_name, interval_long_name, skin_data_binding, page_data_binding)
+
+        data += self._gen_aggregate_objects(interval, page_definition_name, interval_long_name)
+
+        if self.skin_dict['Extras']['pages'][page_definition_name].get('current', None) is not None:
+            data += self._gen_data_load3(skin_data_binding, interval)
+
+        data += "pageData = {};\n"
+        data += "\n"
+
+        data += "\n"
+        if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
+            data += self._gen_windrose(page_data_binding, interval, page_definition_name, interval_long_name)
+
+        data += "};\n"
+
+        elapsed_time = time.time() - start_time
+        log_msg = "Generated " + self.html_root + "/" + filename + " in " + str(elapsed_time)
+        if to_bool(self.skin_dict['Extras'].get('log_times', True)):
+            logdbg(log_msg)
+        return data
+
+    # Create the data used to display current conditions.
+    # This data is only used when MQTT is not enabled.
+    # This data is stored in a javascript object named 'current'.
+    # 'current.header' is an object with the data for the header portion of this section.
+    # 'current.observations' is a map. The key is the observation name, like 'outTemp'. The value is the data to populate the section.
+    def _gen_data_load3(self, skin_data_binding, interval):
+        data = ''
+
+        current_data_binding = self.skin_dict['Extras']['current'].get('data_binding', skin_data_binding)
+        interval_current = self.skin_dict['Extras']['current'].get('interval', interval)
+
+        #data += 'var mqtt_enabled = false;\n'
+        data += '  sessionStorage.setItem(updateDate, ' + str(self._get_current('dateTime', data_binding=current_data_binding, unit_name='default').raw * 1000) + ');\n'
+        if self.skin_dict['Extras']['current'].get('observation', False):
+            data_binding = self.skin_dict['Extras']['current'].get('header_data_binding', current_data_binding)
+            data += '  sessionStorage.setItem("currentHeaderValue", ' + self._get_current(self.skin_dict['Extras']['current']['observation'], data_binding, 'default').format(add_label=False,localize=False) + ');\n'
+
+        data += '  var currentData = {};\n'
+        for observation in self.skin_dict['Extras']['current']['observations']:
+            data_binding = self.skin_dict['Extras']['current']['observations'][observation].get('data_binding', current_data_binding)
+            type_value =  self.skin_dict['Extras']['current']['observations'][observation].get('type', "")
+            unit_name = self.skin_dict['Extras']['current']['observations'][observation].get('unit', "default")
+
+            if type_value == 'rise':
+                 # todo this is a place holder and needs work
+                #set observation_value = '"' + str($getattr($almanac, $observation + 'rise')) + '";'
+                observation_value = '"bar"'
+                #label = 'foo'
+            elif type_value == 'sum':
+                observation_value = self._get_aggregate(observation, data_binding, interval_current, type_value, unit_name, False)
+            else:
+                observation_value = self._get_current(observation, data_binding, unit_name).format(add_label=False,localize=False)
+
+            data += '  currentData.' + observation + ' = ' + observation_value +';\n'
+
+        data += '  sessionStorage.setItem("currentData", JSON.stringify(currentData));'
+        return data
+
+    def _gen_data_load2(self, interval, interval_type, page_definition_name, interval_long_name, skin_data_binding, page_data_binding):
+        data = ""
+
+        skin_timespan_binder = self._get_timespan_binder(interval, skin_data_binding)
+        page_timespan_binder = self._get_timespan_binder(interval, page_data_binding)
+
+        if interval_type == 'active':
+            data += "  sessionStorage.setItem('startDate', moment('" + getattr(page_timespan_binder, 'start').format("%Y-%m-%dT%H:%M:%S") + "').utcOffset(" + str(self.utc_offset) + "));\n"
+            data += "  sessionStorage.setItem('endDate', moment('" + getattr(page_timespan_binder, 'end').format("%Y-%m-%dT%H:%M:%S") + "').utcOffset(" + str(self.utc_offset) + "));\n"
+            data += "  sessionStorage.setItem('endTimestamp', " + str(getattr(page_timespan_binder, 'start').raw * 1000) + ");\n"
+            data += "  sessionStorage.setItem('endTimestamp', " + str(getattr(page_timespan_binder, 'end').raw * 1000) + ");\n"
+        else:
+            # ToDo: document that skin data binding controls start/end of historical data
+            # ToDo: make start/end configurable
+            start_timestamp = weeutil.weeutil.startOfDay(getattr(getattr(skin_timespan_binder, 'usUnits'), 'firsttime').raw)
+            end_timestamp = weeutil.weeutil.startOfDay(getattr(getattr(skin_timespan_binder, 'usUnits'), 'lasttime').raw)
+            start_date = datetime.datetime.fromtimestamp(start_timestamp).strftime('%Y-%m-%dT%H:%M:%S')
+            end_date = datetime.datetime.fromtimestamp(end_timestamp).strftime('%Y-%m-%dT%H:%M:%S')
+
+            data += "var " + interval_long_name + "startTimestamp =  " + str(start_timestamp * 1000) + ";\n"
+            data += "var " + interval_long_name + "startDate = moment('" + start_date + "').utcOffset(" + str(self.utc_offset) + ");\n"
+            data += "var " + interval_long_name + "endTimestamp =  " + str(end_timestamp * 1000) + ";\n"
+            data += "var " + interval_long_name + "endDate = moment('" + end_date + "').utcOffset(" + str(self.utc_offset) + ");\n"
+
+        data += "\n"
+        data += self._gen_interval_end_timestamp(page_data_binding, interval, page_definition_name, interval_long_name)
+
+        return data
+
     # Create time stamps by aggregation time for the end of interval
     # For example: endTimestamp_min, endTimestamp_max
     def _gen_interval_end_timestamp(self, page_data_binding, interval_name, page_definition_name, interval_long_name):
@@ -1134,14 +1233,54 @@ class JAS(SearchList):
             else:
                 end_timestamp =(self._get_timespan_binder(interval_name, page_data_binding).end.raw // 60 * 60 - (self.utc_offset * 60)) * 1000
 
-            data +=  "var " + interval_long_name + "endTimestamp_" + aggregate_type + " = " + str(end_timestamp) + ";\n"
+            data +=  "  sessionStorage.setItem('endTimestamp_" + aggregate_type +  "', " +  str(end_timestamp) + ");\n"
 
         return data
 
     # Populate the 'aggegate' objects
     # Example: last7days_min.outTemp = [[dateTime1, outTemp1], [dateTime2, outTemp2]]
+    def _gen_aggregate_objects2(self, interval, page_definition_name, interval_long_name):
+        data = ""
+        data += "loadPageData();\n"
+
+        data += "var " + interval_long_name + "startDate = sessionStorage.getItem('startDate');\n"
+        data += "var " + interval_long_name + "endDate = sessionStorage.getItem('endDate');\n"
+        data += "var " + interval_long_name + "startTimestamp = sessionStorage.getItem('startTimestamp');\n"
+        data += "var " + interval_long_name + "endTimestamp = sessionStorage.getItem('endTimestamp');\n"
+
+        for aggregate_type in self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval']:
+            data +=  "var " + interval_long_name + "endTimestamp_" + aggregate_type + " =  sessionStorage.getItem('endTimestamp_" + aggregate_type + "');\n"
+
+        data += "pageData = JSON.parse(sessionStorage.getItem('pageData'));\n"
+
+        for observation, observation_items in self.observations.items():
+            for aggregate_type, aggregate_type_items in observation_items['aggregate_types'].items():
+                interval_name = interval_long_name + aggregate_type
+                for data_binding, data_binding_items in aggregate_type_items.items():
+                    for unit_name in data_binding_items:
+                        name_prefix = interval_name + "." + observation + "_"  + data_binding
+                        name_prefix2 = interval_name + "_" + observation + "_"  + data_binding
+                        if unit_name == "default":
+                            pass
+                        else:
+                            name_prefix += "_" + unit_name
+                            name_prefix2 += "_" + unit_name
+
+                        array_name = name_prefix
+
+                        data += array_name + ' = pageData.' + array_name + ';\n'
+            data += "\n"
+
+        return data
+
     def _gen_aggregate_objects(self, interval, page_definition_name, interval_long_name):
         data = ""
+
+        # Define the 'aggegate' objects to hold the data
+        # For example: last7days_min = {}, last7days_max = {}
+        data += "  pageData = {};\n"
+        for aggregate_type in self.aggregate_types:
+            data += "  pageData." + interval_long_name + aggregate_type + " = {};\n"
 
         for observation, observation_items in self.observations.items():
             for aggregate_type, aggregate_type_items in observation_items['aggregate_types'].items():
@@ -1158,11 +1297,9 @@ class JAS(SearchList):
                             name_prefix2 += "_" + unit_name
 
                         array_name = name_prefix
-                        datetime_name = name_prefix2 + "_dateTime"
-                        data_name = name_prefix2 + "_data"
 
                         if aggregate_interval is not None:
-                            data += array_name + " = " + self._get_series(observation, data_binding, interval, aggregate_type, aggregate_interval, 'start', 'unix_epoch_ms', unit_name, 2, True) + ";\n"
+                            data += "  pageData." + array_name + " = " + self._get_series(observation, data_binding, interval, aggregate_type, aggregate_interval, 'start', 'unix_epoch_ms', unit_name, 2, True) + ";\n"
                         else:
                             # wind 'observation' is special see #87
                             if observation == 'wind':
@@ -1174,7 +1311,31 @@ class JAS(SearchList):
                             else:
                                 weewx_observation = observation
                             #end if
-                            data += array_name + " = " + self._get_series(weewx_observation, data_binding, interval, None, None, 'start', 'unix_epoch_ms', unit_name, 2, True) + ";\n"
+                            data += "  pageData." + array_name + " = " + self._get_series(weewx_observation, data_binding, interval, None, None, 'start', 'unix_epoch_ms', unit_name, 2, True) + ";\n"
+
+        data +='  sessionStorage.setItem("pageData", JSON.stringify(pageData));\n'
+        data += "\n"
+        return data
+
+    def _gen_aggregate_cache(self, interval_long_name):
+        data = ""
+
+        for observation, observation_items in self.observations.items():
+            for aggregate_type, aggregate_type_items in observation_items['aggregate_types'].items():
+                interval_name = interval_long_name + aggregate_type
+                for data_binding, data_binding_items in aggregate_type_items.items():
+                    for unit_name in data_binding_items:
+                        name_prefix = interval_name + "." + observation + "_"  + data_binding
+                        name_prefix2 = interval_name + "_" + observation + "_"  + data_binding
+                        if unit_name == "default":
+                            pass
+                        else:
+                            name_prefix += "_" + unit_name
+                            name_prefix2 += "_" + unit_name
+
+                        array_name = name_prefix
+                        datetime_name = name_prefix2 + "_dateTime"
+                        data_name = name_prefix2 + "_data"
 
                         # Cache the dateTimes into its own list variable
                         data += datetime_name + " = [].concat(" + array_name + ".map(arr => arr[0]));\n"
@@ -1282,17 +1443,16 @@ class JAS(SearchList):
         interval_current = self.skin_dict['Extras']['current'].get('interval', interval)
 
         data += 'var mqtt_enabled = false;\n'
-        data += 'var updateDate = ' + str(self._get_current('dateTime', data_binding=current_data_binding, unit_name='default').raw * 1000) +';\n'
+        data += 'var updateDate = sessionStorage.getItem("updateDate");\n'
         data += 'var current = {};\n'
         if self.skin_dict['Extras']['current'].get('observation', False):
             data += 'current.header = {};\n'
             data += 'current.header.name = "' + self.skin_dict['Extras']['current']['observation'] +'";\n'
 
             data_binding = self.skin_dict['Extras']['current'].get('header_data_binding', current_data_binding)
-            data += 'current.header.value = ' + self._get_current(self.skin_dict['Extras']['current']['observation'], data_binding, 'default').format(add_label=False,localize=False) + ';\n'
             header_max_decimals = self.skin_dict['Extras']['current'].get('header_max_decimals', False)
             if header_max_decimals:
-                data += 'current.header.value = current.header.value.toFixed(' + header_max_decimals + ');\n'
+                data += 'current.header.value = Number(sessionStorage.getItem("currentHeaderValue")).toFixed(' + header_max_decimals + ');\n'
 
             data += 'if (!isNaN(current.header.value)) {\n'
             data += '    current.header.value = Number(current.header.value).toLocaleString(lang);\n'
@@ -1300,6 +1460,7 @@ class JAS(SearchList):
             data += 'current.header.unit = "' + getattr(self.unit.label, self.skin_dict['Extras']['current']['observation']) + '";\n'
 
         data += 'current.observations = new Map();\n'
+        data += 'currentData = JSON.parse(sessionStorage.getItem("currentData"));\n'
 
         for observation in self.skin_dict['Extras']['current']['observations']:
             data_binding = self.skin_dict['Extras']['current']['observations'][observation].get('data_binding', current_data_binding)
@@ -1314,18 +1475,12 @@ class JAS(SearchList):
             if type_value == 'rise':
                  # todo this is a place holder and needs work
                 #set observation_value = '"' + str($getattr($almanac, $observation + 'rise')) + '";'
-                observation_value = '"bar"'
                 observation_unit = " "
                 #label = 'foo'
-            elif type_value == 'sum':
-                observation_value = self._get_aggregate(observation, data_binding, interval_current, type_value, unit_name, False)
-            else:
-                observation_value = self._get_current(observation, data_binding, unit_name).format(add_label=False,localize=False)
-
             data += 'var observation = {};\n'
             data += 'observation.name = "' + observation + '";\n'
             data += 'observation.mqtt = ' + self.skin_dict['Extras']['current']['observations'][observation].get('mqtt', 'true').lower() + ';\n'
-            data += 'observation.value = ' + observation_value +';\n'
+            data += 'observation.value = currentData.' + observation + ';\n'
             max_decimals = self.skin_dict['Extras']['current']['observations'][observation].get('max_decimals', False)
             if max_decimals:
                 data += 'observation.value = observation.value.toFixed(' + max_decimals + ');\n'
@@ -1380,10 +1535,10 @@ class JAS(SearchList):
 
         if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
             avg_value, max_value, wind_directions, wind_range_legend = self._get_wind_compass(data_binding=page_data_binding, start_time=interval_start_seconds_global, end_time=interval_end_seconds_global) # need to match function signature pylint: disable=unused-variable
-            data += "var windRangeLegend = " + wind_range_legend + ";\n"
+            data += "  sessionStorage.setItem('windRangeLegend', JSON.stringify(" + wind_range_legend + "));\n"
             i = 0
             for wind in wind_directions:
-                data += interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + " = "  + str(wind) +  ";\n"
+                data += "  sessionStorage.setItem('" + interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + "', JSON.stringify(" +  str(wind) +  "));\n"
                 i += 1
 
         return data
@@ -1394,41 +1549,17 @@ class JAS(SearchList):
         skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
         page_data_binding = self.skin_dict['Extras']['pages'][page_definition_name].get('data_binding', skin_data_binding)
 
-        skin_timespan_binder = self._get_timespan_binder(interval, skin_data_binding)
-        page_timespan_binder = self._get_timespan_binder(interval, page_data_binding)
+        data = ""
 
-        data = ''
-        data += '// the start\n'
-
-        if interval_type == 'active':
-            data += "var " + interval_long_name + "startDate = moment('" + getattr(page_timespan_binder, 'start').format("%Y-%m-%dT%H:%M:%S") + "').utcOffset(" + str(self.utc_offset) + ");\n"
-            data += "var " + interval_long_name + "endDate = moment('" + getattr(page_timespan_binder, 'end').format("%Y-%m-%dT%H:%M:%S") + "').utcOffset(" + str(self.utc_offset) + ");\n"
-            data += "var " + interval_long_name + "startTimestamp = " + str(getattr(page_timespan_binder, 'start').raw * 1000) + ";\n"
-            data += "var " + interval_long_name + "endTimestamp = " + str(getattr(page_timespan_binder, 'end').raw * 1000) + ";\n"
-        else:
-            # ToDo: document that skin data binding controls start/end of historical data
-            # ToDo: make start/end configurable
-            start_timestamp = weeutil.weeutil.startOfDay(getattr(getattr(skin_timespan_binder, 'usUnits'), 'firsttime').raw)
-            end_timestamp = weeutil.weeutil.startOfDay(getattr(getattr(skin_timespan_binder, 'usUnits'), 'lasttime').raw)
-            start_date = datetime.datetime.fromtimestamp(start_timestamp).strftime('%Y-%m-%dT%H:%M:%S')
-            end_date = datetime.datetime.fromtimestamp(end_timestamp).strftime('%Y-%m-%dT%H:%M:%S')
-
-            data += "var " + interval_long_name + "startTimestamp =  " + str(start_timestamp * 1000) + ";\n"
-            data += "var " + interval_long_name + "startDate = moment('" + start_date + "').utcOffset(" + str(self.utc_offset) + ");\n"
-            data += "var " + interval_long_name + "endTimestamp =  " + str(end_timestamp * 1000) + ";\n"
-            data += "var " + interval_long_name + "endDate = moment('" + end_date + "').utcOffset(" + str(self.utc_offset) + ");\n"
-
-        data += "\n"
-        data += self._gen_interval_end_timestamp(page_data_binding, interval, page_definition_name, interval_long_name)
-
-        data += "\n"
         # Define the 'aggegate' objects to hold the data
         # For example: last7days_min = {}, last7days_max = {}
         for aggregate_type in self.aggregate_types:
             data += interval_long_name + aggregate_type + " = {};\n"
 
         data += "\n"
-        data += self._gen_aggregate_objects(interval, page_definition_name, interval_long_name)
+        data += self._gen_aggregate_objects2(interval, page_definition_name, interval_long_name)
+
+        data += self._gen_aggregate_cache(interval_long_name)
 
         data += "\n"
         data += "thisDateObsList = [];\n"
@@ -1447,9 +1578,15 @@ class JAS(SearchList):
         data += "\n"
         data += self._gen_mqtt(page)
 
-        data += "\n"
+        interval_start_seconds_global = self._get_timespan_binder(interval, page_data_binding).start.raw
+        interval_end_seconds_global = self._get_timespan_binder(interval, page_data_binding).end.raw
         if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
-            data += self._gen_windrose(page_data_binding, interval, page_definition_name, interval_long_name)
+            avg_value, max_value, wind_directions, wind_range_legend = self._get_wind_compass(data_binding=page_data_binding, start_time=interval_start_seconds_global, end_time=interval_end_seconds_global) # need to match function signature pylint: disable=unused-variable
+            data += "var windRangeLegend = JSON.parse(sessionStorage.getItem('windRangeLegend'));\n"
+            i = 0
+            for wind in wind_directions:
+                data += interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + " = JSON.parse(sessionStorage.getItem('" + interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + "'));\n"
+                i += 1
 
         data += '// the end\n'
 
@@ -1794,7 +1931,7 @@ class JAS(SearchList):
         data +='\n'
         data += '    if (jasOptions.forecast) {\n'
         data +='        updateForecasts();\n'
-        data += '    }\n'        
+        data += '    }\n'
         data += '    logTime("DOMContentLoaded  End");\n'
         data += '});\n'
         data += 'window.addEventListener("load", function (event) {\n'
@@ -2343,6 +2480,7 @@ window.addEventListener("message",
         record = db_manager.getRecord(self.timespan.stop, max_delta=None)
         # If there was no record at that timestamp, it will be None. If there was a record,
         # check to see if the type is in it.
+
         if not record or obs_type in record:
             # If there was no record, then the value of the ValueTuple will be None.
             # Otherwise, it will be value stored in the database.
