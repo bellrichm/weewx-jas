@@ -1895,6 +1895,11 @@ class JAS(SearchList):
         data += '\n'
         default_theme = to_list(self.skin_dict['Extras'].get('themes', 'light'))[0]
         data += 'document.addEventListener("DOMContentLoaded", function (event) {\n'
+        data += '    setupPage();\n'
+        data += '});\n'
+        data += '\n'
+
+        data += 'function setupPage() {\n'
         data += '    logTime("DOMContentLoaded  Start");\n'
         data += '    theme = sessionStorage.getItem("theme");\n'
         data += '    if (!theme) {\n'
@@ -1935,7 +1940,9 @@ class JAS(SearchList):
         data +='        updateForecasts();\n'
         data += '    }\n'
         data += '    logTime("DOMContentLoaded  End");\n'
-        data += '});\n'
+        data += '};\n'
+        data += '\n'
+
         data += 'window.addEventListener("load", function (event) {\n'
         data += '    logTime("onLoad Start");\n'
         data += '     modalChart = null;\n'
