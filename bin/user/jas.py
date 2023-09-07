@@ -1146,6 +1146,11 @@ class JAS(SearchList):
 
         data += "\n"
 
+        data += "message = {};\n"
+        data += "message.kind = 'loaded';\n"
+        data +=  "message.message = {};\n"
+        data += "window.parent.postMessage(message, '*');\n"
+
         elapsed_time = time.time() - start_time
         log_msg = "Generated " + self.html_root + "/" + filename + " in " + str(elapsed_time)
         if to_bool(self.skin_dict['Extras'].get('log_times', True)):
@@ -2257,6 +2262,10 @@ function handleScroll(message) {
     document.getElementById('chartModal').style.top = message.currentScroll + 'px';
 }
 
+// Handle event messages of type "loaded".
+function handleLoaded(message) {
+    console.log("data loaded");
+ }
 
 function handleMQTT(message) {
     test_obj = JSON.parse(message.payload);
@@ -2374,6 +2383,10 @@ window.addEventListener("message",
                         {
                             handleLang(message.message);
                         }
+                        if (message.kind == "loaded")
+                        {
+                            handleLoaded(message.message);
+                        }                        
                         if (message.kind == "mqtt")
                         {
                             handleMQTT(message.message);
