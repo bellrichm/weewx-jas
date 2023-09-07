@@ -999,6 +999,7 @@ class JAS(SearchList):
         chart_final += '  return tooltip;\n'
         chart_final += '}\n'
         chart_final += 'utc_offset = ' + str(self.utc_offset) + ';\n'
+        chart_final += 'function setupCharts() {\n'
         chart_final += "ordinateNames = ['" + "', '".join(self.ordinate_names) + "'];\n"
         chart2 = ""
         charts = self.skin_dict['Extras']['chart_definitions']
@@ -1114,6 +1115,7 @@ class JAS(SearchList):
                 chart2 += "pageChart.chart = " + chart + "chart;\n"
                 chart2 += "pageCharts.push(pageChart);\n"
 
+        chart2 += "}\n"
         chart_final += chart2
 
         elapsed_time = time.time() - start_time
@@ -1129,6 +1131,7 @@ class JAS(SearchList):
         page_data_binding = self.skin_dict['Extras']['pages'][page_definition_name].get('data_binding', skin_data_binding)
         data = ''
         data += '// the start\n'
+        data += 'function dataLoad() {\n'
 
         data += self._gen_data_load2(interval, interval_type, page_definition_name, interval_long_name, skin_data_binding, page_data_binding)
 
@@ -1137,19 +1140,25 @@ class JAS(SearchList):
         if self.skin_dict['Extras']['pages'][page_definition_name].get('current', None) is not None:
             data += self._gen_data_load3(skin_data_binding, interval)
 
-        data += "pageData = {};\n"
+        #data += "pageData = {};\n"
         data += "\n"
 
         data += "\n"
         if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
             data += self._gen_windrose(page_data_binding, interval, page_definition_name, interval_long_name)
 
+        data += "}\n"
         data += "\n"
 
+        data += 'window.addEventListener("load", function (event) {\n'
+        data += '    console.log("a");\n'
+        data += '    dataLoad();\n'
         data += "message = {};\n"
         data += "message.kind = 'loaded';\n"
         data +=  "message.message = {};\n"
         data += "window.parent.postMessage(message, '*');\n"
+        data += '    })\n'
+
 
         elapsed_time = time.time() - start_time
         log_msg = "Generated " + self.html_root + "/" + filename + " in " + str(elapsed_time)
@@ -1245,11 +1254,6 @@ class JAS(SearchList):
     # Example: last7days_min.outTemp = [[dateTime1, outTemp1], [dateTime2, outTemp2]]
     def _gen_aggregate_objects2(self, interval, page_definition_name, interval_long_name):
         data = ""
-
-        data += "var " + interval_long_name + "startDate = sessionStorage.getItem('startDate');\n"
-        data += "var " + interval_long_name + "endDate = sessionStorage.getItem('endDate');\n"
-        data += "var " + interval_long_name + "startTimestamp = sessionStorage.getItem('startTimestamp');\n"
-        data += "var " + interval_long_name + "endTimestamp = sessionStorage.getItem('endTimestamp');\n"
 
         for aggregate_type in self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval']:
             data +=  "var " + interval_long_name + "endTimestamp_" + aggregate_type + " =  sessionStorage.getItem('endTimestamp_" + aggregate_type + "');\n"
@@ -1447,7 +1451,7 @@ class JAS(SearchList):
 
         data += 'var mqtt_enabled = false;\n'
         data += 'var updateDate = sessionStorage.getItem("updateDate");\n'
-        data += 'var current = {};\n'
+        
         if self.skin_dict['Extras']['current'].get('observation', False):
             data += 'current.header = {};\n'
             data += 'current.header.name = "' + self.skin_dict['Extras']['current']['observation'] +'";\n'
@@ -1559,17 +1563,31 @@ class JAS(SearchList):
         for aggregate_type in self.aggregate_types:
             data += interval_long_name + aggregate_type + " = {};\n"
 
+        data += "minMaxObs = [];\n"
+        data += "thisDateObsList = [];\n"
+        data += 'var current = {};\n'
+
+        data += "var " + interval_long_name + "startDate = sessionStorage.getItem('startDate');\n"
+        data += "var " + interval_long_name + "endDate = sessionStorage.getItem('endDate');\n"
+        data += "var " + interval_long_name + "startTimestamp = sessionStorage.getItem('startTimestamp');\n"
+        data += "var " + interval_long_name + "endTimestamp = sessionStorage.getItem('endTimestamp');\n"
+
         data += "\n"
+        data += 'function getData() {\n'
+        data += interval_long_name + "startDate = sessionStorage.getItem('startDate');\n"
+        data += interval_long_name + "endDate = sessionStorage.getItem('endDate');\n"
+        data += interval_long_name + "startTimestamp = sessionStorage.getItem('startTimestamp');\n"
+        data += interval_long_name + "endTimestamp = sessionStorage.getItem('endTimestamp');\n"
+
         data += self._gen_aggregate_objects2(interval, page_definition_name, interval_long_name)
 
         data += self._gen_aggregate_cache(interval_long_name)
         data += "\n"
-        data += "thisDateObsList = [];\n"
+        
         if 'thisdate' in self.skin_dict['Extras']['pages'][page]:
             data += self._gen_this_date(skin_data_binding, interval_long_name)
 
         data += "\n"
-        data += "minMaxObs = [];\n"
         if 'minmax' in self.skin_dict['Extras']['pages'][page]:
             data += self._gen_min_max(skin_data_binding, interval_long_name)
 
@@ -1590,6 +1608,7 @@ class JAS(SearchList):
                 data += interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + " = JSON.parse(sessionStorage.getItem('" + interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + "'));\n"
                 i += 1
 
+        data += '}\n'
         data += '// the end\n'
 
         elapsed_time = time.time() - start_time
@@ -1603,6 +1622,9 @@ class JAS(SearchList):
         data = ''
 
         data += '// start\n'
+        data += 'pageLoaded = false;\n'
+        data += 'DOMLoaded = false;\n'
+        data += 'dataLoaded = false;\n'
         data += 'traceStart = Date.now();\n'
         data += 'function logTime(text) {\n'
         data += '  console.log(text + ": " + (Date.now() - traceStart).toString());\n'
@@ -1895,12 +1917,17 @@ class JAS(SearchList):
         data += '\n'
         default_theme = to_list(self.skin_dict['Extras'].get('themes', 'light'))[0]
         data += 'document.addEventListener("DOMContentLoaded", function (event) {\n'
-        data += '    setupPage();\n'
+        data += '    DOMLoaded = true;\n'
+        data += '    if (dataLoaded) {\n'
+        data += '        pageLoaded = true;\n'
+        data += '        setupPage();\n'
+        data += '    }\n'
         data += '});\n'
         data += '\n'
 
         data += 'function setupPage() {\n'
         data += '    logTime("DOMContentLoaded  Start");\n'
+        data += '    getData();\n'
         data += '    theme = sessionStorage.getItem("theme");\n'
         data += '    if (!theme) {\n'
         data += '        theme = "' + default_theme + '";\n'
@@ -2271,7 +2298,11 @@ function handleScroll(message) {
 
 // Handle event messages of type "loaded".
 function handleLoaded(message) {
-    console.log("data loaded");
+    dataLoaded = true;\n
+    if (DOMLoaded) {
+        pageLoaded = true;
+        setupPage();
+    }
  }
 
 function handleMQTT(message) {
