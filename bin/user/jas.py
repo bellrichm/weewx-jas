@@ -1574,8 +1574,8 @@ class JAS(SearchList):
         data += 'function getData(pageDataString) {\n'
         data += "pageData = JSON.parse(pageDataString);\n"
 
-        data += interval_long_name + "startDate = pageData.startDate;\n"
-        data += interval_long_name + "endDate = pageData.endDate;\n"
+        data += interval_long_name + "startDate = moment(pageData.startDate);\n"
+        data += interval_long_name + "endDate = moment(pageData.endDate);\n"
         data += interval_long_name + "startTimestamp = pageData.startTimestamp;\n"
         data += interval_long_name + "endTimestamp = pageData.endTimeStamp;\n"
 
