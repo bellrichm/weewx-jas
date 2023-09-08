@@ -1568,6 +1568,8 @@ class JAS(SearchList):
         data += "var " + interval_long_name + "startTimestamp;\n"
         data += "var " + interval_long_name + "endTimestamp;\n"
 
+        data += "var windRangeLegend;"
+
         data += "\n"
         data += 'function getData(pageDataString) {\n'
         data += "pageData = JSON.parse(pageDataString);\n"
@@ -1600,7 +1602,7 @@ class JAS(SearchList):
         interval_end_seconds_global = self._get_timespan_binder(interval, page_data_binding).end.raw
         if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
             avg_value, max_value, wind_directions, wind_range_legend = self._get_wind_compass(data_binding=page_data_binding, start_time=interval_start_seconds_global, end_time=interval_end_seconds_global) # need to match function signature pylint: disable=unused-variable
-            data += "var windRangeLegend = pageData.windRangeLegend;\n"
+            data += "windRangeLegend = pageData.windRangeLegend;\n"
             i = 0
             for wind in wind_directions:
                 data += interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + " = JSON.parse(pageData." + interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + ");\n"
@@ -1926,6 +1928,7 @@ class JAS(SearchList):
         data += 'function setupPage(pageDataString) {\n'
         data += '    logTime("DOMContentLoaded  Start");\n'
         data += '    getData(pageDataString);\n'
+        data += '    setupCharts();\n'
         data += '    theme = sessionStorage.getItem("theme");\n'
         data += '    if (!theme) {\n'
         data += '        theme = "' + default_theme + '";\n'
