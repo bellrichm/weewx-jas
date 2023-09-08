@@ -1131,8 +1131,8 @@ class JAS(SearchList):
         page_data_binding = self.skin_dict['Extras']['pages'][page_definition_name].get('data_binding', skin_data_binding)
         data = ''
         data += '// the start\n'
-        data += 'function dataLoad() {\n'
         data += "pageData = {};\n"
+        data += 'function dataLoad() {\n'
 
         data += self._gen_data_load2(interval, interval_type, page_definition_name, interval_long_name, skin_data_binding, page_data_binding)
 
@@ -1147,7 +1147,6 @@ class JAS(SearchList):
         if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
             data += self._gen_windrose(page_data_binding, interval, page_definition_name, interval_long_name)
 
-        data +='  sessionStorage.setItem("pageData", JSON.stringify(pageData));\n'
         data += "}\n"
         data += "\n"
 
@@ -1156,7 +1155,7 @@ class JAS(SearchList):
         data += '    dataLoad();\n'
         data += "message = {};\n"
         data += "message.kind = 'loaded';\n"
-        data +=  "message.message = {};\n"
+        data +=  "message.message = JSON.stringify(pageData);\n"
         data += "window.parent.postMessage(message, '*');\n"
         data += '    })\n'
 
@@ -1570,8 +1569,8 @@ class JAS(SearchList):
         data += "var " + interval_long_name + "endTimestamp;\n"
 
         data += "\n"
-        data += 'function getData() {\n'
-        data += "pageData = JSON.parse(sessionStorage.getItem('pageData'));\n"
+        data += 'function getData(pageDataString) {\n'
+        data += "pageData = JSON.parse(pageDataString);\n"
 
         data += interval_long_name + "startDate = pageData.startDate;\n"
         data += interval_long_name + "endDate = pageData.endDate;\n"
@@ -1924,9 +1923,9 @@ class JAS(SearchList):
         data += '});\n'
         data += '\n'
 
-        data += 'function setupPage() {\n'
+        data += 'function setupPage(pageDataString) {\n'
         data += '    logTime("DOMContentLoaded  Start");\n'
-        data += '    getData();\n'
+        data += '    getData(pageDataString);\n'
         data += '    theme = sessionStorage.getItem("theme");\n'
         data += '    if (!theme) {\n'
         data += '        theme = "' + default_theme + '";\n'
@@ -2300,7 +2299,7 @@ function handleLoaded(message) {
     dataLoaded = true;\n
     if (DOMLoaded) {
         pageLoaded = true;
-        setupPage();
+        setupPage(message);
     }
  }
 
