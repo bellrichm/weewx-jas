@@ -1132,6 +1132,7 @@ class JAS(SearchList):
         data = ''
         data += '// the start\n'
         data += 'function dataLoad() {\n'
+        data += "pageData = {};\n"
 
         data += self._gen_data_load2(interval, interval_type, page_definition_name, interval_long_name, skin_data_binding, page_data_binding)
 
@@ -1140,13 +1141,13 @@ class JAS(SearchList):
         if self.skin_dict['Extras']['pages'][page_definition_name].get('current', None) is not None:
             data += self._gen_data_load3(skin_data_binding, interval)
 
-        #data += "pageData = {};\n"
         data += "\n"
 
         data += "\n"
         if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
             data += self._gen_windrose(page_data_binding, interval, page_definition_name, interval_long_name)
 
+        data +='  sessionStorage.setItem("pageData", JSON.stringify(pageData));\n'
         data += "}\n"
         data += "\n"
 
@@ -1178,10 +1179,10 @@ class JAS(SearchList):
         interval_current = self.skin_dict['Extras']['current'].get('interval', interval)
 
         #data += 'var mqtt_enabled = false;\n'
-        data += '  sessionStorage.setItem("updateDate", ' + str(self._get_current('dateTime', data_binding=current_data_binding, unit_name='default').raw * 1000) + ');\n'
+        data += '  pageData.updateDate = ' + str(self._get_current('dateTime', data_binding=current_data_binding, unit_name='default').raw * 1000) + ';\n'
         if self.skin_dict['Extras']['current'].get('observation', False):
             data_binding = self.skin_dict['Extras']['current'].get('header_data_binding', current_data_binding)
-            data += '  sessionStorage.setItem("currentHeaderValue", ' + self._get_current(self.skin_dict['Extras']['current']['observation'], data_binding, 'default').format(add_label=False,localize=False) + ');\n'
+            data += '  pageData.currentHeaderValue = ' + self._get_current(self.skin_dict['Extras']['current']['observation'], data_binding, 'default').format(add_label=False,localize=False) + ';\n'
 
         data += '  var currentData = {};\n'
         for observation in self.skin_dict['Extras']['current']['observations']:
@@ -1201,7 +1202,7 @@ class JAS(SearchList):
 
             data += '  currentData.' + observation + ' = ' + observation_value +';\n'
 
-        data += '  sessionStorage.setItem("currentData", JSON.stringify(currentData));'
+        data += '  pageData.currentData = JSON.stringify(currentData);'
         return data
 
     def _gen_data_load2(self, interval, interval_type, page_definition_name, interval_long_name, skin_data_binding, page_data_binding):
@@ -1211,10 +1212,10 @@ class JAS(SearchList):
         page_timespan_binder = self._get_timespan_binder(interval, page_data_binding)
 
         if interval_type == 'active':
-            data += "  sessionStorage.setItem('startDate', moment('" + getattr(page_timespan_binder, 'start').format("%Y-%m-%dT%H:%M:%S") + "').utcOffset(" + str(self.utc_offset) + "));\n"
-            data += "  sessionStorage.setItem('endDate', moment('" + getattr(page_timespan_binder, 'end').format("%Y-%m-%dT%H:%M:%S") + "').utcOffset(" + str(self.utc_offset) + "));\n"
-            data += "  sessionStorage.setItem('endTimestamp', " + str(getattr(page_timespan_binder, 'start').raw * 1000) + ");\n"
-            data += "  sessionStorage.setItem('endTimestamp', " + str(getattr(page_timespan_binder, 'end').raw * 1000) + ");\n"
+            data += "  pageData.startDate = moment('" + getattr(page_timespan_binder, 'start').format("%Y-%m-%dT%H:%M:%S") + "').utcOffset(" + str(self.utc_offset) + ");\n"
+            data += "  pageData.endDate = moment('" + getattr(page_timespan_binder, 'end').format("%Y-%m-%dT%H:%M:%S") + "').utcOffset(" + str(self.utc_offset) + ");\n"
+            data += "  pageData.startTimestamp = " + str(getattr(page_timespan_binder, 'start').raw * 1000) + ";\n"
+            data += "  pageData.endTimestamp = " + str(getattr(page_timespan_binder, 'end').raw * 1000) + ";\n"
         else:
             # ToDo: document that skin data binding controls start/end of historical data
             # ToDo: make start/end configurable
@@ -1223,10 +1224,10 @@ class JAS(SearchList):
             start_date = datetime.datetime.fromtimestamp(start_timestamp).strftime('%Y-%m-%dT%H:%M:%S')
             end_date = datetime.datetime.fromtimestamp(end_timestamp).strftime('%Y-%m-%dT%H:%M:%S')
 
-            data += "var " + interval_long_name + "startTimestamp =  " + str(start_timestamp * 1000) + ";\n"
-            data += "var " + interval_long_name + "startDate = moment('" + start_date + "').utcOffset(" + str(self.utc_offset) + ");\n"
-            data += "var " + interval_long_name + "endTimestamp =  " + str(end_timestamp * 1000) + ";\n"
-            data += "var " + interval_long_name + "endDate = moment('" + end_date + "').utcOffset(" + str(self.utc_offset) + ");\n"
+            data += "pageData.startTimestamp =  " + str(start_timestamp * 1000) + ";\n"
+            data += "pageData.startDate = moment('" + start_date + "').utcOffset(" + str(self.utc_offset) + ");\n"
+            data += "pageData.endTimestamp =  " + str(end_timestamp * 1000) + ";\n"
+            data += "pageData.endDate = moment('" + end_date + "').utcOffset(" + str(self.utc_offset) + ");\n"
 
         data += "\n"
         data += self._gen_interval_end_timestamp(page_data_binding, interval, page_definition_name, interval_long_name)
@@ -1246,7 +1247,7 @@ class JAS(SearchList):
             else:
                 end_timestamp =(self._get_timespan_binder(interval_name, page_data_binding).end.raw // 60 * 60 - (self.utc_offset * 60)) * 1000
 
-            data +=  "  sessionStorage.setItem('endTimestamp_" + aggregate_type +  "', " +  str(end_timestamp) + ");\n"
+            data +=  "  pageData.endTimestamp_" + aggregate_type +  " = " +  str(end_timestamp) + ";\n"
 
         return data
 
@@ -1256,9 +1257,7 @@ class JAS(SearchList):
         data = ""
 
         for aggregate_type in self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval']:
-            data +=  "var " + interval_long_name + "endTimestamp_" + aggregate_type + " =  sessionStorage.getItem('endTimestamp_" + aggregate_type + "');\n"
-
-        data += "pageData = JSON.parse(sessionStorage.getItem('pageData'));\n"
+            data +=  "var " + interval_long_name + "endTimestamp_" + aggregate_type + " =  pageData.endTimestamp_" + aggregate_type + ";\n"
 
         for observation, observation_items in self.observations.items():
             for aggregate_type, aggregate_type_items in observation_items['aggregate_types'].items():
@@ -1285,7 +1284,6 @@ class JAS(SearchList):
 
         # Define the 'aggegate' objects to hold the data
         # For example: last7days_min = {}, last7days_max = {}
-        data += "  pageData = {};\n"
         for aggregate_type in self.aggregate_types:
             data += "  pageData." + interval_long_name + aggregate_type + " = {};\n"
 
@@ -1320,7 +1318,6 @@ class JAS(SearchList):
                             #end if
                             data += "  pageData." + array_name + " = " + self._get_series(weewx_observation, data_binding, interval, None, None, 'start', 'unix_epoch_ms', unit_name, 2, True) + ";\n"
 
-        data +='  sessionStorage.setItem("pageData", JSON.stringify(pageData));\n'
         data += "\n"
         return data
 
@@ -1450,7 +1447,7 @@ class JAS(SearchList):
         interval_current = self.skin_dict['Extras']['current'].get('interval', interval)
 
         data += 'var mqtt_enabled = false;\n'
-        data += 'var updateDate = sessionStorage.getItem("updateDate");\n'
+        data += 'var updateDate = pageData.updateDate;\n'
         
         if self.skin_dict['Extras']['current'].get('observation', False):
             data += 'current.header = {};\n'
@@ -1459,7 +1456,7 @@ class JAS(SearchList):
             data_binding = self.skin_dict['Extras']['current'].get('header_data_binding', current_data_binding)
             header_max_decimals = self.skin_dict['Extras']['current'].get('header_max_decimals', False)
             if header_max_decimals:
-                data += 'current.header.value = Number(sessionStorage.getItem("currentHeaderValue")).toFixed(' + header_max_decimals + ');\n'
+                data += 'current.header.value = Number(pageData.currentHeaderValue).toFixed(' + header_max_decimals + ');\n'
 
             data += 'if (!isNaN(current.header.value)) {\n'
             data += '    current.header.value = Number(current.header.value).toLocaleString(lang);\n'
@@ -1467,7 +1464,7 @@ class JAS(SearchList):
             data += 'current.header.unit = "' + getattr(self.unit.label, self.skin_dict['Extras']['current']['observation']) + '";\n'
 
         data += 'current.observations = new Map();\n'
-        data += 'currentData = JSON.parse(sessionStorage.getItem("currentData"));\n'
+        data += 'currentData = JSON.parse(pageData.currentData);\n'
 
         for observation in self.skin_dict['Extras']['current']['observations']:
             data_binding = self.skin_dict['Extras']['current']['observations'][observation].get('data_binding', current_data_binding)
@@ -1542,10 +1539,10 @@ class JAS(SearchList):
 
         if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
             avg_value, max_value, wind_directions, wind_range_legend = self._get_wind_compass(data_binding=page_data_binding, start_time=interval_start_seconds_global, end_time=interval_end_seconds_global) # need to match function signature pylint: disable=unused-variable
-            data += "  sessionStorage.setItem('windRangeLegend', JSON.stringify(" + wind_range_legend + "));\n"
+            data += "  pageData.windRangeLegend = JSON.stringify(" + wind_range_legend + ");\n"
             i = 0
             for wind in wind_directions:
-                data += "  sessionStorage.setItem('" + interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + "', JSON.stringify(" +  str(wind) +  "));\n"
+                data += "  pageData." + interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + " = JSON.stringify(" +  str(wind) +  ");\n"
                 i += 1
 
         return data
@@ -1567,17 +1564,19 @@ class JAS(SearchList):
         data += "thisDateObsList = [];\n"
         data += 'var current = {};\n'
 
-        data += "var " + interval_long_name + "startDate = sessionStorage.getItem('startDate');\n"
-        data += "var " + interval_long_name + "endDate = sessionStorage.getItem('endDate');\n"
-        data += "var " + interval_long_name + "startTimestamp = sessionStorage.getItem('startTimestamp');\n"
-        data += "var " + interval_long_name + "endTimestamp = sessionStorage.getItem('endTimestamp');\n"
+        data += "var " + interval_long_name + "startDate;\n"
+        data += "var " + interval_long_name + "endDate;\n"
+        data += "var " + interval_long_name + "startTimestamp;\n"
+        data += "var " + interval_long_name + "endTimestamp;\n"
 
         data += "\n"
         data += 'function getData() {\n'
-        data += interval_long_name + "startDate = sessionStorage.getItem('startDate');\n"
-        data += interval_long_name + "endDate = sessionStorage.getItem('endDate');\n"
-        data += interval_long_name + "startTimestamp = sessionStorage.getItem('startTimestamp');\n"
-        data += interval_long_name + "endTimestamp = sessionStorage.getItem('endTimestamp');\n"
+        data += "pageData = JSON.parse(sessionStorage.getItem('pageData'));\n"
+
+        data += interval_long_name + "startDate = pageData.startDate;\n"
+        data += interval_long_name + "endDate = pageData.endDate;\n"
+        data += interval_long_name + "startTimestamp = pageData.startTimestamp;\n"
+        data += interval_long_name + "endTimestamp = pageData.endTimeStamp;\n"
 
         data += self._gen_aggregate_objects2(interval, page_definition_name, interval_long_name)
 
@@ -1602,10 +1601,10 @@ class JAS(SearchList):
         interval_end_seconds_global = self._get_timespan_binder(interval, page_data_binding).end.raw
         if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
             avg_value, max_value, wind_directions, wind_range_legend = self._get_wind_compass(data_binding=page_data_binding, start_time=interval_start_seconds_global, end_time=interval_end_seconds_global) # need to match function signature pylint: disable=unused-variable
-            data += "var windRangeLegend = JSON.parse(sessionStorage.getItem('windRangeLegend'));\n"
+            data += "var windRangeLegend = pageData.windRangeLegend;\n"
             i = 0
             for wind in wind_directions:
-                data += interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + " = JSON.parse(sessionStorage.getItem('" + interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + "'));\n"
+                data += interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + " = JSON.parse(pageData." + interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + ");\n"
                 i += 1
 
         data += '}\n'
