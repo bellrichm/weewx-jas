@@ -1447,7 +1447,7 @@ class JAS(SearchList):
 
         data += 'var mqtt_enabled = false;\n'
         data += 'var updateDate = pageData.updateDate;\n'
-        
+
         if self.skin_dict['Extras']['current'].get('observation', False):
             data += 'current.header = {};\n'
             data += 'current.header.name = "' + self.skin_dict['Extras']['current']['observation'] +'";\n'
@@ -1583,7 +1583,7 @@ class JAS(SearchList):
 
         data += self._gen_aggregate_cache(interval_long_name)
         data += "\n"
-        
+
         if 'thisdate' in self.skin_dict['Extras']['pages'][page]:
             data += self._gen_this_date(skin_data_binding, interval_long_name)
 
@@ -1617,7 +1617,7 @@ class JAS(SearchList):
             logdbg(log_msg)
         return data
 
-    def _gen_js(self, filename, page, year, month, interval_long_name):
+    def _gen_js(self, filename, page, page_name, year, month, interval_long_name):
         start_time = time.time()
         data = ''
 
@@ -1918,6 +1918,7 @@ class JAS(SearchList):
         default_theme = to_list(self.skin_dict['Extras'].get('themes', 'light'))[0]
         data += 'document.addEventListener("DOMContentLoaded", function (event) {\n'
         data += '    DOMLoaded = true;\n'
+        data += '    setIframeSrc();\n'
         data += '    if (dataLoaded) {\n'
         data += '        pageLoaded = true;\n'
         data += '        setupPage();\n'
@@ -2064,6 +2065,15 @@ class JAS(SearchList):
         data += '    window.top.postMessage(message, "*");\n'
         data += '    logTime("onLoad end");\n'
         data += '});\n'
+        data += '\n'
+        data += 'function setIframeSrc() {\n'
+        data += '    url = "../dataload/' + page_name + '.html";\n'
+        if page in self.skin_dict['Extras']['pages'] and \
+          'data' in to_list(self.skin_dict['Extras']['pages'][page].get('query_string_on', self.skin_dict['Extras']['pages'].get('query_string_on', []))):
+            data += '    // use query string so that iframe is not cached\n'
+            data += '    url = url + "?ts=" + Date.now();\n'
+        data += '    document.getElementById("data-iframe").src = url;\n'
+        data += '}\n'
 
         javascript = '''
 function jasShow(data) {

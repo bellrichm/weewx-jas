@@ -113,7 +113,7 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
 
     <body onresize="refreshSizes()" onload="refreshSizes()">
       <div style="display: none;">
-        #set line = '<iframe id="data-iframe" src="../dataload/' + $page_name_global + '.html"></iframe>'
+        #set line = '<iframe id="data-iframe"></iframe>'
         $line
       </div>
       #include $getVar('Extras.pages.layout', 'generators/body.inc')

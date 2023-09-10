@@ -4,9 +4,11 @@
 
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
     #set $data_binding = $getVar('Extras.pages.' + $page + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
+    #set page_name = $year($data_binding=$data_binding).start.format('%Y') + '-' + $month($data_binding=$data_binding).start.format('%m')
     $genJasOptions($filename, $page)
     $genJs($filename, 
-           $page, 
+           $page,
+           $page_name,
            $year_name, 
            $month($data_binding=$data_binding).start.format('%m'), 
            'month' + $year($data_binding=$data_binding).start.format('%Y') + $month($data_binding=$data_binding).start.format('%m') + '_')
