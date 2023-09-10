@@ -183,6 +183,27 @@ function manageNavbar() {
   }
 }
 
+function refreshData() {
+    message = {};
+    message.kind = 'refreshData';
+    message.message = {};
+    
+    // When running without a webserver, there is a lot of 'strangeness'
+    if (window.location.protocol == "file:") {
+        targetOrigin = "*";
+    }
+    else {
+        targetOrigin = window.location.origin;
+    }      
+
+    if (document.getElementById('child-iframe')) {
+      document.getElementById('child-iframe').contentWindow.postMessage(message, targetOrigin);
+    }
+    else {
+      window.self.postMessage(message, targetOrigin);
+    }
+}
+
 ## ToDo: thiscould be cleaned up
 function setIframeSrc(id, url, addQueryString) {
   document.querySelector("#child-iframe").style.visibility = 'hidden';

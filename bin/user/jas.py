@@ -1446,7 +1446,7 @@ class JAS(SearchList):
         interval_current = self.skin_dict['Extras']['current'].get('interval', interval)
 
         data += 'var mqtt_enabled = false;\n'
-        data += 'var updateDate = pageData.updateDate;\n'
+        data += 'updateDate = pageData.updateDate;\n'
 
         if self.skin_dict['Extras']['current'].get('observation', False):
             data += 'current.header = {};\n'
@@ -1567,6 +1567,8 @@ class JAS(SearchList):
         data += "var " + interval_long_name + "endDate;\n"
         data += "var " + interval_long_name + "startTimestamp;\n"
         data += "var " + interval_long_name + "endTimestamp;\n"
+
+        data += "var updateDate;\n"
 
         data += "var windRangeLegend;"
 
@@ -1822,7 +1824,7 @@ class JAS(SearchList):
         data +='        // And the "current" section date/time.\n'
         data +='        if (test_obj.dateTime) {\n'
         data +='            sessionStorage.setItem("updateDate", test_obj.dateTime*1000);\n'
-        data +='            timeElem = document.getElementById("updateDate");\n'
+        data +='            timeElem = document.getElementById("updateDateDiv");\n'
         data +='            if (timeElem) {\n'
         data +='                timeElem.innerHTML = moment.unix(test_obj.dateTime).utcOffset(' + str(self.utc_offset) + ').format(dateTimeFormat[lang].current);\n'
         data +='            }\n'
@@ -1864,7 +1866,7 @@ class JAS(SearchList):
         data += '    if(sessionStorage.getItem("updateDate") === null || !jasOptions.MQTTConfig){\n'
         data +='        sessionStorage.setItem("updateDate", updateDate);\n'
         data += '    }\n'
-        data += '    document.getElementById("updateDate").innerHTML = moment.unix(sessionStorage.getItem("updateDate")/1000).utcOffset(' + str(self.utc_offset) +').format(dateTimeFormat[lang].current);\n'
+        data += '    document.getElementById("updateDateDiv").innerHTML = moment.unix(sessionStorage.getItem("updateDate")/1000).utcOffset(' + str(self.utc_offset) +').format(dateTimeFormat[lang].current);\n'
         data += '}\n'
         data += '\n'
 
@@ -1917,33 +1919,18 @@ class JAS(SearchList):
         data += '\n'
         default_theme = to_list(self.skin_dict['Extras'].get('themes', 'light'))[0]
         data += 'document.addEventListener("DOMContentLoaded", function (event) {\n'
+        data += '    setupPage();\n'
         data += '    DOMLoaded = true;\n'
         data += '    setIframeSrc();\n'
         data += '    if (dataLoaded) {\n'
         data += '        pageLoaded = true;\n'
-        data += '        setupPage();\n'
+        data += '        updateData();\n'
         data += '    }\n'
         data += '});\n'
         data += '\n'
 
-        data += 'function setupPage(pageDataString) {\n'
-        data += '    logTime("DOMContentLoaded  Start");\n'
-        data += '    getData(pageDataString);\n'
-        data += '    setupCharts();\n'
-        data += '    theme = sessionStorage.getItem("theme");\n'
-        data += '    if (!theme) {\n'
-        data += '        theme = "' + default_theme + '";\n'
-        data += '    }\n'
-        data += '    logTime("DOMContentLoaded  getTheme");\n'
-        data += '    setTheme(theme);\n'
-        data += '    logTime("DOMContentLoaded  setTheme");\n'
-        data += '    updateTexts();\n'
-        data += '    logTime("DOMContentLoaded  updateTexts");\n'
-        data += '    updateLabels();\n'
-        data += '    logTime("DOMContentLoaded  updateLabels");\n'
-        data += '    updateCharts();\n'
-        data += '    logTime("DOMContentLoaded  updateCharts");\n'
-        data += '\n'
+        data += 'function updateData() {\n'
+        data += '    console.log("b");\n'
         data += '    if (jasOptions.minmax) {\n'
         data +='        updateMinMax(' + start_timestamp + ', ' + end_timestamp + ');\n'
         data += '    }\n'
@@ -1964,7 +1951,28 @@ class JAS(SearchList):
         data += '    if (jasOptions.current) {\n'
         data +='        updateCurrentObservations();\n'
         data += '    }\n'
-        data +='\n'
+        # This is only here because the windrose legend is retrieved with data that changes. This should be changed
+        data += '    setupCharts();\n' # ToDo: manage wind rose legend better
+        data += '    updateCharts();\n'
+        data += '    logTime("DOMContentLoaded  updateCharts");\n'
+        data +='\n'        
+        data += '}\n'
+        data += '\n'
+
+        data += 'function setupPage(pageDataString) {\n'
+        data += '    logTime("DOMContentLoaded  Start");\n'
+        data += '    theme = sessionStorage.getItem("theme");\n'
+        data += '    if (!theme) {\n'
+        data += '        theme = "' + default_theme + '";\n'
+        data += '    }\n'
+        data += '    logTime("DOMContentLoaded  getTheme");\n'
+        data += '    setTheme(theme);\n'
+        data += '    logTime("DOMContentLoaded  setTheme");\n'
+        data += '    updateTexts();\n'
+        data += '    logTime("DOMContentLoaded  updateTexts");\n'
+        data += '    updateLabels();\n'
+        data += '    logTime("DOMContentLoaded  updateLabels");\n'
+        data += '\n'
         data += '    if (jasOptions.forecast) {\n'
         data +='        updateForecasts();\n'
         data += '    }\n'
@@ -2302,6 +2310,11 @@ function handleLog(message) {
     }
 }
 
+// Handle event messages of type "refreshData".
+function handleRefreshData(message) {
+    setIframeSrc();
+}
+
 // Handle event messages of type "scroll".
 function handleScroll(message) {
     document.getElementById('chartModal').style.top = message.currentScroll + 'px';
@@ -2309,10 +2322,11 @@ function handleScroll(message) {
 
 // Handle event messages of type "loaded".
 function handleLoaded(message) {
+    getData(message);
     dataLoaded = true;\n
     if (DOMLoaded) {
         pageLoaded = true;
-        setupPage(message);
+        updateData();
     }
  }
 
@@ -2444,6 +2458,10 @@ window.addEventListener("message",
                         {
                             setTheme(message.message);
                         }
+                        if (message.kind == "refreshData")
+                        {
+                            handleRefreshData(message.message);
+                        }                               
                         if (message.kind == "resize")
                         {
                             handleResize(message.message);
