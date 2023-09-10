@@ -1725,14 +1725,14 @@ class JAS(SearchList):
         data += '\n'
         wait_milliseconds = str(int(self.skin_dict['Extras']['pages'][page].get('wait_seconds', 300)) * 1000)
         delay_milliseconds = str(int(self.skin_dict['Extras']['pages'][page].get('delay_seconds', 60)) * 1000)
-        data += 'function setupPageReload() {\n'
+        data += 'function setupPageRefresh() {\n'
         data += '    // Set a timer to reload the iframe/page.\n'
         data += '    var currentDate = new Date();\n'
         data += '    var futureDate = new Date();\n'
         data += '    futureDate.setTime(futureDate.getTime() + ' + wait_milliseconds + ');\n'
         data += '    var futureTimestamp = Math.floor(futureDate.getTime()/' + wait_milliseconds + ') * '+ wait_milliseconds + ';\n'
         data += '    var timeout = futureTimestamp - currentDate.getTime() + ' + delay_milliseconds + ';\n'
-        data += '    setTimeout(function() { window.location.reload(true); }, timeout);\n'
+        data += '    setTimeout(function() { handleRefreshData(null); setupPageRefresh();}, timeout);\n' 
         data += '}\n'
         data += '\n'
         data += '// Handle reset button of zoom control\n'
@@ -1944,10 +1944,6 @@ class JAS(SearchList):
         data +='        setupThisDate();\n'
         data += '    }\n'
         data += '\n'
-        data += '    if (jasOptions.reload) {\n'
-        data +='        setupPageReload();\n'
-        data += '    }\n'
-        data += '\n'
         data += '    if (jasOptions.current) {\n'
         data +='        updateCurrentObservations();\n'
         data += '    }\n'
@@ -1973,6 +1969,10 @@ class JAS(SearchList):
         data += '    updateLabels();\n'
         data += '    logTime("DOMContentLoaded  updateLabels");\n'
         data += '\n'
+        data += '    if (jasOptions.refresh) {\n'
+        data +='        setupPageRefresh();\n'
+        data += '    }\n'
+        data += '\n'        
         data += '    if (jasOptions.forecast) {\n'
         data +='        updateForecasts();\n'
         data += '    }\n'
@@ -2497,7 +2497,7 @@ window.addEventListener("message",
 
         data += "jasOptions.pageMQTT = " + self.skin_dict['Extras']['pages'][page].get('mqtt', 'true').lower() + ";\n"
         data += "jasOptions.displayAerisObservation = -" + self.skin_dict['Extras'].get('display_aeris_observation', 'false').lower() + ";\n"
-        data += "jasOptions.reload = " + self.skin_dict['Extras']['pages'][page].get('reload', 'false').lower() + ";\n"
+        data += "jasOptions.refresh = " + self.skin_dict['Extras']['pages'][page].get('reload', 'false').lower() + ";\n"
         data += "jasOptions.zoomcontrol = " + self.skin_dict['Extras']['pages'][page].get('zoomControl', 'false').lower() + ";\n"
 
         data += "jasOptions.currentHeader = null;\n"
