@@ -1153,7 +1153,7 @@ class JAS(SearchList):
         data += 'window.addEventListener("load", function (event) {\n'
         data += '    dataLoad();\n'
         data += "message = {};\n"
-        data += "message.kind = 'loaded';\n"
+        data += "message.kind = 'dataLoaded';\n"
         data +=  "message.message = JSON.stringify(pageData);\n"
         data += "window.parent.postMessage(message, '*');\n"
         data += '    })\n'
@@ -2324,9 +2324,9 @@ function handleScroll(message) {
     document.getElementById('chartModal').style.top = message.currentScroll + 'px';
 }
 
-// Handle event messages of type "loaded".
-function handleLoaded(message) {
-    logTime("handleLoaded  Start");
+// Handle event messages of type "dataLoaded".
+function handleDataLoaded(message) {
+    logTime("handleDataLoaded  Start");
     getData(message);
     logTime("getData");
     dataLoaded = true;\n
@@ -2335,7 +2335,7 @@ function handleLoaded(message) {
         updateData();
     logTime("updateData");
     }
-    logTime("handleLoaded  End");   
+    logTime("handleDataLoaded  End");   
  }
 
 function handleMQTT(message) {
@@ -2454,9 +2454,9 @@ window.addEventListener("message",
                         {
                             handleLang(message.message);
                         }
-                        if (message.kind == "loaded")
+                        if (message.kind == "dataLoaded")
                         {
-                            handleLoaded(message.message);
+                            handleDataLoaded(message.message);
                         }                        
                         if (message.kind == "mqtt")
                         {
