@@ -1151,7 +1151,6 @@ class JAS(SearchList):
         data += "\n"
 
         data += 'window.addEventListener("load", function (event) {\n'
-        data += '    console.log("a");\n'
         data += '    dataLoad();\n'
         data += "message = {};\n"
         data += "message.kind = 'loaded';\n"
@@ -1732,7 +1731,7 @@ class JAS(SearchList):
         data += '    futureDate.setTime(futureDate.getTime() + ' + wait_milliseconds + ');\n'
         data += '    var futureTimestamp = Math.floor(futureDate.getTime()/' + wait_milliseconds + ') * '+ wait_milliseconds + ';\n'
         data += '    var timeout = futureTimestamp - currentDate.getTime() + ' + delay_milliseconds + ';\n'
-        data += '    setTimeout(function() { handleRefreshData(null); setupPageRefresh();}, timeout);\n' 
+        data += '    setTimeout(function() { handleRefreshData(null); setupPageRefresh();}, timeout);\n'
         data += '}\n'
         data += '\n'
         data += '// Handle reset button of zoom control\n'
@@ -1919,6 +1918,7 @@ class JAS(SearchList):
         data += '\n'
         default_theme = to_list(self.skin_dict['Extras'].get('themes', 'light'))[0]
         data += 'document.addEventListener("DOMContentLoaded", function (event) {\n'
+        data += '    logTime("DOMContentLoaded  Start");\n'
         data += '    setupPage();\n'
         data += '    DOMLoaded = true;\n'
         data += '    setIframeSrc();\n'
@@ -1926,11 +1926,12 @@ class JAS(SearchList):
         data += '        pageLoaded = true;\n'
         data += '        updateData();\n'
         data += '    }\n'
+        data += '    logTime("DOMContentLoaded  End");\n'
         data += '});\n'
         data += '\n'
 
         data += 'function updateData() {\n'
-        data += '    console.log("b");\n'
+        data += '    logTime("updateData  start");\n'
         data += '    if (jasOptions.minmax) {\n'
         data +='        updateMinMax(' + start_timestamp + ', ' + end_timestamp + ');\n'
         data += '    }\n'
@@ -1947,36 +1948,39 @@ class JAS(SearchList):
         data += '    if (jasOptions.current) {\n'
         data +='        updateCurrentObservations();\n'
         data += '    }\n'
+        data += '    logTime("updateCurrentObservations");\n'
         # This is only here because the windrose legend is retrieved with data that changes. This should be changed
         data += '    setupCharts();\n' # ToDo: manage wind rose legend better
+        data += '    logTime("setupCharts");\n'
         data += '    updateCharts();\n'
-        data += '    logTime("DOMContentLoaded  updateCharts");\n'
-        data +='\n'        
+        data += '    logTime("updateCharts");\n'
+        data += '    logTime("updateData  end");\n'
+        data +='\n'
         data += '}\n'
         data += '\n'
 
         data += 'function setupPage(pageDataString) {\n'
-        data += '    logTime("DOMContentLoaded  Start");\n'
+        data += '    logTime("setupPage  Start");\n'
         data += '    theme = sessionStorage.getItem("theme");\n'
         data += '    if (!theme) {\n'
         data += '        theme = "' + default_theme + '";\n'
         data += '    }\n'
-        data += '    logTime("DOMContentLoaded  getTheme");\n'
+        data += '    logTime("setupPage  getTheme");\n'
         data += '    setTheme(theme);\n'
-        data += '    logTime("DOMContentLoaded  setTheme");\n'
+        data += '    logTime("setupPage  setTheme");\n'
         data += '    updateTexts();\n'
-        data += '    logTime("DOMContentLoaded  updateTexts");\n'
+        data += '    logTime("setupPage  updateTexts");\n'
         data += '    updateLabels();\n'
-        data += '    logTime("DOMContentLoaded  updateLabels");\n'
+        data += '    logTime("setupPage  updateLabels");\n'
         data += '\n'
         data += '    if (jasOptions.refresh) {\n'
         data +='        setupPageRefresh();\n'
         data += '    }\n'
-        data += '\n'        
+        data += '\n'
         data += '    if (jasOptions.forecast) {\n'
         data +='        updateForecasts();\n'
         data += '    }\n'
-        data += '    logTime("DOMContentLoaded  End");\n'
+        data += '    logTime("setupPage  End");\n'
         data += '};\n'
         data += '\n'
 
@@ -2322,12 +2326,16 @@ function handleScroll(message) {
 
 // Handle event messages of type "loaded".
 function handleLoaded(message) {
+    logTime("handleLoaded  Start");
     getData(message);
+    logTime("getData");
     dataLoaded = true;\n
     if (DOMLoaded) {
         pageLoaded = true;
         updateData();
+    logTime("updateData");
     }
+    logTime("handleLoaded  End");   
  }
 
 function handleMQTT(message) {
