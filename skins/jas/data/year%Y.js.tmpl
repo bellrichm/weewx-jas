@@ -5,7 +5,6 @@
 
 #set $data_binding = $getVar('Extras.pages.' + $page + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
 #set global interval_global = 'year'
-#set global interval_type_global = 'historical'
 #set global page_definition_name_global = 'archive-year'
 #set global interval_long_name_global = 'year' + $year($data_binding=$data_binding).start.format('%Y') + "_"
 
@@ -14,6 +13,5 @@
 #end if    
 
 #set global interval_global = None
-#set global interval_type_global = None
 #set global page_definition_name_global = None
 #set global interval_long_name_global = None

@@ -67,7 +67,6 @@ function getData(pageDataString) {
 $genData($filename, 
             $page,
             $interval_global,
-            $interval_type_global,
             $page_definition_name_global,
             $interval_long_name_global
             )

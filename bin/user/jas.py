@@ -1134,7 +1134,7 @@ class JAS(SearchList):
         data += "pageData = {};\n"
         data += 'function dataLoad() {\n'
 
-        data += self._gen_data_load2(interval, interval_type, page_definition_name, interval_long_name, skin_data_binding, page_data_binding)
+        data += self._gen_data_load2(interval, interval_type, page_definition_name, skin_data_binding, page_data_binding)
 
         data += self._gen_aggregate_objects(interval, page_definition_name, interval_long_name)
 
@@ -1203,7 +1203,7 @@ class JAS(SearchList):
         data += '  pageData.currentData = JSON.stringify(currentData);'
         return data
 
-    def _gen_data_load2(self, interval, interval_type, page_definition_name, interval_long_name, skin_data_binding, page_data_binding):
+    def _gen_data_load2(self, interval, interval_type, page_definition_name, skin_data_binding, page_data_binding):
         data = ""
 
         skin_timespan_binder = self._get_timespan_binder(interval, skin_data_binding)
@@ -1228,13 +1228,13 @@ class JAS(SearchList):
             data += "pageData.endDate = moment('" + end_date + "').utcOffset(" + str(self.utc_offset) + ");\n"
 
         data += "\n"
-        data += self._gen_interval_end_timestamp(page_data_binding, interval, page_definition_name, interval_long_name)
+        data += self._gen_interval_end_timestamp(page_data_binding, interval, page_definition_name)
 
         return data
 
     # Create time stamps by aggregation time for the end of interval
     # For example: endTimestamp_min, endTimestamp_max
-    def _gen_interval_end_timestamp(self, page_data_binding, interval_name, page_definition_name, interval_long_name):
+    def _gen_interval_end_timestamp(self, page_data_binding, interval_name, page_definition_name):
         data = ''
         for aggregate_type in self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval']:
             aggregate_interval = self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval'][aggregate_type]
@@ -1382,11 +1382,11 @@ class JAS(SearchList):
     # This data is stored in a javascript object named 'current'.
     # 'current.header' is an object with the data for the header portion of this section.
     # 'current.observations' is a map. The key is the observation name, like 'outTemp'. The value is the data to populate the section.
-    def _gen_current(self, skin_data_binding, interval):
+    def _gen_current(self):
         data = ''
 
-        current_data_binding = self.skin_dict['Extras']['current'].get('data_binding', skin_data_binding)
-        interval_current = self.skin_dict['Extras']['current'].get('interval', interval)
+        # current_data_binding = self.skin_dict['Extras']['current'].get('data_binding', skin_data_binding)
+        # interval_current = self.skin_dict['Extras']['current'].get('interval', interval)
 
         data += 'var mqtt_enabled = false;\n'
         data += 'updateDate = pageData.updateDate;\n'
@@ -1395,7 +1395,7 @@ class JAS(SearchList):
             data += 'current.header = {};\n'
             data += 'current.header.name = "' + self.skin_dict['Extras']['current']['observation'] +'";\n'
 
-            data_binding = self.skin_dict['Extras']['current'].get('header_data_binding', current_data_binding)
+            # data_binding = self.skin_dict['Extras']['current'].get('header_data_binding', current_data_binding)
             header_max_decimals = self.skin_dict['Extras']['current'].get('header_max_decimals', False)
             if header_max_decimals:
                 data += 'current.header.value = Number(pageData.currentHeaderValue).toFixed(' + header_max_decimals + ');\n'
@@ -1409,7 +1409,7 @@ class JAS(SearchList):
         data += 'currentData = JSON.parse(pageData.currentData);\n'
 
         for observation in self.skin_dict['Extras']['current']['observations']:
-            data_binding = self.skin_dict['Extras']['current']['observations'][observation].get('data_binding', current_data_binding)
+            # data_binding = self.skin_dict['Extras']['current']['observations'][observation].get('data_binding', current_data_binding)
             type_value =  self.skin_dict['Extras']['current']['observations'][observation].get('type', "")
             unit_name = self.skin_dict['Extras']['current']['observations'][observation].get('unit', "default")
 
@@ -1489,7 +1489,7 @@ class JAS(SearchList):
 
         return data
 
-    def _gen_data(self, filename, page, interval, interval_type, page_definition_name, interval_long_name):
+    def _gen_data(self, filename, page, interval, page_definition_name, interval_long_name):
         start_time = time.time()
 
         skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
@@ -1506,7 +1506,7 @@ class JAS(SearchList):
 
         data += "\n"
         if self.skin_dict['Extras']['pages'][page_definition_name].get('current', None) is not None:
-            data += self._gen_current(skin_data_binding, interval)
+            data += self._gen_current()
 
         data += "\n"
         data += self._gen_mqtt(page)
