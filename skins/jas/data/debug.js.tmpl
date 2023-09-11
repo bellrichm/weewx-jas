@@ -3,13 +3,16 @@
 
 #from weeutil.weeutil import to_bool
 
+#set global interval_global = $getVar("$Extras.pages.debug.simulate_interval", 'day')
+#set global interval_type_global = 'active'
+#set global page_definition_name_global = $getVar("$Extras.pages.debug.simulate_page", 'last24hours')
+#set global interval_long_name_global = $getVar("$Extras.pages.debug.simulate_interval", 'day') +'_'
+
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
-    $genData($filename, 
-             $page,
-             $getVar("$Extras.pages.debug.simulate_interval", 'day'),
-             'active',
-             $getVar("$Extras.pages.debug.simulate_page", 'last24hours'),
-             $getVar("$Extras.pages.debug.simulate_interval", 'day') +'_'
-            )
+    #include 'generators/data.gen'
 #end if    
 
+#set global interval_global = None
+#set global interval_type_global = None
+#set global page_definition_name_global = None
+#set global interval_long_name_global = None
