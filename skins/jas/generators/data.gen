@@ -5,6 +5,65 @@
 #from weeutil.weeutil import to_bool, to_list
 #set $start_time = time.time()
 
+## Define the 'aggegate' objects to hold the data
+## For example: last7days_min = {}, last7days_max = {}
+#for $aggregate_type in $aggregate_types
+    #echo $interval_long_name_global + $aggregate_type + " = {};\n"
+#end for
+
+minMaxObs = [];
+thisDateObsList = [];
+var current = {};
+
+#echo "var " + $interval_long_name_global + "startDate;\n"
+#echo "var " + $interval_long_name_global + "endDate;\n"
+#echo "var " + $interval_long_name_global + "startTimestamp;\n"
+#echo "var " + $interval_long_name_global + "endTimestamp;\n"
+
+var updateDate;
+var windRangeLegend;
+
+function getData(pageDataString) {
+    pageData = JSON.parse(pageDataString);
+
+#echo "    " + $interval_long_name_global + "startDate = moment(pageData.startDate);\n"
+#echo "    " + $interval_long_name_global + "endDate = moment(pageData.endDate);\n"
+#echo "    " + $interval_long_name_global + "startTimestamp = pageData.startTimestamp;\n"
+#echo "    " + $interval_long_name_global + "endTimestamp = pageData.endTimeStamp;\n"
+
+## Populate the 'aggegate' objects
+## Example: last7days_min.outTemp = [[dateTime1, outTemp1], [dateTime2, outTemp2]]
+#for aggregate_type in $getVar('$Extras.page_definition.' + $page_definition_name_global + '.aggregate_interval')
+    #echo "    var " + $interval_long_name_global + "endTimestamp_" + $aggregate_type + " =  pageData.endTimestamp_" + $aggregate_type + ";\n"
+#end for
+
+#for $observation in $observations
+    #for $aggregate_type in $observations[$observation]['aggregate_types']
+        #set $interval_name = $interval_long_name_global + $aggregate_type
+        #for $data_binding in $observations[$observation]['aggregate_types'][$aggregate_type]
+            #for $unit_name in $observations[$observation]['aggregate_types'][$aggregate_type][$data_binding]
+                #set $name_prefix = $interval_name + "." + $observation + "_"  + $data_binding
+                #set $name_prefix2 = $interval_name + "_" + $observation + "_"  + $data_binding
+                #if $unit_name == "default"
+                    #pass
+                #else
+                    #set $name_prefix += "_" + $unit_name
+                    #set $name_prefix2 += "_" + $unit_name
+                #end if
+                #set $array_name = $name_prefix
+                #set $datetime_name = $name_prefix2 + "_dateTime"
+                #set $data_name = $name_prefix2 + "_data"
+                #echo "    " + $array_name + ' = pageData.' + $array_name + ';\n'
+                ## Cache the dateTimes into its own list variable
+                #echo "    " + $datetime_name + " = [].concat(" + $array_name + ".map(arr => arr[0]));\n"
+                ## Cache the values into its own list variable
+                #echo "    " + $data_name + " = [].concat(" + $array_name + ".map(arr => arr[1]));\n"
+            #end for
+        #end for
+    #end for
+    #echo "\n"
+#end for
+
 $genData($filename, 
             $page,
             $interval_global,

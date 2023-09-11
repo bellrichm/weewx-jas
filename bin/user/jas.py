@@ -1249,34 +1249,6 @@ class JAS(SearchList):
 
         return data
 
-    # Populate the 'aggegate' objects
-    # Example: last7days_min.outTemp = [[dateTime1, outTemp1], [dateTime2, outTemp2]]
-    def _gen_aggregate_objects2(self, interval, page_definition_name, interval_long_name):
-        data = ""
-
-        for aggregate_type in self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval']:
-            data +=  "var " + interval_long_name + "endTimestamp_" + aggregate_type + " =  pageData.endTimestamp_" + aggregate_type + ";\n"
-
-        for observation, observation_items in self.observations.items():
-            for aggregate_type, aggregate_type_items in observation_items['aggregate_types'].items():
-                interval_name = interval_long_name + aggregate_type
-                for data_binding, data_binding_items in aggregate_type_items.items():
-                    for unit_name in data_binding_items:
-                        name_prefix = interval_name + "." + observation + "_"  + data_binding
-                        name_prefix2 = interval_name + "_" + observation + "_"  + data_binding
-                        if unit_name == "default":
-                            pass
-                        else:
-                            name_prefix += "_" + unit_name
-                            name_prefix2 += "_" + unit_name
-
-                        array_name = name_prefix
-
-                        data += array_name + ' = pageData.' + array_name + ';\n'
-            data += "\n"
-
-        return data
-
     def _gen_aggregate_objects(self, interval, page_definition_name, interval_long_name):
         data = ""
 
@@ -1317,34 +1289,6 @@ class JAS(SearchList):
                             data += "  pageData." + array_name + " = " + self._get_series(weewx_observation, data_binding, interval, None, None, 'start', 'unix_epoch_ms', unit_name, 2, True) + ";\n"
 
         data += "\n"
-        return data
-
-    def _gen_aggregate_cache(self, interval_long_name):
-        data = ""
-
-        for observation, observation_items in self.observations.items():
-            for aggregate_type, aggregate_type_items in observation_items['aggregate_types'].items():
-                interval_name = interval_long_name + aggregate_type
-                for data_binding, data_binding_items in aggregate_type_items.items():
-                    for unit_name in data_binding_items:
-                        name_prefix = interval_name + "." + observation + "_"  + data_binding
-                        name_prefix2 = interval_name + "_" + observation + "_"  + data_binding
-                        if unit_name == "default":
-                            pass
-                        else:
-                            name_prefix += "_" + unit_name
-                            name_prefix2 += "_" + unit_name
-
-                        array_name = name_prefix
-                        datetime_name = name_prefix2 + "_dateTime"
-                        data_name = name_prefix2 + "_data"
-
-                        # Cache the dateTimes into its own list variable
-                        data += datetime_name + " = [].concat(" + array_name + ".map(arr => arr[0]));\n"
-                        # Cache the values into its own list variable
-                        data += data_name + " = [].concat(" + array_name + ".map(arr => arr[1]));\n"
-                        data += "\n"
-
         return data
 
     def _gen_this_date(self, skin_data_binding, interval_long_name):
@@ -1552,38 +1496,6 @@ class JAS(SearchList):
         page_data_binding = self.skin_dict['Extras']['pages'][page_definition_name].get('data_binding', skin_data_binding)
 
         data = ""
-
-        # Define the 'aggegate' objects to hold the data
-        # For example: last7days_min = {}, last7days_max = {}
-        for aggregate_type in self.aggregate_types:
-            data += interval_long_name + aggregate_type + " = {};\n"
-
-        data += "minMaxObs = [];\n"
-        data += "thisDateObsList = [];\n"
-        data += 'var current = {};\n'
-
-        data += "var " + interval_long_name + "startDate;\n"
-        data += "var " + interval_long_name + "endDate;\n"
-        data += "var " + interval_long_name + "startTimestamp;\n"
-        data += "var " + interval_long_name + "endTimestamp;\n"
-
-        data += "var updateDate;\n"
-
-        data += "var windRangeLegend;"
-
-        data += "\n"
-        data += 'function getData(pageDataString) {\n'
-        data += "pageData = JSON.parse(pageDataString);\n"
-
-        data += interval_long_name + "startDate = moment(pageData.startDate);\n"
-        data += interval_long_name + "endDate = moment(pageData.endDate);\n"
-        data += interval_long_name + "startTimestamp = pageData.startTimestamp;\n"
-        data += interval_long_name + "endTimestamp = pageData.endTimeStamp;\n"
-
-        data += self._gen_aggregate_objects2(interval, page_definition_name, interval_long_name)
-
-        data += self._gen_aggregate_cache(interval_long_name)
-        data += "\n"
 
         if 'thisdate' in self.skin_dict['Extras']['pages'][page]:
             data += self._gen_this_date(skin_data_binding, interval_long_name)
