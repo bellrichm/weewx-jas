@@ -213,6 +213,17 @@ class JAS(SearchList):
         current_filename = 'current.json'
         current_endpoint = 'https://api.aerisapi.com/observations/'
 
+        self.wind_ranges = {}
+        self.wind_ranges['mile_per_hour'] = [1, 4, 8, 13, 19, 25, 32]
+        self.wind_ranges['mile_per_hour2'] = [1, 4, 8, 13, 19, 25, 32]
+        self.wind_ranges['km_per_hour'] = [.5, 6, 12, 20, 29, 39, 50]
+        self.wind_ranges['km_per_hour2'] = [.5, 6, 12, 20, 29, 39, 50]
+        self.wind_ranges['meter_per_second'] = [1, 1.6, 3.4, 5.5, 8, 10.8, 13.9]
+        self.wind_ranges['meter_per_second2'] = [1, 1.6, 3.4, 5.5, 8, 10.8, 13.9]
+        self.wind_ranges['knot'] = [1, 4, 7, 11, 17, 22, 28]
+        self.wind_ranges['knot2'] = [1, 4, 7, 11, 17, 22, 28]
+        self.wind_ranges_count = 7
+
         self.ordinate_names = copy.deepcopy(self.generator.formatter.ordinate_names)
         del self.ordinate_names[-1]
 
@@ -449,17 +460,6 @@ class JAS(SearchList):
 
         data_timespan = TimeSpan(start_ts, end_ts)
 
-        wind_ranges = {}
-        wind_ranges['mile_per_hour'] = [1, 4, 8, 13, 19, 25, 32]
-        wind_ranges['mile_per_hour2'] = [1, 4, 8, 13, 19, 25, 32]
-        wind_ranges['km_per_hour'] = [.5, 6, 12, 20, 29, 39, 50]
-        wind_ranges['km_per_hour2'] = [.5, 6, 12, 20, 29, 39, 50]
-        wind_ranges['meter_per_second'] = [1, 1.6, 3.4, 5.5, 8, 10.8, 13.9]
-        wind_ranges['meter_per_second2'] = [1, 1.6, 3.4, 5.5, 8, 10.8, 13.9]
-        wind_ranges['knot'] = [1, 4, 7, 11, 17, 22, 28]
-        wind_ranges['knot2'] = [1, 4, 7, 11, 17, 22, 28]
-        wind_ranges_count = 7
-
         # current day calculation
         #day_ts = int(timespan.stop - timespan.stop % age)
 
@@ -483,7 +483,7 @@ class JAS(SearchList):
             wind_data[ordinate_name]['max'] = 0
             wind_data[ordinate_name]['speed_data'] = []
             j = 0
-            while j < wind_ranges_count:
+            while j < self.wind_ranges_count:
                 wind_data[ordinate_name]['speed_data'].append(0)
                 j += 1
             i += 1
@@ -502,7 +502,7 @@ class JAS(SearchList):
                     wind_data[ordinate_name]['max'] = wind_gust_data[0][i]
 
                 j = 0
-                for wind_range in wind_ranges[wind_unit]:
+                for wind_range in self.wind_ranges[wind_unit]:
                     if wind_speed < wind_range:
                         wind_data[ordinate_name]['speed_data'][j] += 1
                         break
@@ -522,7 +522,7 @@ class JAS(SearchList):
         wind_compass_max = []
         wind_compass_speeds = []
         j = 0
-        while j < wind_ranges_count:
+        while j < self.wind_ranges_count:
             wind_compass_speeds.append([])
             j += 1
 
@@ -535,17 +535,20 @@ class JAS(SearchList):
                 wind_compass_speeds[i].append(wind_x)
                 i += 1
 
+        return wind_compass_avg, wind_compass_max, wind_compass_speeds
+
+    def _get_wind_range_legend(self):
         wind_speed_unit = self.skin_dict["Units"]["Groups"]["group_speed"]
         wind_speed_unit_label = self.skin_dict["Units"]["Labels"][wind_speed_unit]
-        low_range = wind_ranges[wind_speed_unit][0]
-        high_range = wind_ranges[wind_speed_unit][len(wind_ranges[wind_speed_unit]) - 1]
+        low_range = self.wind_ranges[wind_speed_unit][0]
+        high_range = self.wind_ranges[wind_speed_unit][len(self.wind_ranges[wind_speed_unit]) - 1]
         wind_range_legend = F"['<{low_range} {wind_speed_unit_label}', "
-        for high_range in wind_ranges[wind_speed_unit][1:]:
+        for high_range in self.wind_ranges[wind_speed_unit][1:]:
             wind_range_legend += F"'{low_range}-{high_range} {wind_speed_unit_label}', "
             low_range = high_range
-        wind_range_legend += F"'>{high_range} {wind_speed_unit_label}']"
 
-        return wind_compass_avg, wind_compass_max, wind_compass_speeds, wind_range_legend
+        wind_range_legend += F"'>{high_range} {wind_speed_unit_label}']"
+        return wind_range_legend
 
     def _get_observation_text(self, coded_weather):
         cloud_codes = ["CL", "FW", "SC", "BK", "OV",]
@@ -1001,6 +1004,9 @@ class JAS(SearchList):
         chart_final += 'utc_offset = ' + str(self.utc_offset) + ';\n'
         chart_final += 'function setupCharts() {\n'
         chart_final += "ordinateNames = ['" + "', '".join(self.ordinate_names) + "'];\n"
+        if self.skin_dict['Extras']['pages'][page].get('windRose', None) is not None:
+            chart_final += "windRangeLegend = " + self._get_wind_range_legend() + ";\n"
+
         chart2 = ""
         charts = self.skin_dict['Extras']['chart_definitions']
         for chart in self.skin_dict['Extras']['pages'][page]:
@@ -1134,7 +1140,7 @@ class JAS(SearchList):
         data += "pageData = {};\n"
         data += 'function dataLoad() {\n'
 
-        data += self._gen_data_load2(interval, interval_type, page_definition_name, interval_long_name, skin_data_binding, page_data_binding)
+        data += self._gen_data_load2(interval, interval_type, page_definition_name, skin_data_binding, page_data_binding)
 
         data += self._gen_aggregate_objects(interval, page_definition_name, interval_long_name)
 
@@ -1203,7 +1209,7 @@ class JAS(SearchList):
         data += '  pageData.currentData = JSON.stringify(currentData);'
         return data
 
-    def _gen_data_load2(self, interval, interval_type, page_definition_name, interval_long_name, skin_data_binding, page_data_binding):
+    def _gen_data_load2(self, interval, interval_type, page_definition_name, skin_data_binding, page_data_binding):
         data = ""
 
         skin_timespan_binder = self._get_timespan_binder(interval, skin_data_binding)
@@ -1228,13 +1234,13 @@ class JAS(SearchList):
             data += "pageData.endDate = moment('" + end_date + "').utcOffset(" + str(self.utc_offset) + ");\n"
 
         data += "\n"
-        data += self._gen_interval_end_timestamp(page_data_binding, interval, page_definition_name, interval_long_name)
+        data += self._gen_interval_end_timestamp(page_data_binding, interval, page_definition_name)
 
         return data
 
     # Create time stamps by aggregation time for the end of interval
     # For example: endTimestamp_min, endTimestamp_max
-    def _gen_interval_end_timestamp(self, page_data_binding, interval_name, page_definition_name, interval_long_name):
+    def _gen_interval_end_timestamp(self, page_data_binding, interval_name, page_definition_name):
         data = ''
         for aggregate_type in self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval']:
             aggregate_interval = self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval'][aggregate_type]
@@ -1246,34 +1252,6 @@ class JAS(SearchList):
                 end_timestamp =(self._get_timespan_binder(interval_name, page_data_binding).end.raw // 60 * 60 - (self.utc_offset * 60)) * 1000
 
             data +=  "  pageData.endTimestamp_" + aggregate_type +  " = " +  str(end_timestamp) + ";\n"
-
-        return data
-
-    # Populate the 'aggegate' objects
-    # Example: last7days_min.outTemp = [[dateTime1, outTemp1], [dateTime2, outTemp2]]
-    def _gen_aggregate_objects2(self, interval, page_definition_name, interval_long_name):
-        data = ""
-
-        for aggregate_type in self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval']:
-            data +=  "var " + interval_long_name + "endTimestamp_" + aggregate_type + " =  pageData.endTimestamp_" + aggregate_type + ";\n"
-
-        for observation, observation_items in self.observations.items():
-            for aggregate_type, aggregate_type_items in observation_items['aggregate_types'].items():
-                interval_name = interval_long_name + aggregate_type
-                for data_binding, data_binding_items in aggregate_type_items.items():
-                    for unit_name in data_binding_items:
-                        name_prefix = interval_name + "." + observation + "_"  + data_binding
-                        name_prefix2 = interval_name + "_" + observation + "_"  + data_binding
-                        if unit_name == "default":
-                            pass
-                        else:
-                            name_prefix += "_" + unit_name
-                            name_prefix2 += "_" + unit_name
-
-                        array_name = name_prefix
-
-                        data += array_name + ' = pageData.' + array_name + ';\n'
-            data += "\n"
 
         return data
 
@@ -1319,214 +1297,6 @@ class JAS(SearchList):
         data += "\n"
         return data
 
-    def _gen_aggregate_cache(self, interval_long_name):
-        data = ""
-
-        for observation, observation_items in self.observations.items():
-            for aggregate_type, aggregate_type_items in observation_items['aggregate_types'].items():
-                interval_name = interval_long_name + aggregate_type
-                for data_binding, data_binding_items in aggregate_type_items.items():
-                    for unit_name in data_binding_items:
-                        name_prefix = interval_name + "." + observation + "_"  + data_binding
-                        name_prefix2 = interval_name + "_" + observation + "_"  + data_binding
-                        if unit_name == "default":
-                            pass
-                        else:
-                            name_prefix += "_" + unit_name
-                            name_prefix2 += "_" + unit_name
-
-                        array_name = name_prefix
-                        datetime_name = name_prefix2 + "_dateTime"
-                        data_name = name_prefix2 + "_data"
-
-                        # Cache the dateTimes into its own list variable
-                        data += datetime_name + " = [].concat(" + array_name + ".map(arr => arr[0]));\n"
-                        # Cache the values into its own list variable
-                        data += data_name + " = [].concat(" + array_name + ".map(arr => arr[1]));\n"
-                        data += "\n"
-
-        return data
-
-    def _gen_this_date(self, skin_data_binding, interval_long_name):
-        data = ""
-
-        thisdate_data_binding = self.skin_dict['Extras']['thisdate'].get('data_binding', skin_data_binding)
-        for observation in self.skin_dict['Extras']['thisdate']['observations']:
-            data_binding = self.skin_dict['Extras']['thisdate']['observations'][observation].get('data_binding', thisdate_data_binding)
-            unit_name = self.skin_dict['Extras']['thisdate']['observations'][observation].get('unit', "default")
-            if unit_name == "default":
-                label = getattr(self.unit.label, observation)
-            else:
-                label = self._get_unit_label(unit_name)
-
-            aggregation_type = self.skin_dict['Extras']['thisdate']['observations'][observation].get('type', None)
-            max_decimals = self.skin_dict['Extras']['thisdate']['observations'][observation].get('max_decimals', False)
-
-            data += "thisDateObs = [];\n"
-            data += "maxDecimals = null;\n"
-            if max_decimals:
-                data += "maxDecimals = " + max_decimals + ";\n"
-
-            if aggregation_type is None:
-                data += 'thisDateObsDetail = {};\n'
-                data += 'thisDateObsDetail.label = "' + label + '";\n'
-                data += 'thisDateObsDetail.maxDecimals = maxDecimals;\n'
-                value = interval_long_name + 'min.' + observation + "_" + data_binding
-                id_value = observation + "_thisdate_min"
-                data += 'thisDateObsDetail.dataArray = ' + value + ';\n'
-                data += 'thisDateObsDetail.id = "' + id_value + '";\n'
-                data += 'thisDateObs.push(thisDateObsDetail);\n'
-                data += '\n'
-
-                data += 'thisDateObsDetail = {};\n'
-                data += 'thisDateObsDetail.label = "' + label + '";\n'
-                data += 'thisDateObsDetail.maxDecimals = maxDecimals;\n'
-                value = interval_long_name + 'max.' + observation + "_" + data_binding
-                id_value = observation + "_thisdate_max"
-                data += 'thisDateObsDetail.dataArray = ' + value + ';\n'
-                data += 'thisDateObsDetail.id = "' + id_value + '";\n'
-                data += 'thisDateObs.push(thisDateObsDetail);\n'
-                data += '\n'
-            else:
-                data += 'thisDateObsDetail = {};\n'
-                data += 'thisDateObsDetail.label = "' + label + '";\n'
-                data += 'thisDateObsDetail.maxDecimals = maxDecimals;\n'
-                value = interval_long_name + aggregation_type + '.' + observation + "_" + data_binding
-                id_value = observation + "_thisdate_" + aggregation_type
-                data += 'thisDateObsDetail.dataArray = ' + value + ';\n'
-                data += 'thisDateObsDetail.id = "' + id_value + '";\n'
-                data += 'thisDateObs.push(thisDateObsDetail);\n'
-                data += '\n'
-
-            data += 'thisDateObsList.push(thisDateObs);\n'
-
-        return data
-
-    def _gen_min_max(self, skin_data_binding, interval_long_name):
-        data = ''
-
-        minmax_data_binding = self.skin_dict['Extras']['minmax'].get('data_binding', skin_data_binding)
-        for observation in self.skin_dict['Extras']['minmax']['observations']:
-            data_binding = self.skin_dict['Extras']['minmax']['observations'][observation].get('data_binding', minmax_data_binding)
-            unit_name = self.skin_dict['Extras']['minmax']['observations'][observation].get('unit', "default")
-
-            min_name_prefix = interval_long_name + "min_" + observation + "_" + data_binding
-            max_name_prefix = interval_long_name + "max_" + observation + "_" + data_binding
-            if unit_name != "default":
-                min_name_prefix += "_" + unit_name
-                max_name_prefix += "_" + unit_name
-                label = self._get_unit_label(unit_name)
-            else:
-                label = getattr(self.unit.label, observation)
-
-            data += 'minMaxObsData = {};\n'
-            data += 'minMaxObsData.minDateTimeArray = ' + min_name_prefix + '_dateTime;\n'
-            data += 'minMaxObsData.minDataArray = ' +  min_name_prefix + '_data;\n'
-            data += 'minMaxObsData.maxDateTimeArray = ' + max_name_prefix + '_dateTime;\n'
-            data += 'minMaxObsData.maxDataArray = ' +  max_name_prefix + '_data;\n'
-            data += 'minMaxObsData.label = "' + label + '";\n'
-            data += 'minMaxObsData.minId =  "' + observation + '_minmax_min";\n'
-            data += 'minMaxObsData.maxId = "' + observation + '_minmax_max";\n'
-            data += 'minMaxObsData.maxDecimals = ' + self.skin_dict['Extras']['minmax']['observations'][observation].get('max_decimals', "null") +';\n'
-            data += 'minMaxObs.push(minMaxObsData);\n'
-            data += '\n'
-
-        return data
-
-    # Create the data used to display current conditions.
-    # This data is only used when MQTT is not enabled.
-    # This data is stored in a javascript object named 'current'.
-    # 'current.header' is an object with the data for the header portion of this section.
-    # 'current.observations' is a map. The key is the observation name, like 'outTemp'. The value is the data to populate the section.
-    def _gen_current(self, skin_data_binding, interval):
-        data = ''
-
-        current_data_binding = self.skin_dict['Extras']['current'].get('data_binding', skin_data_binding)
-        interval_current = self.skin_dict['Extras']['current'].get('interval', interval)
-
-        data += 'var mqtt_enabled = false;\n'
-        data += 'updateDate = pageData.updateDate;\n'
-
-        if self.skin_dict['Extras']['current'].get('observation', False):
-            data += 'current.header = {};\n'
-            data += 'current.header.name = "' + self.skin_dict['Extras']['current']['observation'] +'";\n'
-
-            data_binding = self.skin_dict['Extras']['current'].get('header_data_binding', current_data_binding)
-            header_max_decimals = self.skin_dict['Extras']['current'].get('header_max_decimals', False)
-            if header_max_decimals:
-                data += 'current.header.value = Number(pageData.currentHeaderValue).toFixed(' + header_max_decimals + ');\n'
-
-            data += 'if (!isNaN(current.header.value)) {\n'
-            data += '    current.header.value = Number(current.header.value).toLocaleString(lang);\n'
-            data += '}\n'
-            data += 'current.header.unit = "' + getattr(self.unit.label, self.skin_dict['Extras']['current']['observation']) + '";\n'
-
-        data += 'current.observations = new Map();\n'
-        data += 'currentData = JSON.parse(pageData.currentData);\n'
-
-        for observation in self.skin_dict['Extras']['current']['observations']:
-            data_binding = self.skin_dict['Extras']['current']['observations'][observation].get('data_binding', current_data_binding)
-            type_value =  self.skin_dict['Extras']['current']['observations'][observation].get('type', "")
-            unit_name = self.skin_dict['Extras']['current']['observations'][observation].get('unit', "default")
-
-            if unit_name != "default":
-                observation_unit = self._get_unit_label(unit_name)
-            else:
-                observation_unit = getattr(self.unit.label, observation)
-
-            if type_value == 'rise':
-                 # todo this is a place holder and needs work
-                #set observation_value = '"' + str($getattr($almanac, $observation + 'rise')) + '";'
-                observation_unit = " "
-                #label = 'foo'
-            data += 'var observation = {};\n'
-            data += 'observation.name = "' + observation + '";\n'
-            data += 'observation.mqtt = ' + self.skin_dict['Extras']['current']['observations'][observation].get('mqtt', 'true').lower() + ';\n'
-            data += 'observation.value = currentData.' + observation + ';\n'
-            max_decimals = self.skin_dict['Extras']['current']['observations'][observation].get('max_decimals', False)
-            if max_decimals:
-                data += 'observation.value = observation.value.toFixed(' + max_decimals + ');\n'
-            data += 'if (!isNaN(observation.value)) {\n'
-            data += '    observation.value = Number(observation.value).toLocaleString(lang);\n'
-            data += '}\n'
-            data += 'observation.unit = "' + observation_unit + '";\n'
-            data += 'observation.maxDecimals = ' + self.skin_dict['Extras']['current']['observations'][observation].get('max_decimals', 'null') +';\n'
-            data += 'observation.modalLabel = null;\n'
-            if 'modal' in to_list(self.skin_dict['Extras']['current']['observations'][observation].get('display', ['page', 'modal'])):
-                data += 'observation.modalLabel = observation.name + "_value_modal";\n'
-            data += 'current.observations.set("' + observation + '", observation);\n'
-            data += '\n'
-
-        return data
-
-    def _gen_mqtt(self, page):
-        data = ''
-
-        ## Create an array of mqtt observations in charts
-        data += 'mqttData2 = {};\n'
-        data += 'mqttData = {};\n'
-
-        page_series_type = self.skin_dict['Extras']['page_definition'].get('series_type', 'single')
-        for chart in self.skin_dict['Extras']['chart_definitions']:
-            if chart in self.skin_dict['Extras']['pages'][page]:
-                chart_series_type = self.skin_dict['Extras']['pages'][page][chart].get('series_type', page_series_type)
-                if chart_series_type == 'mqtt':
-                    for observation in self.skin_dict['Extras']['chart_definitions'][chart]['series']:
-                        data += "mqttData2['" + observation + "'] = {};\n"
-                        data += "mqttData2['" + observation + "'] = [];\n"
-                        data+= "mqttData." + observation + "= [];\n"
-
-        # ToDo: optimize - only do if page uses MQTT
-        if self.skin_dict['Extras'].get('mqtt', False):
-            data += "topics = new Map();\n"
-            for topic in self.skin_dict['Extras']['mqtt'].get('topics', []):
-                data += "topics.set('" + topic + "', new Map());\n"
-                for field in self.skin_dict['Extras']['mqtt']['topics'][topic].get('fields', []):
-                    fieldname = self.skin_dict['Extras']['mqtt']['topics'][topic]['fields'][field]['name']
-                    data += "topics.get('" + topic + "').set('" + fieldname + "', '" + field + "');\n"
-
-        return data
-
     # Proof of concept - wind rose
     # Create data for wind rose chart
     def _gen_windrose(self, page_data_binding, interval_name, page_definition_name, interval_long_name):
@@ -1536,8 +1306,7 @@ class JAS(SearchList):
         interval_end_seconds_global = self._get_timespan_binder(interval_name, page_data_binding).end.raw
 
         if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
-            avg_value, max_value, wind_directions, wind_range_legend = self._get_wind_compass(data_binding=page_data_binding, start_time=interval_start_seconds_global, end_time=interval_end_seconds_global) # need to match function signature pylint: disable=unused-variable
-            data += "  pageData.windRangeLegend = JSON.stringify(" + wind_range_legend + ");\n"
+            avg_value, max_value, wind_directions = self._get_wind_compass(data_binding=page_data_binding, start_time=interval_start_seconds_global, end_time=interval_end_seconds_global) # need to match function signature pylint: disable=unused-variable
             i = 0
             for wind in wind_directions:
                 data += "  pageData." + interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + " = JSON.stringify(" +  str(wind) +  ");\n"
@@ -1545,65 +1314,16 @@ class JAS(SearchList):
 
         return data
 
-    def _gen_data(self, filename, page, interval, interval_type, page_definition_name, interval_long_name):
-        start_time = time.time()
-
+    def _gen_data(self, interval, page_definition_name, interval_long_name):
         skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
         page_data_binding = self.skin_dict['Extras']['pages'][page_definition_name].get('data_binding', skin_data_binding)
 
         data = ""
 
-        # Define the 'aggegate' objects to hold the data
-        # For example: last7days_min = {}, last7days_max = {}
-        for aggregate_type in self.aggregate_types:
-            data += interval_long_name + aggregate_type + " = {};\n"
-
-        data += "minMaxObs = [];\n"
-        data += "thisDateObsList = [];\n"
-        data += 'var current = {};\n'
-
-        data += "var " + interval_long_name + "startDate;\n"
-        data += "var " + interval_long_name + "endDate;\n"
-        data += "var " + interval_long_name + "startTimestamp;\n"
-        data += "var " + interval_long_name + "endTimestamp;\n"
-
-        data += "var updateDate;\n"
-
-        data += "var windRangeLegend;"
-
-        data += "\n"
-        data += 'function getData(pageDataString) {\n'
-        data += "pageData = JSON.parse(pageDataString);\n"
-
-        data += interval_long_name + "startDate = moment(pageData.startDate);\n"
-        data += interval_long_name + "endDate = moment(pageData.endDate);\n"
-        data += interval_long_name + "startTimestamp = pageData.startTimestamp;\n"
-        data += interval_long_name + "endTimestamp = pageData.endTimeStamp;\n"
-
-        data += self._gen_aggregate_objects2(interval, page_definition_name, interval_long_name)
-
-        data += self._gen_aggregate_cache(interval_long_name)
-        data += "\n"
-
-        if 'thisdate' in self.skin_dict['Extras']['pages'][page]:
-            data += self._gen_this_date(skin_data_binding, interval_long_name)
-
-        data += "\n"
-        if 'minmax' in self.skin_dict['Extras']['pages'][page]:
-            data += self._gen_min_max(skin_data_binding, interval_long_name)
-
-        data += "\n"
-        if self.skin_dict['Extras']['pages'][page_definition_name].get('current', None) is not None:
-            data += self._gen_current(skin_data_binding, interval)
-
-        data += "\n"
-        data += self._gen_mqtt(page)
-
         interval_start_seconds_global = self._get_timespan_binder(interval, page_data_binding).start.raw
         interval_end_seconds_global = self._get_timespan_binder(interval, page_data_binding).end.raw
         if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
-            avg_value, max_value, wind_directions, wind_range_legend = self._get_wind_compass(data_binding=page_data_binding, start_time=interval_start_seconds_global, end_time=interval_end_seconds_global) # need to match function signature pylint: disable=unused-variable
-            data += "windRangeLegend = pageData.windRangeLegend;\n"
+            avg_value, max_value, wind_directions = self._get_wind_compass(data_binding=page_data_binding, start_time=interval_start_seconds_global, end_time=interval_end_seconds_global) # need to match function signature pylint: disable=unused-variable
             i = 0
             for wind in wind_directions:
                 data += interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + " = JSON.parse(pageData." + interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + ");\n"
@@ -1612,10 +1332,6 @@ class JAS(SearchList):
         data += '}\n'
         data += '// the end\n'
 
-        elapsed_time = time.time() - start_time
-        log_msg = "Generated " + self.html_root + "/" + filename + " in " + str(elapsed_time)
-        if to_bool(self.skin_dict['Extras'].get('log_times', True)):
-            logdbg(log_msg)
         return data
 
     def _gen_js(self, filename, page, page_name, year, month, interval_long_name):
@@ -1920,6 +1636,9 @@ class JAS(SearchList):
         data += 'document.addEventListener("DOMContentLoaded", function (event) {\n'
         data += '    logTime("DOMContentLoaded  Start");\n'
         data += '    setupPage();\n'
+        data += '    logTime("setupPage");\n'
+        data += '    setupCharts();\n'
+        data += '    logTime("setupCharts");\n'
         data += '    DOMLoaded = true;\n'
         data += '    setIframeSrc();\n'
         data += '    if (dataLoaded) {\n'
@@ -1949,9 +1668,6 @@ class JAS(SearchList):
         data +='        updateCurrentObservations();\n'
         data += '    }\n'
         data += '    logTime("updateCurrentObservations");\n'
-        # This is only here because the windrose legend is retrieved with data that changes. This should be changed
-        data += '    setupCharts();\n' # ToDo: manage wind rose legend better
-        data += '    logTime("setupCharts");\n'
         data += '    updateCharts();\n'
         data += '    logTime("updateCharts");\n'
         data += '    logTime("updateData  end");\n'
