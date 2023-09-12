@@ -1636,6 +1636,9 @@ class JAS(SearchList):
         data += 'document.addEventListener("DOMContentLoaded", function (event) {\n'
         data += '    logTime("DOMContentLoaded  Start");\n'
         data += '    setupPage();\n'
+        data += '    logTime("setupPage");\n'
+        data += '    setupCharts();\n'
+        data += '    logTime("setupCharts");\n'
         data += '    DOMLoaded = true;\n'
         data += '    setIframeSrc();\n'
         data += '    if (dataLoaded) {\n'
@@ -1665,9 +1668,6 @@ class JAS(SearchList):
         data +='        updateCurrentObservations();\n'
         data += '    }\n'
         data += '    logTime("updateCurrentObservations");\n'
-        # This is only here because the windrose legend is retrieved with data that changes. This should be changed
-        data += '    setupCharts();\n' # ToDo: manage wind rose legend better
-        data += '    logTime("setupCharts");\n'
         data += '    updateCharts();\n'
         data += '    logTime("updateCharts");\n'
         data += '    logTime("updateData  end");\n'
