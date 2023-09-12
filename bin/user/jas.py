@@ -213,6 +213,17 @@ class JAS(SearchList):
         current_filename = 'current.json'
         current_endpoint = 'https://api.aerisapi.com/observations/'
 
+        self.wind_ranges = {}
+        self.wind_ranges['mile_per_hour'] = [1, 4, 8, 13, 19, 25, 32]
+        self.wind_ranges['mile_per_hour2'] = [1, 4, 8, 13, 19, 25, 32]
+        self.wind_ranges['km_per_hour'] = [.5, 6, 12, 20, 29, 39, 50]
+        self.wind_ranges['km_per_hour2'] = [.5, 6, 12, 20, 29, 39, 50]
+        self.wind_ranges['meter_per_second'] = [1, 1.6, 3.4, 5.5, 8, 10.8, 13.9]
+        self.wind_ranges['meter_per_second2'] = [1, 1.6, 3.4, 5.5, 8, 10.8, 13.9]
+        self.wind_ranges['knot'] = [1, 4, 7, 11, 17, 22, 28]
+        self.wind_ranges['knot2'] = [1, 4, 7, 11, 17, 22, 28]
+        self.wind_ranges_count = 7
+
         self.ordinate_names = copy.deepcopy(self.generator.formatter.ordinate_names)
         del self.ordinate_names[-1]
 
@@ -449,17 +460,6 @@ class JAS(SearchList):
 
         data_timespan = TimeSpan(start_ts, end_ts)
 
-        wind_ranges = {}
-        wind_ranges['mile_per_hour'] = [1, 4, 8, 13, 19, 25, 32]
-        wind_ranges['mile_per_hour2'] = [1, 4, 8, 13, 19, 25, 32]
-        wind_ranges['km_per_hour'] = [.5, 6, 12, 20, 29, 39, 50]
-        wind_ranges['km_per_hour2'] = [.5, 6, 12, 20, 29, 39, 50]
-        wind_ranges['meter_per_second'] = [1, 1.6, 3.4, 5.5, 8, 10.8, 13.9]
-        wind_ranges['meter_per_second2'] = [1, 1.6, 3.4, 5.5, 8, 10.8, 13.9]
-        wind_ranges['knot'] = [1, 4, 7, 11, 17, 22, 28]
-        wind_ranges['knot2'] = [1, 4, 7, 11, 17, 22, 28]
-        wind_ranges_count = 7
-
         # current day calculation
         #day_ts = int(timespan.stop - timespan.stop % age)
 
@@ -483,7 +483,7 @@ class JAS(SearchList):
             wind_data[ordinate_name]['max'] = 0
             wind_data[ordinate_name]['speed_data'] = []
             j = 0
-            while j < wind_ranges_count:
+            while j < self.wind_ranges_count:
                 wind_data[ordinate_name]['speed_data'].append(0)
                 j += 1
             i += 1
@@ -502,7 +502,7 @@ class JAS(SearchList):
                     wind_data[ordinate_name]['max'] = wind_gust_data[0][i]
 
                 j = 0
-                for wind_range in wind_ranges[wind_unit]:
+                for wind_range in self.wind_ranges[wind_unit]:
                     if wind_speed < wind_range:
                         wind_data[ordinate_name]['speed_data'][j] += 1
                         break
@@ -522,7 +522,7 @@ class JAS(SearchList):
         wind_compass_max = []
         wind_compass_speeds = []
         j = 0
-        while j < wind_ranges_count:
+        while j < self.wind_ranges_count:
             wind_compass_speeds.append([])
             j += 1
 
@@ -535,17 +535,20 @@ class JAS(SearchList):
                 wind_compass_speeds[i].append(wind_x)
                 i += 1
 
+        return wind_compass_avg, wind_compass_max, wind_compass_speeds
+
+    def _get_wind_range_legend(self):
         wind_speed_unit = self.skin_dict["Units"]["Groups"]["group_speed"]
         wind_speed_unit_label = self.skin_dict["Units"]["Labels"][wind_speed_unit]
-        low_range = wind_ranges[wind_speed_unit][0]
-        high_range = wind_ranges[wind_speed_unit][len(wind_ranges[wind_speed_unit]) - 1]
+        low_range = self.wind_ranges[wind_speed_unit][0]
+        high_range = self.wind_ranges[wind_speed_unit][len(self.wind_ranges[wind_speed_unit]) - 1]
         wind_range_legend = F"['<{low_range} {wind_speed_unit_label}', "
-        for high_range in wind_ranges[wind_speed_unit][1:]:
+        for high_range in self.wind_ranges[wind_speed_unit][1:]:
             wind_range_legend += F"'{low_range}-{high_range} {wind_speed_unit_label}', "
             low_range = high_range
-        wind_range_legend += F"'>{high_range} {wind_speed_unit_label}']"
 
-        return wind_compass_avg, wind_compass_max, wind_compass_speeds, wind_range_legend
+        wind_range_legend += F"'>{high_range} {wind_speed_unit_label}']"
+        return wind_range_legend
 
     def _get_observation_text(self, coded_weather):
         cloud_codes = ["CL", "FW", "SC", "BK", "OV",]
@@ -1001,6 +1004,9 @@ class JAS(SearchList):
         chart_final += 'utc_offset = ' + str(self.utc_offset) + ';\n'
         chart_final += 'function setupCharts() {\n'
         chart_final += "ordinateNames = ['" + "', '".join(self.ordinate_names) + "'];\n"
+        if self.skin_dict['Extras']['pages'][page].get('windRose', None) is not None:
+            chart_final += "windRangeLegend = " + self._get_wind_range_legend() + ";\n"
+
         chart2 = ""
         charts = self.skin_dict['Extras']['chart_definitions']
         for chart in self.skin_dict['Extras']['pages'][page]:
@@ -1300,8 +1306,7 @@ class JAS(SearchList):
         interval_end_seconds_global = self._get_timespan_binder(interval_name, page_data_binding).end.raw
 
         if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
-            avg_value, max_value, wind_directions, wind_range_legend = self._get_wind_compass(data_binding=page_data_binding, start_time=interval_start_seconds_global, end_time=interval_end_seconds_global) # need to match function signature pylint: disable=unused-variable
-            data += "  pageData.windRangeLegend = JSON.stringify(" + wind_range_legend + ");\n"
+            avg_value, max_value, wind_directions = self._get_wind_compass(data_binding=page_data_binding, start_time=interval_start_seconds_global, end_time=interval_end_seconds_global) # need to match function signature pylint: disable=unused-variable
             i = 0
             for wind in wind_directions:
                 data += "  pageData." + interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + " = JSON.stringify(" +  str(wind) +  ");\n"
@@ -1318,8 +1323,7 @@ class JAS(SearchList):
         interval_start_seconds_global = self._get_timespan_binder(interval, page_data_binding).start.raw
         interval_end_seconds_global = self._get_timespan_binder(interval, page_data_binding).end.raw
         if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
-            avg_value, max_value, wind_directions, wind_range_legend = self._get_wind_compass(data_binding=page_data_binding, start_time=interval_start_seconds_global, end_time=interval_end_seconds_global) # need to match function signature pylint: disable=unused-variable
-            data += "windRangeLegend = pageData.windRangeLegend;\n"
+            avg_value, max_value, wind_directions = self._get_wind_compass(data_binding=page_data_binding, start_time=interval_start_seconds_global, end_time=interval_end_seconds_global) # need to match function signature pylint: disable=unused-variable
             i = 0
             for wind in wind_directions:
                 data += interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + " = JSON.parse(pageData." + interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + ");\n"

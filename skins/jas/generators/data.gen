@@ -23,7 +23,6 @@ var current = {};
 #echo "var " + $interval_long_name_global + "endTimestamp;\n"
 
 var updateDate;
-var windRangeLegend;
 
 function getData(pageDataString) {
     pageData = JSON.parse(pageDataString);
