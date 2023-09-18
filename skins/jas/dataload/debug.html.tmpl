@@ -3,6 +3,8 @@
 
 #from weeutil.weeutil import to_bool, to_list
 
+#set global interval_long_name_global = $getVar("$Extras.pages.debug.simulate_interval", 'day') +'_'
+
 #set momentjs_version = $getVar("$Extras.momentjs_version", "latest")
 #set momentjs_minified = ""
 #if $getVar("$Extras.momentjs_minified", True)
@@ -20,5 +22,8 @@
     <head>
         #echo '<script src="https://cdn.jsdelivr.net/npm/moment@' + $momentjs_version + '/moment' + $momentjs_minified + '.js"></script>\n'
         #echo '<script src="' + $page +  '.js' + $query_string + '"></script>\n'
+        #include 'dataload/eventlistener.inc'
     </head>
 </html>
+
+#set global interval_long_name_global = None

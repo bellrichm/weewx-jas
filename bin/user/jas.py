@@ -312,6 +312,7 @@ class JAS(SearchList):
                                  'logdbg': logdbg,
                                  'loginf': loginf,
                                  'logerr': logerr,
+                                 'multiSeries': self._get_multi_series,
                                  'observations': self.observations,
                                  'observationLabels': self._get_observation_labels,
                                  'ordinateNames': self.ordinate_names,
@@ -1069,14 +1070,10 @@ class JAS(SearchList):
                         aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
                         obs_data_binding = chart_def['series'][obs].get('weewx', {}).get('data_binding', chart_data_binding)
                         chart2 += "    {name: " + chart_def['series'][obs].get('name', 'getLabel(' + "'" + obs + "')") + ",\n"
-                        chart2 += "     data: [\n"
-                        (start_year, end_year) = self._get_range(self.skin_dict['Extras']['pages'][page].get('start', None),
-                                                                 self.skin_dict['Extras']['pages'][page].get('end', None),
-                                                                 chart_data_binding)
-                        for year in range(start_year, end_year):
-                            chart2 += "            ...year" + str(year) + "_" + aggregate_type \
-                                      + "." + chart_def['series'][obs]['weewx']['observation'] + "_"  + obs_data_binding + ",\n"
-                        chart2 += "          ]},\n"
+                        chart2 += "     data: \n"
+                        chart2 += "multi_" + aggregate_type \
+                              + "_" + chart_def['series'][obs]['weewx']['observation'] + "_"  + obs_data_binding + " \n"
+                        chart2 += "          },\n"
                     chart2 += "]};\n"
                     chart2 += "pageChart.option = series_option;\n"
                     chart2 += "pageChart.def = option;\n"
@@ -1130,6 +1127,67 @@ class JAS(SearchList):
             logdbg(log_msg)
         return chart_final
 
+    def _get_multi_series(self, filename, page, interval, page_name):
+        #start_time = time.time()
+        chart1 = ""
+        chart2 = "function updateMultiYearData() {\n"
+        skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
+        charts = self.skin_dict['Extras']['chart_definitions']
+        for chart in self.skin_dict['Extras']['pages'][page]:
+            if chart in charts.sections:
+                chart_data_binding = charts[chart].get('weewx', {}).get('data_binding', skin_data_binding)
+                chart_def = copy.deepcopy(self.chart_defs[chart])
+                for obs in chart_def['series']:
+                    aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
+                    obs_data_binding = chart_def['series'][obs].get('weewx', {}).get('data_binding', chart_data_binding)
+                    (start_year, end_year) = self._get_range(self.skin_dict['Extras']['pages'][page].get('start', None),
+                                                                self.skin_dict['Extras']['pages'][page].get('end', None),
+                                                                chart_data_binding)
+                    chart1 += "var multi_" + aggregate_type \
+                              + "_" + chart_def['series'][obs]['weewx']['observation'] + "_"  + obs_data_binding + ";\n"
+                    chart2 += "multi_" + aggregate_type \
+                              + "_" + chart_def['series'][obs]['weewx']['observation'] + "_"  + obs_data_binding + " = [\n"
+                    for year in range(start_year, end_year):
+                        chart2 += "    ...year" + str(year) + "_" + aggregate_type \
+                                    + "." + chart_def['series'][obs]['weewx']['observation'] + "_"  + obs_data_binding + ",\n"
+                    chart2 += "];\n"
+
+        chart2 += "}\n"
+        chart1 += chart2
+        return chart1
+
+    def _get_comparison_series(self, filename, page, interval, page_name):
+        print("start")
+
+        #start_time = time.time()
+        chart2 = ""
+        skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
+
+        charts = self.skin_dict['Extras']['chart_definitions']
+        for chart in self.skin_dict['Extras']['pages'][page]:
+            if chart in charts.sections:        
+                chart_data_binding = charts[chart].get('weewx', {}).get('data_binding', skin_data_binding)
+
+                chart_def = copy.deepcopy(self.chart_defs[chart])
+                chart2 += "series_option = {\n"
+                chart2 += "  series: [\n"
+                obs = next(iter(chart_def['series']))
+                obs_data_binding = chart_def['series'][obs].get('weewx', {}).get('data_binding', chart_data_binding)
+                aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
+                (start_year, end_year) = self._get_range(self.skin_dict['Extras']['pages'][page].get('start', None),
+                                                            self.skin_dict['Extras']['pages'][page].get('end', None),
+                                                            chart_data_binding)
+                for year in range(start_year, end_year):
+                    chart2 += "    {name: '" + str(year) + "',\n"
+                    chart2 += "     data: year" + str(year) + "_" + aggregate_type \
+                            + "." + obs + "_"  + obs_data_binding \
+                            + ".map(arr => [moment.unix(arr[0] / 1000).utcOffset(" + str(self.utc_offset) \
+                            + ").format(dateTimeFormat[lang].chart.yearToYearXaxis), arr[1]]),\n" \
+                            + "},\n"
+                chart2 += "]};\n"
+
+        print("end")
+
     def _gen_data_load(self, filename, page, interval, interval_type, page_definition_name, interval_long_name):
         start_time = time.time()
 
@@ -1138,7 +1196,7 @@ class JAS(SearchList):
         data = ''
         data += '// the start\n'
         data += "pageData = {};\n"
-        data += 'function dataLoad() {\n'
+        data += 'function ' + interval_long_name + 'dataLoad() {\n'
 
         data += self._gen_data_load2(interval, interval_type, page_definition_name, skin_data_binding, page_data_binding)
 
@@ -1155,15 +1213,6 @@ class JAS(SearchList):
 
         data += "}\n"
         data += "\n"
-
-        data += 'window.addEventListener("load", function (event) {\n'
-        data += '    dataLoad();\n'
-        data += "message = {};\n"
-        data += "message.kind = 'dataLoaded';\n"
-        data +=  "message.message = JSON.stringify(pageData);\n"
-        data += "window.parent.postMessage(message, '*');\n"
-        data += '    })\n'
-
 
         elapsed_time = time.time() - start_time
         log_msg = "Generated " + self.html_root + "/" + filename + " in " + str(elapsed_time)
@@ -1637,11 +1686,13 @@ class JAS(SearchList):
         data += '    logTime("DOMContentLoaded  Start");\n'
         data += '    setupPage();\n'
         data += '    logTime("setupPage");\n'
-        data += '    setupCharts();\n'
+        data += '    //setupCharts();\n'
         data += '    logTime("setupCharts");\n'
         data += '    DOMLoaded = true;\n'
         data += '    setIframeSrc();\n'
         data += '    if (dataLoaded) {\n'
+        data += '        setupCharts();\n'
+        data += '        //logTime("setupCharts");\n'
         data += '        pageLoaded = true;\n'
         data += '        updateData();\n'
         data += '    }\n'
@@ -2043,11 +2094,22 @@ function handleScroll(message) {
 // Handle event messages of type "dataLoaded".
 function handleDataLoaded(message) {
     logTime("handleDataLoaded  Start");
-    getData(message);
-    logTime("getData");
+'''
+        data += javascript
+
+        series_type = self.skin_dict['Extras']['page_definition'][page].get('series_type', 'single')
+        if series_type == 'single':
+            data += 'getData' + interval_long_name + '(message);\n'
+        elif series_type == 'multiple':
+            data += 'getDataMultiyear(message);\n'
+            data += "updateMultiYearData();\n"
+        data += 'logTime("getData");\n'
+
+        javascript = '''    
     dataLoaded = true;\n
     if (DOMLoaded) {
         pageLoaded = true;
+        setupCharts();
         updateData();
     logTime("updateData");
     }
