@@ -7,7 +7,7 @@
 #set $series_type = $getVar('$Extras.page_definition.' + $page + '.series_type', 'single')
 #if $series_type == 'single'    
     #echo '        ' + $interval_long_name_global + 'dataLoad();\n'
-#else if $series_type == 'multiple'
+#else if $series_type == 'multiple' or $series_type == 'comparison'
     #set $data_binding = $getVar('Extras.pages.' + $page + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
     #set (year_start,year_end) = $getRange($getVar('$Extras.pages.' + $page + '.start', None), $getVar('$Extras.pages.' + $page + '.end', None), $data_binding)
     #for $year in range($year_start, $year_end)

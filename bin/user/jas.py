@@ -292,6 +292,7 @@ class JAS(SearchList):
         self.timespan = timespan
 
         search_list_extension = {'aggregate_types': self.aggregate_types,
+                                 'comparisonSeries': self._get_comparison_series,
                                  'current_observation': self.data_current,
                                  'dateTimeFormats': self._get_date_time_formats,
                                  'data_binding': self.data_binding,
@@ -1088,10 +1089,8 @@ class JAS(SearchList):
                                                              chart_data_binding)
                     for year in range(start_year, end_year):
                         chart2 += "    {name: '" + str(year) + "',\n"
-                        chart2 += "     data: year" + str(year) + "_" + aggregate_type \
-                                + "." + obs + "_"  + obs_data_binding \
-                                + ".map(arr => [moment.unix(arr[0] / 1000).utcOffset(" + str(self.utc_offset) \
-                                + ").format(dateTimeFormat[lang].chart.yearToYearXaxis), arr[1]]),\n" \
+                        chart2 += "     data: comparison_" + str(year) + "_" + aggregate_type \
+                                + "_" + obs + "_"  + obs_data_binding + ",\n" \
                                 + "},\n"
                     chart2 += "]};\n"
                     chart2 += "pageChart.option = series_option;\n"
@@ -1157,36 +1156,36 @@ class JAS(SearchList):
         return chart1
 
     def _get_comparison_series(self, filename, page, interval, page_name):
-        print("start")
-
         #start_time = time.time()
-        chart2 = ""
+        chart1 = ""
+        chart2 = "function updateComparisonData() {\n"
         skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
-
         charts = self.skin_dict['Extras']['chart_definitions']
-        for chart in self.skin_dict['Extras']['pages'][page]:
-            if chart in charts.sections:        
-                chart_data_binding = charts[chart].get('weewx', {}).get('data_binding', skin_data_binding)
 
+        for chart in self.skin_dict['Extras']['pages'][page]:
+            if chart in charts.sections:
+                chart_data_binding = charts[chart].get('weewx', {}).get('data_binding', skin_data_binding)
                 chart_def = copy.deepcopy(self.chart_defs[chart])
-                chart2 += "series_option = {\n"
-                chart2 += "  series: [\n"
                 obs = next(iter(chart_def['series']))
                 obs_data_binding = chart_def['series'][obs].get('weewx', {}).get('data_binding', chart_data_binding)
                 aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
                 (start_year, end_year) = self._get_range(self.skin_dict['Extras']['pages'][page].get('start', None),
                                                             self.skin_dict['Extras']['pages'][page].get('end', None),
                                                             chart_data_binding)
+
                 for year in range(start_year, end_year):
-                    chart2 += "    {name: '" + str(year) + "',\n"
-                    chart2 += "     data: year" + str(year) + "_" + aggregate_type \
+                    chart1 += "var comparison_" +  str(year) + "_" + aggregate_type \
+                            + "_" + obs + "_"  + obs_data_binding + ";\n"
+                    chart2 += "    comparison_" +  str(year) + "_" + aggregate_type \
+                            + "_" + obs + "_"  + obs_data_binding + " = "
+                    chart2 += " year" + str(year) + "_" + aggregate_type \
                             + "." + obs + "_"  + obs_data_binding \
                             + ".map(arr => [moment.unix(arr[0] / 1000).utcOffset(" + str(self.utc_offset) \
-                            + ").format(dateTimeFormat[lang].chart.yearToYearXaxis), arr[1]]),\n" \
-                            + "},\n"
-                chart2 += "]};\n"
+                            + ").format(dateTimeFormat[lang].chart.yearToYearXaxis), arr[1]]);\n"
 
-        print("end")
+        chart2 += "}\n"
+        chart1 += chart2
+        return chart1
 
     def _gen_data_load(self, filename, page, interval, interval_type, page_definition_name, interval_long_name):
         start_time = time.time()
@@ -2103,9 +2102,12 @@ function handleDataLoaded(message) {
         elif series_type == 'multiple':
             data += 'getDataMultiyear(message);\n'
             data += "updateMultiYearData();\n"
+        elif series_type == 'comparison':
+            data += 'getDataComparison(message);\n'
+            data += "updateComparisonData();\n"            
         data += 'logTime("getData");\n'
 
-        javascript = '''    
+        javascript = '''
     dataLoaded = true;\n
     if (DOMLoaded) {
         pageLoaded = true;
