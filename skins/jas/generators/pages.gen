@@ -77,6 +77,11 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
           #set $line = '<script src="../data/year' + str($year) + '.js' + '"></script>'
           $line
         #end for
+        #if $series_type == 'multiple'
+          #echo '    <script src="../data/multiyear.js"></script>\n'
+        #else
+          #echo '    <script src="../data/yeartoyear.js"></script>\n'
+        #end if
       #end if
 
     #set data = '<script src="../javascript/' + $page_name_global + '.js"></script>'

@@ -24,7 +24,7 @@ var current = {};
 
 var updateDate;
 
-function getData(pageDataString) {
+#echo "function getData" + $interval_long_name_global + "(pageDataString) {\n"
     pageData = JSON.parse(pageDataString);
 
 #echo "    " + $interval_long_name_global + "startDate = moment(pageData.startDate);\n"
@@ -196,10 +196,10 @@ function getData(pageDataString) {
         #echo '    observation.name = "' + observation + '";\n'
         #echo '    observation.mqtt = ' + $getVar('$Extras.current.observations.' + $observation + '.mqtt', 'true').lower() + ';\n'
         #echo '    observation.value = currentData.' + observation + ';\n'
-        #if $max_decimals
-            #echo '    observation.value = observation.value.toFixed(' + $max_decimals + ');\n'
-        #end if
         #echo '    if (!isNaN(observation.value)) {\n'
+        #if $max_decimals
+            #echo '        observation.value = Number(observation.value).toFixed(' + $max_decimals + ');\n'
+        #end if        
         #echo '        observation.value = Number(observation.value).toLocaleString(lang);\n'
         #echo '    }\n'
         #echo '    observation.unit = "' + $observation_unit + '";\n'
@@ -222,8 +222,8 @@ function getData(pageDataString) {
         #set $chart_series_type = $getVar('$Extras.pages.' + $page + '.' + chart + '.series_type', $page_series_type)
         #if $chart_series_type == 'mqtt'
             #for $observation in $getVar('$Extras.chart_definitions.' + chart + '.series')
-                #echo "    mqttData2['" + observation + "'] = {};\n"
-                ##echo "    mqttData2['" + observation + "'] = [];\n"
+                ##echo "    mqttData2['" + observation + "'] = {};\n"
+                #echo "    mqttData2['" + observation + "'] = [];\n"
                 #echo "    mqttData." + observation + "= [];\n"
             #end for
         #end if
