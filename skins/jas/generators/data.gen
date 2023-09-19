@@ -196,10 +196,10 @@ var updateDate;
         #echo '    observation.name = "' + observation + '";\n'
         #echo '    observation.mqtt = ' + $getVar('$Extras.current.observations.' + $observation + '.mqtt', 'true').lower() + ';\n'
         #echo '    observation.value = currentData.' + observation + ';\n'
-        #if $max_decimals
-            #echo '    observation.value = observation.value.toFixed(' + $max_decimals + ');\n'
-        #end if
         #echo '    if (!isNaN(observation.value)) {\n'
+        #if $max_decimals
+            #echo '        observation.value = Number(observation.value).toFixed(' + $max_decimals + ');\n'
+        #end if        
         #echo '        observation.value = Number(observation.value).toLocaleString(lang);\n'
         #echo '    }\n'
         #echo '    observation.unit = "' + $observation_unit + '";\n'

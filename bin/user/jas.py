@@ -1234,7 +1234,7 @@ class JAS(SearchList):
         data += '  pageData.updateDate = ' + str(self._get_current('dateTime', data_binding=current_data_binding, unit_name='default').raw * 1000) + ';\n'
         if self.skin_dict['Extras']['current'].get('observation', False):
             data_binding = self.skin_dict['Extras']['current'].get('header_data_binding', current_data_binding)
-            data += '  pageData.currentHeaderValue = ' + self._get_current(self.skin_dict['Extras']['current']['observation'], data_binding, 'default').format(add_label=False,localize=False) + ';\n'
+            data += '  pageData.currentHeaderValue = "' + self._get_current(self.skin_dict['Extras']['current']['observation'], data_binding, 'default').format(add_label=False,localize=False) + '";\n'
 
         data += '  var currentData = {};\n'
         for observation in self.skin_dict['Extras']['current']['observations']:
@@ -1245,14 +1245,14 @@ class JAS(SearchList):
             if type_value == 'rise':
                  # todo this is a place holder and needs work
                 #set observation_value = '"' + str($getattr($almanac, $observation + 'rise')) + '";'
-                observation_value = '"bar"'
+                observation_value = 'bar'
                 #label = 'foo'
             elif type_value == 'sum':
                 observation_value = self._get_aggregate(observation, data_binding, interval_current, type_value, unit_name, False)
             else:
                 observation_value = self._get_current(observation, data_binding, unit_name).format(add_label=False,localize=False)
 
-            data += '  currentData.' + observation + ' = ' + observation_value +';\n'
+            data += '  currentData.' + observation + ' = "' + observation_value + '";\n'
 
         data += '  pageData.currentData = JSON.stringify(currentData);'
         return data
