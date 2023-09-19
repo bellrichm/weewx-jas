@@ -2096,16 +2096,17 @@ function handleDataLoaded(message) {
 '''
         data += javascript
 
-        series_type = self.skin_dict['Extras']['page_definition'][page].get('series_type', 'single')
-        if series_type == 'single':
-            data += 'getData' + interval_long_name + '(message);\n'
-        elif series_type == 'multiple':
-            data += 'getDataMultiyear(message);\n'
-            data += "updateMultiYearData();\n"
-        elif series_type == 'comparison':
-            data += 'getDataComparison(message);\n'
-            data += "updateComparisonData();\n"            
-        data += 'logTime("getData");\n'
+        if page in self.skin_dict['Extras']['page_definition']:
+            series_type = self.skin_dict['Extras']['page_definition'][page].get('series_type', 'single')
+            if series_type == 'single':
+                data += 'getData' + interval_long_name + '(message);\n'
+            elif series_type == 'multiple':
+                data += 'getDataMultiyear(message);\n'
+                data += "updateMultiYearData();\n"
+            elif series_type == 'comparison':
+                data += 'getDataComparison(message);\n'
+                data += "updateComparisonData();\n"            
+            data += 'logTime("getData");\n'
 
         javascript = '''
     dataLoaded = true;\n
