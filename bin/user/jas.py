@@ -1703,7 +1703,6 @@ class JAS(SearchList):
 
         data += 'window.addEventListener("load", function (event) {\n'
         data += '    logTime("onLoad Start");\n'
-        data += '    setIframeSrc();\n'
         data += '    if (dataLoaded) {\n'
         data += '        pageLoaded = true;\n'
         data += '        updateData();\n'
