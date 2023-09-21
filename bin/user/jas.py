@@ -1101,8 +1101,8 @@ class JAS(SearchList):
                     chart3 += "pageChart.option = series_option;\n"
                     chart2 += "pageChart.def = option;\n"
                 else:
-                    chart2 += "series_option = {\n"
-                    chart2 += "  series: [\n"
+                    chart3 += "series_option = {\n"
+                    chart3 += "  series: [\n"
                     for obs in chart_def['series']:
                         aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
                         obs_data_binding = chart_def['series'][obs].get('weewx', {}).get('data_binding', chart_data_binding)
@@ -1110,13 +1110,13 @@ class JAS(SearchList):
                         obs_data_unit = ""
                         if unit_name is not None:
                             obs_data_unit = "_" + unit_name
-                        chart2 += "    {name: " + chart_def['series'][obs].get('name', "getLabel('" + obs + "')") + ",\n"
-                        chart2 += "    data: " \
+                        chart3 += "    {name: " + chart_def['series'][obs].get('name', "getLabel('" + obs + "')") + ",\n"
+                        chart3 += "    data: " \
                                 + interval + "_" + aggregate_type \
                                 + "." + chart_def['series'][obs]['weewx']['observation'] + "_"  + obs_data_binding + obs_data_unit \
                                 + "},\n"
-                    chart2 += "]};\n"
-                    chart2 += "pageChart.option = series_option;\n"
+                    chart3 += "]};\n"
+                    chart3 += "pageChart.option = series_option;\n"
                     chart2 += "pageChart.def = option;\n"
 
                 chart3 += "pageCharts[index].option = series_option;\n"
