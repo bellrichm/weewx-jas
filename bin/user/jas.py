@@ -1150,6 +1150,8 @@ class JAS(SearchList):
         data += '// the start\n'
         data += "pageData = {};\n"
         data += 'function ' + interval_long_name + 'dataLoad() {\n'
+        data += 'traceStart = Date.now();\n'
+        data += '  console.log("dataLoad start: " + (Date.now() - traceStart).toString());\n'
 
         data += self._gen_data_load2(interval, interval_type, page_definition_name, skin_data_binding, page_data_binding)
 
@@ -1164,6 +1166,7 @@ class JAS(SearchList):
         if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
             data += self._gen_windrose(page_data_binding, interval, page_definition_name, interval_long_name)
 
+        data += '  console.log("dataLoad end: " + (Date.now() - traceStart).toString());\n'
         data += "}\n"
         data += "\n"
 
@@ -1643,10 +1646,6 @@ class JAS(SearchList):
         data += '    logTime("setupCharts");\n'
         data += '    DOMLoaded = true;\n'
         data += '    setIframeSrc();\n'
-        data += '    if (dataLoaded) {\n'
-        data += '        pageLoaded = true;\n'
-        data += '        updateData();\n'
-        data += '    }\n'
         data += '    logTime("DOMContentLoaded  End");\n'
         data += '});\n'
         data += '\n'
@@ -1704,7 +1703,14 @@ class JAS(SearchList):
 
         data += 'window.addEventListener("load", function (event) {\n'
         data += '    logTime("onLoad Start");\n'
-        data += '     modalChart = null;\n'
+        data += '    setIframeSrc();\n'
+        data += '    if (dataLoaded) {\n'
+        data += '        pageLoaded = true;\n'
+        data += '        updateData();\n'
+        data += '    logTime("updateData");\n'
+        data += '    }\n'
+
+        data += '    modalChart = null;\n'
         data += '    var chartModal = document.getElementById("chartModal");\n'
 
         data += '    chartModal.addEventListener("shown.bs.modal", function (event) {\n'
