@@ -1645,7 +1645,6 @@ class JAS(SearchList):
         data += '    setupCharts();\n'
         data += '    logTime("setupCharts");\n'
         data += '    DOMLoaded = true;\n'
-        data += '    setIframeSrc();\n'
         data += '    logTime("DOMContentLoaded  End");\n'
         data += '});\n'
         data += '\n'
@@ -1703,6 +1702,7 @@ class JAS(SearchList):
 
         data += 'window.addEventListener("load", function (event) {\n'
         data += '    logTime("onLoad Start");\n'
+        data += '    setIframeSrc();\n'
         data += '    if (dataLoaded) {\n'
         data += '        pageLoaded = true;\n'
         data += '        updateData();\n'
