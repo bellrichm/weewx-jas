@@ -1051,7 +1051,6 @@ class JAS(SearchList):
 
                 chart2 += "pageChart = {};\n"
 
-                # start refactor here
                 if series_type == 'mqtt':
                     chart2 += 'pageChart.option = null;\n'
                     chart2 += 'pageChart.series = [];\n'
@@ -1119,11 +1118,13 @@ class JAS(SearchList):
                     chart3 += "pageChart.option = series_option;\n"
                     chart2 += "pageChart.def = option;\n"
 
-                chart3 += "pageCharts[index].option = series_option;\n"
-                chart3 += "options = pageCharts[index].chart.getOption();\n"
-                chart3 += "pageCharts[index].chart.setOption(series_option);\n"
+                chart3 += "// charts updated via mqtt will not have 'option' set\n"
+                chart3 += "if (pageChart.option) {\n"
+                chart3 += "    pageCharts[index].option = series_option;\n"
+                chart3 += "    options = pageCharts[index].chart.getOption();\n"
+                chart3 += "    pageCharts[index].chart.setOption(series_option);\n"
+                chart3 += "}\n"
                 chart3 += "index += 1;\n"
-                #end refactor here
 
                 chart2 += "pageChart.chart = " + chart + "chart;\n"
                 chart2 += "pageCharts.push(pageChart);\n"
