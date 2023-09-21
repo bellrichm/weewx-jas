@@ -17,13 +17,13 @@
 
 <!doctype html>
 <html>
-    <head>
-        #echo '    <script src="https://cdn.jsdelivr.net/npm/moment@' + $momentjs_version + '/moment' + $momentjs_minified + '.js"></script>\n'
-        #set $data_binding = $getVar('Extras.pages.' + $page + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
-        #set (year_start,year_end) = $getRange($getVar('$Extras.pages.' + $page + '.start', None), $getVar('$Extras.pages.' + $page + '.end', None), $data_binding)
-        #for $year in range($year_start, $year_end)
-          #echo '    <script src="' + str($year) + '.js' + $query_string + '"></script>\n'
-        #end for
-        #include 'dataload/eventlistener.inc'
-    </head>
+  <head>
+    #echo '    <script src="https://cdn.jsdelivr.net/npm/moment@' + $momentjs_version + '/moment' + $momentjs_minified + '.js"></script>\n'
+    #set $data_binding = $getVar('Extras.pages.' + $page + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
+    #set (year_start,year_end) = $getRange($getVar('$Extras.pages.' + $page + '.start', None), $getVar('$Extras.pages.' + $page + '.end', None), $data_binding)
+    #for $year in range($year_start, $year_end)
+      #echo '    <script src="' + str($year) + '.js' + $query_string + '"></script>\n'
+    #end for
+    #include 'dataload/eventlistener.inc'
+  </head>
 </html>

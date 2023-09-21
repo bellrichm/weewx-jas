@@ -1156,7 +1156,7 @@ class JAS(SearchList):
         data += '// the start\n'
         data += "pageData = {};\n"
         data += 'function ' + interval_long_name + 'dataLoad() {\n'
-        data += 'traceStart = Date.now();\n'
+        data += '  traceStart = Date.now();\n'
         data += '  console.log("dataLoad start: " + (Date.now() - traceStart).toString());\n'
 
         data += self._gen_data_load2(interval, interval_type, page_definition_name, skin_data_binding, page_data_binding)
@@ -1337,7 +1337,7 @@ class JAS(SearchList):
             avg_value, max_value, wind_directions = self._get_wind_compass(data_binding=page_data_binding, start_time=interval_start_seconds_global, end_time=interval_end_seconds_global) # need to match function signature pylint: disable=unused-variable
             i = 0
             for wind in wind_directions:
-                data += interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + " = JSON.parse(pageData." + interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + ");\n"
+                data += "    " + interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + " = JSON.parse(pageData." + interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + ");\n"
                 i += 1
 
         data += '}\n'

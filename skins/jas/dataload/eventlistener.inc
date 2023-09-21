@@ -1,8 +1,8 @@
 ##    Copyright (c) 2023 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
-#echo '<script>\n'
-#echo '        window.addEventListener("load", function (event) {\n'
+#echo '    <script>\n'
+#echo '      window.addEventListener("load", function (event) {\n'
 
 #set $series_type = $getVar('$Extras.page_definition.' + $page + '.series_type', 'single')
 #if $series_type == 'single'    
@@ -19,5 +19,5 @@
 #echo '        message.kind = "dataLoaded";\n'
 #echo '        message.message = JSON.stringify(pageData);\n'
 #echo '        window.parent.postMessage(message, "*");\n'
-#echo '    })\n'
-#echo '</script>\n'
+#echo '      })\n'
+#echo '    </script>\n'
