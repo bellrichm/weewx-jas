@@ -292,7 +292,6 @@ class JAS(SearchList):
         self.timespan = timespan
 
         search_list_extension = {'aggregate_types': self.aggregate_types,
-                                 'comparisonSeries': self._get_comparison_series,
                                  'current_observation': self.data_current,
                                  'dateTimeFormats': self._get_date_time_formats,
                                  'data_binding': self.data_binding,
@@ -313,7 +312,6 @@ class JAS(SearchList):
                                  'logdbg': logdbg,
                                  'loginf': loginf,
                                  'logerr': logerr,
-                                 'multiSeries': self._get_multi_series,
                                  'observations': self.observations,
                                  'observationLabels': self._get_observation_labels,
                                  'ordinateNames': self.ordinate_names,
@@ -1010,6 +1008,7 @@ class JAS(SearchList):
             chart_final += "windRangeLegend = " + self._get_wind_range_legend() + ";\n"
 
         chart2 = ""
+        chart3 = " index = 0;\n"
         charts = self.skin_dict['Extras']['chart_definitions']
         for chart in self.skin_dict['Extras']['pages'][page]:
             if chart in charts.sections:
@@ -1065,22 +1064,26 @@ class JAS(SearchList):
                             chart2 += 'seriesData.name = null;\n'
                         chart2 += 'pageChart.series.push(seriesData);\n'
                 elif series_type == 'multiple':
-                    chart2 += "series_option = {\n"
-                    chart2 += "  series: [\n"
+                    chart3 += "series_option = {\n"
+                    chart3 += "  series: [\n"
                     for obs in chart_def['series']:
                         aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
                         obs_data_binding = chart_def['series'][obs].get('weewx', {}).get('data_binding', chart_data_binding)
-                        chart2 += "    {name: " + chart_def['series'][obs].get('name', 'getLabel(' + "'" + obs + "')") + ",\n"
-                        chart2 += "     data: \n"
-                        chart2 += "multi_" + aggregate_type \
-                              + "_" + chart_def['series'][obs]['weewx']['observation'] + "_"  + obs_data_binding + " \n"
-                        chart2 += "          },\n"
-                    chart2 += "]};\n"
-                    chart2 += "pageChart.option = series_option;\n"
+                        chart3 += "    {name: " + chart_def['series'][obs].get('name', 'getLabel(' + "'" + obs + "')") + ",\n"
+                        chart3 += "     data: [\n"
+                        (start_year, end_year) = self._get_range(self.skin_dict['Extras']['pages'][page].get('start', None),
+                                                                 self.skin_dict['Extras']['pages'][page].get('end', None),
+                                                                 chart_data_binding)
+                        for year in range(start_year, end_year):
+                            chart3 += "            ...year" + str(year) + "_" + aggregate_type \
+                                      + "." + chart_def['series'][obs]['weewx']['observation'] + "_"  + obs_data_binding + ",\n"
+                        chart3 += "          ]},\n"
+                    chart3 += "]};\n"
+                    chart3 += "pageChart.option = series_option;\n"
                     chart2 += "pageChart.def = option;\n"
                 elif series_type == 'comparison':
-                    chart2 += "series_option = {\n"
-                    chart2 += "  series: [\n"
+                    chart3 += "series_option = {\n"
+                    chart3 += "  series: [\n"
                     obs = next(iter(chart_def['series']))
                     obs_data_binding = chart_def['series'][obs].get('weewx', {}).get('data_binding', chart_data_binding)
                     aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
@@ -1088,16 +1091,17 @@ class JAS(SearchList):
                                                              self.skin_dict['Extras']['pages'][page].get('end', None),
                                                              chart_data_binding)
                     for year in range(start_year, end_year):
-                        chart2 += "    {name: '" + str(year) + "',\n"
-                        chart2 += "     data: comparison_" + str(year) + "_" + aggregate_type \
-                                + "_" + obs + "_"  + obs_data_binding + ",\n" \
-                                + "},\n"
-                    chart2 += "]};\n"
-                    chart2 += "pageChart.option = series_option;\n"
+                        chart3 += "    {name: '" + str(year) + "',\n"
+                        chart3 += "     data: year" + str(year) + "_" + aggregate_type \
+                                + "." + obs + "_"  + obs_data_binding \
+                                + ".map(arr => [moment.unix(arr[0] / 1000).utcOffset(" + str(self.utc_offset) \
+                                + ").format(dateTimeFormat[lang].chart.yearToYearXaxis), arr[1]])},\n"
+                    chart3 += "]};\n"
+                    chart3 += "pageChart.option = series_option;\n"
                     chart2 += "pageChart.def = option;\n"
                 else:
-                    chart2 += "series_option = {\n"
-                    chart2 += "  series: [\n"
+                    chart3 += "series_option = {\n"
+                    chart3 += "  series: [\n"
                     for obs in chart_def['series']:
                         aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
                         obs_data_binding = chart_def['series'][obs].get('weewx', {}).get('data_binding', chart_data_binding)
@@ -1105,18 +1109,29 @@ class JAS(SearchList):
                         obs_data_unit = ""
                         if unit_name is not None:
                             obs_data_unit = "_" + unit_name
-                        chart2 += "    {name: " + chart_def['series'][obs].get('name', "getLabel('" + obs + "')") + ",\n"
-                        chart2 += "    data: " \
+                        chart3 += "    {name: " + chart_def['series'][obs].get('name', "getLabel('" + obs + "')") + ",\n"
+                        chart3 += "    data: " \
                                 + interval + "_" + aggregate_type \
                                 + "." + chart_def['series'][obs]['weewx']['observation'] + "_"  + obs_data_binding + obs_data_unit \
                                 + "},\n"
-                    chart2 += "]};\n"
-                    chart2 += "pageChart.option = series_option;\n"
+                    chart3 += "]};\n"
+                    chart3 += "pageChart.option = series_option;\n"
                     chart2 += "pageChart.def = option;\n"
+
+                chart3 += "// charts updated via mqtt will not have 'option' set\n"
+                chart3 += "if (pageChart.option) {\n"
+                chart3 += "    pageCharts[index].option = series_option;\n"
+                chart3 += "    options = pageCharts[index].chart.getOption();\n"
+                chart3 += "    pageCharts[index].chart.setOption(series_option);\n"
+                chart3 += "}\n"
+                chart3 += "index += 1;\n"
 
                 chart2 += "pageChart.chart = " + chart + "chart;\n"
                 chart2 += "pageCharts.push(pageChart);\n"
 
+        chart2 += "}\n"
+        chart2 += "function updateChartData() {\n"
+        chart2 += chart3
         chart2 += "}\n"
         chart_final += chart2
 
@@ -1125,67 +1140,6 @@ class JAS(SearchList):
         if to_bool(self.skin_dict['Extras'].get('log_times', True)):
             logdbg(log_msg)
         return chart_final
-
-    def _get_multi_series(self, filename, page, interval, page_name):
-        #start_time = time.time()
-        chart1 = ""
-        chart2 = "function updateMultiYearData() {\n"
-        skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
-        charts = self.skin_dict['Extras']['chart_definitions']
-        for chart in self.skin_dict['Extras']['pages'][page]:
-            if chart in charts.sections:
-                chart_data_binding = charts[chart].get('weewx', {}).get('data_binding', skin_data_binding)
-                chart_def = copy.deepcopy(self.chart_defs[chart])
-                for obs in chart_def['series']:
-                    aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
-                    obs_data_binding = chart_def['series'][obs].get('weewx', {}).get('data_binding', chart_data_binding)
-                    (start_year, end_year) = self._get_range(self.skin_dict['Extras']['pages'][page].get('start', None),
-                                                                self.skin_dict['Extras']['pages'][page].get('end', None),
-                                                                chart_data_binding)
-                    chart1 += "var multi_" + aggregate_type \
-                              + "_" + chart_def['series'][obs]['weewx']['observation'] + "_"  + obs_data_binding + ";\n"
-                    chart2 += "multi_" + aggregate_type \
-                              + "_" + chart_def['series'][obs]['weewx']['observation'] + "_"  + obs_data_binding + " = [\n"
-                    for year in range(start_year, end_year):
-                        chart2 += "    ...year" + str(year) + "_" + aggregate_type \
-                                    + "." + chart_def['series'][obs]['weewx']['observation'] + "_"  + obs_data_binding + ",\n"
-                    chart2 += "];\n"
-
-        chart2 += "}\n"
-        chart1 += chart2
-        return chart1
-
-    def _get_comparison_series(self, filename, page, interval, page_name):
-        #start_time = time.time()
-        chart1 = ""
-        chart2 = "function updateComparisonData() {\n"
-        skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
-        charts = self.skin_dict['Extras']['chart_definitions']
-
-        for chart in self.skin_dict['Extras']['pages'][page]:
-            if chart in charts.sections:
-                chart_data_binding = charts[chart].get('weewx', {}).get('data_binding', skin_data_binding)
-                chart_def = copy.deepcopy(self.chart_defs[chart])
-                obs = next(iter(chart_def['series']))
-                obs_data_binding = chart_def['series'][obs].get('weewx', {}).get('data_binding', chart_data_binding)
-                aggregate_type = chart_def['series'][obs]['weewx']['aggregate_type']
-                (start_year, end_year) = self._get_range(self.skin_dict['Extras']['pages'][page].get('start', None),
-                                                            self.skin_dict['Extras']['pages'][page].get('end', None),
-                                                            chart_data_binding)
-
-                for year in range(start_year, end_year):
-                    chart1 += "var comparison_" +  str(year) + "_" + aggregate_type \
-                            + "_" + obs + "_"  + obs_data_binding + ";\n"
-                    chart2 += "    comparison_" +  str(year) + "_" + aggregate_type \
-                            + "_" + obs + "_"  + obs_data_binding + " = "
-                    chart2 += " year" + str(year) + "_" + aggregate_type \
-                            + "." + obs + "_"  + obs_data_binding \
-                            + ".map(arr => [moment.unix(arr[0] / 1000).utcOffset(" + str(self.utc_offset) \
-                            + ").format(dateTimeFormat[lang].chart.yearToYearXaxis), arr[1]]);\n"
-
-        chart2 += "}\n"
-        chart1 += chart2
-        return chart1
 
     def _gen_data_load(self, filename, page, interval, interval_type, page_definition_name, interval_long_name):
         start_time = time.time()
@@ -1685,13 +1639,11 @@ class JAS(SearchList):
         data += '    logTime("DOMContentLoaded  Start");\n'
         data += '    setupPage();\n'
         data += '    logTime("setupPage");\n'
-        data += '    //setupCharts();\n'
+        data += '    setupCharts();\n'
         data += '    logTime("setupCharts");\n'
         data += '    DOMLoaded = true;\n'
         data += '    setIframeSrc();\n'
         data += '    if (dataLoaded) {\n'
-        data += '        setupCharts();\n'
-        data += '        //logTime("setupCharts");\n'
         data += '        pageLoaded = true;\n'
         data += '        updateData();\n'
         data += '    }\n'
@@ -1718,8 +1670,8 @@ class JAS(SearchList):
         data +='        updateCurrentObservations();\n'
         data += '    }\n'
         data += '    logTime("updateCurrentObservations");\n'
-        data += '    updateCharts();\n'
-        data += '    logTime("updateCharts");\n'
+        data += '    updateChartData();\n'
+        data += '    logTime("updateChartData");\n'
         data += '    logTime("updateData  end");\n'
         data +='\n'
         data += '}\n'
@@ -1881,19 +1833,6 @@ updatelogLevel(logLevel);
 // ToDo: make a dictionary of dictionaries
 var pageCharts = [];
 var pageIndex = {};
-
-// Update the chart data
-function updateCharts() {
-    currTime = Date.now();
-    startTime = currTime
-    for (var index in pageCharts) {
-        if (pageCharts[index].option) {
-            pageCharts[index].chart.setOption(pageCharts[index].option);
-        }
-        prevTime = currTime;
-        currTime = Date.now();
-    }
-}
 
 // Ensure that the height of charts is consistent ratio of the width.
 function refreshSizes() {
@@ -2102,17 +2041,14 @@ function handleDataLoaded(message) {
                 data += 'getData' + interval_long_name + '(message);\n'
             elif series_type == 'multiple':
                 data += 'getDataMultiyear(message);\n'
-                data += "updateMultiYearData();\n"
             elif series_type == 'comparison':
                 data += 'getDataComparison(message);\n'
-                data += "updateComparisonData();\n"            
             data += 'logTime("getData");\n'
 
         javascript = '''
     dataLoaded = true;\n
     if (DOMLoaded) {
         pageLoaded = true;
-        setupCharts();
         updateData();
     logTime("updateData");
     }
