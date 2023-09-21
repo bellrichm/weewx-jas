@@ -1671,7 +1671,7 @@ class JAS(SearchList):
         data += '    }\n'
         data += '    logTime("updateCurrentObservations");\n'
         data += '    updateChartData();\n'
-        data += '    logTime("updateCharts");\n'
+        data += '    logTime("updateChartData");\n'
         data += '    logTime("updateData  end");\n'
         data +='\n'
         data += '}\n'
@@ -1833,19 +1833,6 @@ updatelogLevel(logLevel);
 // ToDo: make a dictionary of dictionaries
 var pageCharts = [];
 var pageIndex = {};
-
-// Update the chart data
-function updateCharts() {
-    currTime = Date.now();
-    startTime = currTime
-    for (var index in pageCharts) {
-        if (pageCharts[index].option) {
-            pageCharts[index].chart.setOption(pageCharts[index].option);
-        }
-        prevTime = currTime;
-        currTime = Date.now();
-    }
-}
 
 // Ensure that the height of charts is consistent ratio of the width.
 function refreshSizes() {
