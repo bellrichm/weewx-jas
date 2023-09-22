@@ -1003,7 +1003,7 @@ class JAS(SearchList):
         chart_final += '  });\n'
         chart_final += '  return tooltip;\n'
         chart_final += '}\n'
-        chart_final = '\n'
+        chart_final += '\n'
         chart_final += 'function setupCharts() {\n'
         chart_final += "  ordinateNames = ['" + "', '".join(self.ordinate_names) + "'];\n"
         if self.skin_dict['Extras']['pages'][page].get('windRose', None) is not None:
