@@ -16,6 +16,7 @@
 minMaxObs = [];
 thisDateObsList = [];
 var current = {};
+var current_observation = null;
 
 #echo "var " + $interval_long_name_global + "startDate;\n"
 #echo "var " + $interval_long_name_global + "endDate;\n"
@@ -26,6 +27,13 @@ var updateDate;
 
 #echo "function getData" + $interval_long_name_global + "(pageDataString) {\n"
     pageData = JSON.parse(pageDataString);
+
+#if $getVar("$Extras.display_aeris_observation", False)
+    #echo "    current_observation = '';\n"
+    #echo "    pageData.currentObservations.forEach(function(observationCode) {\n"
+    #echo "        current_observation += getText(observationCode) + ' ';\n"
+    #echo "    });\n"
+#end if
 
 #echo "    " + $interval_long_name_global + "startDate = moment(pageData.startDate);\n"
 #echo "    " + $interval_long_name_global + "endDate = moment(pageData.endDate);\n"

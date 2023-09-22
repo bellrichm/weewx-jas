@@ -556,29 +556,23 @@ class JAS(SearchList):
         coverage_code = coded_weather.split(":")[0]
         intensity_code = coded_weather.split(":")[1]
         weather_code = coded_weather.split(":")[2]
+        observation_codes = []
 
         if weather_code in cloud_codes:
             cloud_code_key = 'cloud_code_' + weather_code
-            observation_text = "getText('" + cloud_code_key + "')"
+            observation_codes.append(cloud_code_key)
         else:
-            observation_text = ''
             if coverage_code:
                 coverage_code_key = 'coverage_code_' + coverage_code
-                if observation_text != "":
-                    observation_text +=  " + ' ' + "
-                observation_text += "getText('" + coverage_code_key + "')"
+                observation_codes.append(coverage_code_key)
             if intensity_code:
                 intensity_code_key = 'intensity_code_' + intensity_code
-                if observation_text != "":
-                    observation_text +=  " + ' ' + "
-                observation_text += "getText('" + intensity_code_key + "')"
+                observation_codes.append(intensity_code_key)
 
             weather_code_key = 'weather_code_' + weather_code
-            if observation_text != "":
-                observation_text +=  " + ' ' + "
-            observation_text += "getText('" + weather_code_key + "')"
+            observation_codes.append(weather_code_key)
 
-        return observation_text
+        return observation_codes
 
     def _call_api(self, url):
         request = Request(url)
@@ -1158,6 +1152,8 @@ class JAS(SearchList):
         data += 'function ' + interval_long_name + 'dataLoad() {\n'
         data += '  traceStart = Date.now();\n'
         data += '  console.log("dataLoad start: " + (Date.now() - traceStart).toString());\n'
+        if self.data_current:
+            data += '  pageData.currentObservations = ["' + '", "'.join(self.data_current['observation']) + '"];\n'
 
         data += self._gen_data_load2(interval, interval_type, page_definition_name, skin_data_binding, page_data_binding)
 
@@ -1381,11 +1377,6 @@ class JAS(SearchList):
             selected_month = str(month)
 
         offset_seconds = str(self.utc_offset * 60)
-
-        if self.skin_dict['Extras'].get('display_aeris_observation', False):
-            data += 'current_observation = ' + self.data_current['observation'] + ';\n'
-        else:
-            data += 'current_observation = null;\n'
 
         data += 'headerMaxDecimals = ' + self.skin_dict['Extras'].get('current', {}).get('header_max_decimals', 'null') + ';\n'
         data += "logLevel = sessionStorage.getItem('logLevel');\n"
