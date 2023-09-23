@@ -87,10 +87,6 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
     #set data = '<script src="../javascript/' + $page_name_global + '.js"></script>'
     $data
 
-    #if 'forecast' in $getVar('$Extras.pages.' + $page)
-      <script src="../data/forecast.js"></script>
-    #end if
-
     #if $page_name_global == 'debug'
       #echo '<script src="https://cdn.jsdelivr.net/npm/paho-mqtt@' + $paho_mqtt_version+ '/paho-mqtt' + $paho_mqtt_minified + '.js"></script>'
       <script src="../javascript/mqtt.js"></script>

@@ -658,7 +658,7 @@ class JAS(SearchList):
                 forecast['timestamp'] = period['timestamp']
                 day_of_week = (int(datetime.datetime.fromtimestamp(period['timestamp']).strftime("%w")) + 6) % 7
                 day_of_week_key = 'forecast_week_day' + str(day_of_week)
-                forecast['day'] = "getText('" + day_of_week_key + "')"
+                forecast['day'] = "'" + day_of_week_key + "'"
                 forecast['temp_min'] = period[forecast_observations[self.unit_system]['temp_min']]
                 forecast['temp_max'] = period[forecast_observations[self.unit_system]['temp_max']]
                 forecast['temp_unit'] = forecast_observations[self.unit_system]['temp_unit']
@@ -1154,6 +1154,23 @@ class JAS(SearchList):
         data += '  console.log("dataLoad start: " + (Date.now() - traceStart).toString());\n'
         if self.data_current:
             data += '  pageData.currentObservations = ["' + '", "'.join(self.data_current['observation']) + '"];\n'
+
+        data += 'pageData.forecasts = [];\n'
+        if self.data_forecast:
+            for forecast in self.data_forecast:
+                data += '  forecast = {};\n'
+                data += '  forecast.timestamp = ' + str(forecast["timestamp"]) + ';\n'
+                data += '  forecast.observation_codes = ["' + '", "'.join(forecast["observation"]) + '"];\n'
+                data += '  forecast.day_code = ' + forecast["day"] + ';\n'
+                data += '  forecast.temp_min = ' + str(forecast["temp_min"]) + ';\n'
+                data += '  forecast.temp_max = ' + str(forecast["temp_max"]) + ';\n'
+                data += '  forecast.temp_unit = "' + forecast["temp_unit"] + '";\n'
+                data += '  forecast.rain = ' + str(forecast["rain"]) + ';\n'
+                data += '  forecast.wind_min = ' + str(forecast["wind_min"]) + ';\n'
+                data += '  forecast.wind_max = ' + str(forecast["wind_max"]) + ';\n'
+                data += '  forecast.wind_unit = "' + forecast["wind_unit"] + '";\n'
+                data += '  pageData.forecasts.push(forecast);\n'
+                data += '\n'
 
         data += self._gen_data_load2(interval, interval_type, page_definition_name, skin_data_binding, page_data_binding)
 
@@ -1665,6 +1682,10 @@ class JAS(SearchList):
         data +='        updateCurrentObservations();\n'
         data += '    }\n'
         data += '    logTime("updateCurrentObservations");\n'
+        data += '    if (jasOptions.forecast) {\n'
+        data +='        updateForecasts();\n'
+        data += '    }\n'
+        data += '    logTime("updateForecasts");\n'
         data += '    updateChartData();\n'
         data += '    logTime("updateChartData");\n'
         data += '    logTime("updateData  end");\n'
@@ -1690,9 +1711,6 @@ class JAS(SearchList):
         data +='        setupPageRefresh();\n'
         data += '    }\n'
         data += '\n'
-        data += '    if (jasOptions.forecast) {\n'
-        data +='        updateForecasts();\n'
-        data += '    }\n'
         data += '    logTime("setupPage  End");\n'
         data += '};\n'
         data += '\n'
@@ -2127,9 +2145,18 @@ function updateForecasts() {
     i = 0;
     forecasts.forEach(function(forecast)
     {
-        observationId = "forecastObservation" + i;
-        document.getElementById("forecastDate" + i).innerHTML = forecast["day"]  + " " + forecast["date"];
-        document.getElementById("forecastObservation" + i).innerHTML = forecast["observation"];
+        observation = '';
+        forecast.observation_codes.forEach(function(observationCode) {
+            observation += getText(observationCode) + ' '
+        });'''
+
+        data += javascript + "\n"
+        data += '        date = moment.unix(forecast["timestamp"]).utcOffset(' + str(self.utc_offset) + ').format(dateTimeFormat[lang].forecast);\n'
+
+        javascript =\
+        '''        observationId = "forecastObservation" + i;
+        document.getElementById("forecastDate" + i).innerHTML = getText(forecast["day_code"])  + " " + date;
+        document.getElementById("forecastObservation" + i).innerHTML = observation;
         document.getElementById("forecastTemp" + i).innerHTML = forecast["temp_min"] + " | " + forecast["temp_max"];
         document.getElementById("forecastRain" + i).innerHTML = '<i class="bi bi-droplet"></i>' + ' ' + forecast['rain'] + '%';
         document.getElementById('forecastWind' + i).innerHTML = '<i class="bi bi-wind"></i>' + ' ' + forecast['wind_min'] + ' | ' + forecast['wind_max'] + ' ' + forecast['wind_unit'];

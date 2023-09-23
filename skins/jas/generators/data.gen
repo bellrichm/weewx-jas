@@ -17,6 +17,7 @@ minMaxObs = [];
 thisDateObsList = [];
 var current = {};
 var current_observation = null;
+var forecasts = [];
 
 #echo "var " + $interval_long_name_global + "startDate;\n"
 #echo "var " + $interval_long_name_global + "endDate;\n"
@@ -34,6 +35,8 @@ var updateDate;
     #echo "        current_observation += getText(observationCode) + ' ';\n"
     #echo "    });\n"
 #end if
+
+#echo "    forecasts = pageData.forecasts"
 
 #echo "    " + $interval_long_name_global + "startDate = moment(pageData.startDate);\n"
 #echo "    " + $interval_long_name_global + "endDate = moment(pageData.endDate);\n"
