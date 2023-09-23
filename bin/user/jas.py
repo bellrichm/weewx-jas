@@ -1077,7 +1077,7 @@ class JAS(SearchList):
                                       + "." + chart_def['series'][obs]['weewx']['observation'] + "_"  + obs_data_binding + ",\n"
                         chart3 += "             ]},\n"
                     chart3 += "  ]};\n"
-                    chart3 += "  pageChart.option = series_option;\n"
+                    chart3 += "  pageCharts[index].chart.setOption(series_option);\n"
                     chart2 += "pageChart.def = option;\n"
                 elif series_type == 'comparison':
                     chart3 += "  series_option = {\n"
@@ -1095,7 +1095,7 @@ class JAS(SearchList):
                                 + ".map(arr => [moment.unix(arr[0] / 1000).utcOffset(" + str(self.utc_offset) \
                                 + ").format(dateTimeFormat[lang].chart.yearToYearXaxis), arr[1]])},\n"
                     chart3 += "  ]};\n"
-                    chart3 += "  pageChart.option = series_option;\n"
+                    chart3 += "  pageCharts[index].chart.setOption(series_option);\n"
                     chart2 += "pageChart.def = option;\n"
                 else:
                     chart3 += "  series_option = {\n"
@@ -1113,15 +1113,9 @@ class JAS(SearchList):
                                 + "." + chart_def['series'][obs]['weewx']['observation'] + "_"  + obs_data_binding + obs_data_unit \
                                 + "},\n"
                     chart3 += "  ]};\n"
-                    chart3 += "  pageChart.option = series_option;\n"
+                    chart3 += "  pageCharts[index].chart.setOption(series_option);\n"
                     chart2 += "  pageChart.def = option;\n"
 
-                chart3 += "  // charts updated via mqtt will not have 'option' set\n"
-                chart3 += "  if (pageChart.option) {\n"
-                chart3 += "    pageCharts[index].option = series_option;\n"
-                chart3 += "    pageCharts[index].chart.setOption(series_option);\n"
-                chart3 += "  }\n"
-                chart3 += "\n"
                 chart3 += "  index += 1;\n"
 
                 chart2 += "  pageChart.chart = " + chart + "chart;\n"
