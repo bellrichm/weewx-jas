@@ -1155,7 +1155,8 @@ class JAS(SearchList):
         if self.data_current:
             data += '  pageData.currentObservations = ["' + '", "'.join(self.data_current['observation']) + '"];\n'
 
-        data += 'pageData.forecasts = [];\n'
+        data += '  pageData.forecasts = [];\n'
+        data += '\n'
         if self.data_forecast:
             for forecast in self.data_forecast:
                 data += '  forecast = {};\n'
@@ -1402,7 +1403,7 @@ class JAS(SearchList):
         data += '    logLevel = "' + self.skin_dict['Extras'].get('jas_debug_level', '3') + '";\n'
         data += "    sessionStorage.setItem('logLevel', logLevel);\n"
         data += '}\n'
-
+        data += '\n'
 
         data += 'function setupZoomDate() {\n'
         data += '    zoomDateRangePicker = new DateRangePicker("zoomdatetimerange-input",\n'
@@ -1478,6 +1479,7 @@ class JAS(SearchList):
         data += '    });\n'
         data += '    updateMinMax(' + start_timestamp + ', ' + end_timestamp + ');\n'
         data += '}\n'
+        data += '\n'
         data += '// Handle event messages of type "mqtt".\n'
         data += 'var test_obj = null; // Not a great idea to be global, but makes remote debugging easier.\n'
         data += 'function updateCurrentMQTT(topic, test_obj) {\n'
