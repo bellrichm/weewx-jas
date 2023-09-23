@@ -206,6 +206,7 @@ function refreshData() {
 
 ## ToDo: thiscould be cleaned up
 function setIframeSrc(id, url, addQueryString) {
+  console.debug(Date.now().toString() + " setIframeSrc start");
   document.querySelector("#child-iframe").style.visibility = 'hidden';
   // Set current page as the active page.
   currentPage = sessionStorage.getItem('currentPage');
@@ -236,6 +237,7 @@ function setIframeSrc(id, url, addQueryString) {
     document.getElementById('connectButton').classList.add("d-none");
     document.getElementById('disconnectButton').classList.add("d-none");      
   }
+  console.debug(Date.now().toString() + " setIframeSrc end");
 }
 
 function updateLang(language) {

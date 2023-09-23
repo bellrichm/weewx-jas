@@ -1151,7 +1151,7 @@ class JAS(SearchList):
         data += "pageData = {};\n"
         data += 'function ' + interval_long_name + 'dataLoad() {\n'
         data += '  traceStart = Date.now();\n'
-        data += '  console.log("dataLoad start: " + (Date.now() - traceStart).toString());\n'
+        data += '        console.debug(Date.now().toString() + " dataLoad start");\n'
         if self.data_current:
             data += '  pageData.currentObservations = ["' + '", "'.join(self.data_current['observation']) + '"];\n'
 
@@ -1186,7 +1186,7 @@ class JAS(SearchList):
         if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
             data += self._gen_windrose(page_data_binding, interval, page_definition_name, interval_long_name)
 
-        data += '  console.log("dataLoad end: " + (Date.now() - traceStart).toString());\n'
+        data += '        console.debug(Date.now().toString() + " dataLoad end");\n'
         data += "}\n"
         data += "\n"
 
@@ -1368,10 +1368,7 @@ class JAS(SearchList):
         data += 'DOMLoaded = false;\n'
         data += 'dataLoaded = false;\n'
         data += 'traceStart = Date.now();\n'
-        data += 'function logTime(text) {\n'
-        data += '  console.log(text + ": " + (Date.now() - traceStart).toString());\n'
-        data += '}\n'
-        data += 'logTime("Starting");\n'
+        data += 'console.debug(Date.now().toString() + " Starting");\n'
 
         if interval_long_name:
             start_date = interval_long_name + "startDate"
@@ -1655,18 +1652,18 @@ class JAS(SearchList):
         data += '\n'
         default_theme = to_list(self.skin_dict['Extras'].get('themes', 'light'))[0]
         data += 'document.addEventListener("DOMContentLoaded", function (event) {\n'
-        data += '    logTime("DOMContentLoaded  Start");\n'
+        data += '    console.debug(Date.now().toString() + " DOMContentLoaded Start");\n'
         data += '    setupPage();\n'
-        data += '    logTime("setupPage");\n'
+        data += '    console.debug(Date.now().toString() + " setupPage done");\n'
         data += '    setupCharts();\n'
-        data += '    logTime("setupCharts");\n'
+        data += '    console.debug(Date.now().toString() + " setupCharts done");\n'
         data += '    DOMLoaded = true;\n'
-        data += '    logTime("DOMContentLoaded  End");\n'
+        data += '    console.debug(Date.now().toString() + " DOMContentLoaded End");\n'
         data += '});\n'
         data += '\n'
 
         data += 'function updateData() {\n'
-        data += '    logTime("updateData  start");\n'
+        data += '    console.debug(Date.now().toString() + " updateData Start");\n'
         data += '    if (jasOptions.minmax) {\n'
         data +='        updateMinMax(' + start_timestamp + ', ' + end_timestamp + ');\n'
         data += '    }\n'
@@ -1683,47 +1680,47 @@ class JAS(SearchList):
         data += '    if (jasOptions.current) {\n'
         data +='        updateCurrentObservations();\n'
         data += '    }\n'
-        data += '    logTime("updateCurrentObservations");\n'
+        data += '    console.debug(Date.now().toString() + " updateCurrentObservations done");\n'
         data += '    if (jasOptions.forecast) {\n'
         data +='        updateForecasts();\n'
         data += '    }\n'
-        data += '    logTime("updateForecasts");\n'
+        data += '    console.debug(Date.now().toString() + " updateForecasts done");\n'
         data += '    updateChartData();\n'
-        data += '    logTime("updateChartData");\n'
-        data += '    logTime("updateData  end");\n'
+        data += '    console.debug(Date.now().toString() + " updateChartData done");\n'
+        data += '    console.debug(Date.now().toString() + " updateData End");\n'
         data +='\n'
         data += '}\n'
         data += '\n'
 
         data += 'function setupPage(pageDataString) {\n'
-        data += '    logTime("setupPage  Start");\n'
+        data += '    console.debug(Date.now().toString() + " setupPage Start");\n'
         data += '    theme = sessionStorage.getItem("theme");\n'
         data += '    if (!theme) {\n'
         data += '        theme = "' + default_theme + '";\n'
         data += '    }\n'
-        data += '    logTime("setupPage  getTheme");\n'
+        data += '    console.debug(Date.now().toString() + " getTheme done");\n'
         data += '    setTheme(theme);\n'
-        data += '    logTime("setupPage  setTheme");\n'
+        data += '    console.debug(Date.now().toString() + " setTheme done");\n'
         data += '    updateTexts();\n'
-        data += '    logTime("setupPage  updateTexts");\n'
+        data += '    console.debug(Date.now().toString() + " updateTexts done");\n'
         data += '    updateLabels();\n'
-        data += '    logTime("setupPage  updateLabels");\n'
+        data += '    console.debug(Date.now().toString() + " updateLabels done");\n'
         data += '\n'
         data += '    if (jasOptions.refresh) {\n'
         data +='        setupPageRefresh();\n'
         data += '    }\n'
         data += '\n'
-        data += '    logTime("setupPage  End");\n'
+        data += '    console.debug(Date.now().toString() + " setupPage End");\n'
         data += '};\n'
         data += '\n'
 
         data += 'window.addEventListener("load", function (event) {\n'
-        data += '    logTime("onLoad Start");\n'
+        data += '    console.debug(Date.now().toString() + " onLoad Start");\n'
         data += '    setIframeSrc();\n'
         data += '    if (dataLoaded) {\n'
         data += '        pageLoaded = true;\n'
         data += '        updateData();\n'
-        data += '    logTime("updateData");\n'
+        data += '    console.debug(Date.now().toString() + " updateData done");\n'
         data += '    }\n'
 
         data += '    modalChart = null;\n'
@@ -1815,7 +1812,7 @@ class JAS(SearchList):
         data += '    message.message = {};\n'
         data += '    // window.top refers to parent window\n'
         data += '    window.top.postMessage(message, "*");\n'
-        data += '    logTime("onLoad end");\n'
+        data += '    console.debug(Date.now().toString() + " onLoad End");\n'
         data += '});\n'
         data += '\n'
         data += 'function setIframeSrc() {\n'
@@ -2053,7 +2050,7 @@ function handleScroll(message) {
 
 // Handle event messages of type "dataLoaded".
 function handleDataLoaded(message) {
-    logTime("handleDataLoaded  Start");
+    console.debug(Date.now().toString() + " handleDataLoaded start");
 '''
         data += javascript
 
@@ -2065,16 +2062,16 @@ function handleDataLoaded(message) {
                 data += 'getDataMultiyear(message);\n'
             elif series_type == 'comparison':
                 data += 'getDataComparison(message);\n'
-            data += 'logTime("getData");\n'
+            data += 'console.debug(Date.now().toString() + " getData done");\n'
 
         javascript = '''
     dataLoaded = true;\n
     if (DOMLoaded) {
         pageLoaded = true;
         updateData();
-    logTime("updateData");
+        console.debug(Date.now().toString() + " updateData done");
     }
-    logTime("handleDataLoaded  End");   
+    console.debug(Date.now().toString() + " handleDataLoaded end");
  }
 
 function handleMQTT(message) {
@@ -2236,7 +2233,7 @@ window.addEventListener("message",
 
         data += javascript + "\n"
 
-        data += 'logTime("Ending");\n'
+        data += 'console.debug(Date.now().toString() + " Ending");\n'
         data += '// end\n'
 
         elapsed_time = time.time() - start_time
