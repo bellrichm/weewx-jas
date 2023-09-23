@@ -1119,7 +1119,6 @@ class JAS(SearchList):
                 chart3 += "  // charts updated via mqtt will not have 'option' set\n"
                 chart3 += "  if (pageChart.option) {\n"
                 chart3 += "    pageCharts[index].option = series_option;\n"
-                chart3 += "    options = pageCharts[index].chart.getOption();\n"
                 chart3 += "    pageCharts[index].chart.setOption(series_option);\n"
                 chart3 += "  }\n"
                 chart3 += "\n"
@@ -1368,7 +1367,7 @@ class JAS(SearchList):
         data += 'DOMLoaded = false;\n'
         data += 'dataLoaded = false;\n'
         data += 'traceStart = Date.now();\n'
-        data += 'console.debug(Date.now().toString() + " Starting");\n'
+        data += 'console.debug(Date.now().toString() + " starting");\n'
 
         if interval_long_name:
             start_date = interval_long_name + "startDate"
@@ -1652,18 +1651,18 @@ class JAS(SearchList):
         data += '\n'
         default_theme = to_list(self.skin_dict['Extras'].get('themes', 'light'))[0]
         data += 'document.addEventListener("DOMContentLoaded", function (event) {\n'
-        data += '    console.debug(Date.now().toString() + " DOMContentLoaded Start");\n'
+        data += '    console.debug(Date.now().toString() + " DOMContentLoaded start");\n'
         data += '    setupPage();\n'
         data += '    console.debug(Date.now().toString() + " setupPage done");\n'
         data += '    setupCharts();\n'
         data += '    console.debug(Date.now().toString() + " setupCharts done");\n'
         data += '    DOMLoaded = true;\n'
-        data += '    console.debug(Date.now().toString() + " DOMContentLoaded End");\n'
+        data += '    console.debug(Date.now().toString() + " DOMContentLoaded end");\n'
         data += '});\n'
         data += '\n'
 
         data += 'function updateData() {\n'
-        data += '    console.debug(Date.now().toString() + " updateData Start");\n'
+        data += '    console.debug(Date.now().toString() + " updateData start");\n'
         data += '    if (jasOptions.minmax) {\n'
         data +='        updateMinMax(' + start_timestamp + ', ' + end_timestamp + ');\n'
         data += '    }\n'
@@ -1687,13 +1686,13 @@ class JAS(SearchList):
         data += '    console.debug(Date.now().toString() + " updateForecasts done");\n'
         data += '    updateChartData();\n'
         data += '    console.debug(Date.now().toString() + " updateChartData done");\n'
-        data += '    console.debug(Date.now().toString() + " updateData End");\n'
+        data += '    console.debug(Date.now().toString() + " updateData end");\n'
         data +='\n'
         data += '}\n'
         data += '\n'
 
         data += 'function setupPage(pageDataString) {\n'
-        data += '    console.debug(Date.now().toString() + " setupPage Start");\n'
+        data += '    console.debug(Date.now().toString() + " setupPage start");\n'
         data += '    theme = sessionStorage.getItem("theme");\n'
         data += '    if (!theme) {\n'
         data += '        theme = "' + default_theme + '";\n'
@@ -1710,17 +1709,16 @@ class JAS(SearchList):
         data +='        setupPageRefresh();\n'
         data += '    }\n'
         data += '\n'
-        data += '    console.debug(Date.now().toString() + " setupPage End");\n'
+        data += '    console.debug(Date.now().toString() + " setupPage end");\n'
         data += '};\n'
         data += '\n'
 
         data += 'window.addEventListener("load", function (event) {\n'
-        data += '    console.debug(Date.now().toString() + " onLoad Start");\n'
+        data += '    console.debug(Date.now().toString() + " onLoad start");\n'
         data += '    setIframeSrc();\n'
         data += '    if (dataLoaded) {\n'
         data += '        pageLoaded = true;\n'
         data += '        updateData();\n'
-        data += '    console.debug(Date.now().toString() + " updateData done");\n'
         data += '    }\n'
 
         data += '    modalChart = null;\n'
@@ -2069,7 +2067,6 @@ function handleDataLoaded(message) {
     if (DOMLoaded) {
         pageLoaded = true;
         updateData();
-        console.debug(Date.now().toString() + " updateData done");
     }
     console.debug(Date.now().toString() + " handleDataLoaded end");
  }
@@ -2233,7 +2230,7 @@ window.addEventListener("message",
 
         data += javascript + "\n"
 
-        data += 'console.debug(Date.now().toString() + " Ending");\n'
+        data += 'console.debug(Date.now().toString() + " ending");\n'
         data += '// end\n'
 
         elapsed_time = time.time() - start_time
