@@ -3,6 +3,8 @@
 
 #echo '    <script>\n'
 #echo '      window.addEventListener("load", function (event) {\n'
+#echo '        traceStart = Date.now();\n'
+#echo '        console.log("dataload iframe start: " + (Date.now() - traceStart).toString());\n'
 
 #set $series_type = $getVar('$Extras.page_definition.' + $page + '.series_type', 'single')
 #if $series_type == 'single'    
@@ -19,5 +21,6 @@
 #echo '        message.kind = "dataLoaded";\n'
 #echo '        message.message = JSON.stringify(pageData);\n'
 #echo '        window.parent.postMessage(message, "*");\n'
+#echo '        console.log("dataload iframe end: " + (Date.now() - traceStart).toString());\n'
 #echo '      })\n'
 #echo '    </script>\n'
