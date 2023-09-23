@@ -482,7 +482,13 @@ window.addEventListener("load", function (event) {
   }
   else
   {
-      setIframeSrc('child-iframe', sessionStorage.getItem('currentPage'), sessionStorage.getItem('addQueryString'));  
+    if (sessionStorage.getItem('addQueryString') == 'true') {
+      addQueryString = true;
+    }
+    else {
+      addQueryString = false;
+    }
+      setIframeSrc('child-iframe', sessionStorage.getItem('currentPage'), addQueryString);  
   }
 
   ## ToDo: put here for now, only include if necessary
