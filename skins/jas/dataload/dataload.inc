@@ -1,9 +1,9 @@
 ##    Copyright (c) 2023 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
-#from weeutil.weeutil import to_list
-#set page_name = $year($data_binding=$data_binding).start.format('%Y') + '-' + $month($data_binding=$data_binding).start.format('%m')
-
+import time
+#from weeutil.weeutil import to_bool, to_list
+#set $start_time = time.time()
 
 #set momentjs_version = $getVar("$Extras.momentjs_version", "latest")
 #set momentjs_minified = ""
@@ -33,3 +33,9 @@
     #include 'dataload/eventlistener.inc'
   </head>
 </html>
+
+#set elapsed_time = time.time() - $start_time
+#set log_msg = "Generated " + $HTML_ROOT + "/" + $filename + " in " + str($elapsed_time)
+#if to_bool($getVar("$Extras.log_times", True))
+  $logdbg($log_msg)
+#end if
