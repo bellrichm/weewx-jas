@@ -1078,6 +1078,7 @@ class JAS(SearchList):
                         chart3 += "             ]},\n"
                     chart3 += "  ]};\n"
                     chart3 += "  pageCharts[index].chart.setOption(series_option);\n"
+                    chart3 += "  pageCharts[index].option = series_option;\n"
                     chart2 += "pageChart.def = option;\n"
                 elif series_type == 'comparison':
                     chart3 += "  series_option = {\n"
@@ -1096,6 +1097,7 @@ class JAS(SearchList):
                                 + ").format(dateTimeFormat[lang].chart.yearToYearXaxis), arr[1]])},\n"
                     chart3 += "  ]};\n"
                     chart3 += "  pageCharts[index].chart.setOption(series_option);\n"
+                    chart3 += "  pageCharts[index].option = series_option;\n"
                     chart2 += "pageChart.def = option;\n"
                 else:
                     chart3 += "  series_option = {\n"
@@ -1114,6 +1116,7 @@ class JAS(SearchList):
                                 + "},\n"
                     chart3 += "  ]};\n"
                     chart3 += "  pageCharts[index].chart.setOption(series_option);\n"
+                    chart3 += "  pageCharts[index].option = series_option;\n"
                     chart2 += "  pageChart.def = option;\n"
 
                 chart3 += "  index += 1;\n"
