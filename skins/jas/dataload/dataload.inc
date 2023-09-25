@@ -1,7 +1,7 @@
 ##    Copyright (c) 2023 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
-import time
+#import time
 #from weeutil.weeutil import to_bool, to_list
 #set $start_time = time.time()
 
