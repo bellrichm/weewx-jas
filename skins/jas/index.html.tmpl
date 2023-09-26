@@ -166,10 +166,10 @@
                   <div class="form-check form-switch">
                   <input class="form-check-input" type="checkbox" role="switch" id="themeSelection"  data-bs-toggle="collapse" data-bs-target=".navbar-collapse" onchange="updateTheme(this)">
                   </div>
-                  <button id="connectButton" class="btn btn-primary d-none" type="button" text_label="connect_button_label" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" onclick="MQTTConnect()"></button>
-                  <button id="disconnectButton" class="btn btn-primary d-none" type="button" text_label="disconnect_button_label" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" onclick="MQTTDisconnect()"></button>
+                  <button id="connectButton" class="btn d-none" type="button" text_label="connect_button_label" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" onclick="MQTTConnect()"></button>
+                  <button id="disconnectButton" class="btn d-none" type="button" text_label="disconnect_button_label" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" onclick="MQTTDisconnect()"></button>
                </div>
-               <button id=refreshButton class="btn btn-primary" type="button" onclick="refreshData()" text_label="refresh_button_label"></button>
+               <button id=refreshButton class="btn" type="button" onclick="refreshData()" text_label="refresh_button_label"></button>
             </div>
          </nav>
       </div>

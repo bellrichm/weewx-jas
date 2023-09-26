@@ -1956,6 +1956,22 @@ function setLogLevel(logLevel) {
 
 // Handle event messages of type "setTheme".
 function setTheme(theme) {
+    buttons = document.getElementsByClassName("btn");
+    if (theme == 'dark') {
+        for(var i = 0; i < buttons.length; i++)
+        {
+            buttons[i].classList.remove("btn-dark");
+            buttons[i].classList.add("btn-light");
+        }
+    }
+    else {
+        for(var i = 0; i < buttons.length; i++)
+        {
+            buttons[i].classList.remove("btn-light");
+            buttons[i].classList.add("btn-dark");
+        }
+    }
+
     if (document.documentElement.getAttribute('data-bs-theme') == theme) {
         return;
     }

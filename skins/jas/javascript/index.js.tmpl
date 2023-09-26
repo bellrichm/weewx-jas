@@ -146,11 +146,23 @@ function updateTheme(themeSelection) {
 function setTheme(theme) {
   sessionStorage.setItem('theme', theme);
   document.documentElement.setAttribute('data-bs-theme', theme);
+  buttons = document.getElementsByClassName("btn");
+
   if (theme == 'dark') {
     document.getElementById("themeSelection").checked = true;
+    for(var i = 0; i < buttons.length; i++)
+    {
+      buttons[i].classList.remove("btn-dark");
+      buttons[i].classList.add("btn-light");
+    }
   }
   else {
     document.getElementById("themeSelection").checked = false;
+    for(var i = 0; i < buttons.length; i++)
+    {
+      buttons[i].classList.remove("btn-light");
+      buttons[i].classList.add("btn-dark");
+    }
   }
 
   message = {};
