@@ -1202,15 +1202,18 @@ class JAS(SearchList):
                         filename = os.path.join(destination_dir, "%4d.js") % start_tt[0]
                         period_type = 'historical'
                         time_period = 'year'
-                        interval_long_name = "year%4d_" % start_tt[0]
+                        interval_long_name = f"year{start_tt[0]:4d}_"
                     elif page_name == 'archive-month':
                         #filename = "%4d-%02d.js" % (start_tt[0], start_tt[1])
                         filename = os.path.join(destination_dir, "%4d-%02d.js") % (start_tt[0], start_tt[1])
                         period_type = 'historical'
                         time_period = 'month'
-                        interval_long_name = "month%4d%02d_" % (start_tt[0], start_tt[1])
+                        interval_long_name = f"month{start_tt[0]:4d}{start_tt[1]:02d}_"
                     elif page_name == 'debug':
-                        continue
+                        filename = os.path.join(destination_dir, page_name + '.js')
+                        period_type = 'active'
+                        time_period = self.skin_dict['Extras']['pages']['debug'].get('simulate_page', 'last24hours')
+                        interval_long_name = self.skin_dict['Extras']['pages']['debug'].get('simulate_interval', 'last24hours') + '_'
                     else:
                         filename = os.path.join(destination_dir, page_name + '.js')
                         period_type = 'active'
@@ -1221,33 +1224,14 @@ class JAS(SearchList):
                         continue
 
                     data = self._gen_data_load(filename, '', time_period, period_type, page_name, interval_long_name)
+                    byte_string = data.encode('utf8')
 
-                    #     def _gen_data_load(self, filename, page, interval, interval_type, page_definition_name, interval_long_name):
-
-
-                    encoding = 'utf8' # todo
-                    # Third, convert the results to a byte string, using the strategy chosen by the user.
-                    if encoding == 'html_entities':
-                        byte_string = data.encode('ascii', 'xmlcharrefreplace')
-                    elif encoding == 'strict_ascii':
-                        byte_string = data.encode('ascii', 'ignore')
-                    elif encoding == 'normalized_ascii':
-                        # Normalize the string, replacing accented characters with non-accented
-                        # equivalents
-                        normalized = data.normalize('NFD', data)
-                        byte_string = normalized.encode('ascii', 'ignore')
-                    else:
-                        byte_string = data.encode(encoding)
-
-
-
-                    # Finally, write the byte string to the target file
                     try:
                         # Write to a temporary file first
                         tmpname = filename + '.tmp'
                         # Open it in binary mode. We are writing a byte-string, not a string
-                        with open(tmpname, mode='wb') as fd:
-                            fd.write(byte_string)
+                        with open(tmpname, mode='wb') as temp_file:
+                            temp_file.write(byte_string)
                         # Now move the temporary file into place
                         os.rename(tmpname, filename)
                     finally:
@@ -2237,7 +2221,7 @@ function handleMQTT(message) {
     jasLogDebug("test_obj: ", test_obj);
     jasLogDebug("sessionStorage: ", sessionStorage);
     jasLogDebug("topics: ", Object.fromEntries(topics));
-    // To Do - only exists on pages with "current" section
+    // ToDo - only exists on pages with "current" section
     //jasLogDebug("current.observations: ", Object.fromEntries(current.observations));
 
     if (jasOptions.current && jasOptions.pageMQTT)
