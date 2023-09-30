@@ -136,7 +136,7 @@ from weewx.cheetahgenerator import SearchList
 from weewx.reportengine import merge_lang
 from weewx.units import get_label_string
 from weewx.tags import TimespanBinder
-from weeutil.weeutil import to_bool, to_int, to_list, TimeSpan
+from weeutil.weeutil import to_bool, to_int, to_list, TimeSpan, timestamp_to_string
 
 try:
     import weeutil.logger # pylint: disable=unused-import
@@ -285,6 +285,8 @@ class JAS(SearchList):
 
         if 'fields' in self.skin_dict['Extras']['mqtt']:
             logerr("'[[[[[fields.unused]]]]]' is deprecated, use '[[[[[topics]]]]] [[[[[[[fields]]]]]]]'")
+
+        self._gen_all_data()
 
     def get_extension_list(self, timespan, db_lookup):
         # save these for use when the template variable/function is evaluated
@@ -1136,6 +1138,151 @@ class JAS(SearchList):
         if to_bool(self.skin_dict['Extras'].get('log_times', True)):
             logdbg(log_msg)
         return chart_final
+
+    def _gen_all_data(self):
+        print("start")
+        logdbg('start')
+        generator_dict = {'archive-day'  : weeutil.weeutil.genDaySpans,
+                    'archive-month': weeutil.weeutil.genMonthSpans,
+                    'archive-year' : weeutil.weeutil.genYearSpans}
+
+        default_binding = 'wx_binding' #todo
+        self.data_binding = default_binding
+
+        # Get start and stop times
+        default_archive = self.generator.db_binder.get_manager(default_binding)
+        start_ts = default_archive.firstGoodStamp()
+        if not start_ts:
+            log.info('Skipping, cannot find start time')
+            return
+
+        if self.generator.gen_ts:
+            record = default_archive.getRecord(self.generator.gen_ts)
+            if record:
+                stop_ts = record['dateTime']
+            else:
+                log.info('Skipping, generate time %s not in database', timestamp_to_string(self.generator.gen_ts))
+                return
+        else:
+            stop_ts = default_archive.lastGoodStamp()
+
+        destination_dir = os.path.join(self.generator.config_dict['WEEWX_ROOT'],
+                                       self.skin_dict['HTML_ROOT'],
+                                       'dataload')
+        logdbg(destination_dir)
+
+        try:
+            # Create the directory that is to receive the generated files.  If
+            # it already exists an exception will be thrown, so be prepared to
+            # catch it.
+            os.makedirs(destination_dir)
+        except OSError:
+            pass
+
+        for page_name in self.skin_dict['Extras']['pages'].sections:
+
+            logdbg(page_name)
+            if self.skin_dict['Extras']['pages'].get('enable', True) and \
+                page_name in self.skin_dict['Extras']['page_definition'] and \
+                self.skin_dict['Extras']['page_definition'][page_name].get('series_type', 'single') == 'single':
+
+                generation_interval = self.skin_dict['Extras']['page_definition'][page_name].get('generation_interval', None)
+                logdbg("process")
+                if page_name in generator_dict:
+                    _spangen = generator_dict[page_name]
+                else:
+                    _spangen = lambda start_ts, stop_ts: [weeutil.weeutil.TimeSpan(start_ts, stop_ts)]
+
+                for timespan in _spangen(start_ts, stop_ts):
+                    self.timespan = timespan # todo
+                    start_tt = time.localtime(timespan.start)
+                    stop_tt = time.localtime(timespan.stop)
+                    if page_name == 'archive-year':
+                        #filename =  "%4d.js" % start_tt[0]
+                        filename = os.path.join(destination_dir, "%4d.js") % start_tt[0]
+                        period_type = 'historical'
+                        time_period = 'year'
+                        interval_long_name = "year%4d_" % start_tt[0]
+                    elif page_name == 'archive-month':
+                        #filename = "%4d-%02d.js" % (start_tt[0], start_tt[1])
+                        filename = os.path.join(destination_dir, "%4d-%02d.js") % (start_tt[0], start_tt[1])
+                        period_type = 'historical'
+                        time_period = 'month'
+                        interval_long_name = "month%4d%02d_" % (start_tt[0], start_tt[1])
+                    elif page_name == 'debug':
+                        continue
+                    else:
+                        filename = os.path.join(destination_dir, page_name + '.js')
+                        period_type = 'active'
+                        time_period = page_name
+                        interval_long_name = page_name + '_'
+
+                    if self._skip_generation(timespan, generation_interval, period_type, filename, stop_ts):
+                        continue
+
+                    data = self._gen_data_load('', filename, time_period, period_type, page_name, interval_long_name)
+
+                    #     def _gen_data_load(self, filename, page, interval, interval_type, page_definition_name, interval_long_name):
+
+
+                    encoding = 'utf8' # todo
+                    # Third, convert the results to a byte string, using the strategy chosen by the user.
+                    if encoding == 'html_entities':
+                        byte_string = data.encode('ascii', 'xmlcharrefreplace')
+                    elif encoding == 'strict_ascii':
+                        byte_string = data.encode('ascii', 'ignore')
+                    elif encoding == 'normalized_ascii':
+                        # Normalize the string, replacing accented characters with non-accented
+                        # equivalents
+                        normalized = data.normalize('NFD', data)
+                        byte_string = normalized.encode('ascii', 'ignore')
+                    else:
+                        byte_string = data.encode(encoding)
+
+
+
+                    # Finally, write the byte string to the target file
+                    try:
+                        # Write to a temporary file first
+                        tmpname = filename + '.tmp'
+                        # Open it in binary mode. We are writing a byte-string, not a string
+                        with open(tmpname, mode='wb') as fd:
+                            fd.write(byte_string)
+                        # Now move the temporary file into place
+                        os.rename(tmpname, filename)
+                    finally:
+                        try:
+                            os.unlink(tmpname)
+                        except OSError:
+                            pass
+
+    def _skip_generation(self, timespan, generation_interval, interval_type, filename, stop_ts):
+        # Skip summary files outside the timespan
+        if interval_type == 'historical' \
+                and os.path.exists(filename) \
+                and not timespan.includesArchiveTime(stop_ts):
+            return True
+
+        # Convert from possible string to an integer:
+        generation_interval_seconds = weeutil.weeutil.nominal_spans(generation_interval)
+
+        # Images without an aggregation interval have to be plotted every time. Also, the image
+        # definitely has to be generated if it doesn't exist.
+        if generation_interval_seconds is None or not os.path.exists(filename):
+            return False
+
+        # If its a very old image, then it has to be regenerated
+        if self.generator.gen_ts - os.stat(filename).st_mtime >= generation_interval_seconds:
+            return False
+
+        # If we're on an aggregation boundary, regenerate.
+        time_dt = datetime.datetime.fromtimestamp(self.generator.gen_ts)
+        tdiff = time_dt -  time_dt.replace(hour=0, minute=0, second=0, microsecond=0)
+        if abs(tdiff.seconds % generation_interval_seconds) < 1:
+            return False
+
+        return True
+
 
     def _gen_data_load(self, filename, page, interval, interval_type, page_definition_name, interval_long_name):
         start_time = time.time()
