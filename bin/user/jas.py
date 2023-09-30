@@ -1186,7 +1186,7 @@ class JAS(SearchList):
                 page_name in self.skin_dict['Extras']['page_definition'] and \
                 self.skin_dict['Extras']['page_definition'][page_name].get('series_type', 'single') == 'single':
 
-                generation_interval = self.skin_dict['Extras']['page_definition'][page_name].get('generation_interval', None)
+                generate_interval = self.skin_dict['Extras']['page_definition'][page_name].get('generate_interval', None)
                 logdbg("process")
                 if page_name in generator_dict:
                     _spangen = generator_dict[page_name]
@@ -1217,10 +1217,10 @@ class JAS(SearchList):
                         time_period = page_name
                         interval_long_name = page_name + '_'
 
-                    if self._skip_generation(timespan, generation_interval, period_type, filename, stop_ts):
+                    if self._skip_generation(timespan, generate_interval, period_type, filename, stop_ts):
                         continue
 
-                    data = self._gen_data_load('', filename, time_period, period_type, page_name, interval_long_name)
+                    data = self._gen_data_load(filename, '', time_period, period_type, page_name, interval_long_name)
 
                     #     def _gen_data_load(self, filename, page, interval, interval_type, page_definition_name, interval_long_name):
 
@@ -1256,7 +1256,7 @@ class JAS(SearchList):
                         except OSError:
                             pass
 
-    def _skip_generation(self, timespan, generation_interval, interval_type, filename, stop_ts):
+    def _skip_generation(self, timespan, generate_interval, interval_type, filename, stop_ts):
         # Skip summary files outside the timespan
         if interval_type == 'historical' \
                 and os.path.exists(filename) \
@@ -1264,21 +1264,21 @@ class JAS(SearchList):
             return True
 
         # Convert from possible string to an integer:
-        generation_interval_seconds = weeutil.weeutil.nominal_spans(generation_interval)
+        generate_interval_seconds = weeutil.weeutil.nominal_spans(generate_interval)
 
         # Images without an aggregation interval have to be plotted every time. Also, the image
         # definitely has to be generated if it doesn't exist.
-        if generation_interval_seconds is None or not os.path.exists(filename):
+        if generate_interval_seconds is None or not os.path.exists(filename):
             return False
 
         # If its a very old image, then it has to be regenerated
-        if self.generator.gen_ts - os.stat(filename).st_mtime >= generation_interval_seconds:
+        if self.generator.gen_ts - os.stat(filename).st_mtime >= generate_interval_seconds:
             return False
 
         # If we're on an aggregation boundary, regenerate.
         time_dt = datetime.datetime.fromtimestamp(self.generator.gen_ts)
         tdiff = time_dt -  time_dt.replace(hour=0, minute=0, second=0, microsecond=0)
-        if abs(tdiff.seconds % generation_interval_seconds) < 1:
+        if abs(tdiff.seconds % generate_interval_seconds) < 1:
             return False
 
         return True
