@@ -256,11 +256,6 @@ var updateDate;
     #end for
 #end if
 
-$genData($interval_global,
-         $page_definition_name_global,
-         $interval_long_name_global
-        )
-
 #if $getVar('$Extras.pages.' + $page_definition_name_global + '.windRose', None) is not None
     #for $series in $getVar('$Extras.chart_definitions.windRose.series')
         #echo "    " + $interval_long_name_global + "avg."  + $series + "_" + $page_data_binding + " = JSON.parse(pageData." + $interval_long_name_global + "avg."  + $series + "_" + $page_data_binding + ");\n"
