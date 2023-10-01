@@ -299,7 +299,6 @@ class JAS(SearchList):
                                  'data_binding': self.data_binding,
                                  'forecasts': self.data_forecast,
                                  'genCharts': self._gen_charts,
-                                 'genData': self._gen_data,
                                  'genDataLoad': self._gen_data_load,
                                  'genJs': self._gen_js,
                                  'genJasOptions': self._gen_jas_options,
@@ -1463,26 +1462,6 @@ class JAS(SearchList):
             for wind in wind_directions:
                 data += "  pageData." + interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + " = JSON.stringify(" +  str(wind) +  ");\n"
                 i += 1
-
-        return data
-
-    def _gen_data(self, interval, page_definition_name, interval_long_name):
-        skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
-        page_data_binding = self.skin_dict['Extras']['pages'][page_definition_name].get('data_binding', skin_data_binding)
-
-        data = ""
-
-        interval_start_seconds_global = self._get_timespan_binder(interval, page_data_binding).start.raw
-        interval_end_seconds_global = self._get_timespan_binder(interval, page_data_binding).end.raw
-        if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
-            avg_value, max_value, wind_directions = self._get_wind_compass(data_binding=page_data_binding, start_time=interval_start_seconds_global, end_time=interval_end_seconds_global) # need to match function signature pylint: disable=unused-variable
-            i = 0
-            for wind in wind_directions:
-                data += "    " + interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + " = JSON.parse(pageData." + interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + ");\n"
-                i += 1
-
-        data += '}\n'
-        data += '// the end\n'
 
         return data
 

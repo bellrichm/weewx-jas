@@ -6,6 +6,7 @@
 #set $start_time = time.time()
 
 #set $skin_data_binding = $getVar('$Extras.data_binding', $data_binding)
+#set $page_data_binding = $getVar('$Extras.pages.' + $page_definition_name_global + '.data_binding', $skin_data_binding)
 
 ## Define the 'aggegate' objects to hold the data
 ## For example: last7days_min = {}, last7days_max = {}
@@ -259,6 +260,12 @@ $genData($interval_global,
          $page_definition_name_global,
          $interval_long_name_global
         )
+
+#if $getVar('$Extras.pages.' + $page_definition_name_global + '.windRose', None) is not None
+    #for $series in $getVar('$Extras.chart_definitions.windRose.series')
+        #echo "    " + $interval_long_name_global + "avg."  + $series + "_" + $page_data_binding + " = JSON.parse(pageData." + $interval_long_name_global + "avg."  + $series + "_" + $page_data_binding + ");\n"
+    #end for
+#end if
 
 #set elapsed_time = time.time() - $start_time
 #set log_msg = "Generated " + $HTML_ROOT + "/" + $filename + " in " + str($elapsed_time)
