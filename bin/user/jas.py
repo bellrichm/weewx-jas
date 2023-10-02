@@ -253,6 +253,8 @@ class JAS(SearchList):
         if 'fields' in self.skin_dict['Extras']['mqtt']:
             logerr("'[[[[[fields.unused]]]]]' is deprecated, use '[[[[[topics]]]]] [[[[[[[fields]]]]]]]'")
 
+        self._gen_all_charts()
+
 
     def get_extension_list(self, timespan, db_lookup):
         # save these for use when the template variable/function is evaluated
@@ -1786,6 +1788,101 @@ window.addEventListener("message",
         if to_bool(self.skin_dict['Extras'].get('log_times', True)):
             logdbg(log_msg)
         return data
+
+    def _gen_all_charts(self):
+        #if not self.first_run
+        #to do duplivate code
+        generator_dict = {'archive-day'  : weeutil.weeutil.genDaySpans,
+                    'archive-month': weeutil.weeutil.genMonthSpans,
+                    'archive-year' : weeutil.weeutil.genYearSpans}        
+        default_binding = 'wx_binding' #todo
+        self.data_binding = default_binding
+
+        # Get start and stop times
+        default_archive = self.generator.db_binder.get_manager(default_binding)
+        start_ts = default_archive.firstGoodStamp()
+        if not start_ts:
+            log.info('Skipping, cannot find start time')
+            return
+
+        if self.generator.gen_ts:
+            record = default_archive.getRecord(self.generator.gen_ts)
+            if record:
+                stop_ts = record['dateTime']
+            else:
+                log.info('Skipping, generate time %s not in database', timestamp_to_string(self.generator.gen_ts))
+                return
+        else:
+            stop_ts = default_archive.lastGoodStamp()
+
+        destination_dir = os.path.join(self.generator.config_dict['WEEWX_ROOT'],
+                                    self.skin_dict['HTML_ROOT'],
+                                    'charts')
+        logdbg(destination_dir)
+
+        try:
+            # Create the directory that is to receive the generated files.  If
+            # it already exists an exception will be thrown, so be prepared to
+            # catch it.
+            os.makedirs(destination_dir)
+        except OSError:
+            pass
+
+        for page_name in self.skin_dict['Extras']['pages'].sections:
+            logdbg(page_name)
+            if self.skin_dict['Extras']['pages'].get('enable', True) and \
+                page_name in self.skin_dict['Extras']['page_definition']:
+
+                if page_name in generator_dict:
+                    _spangen = generator_dict[page_name]
+                else:
+                    _spangen = lambda start_ts, stop_ts: [weeutil.weeutil.TimeSpan(start_ts, stop_ts)]
+                for timespan in _spangen(start_ts, stop_ts):
+                    self.timespan = timespan # todo
+                    start_tt = time.localtime(timespan.start)
+                    stop_tt = time.localtime(timespan.stop)
+                    if page_name == 'archive-year':
+                        filename = os.path.join(destination_dir, "%4d.js") % start_tt[0]
+                        interval = f"year{start_tt[0]:4d}"
+                        page = f"{start_tt[0]:4d}"
+                    elif page_name == 'archive-month':
+                        filename = os.path.join(destination_dir, "%4d-%02d.js") % (start_tt[0], start_tt[1])
+                        interval = f"month{start_tt[0]:4d}{start_tt[1]:02d}"
+                        page = f"{start_tt[0]:4d}-{start_tt[1]:02d}"
+                    elif page_name == 'multiyear':
+                        filename = os.path.join(destination_dir, page_name + '.js')
+                        interval = 'year'
+                        page = page_name
+                    elif page_name == 'multiyear':
+                        filename = os.path.join(destination_dir, page_name + '.js')
+                        interval = 'year'
+                        page = page_name
+                    elif page_name == 'debug':
+                        filename = os.path.join(destination_dir, page_name + '.js')
+                        interval = self.skin_dict['Extras']['pages']['debug'].get('simulate_interval', 'last24hours')
+                        page = page_name
+                    else:
+                        filename = os.path.join(destination_dir, page_name + '.js')
+                        interval = page_name
+                        page = page_name
+
+                    chart = self._gen_charts(filename, page_name, interval, page)
+                    chart = '\n' + chart + '\n'
+                    byte_string = chart.encode('utf8')
+
+                    try:
+                        # Write to a temporary file first
+                        tmpname = filename + '.tmp'
+                        # Open it in binary mode. We are writing a byte-string, not a string
+                        with open(tmpname, mode='wb') as temp_file:
+                            temp_file.write(byte_string)
+                        # Now move the temporary file into place
+                        os.rename(tmpname, filename)
+                    finally:
+                        try:
+                            os.unlink(tmpname)
+                        except OSError:
+                            pass                    
 
 class DataGenerator(weewx.reportengine.ReportGenerator):
     """ Generate the data used by the JAS skin. """
