@@ -6,7 +6,7 @@
   </div>
   <div class="row gx-0 justify-content-center">
   #set i = 0
-  #for $forecast in $forecasts
+  #for $i in range(7)
     <div class="col col-6 col-sm-4 col-md-3 col-lg-3 col-xl-1 mb-4" style="min-width:9em;">
       <div class="card h-100">
         <div class="card-body text-center">
