@@ -207,12 +207,7 @@ class JAS(SearchList):
                                   'windCompassRange0', 'windCompassRange1', 'windCompassRange2',
                                   'windCompassRange3', 'windCompassRange4', 'windCompassRange5', 'windCompassRange6']
 
-        forecast_filename = 'forecast.json'
-        forecast_endpoint = 'https://api.aerisapi.com/forecasts/'
-
-        current_filename = 'current.json'
-        current_endpoint = 'https://api.aerisapi.com/observations/'
-
+        # todo duplicate code
         self.wind_ranges = {}
         self.wind_ranges['mile_per_hour'] = [1, 4, 8, 13, 19, 25, 32]
         self.wind_ranges['mile_per_hour2'] = [1, 4, 8, 13, 19, 25, 32]
@@ -232,7 +227,8 @@ class JAS(SearchList):
 
         self.skin_debug = to_bool(self.skin_dict['Extras'].get('debug', False))
         self.data_binding = self.skin_dict['data_binding']
-        self.unit_system = self.skin_dict.get('unit_system', 'us').upper()
+
+        self.observations, self.aggregate_types = self._get_observations_information()
 
         self.chart_defaults = self.skin_dict['Extras']['chart_defaults'].get('global', {})
         self.chart_series_defaults = self.skin_dict['Extras']['chart_defaults'].get('chart_type', {}).get('series', {})
@@ -248,37 +244,8 @@ class JAS(SearchList):
         html_root = os.path.join(
             self.generator.config_dict['WEEWX_ROOT'], html_root)
         self.html_root = html_root
-        self.mkdir_p(os.path.join(self.html_root, 'data'))
-
-        latitude = self.generator.config_dict['Station']['latitude']
-        longitude = self.generator.config_dict['Station']['longitude']
-
-        self.forecast_filename = os.path.join(self.html_root, 'data', forecast_filename)
-        self.current_filename = os.path.join(self.html_root, 'data', current_filename)
-
-        self.raw_forecast_data_file = os.path.join(
-            self.html_root, 'data', 'raw.forecast.json')
-
-        client_id = self.skin_dict['Extras'].get('client_id')
-        if client_id:
-            client_secret = self.skin_dict['Extras']['client_secret']
-            self.forecast_url = F"{forecast_endpoint}{latitude},{longitude}?"
-            self.forecast_url += F"format=json&filter=day&limit=7&client_id={client_id}&client_secret={client_secret}"
-
-            self.current_url = F"{current_endpoint}{latitude},{longitude}?"
-            self.current_url += F"&format=json&filter=allstations&limit=1&client_id={client_id}&client_secret={client_secret}"
-
-        self.observations, self.aggregate_types = self._get_observations_information()
 
         self._set_chart_defs()
-
-        self.data_forecast = None
-        if self._check_forecast():
-            self.data_forecast = self._get_forecasts()
-
-        self.data_current = None
-        if to_bool(self.skin_dict['Extras'].get('display_aeris_observation', False)):
-            self.data_current = self._get_current_obs()
 
         if 'topic' in self.skin_dict['Extras']['mqtt']:
             logerr("'topic' is deprecated, use '[[[[[topics]]]]]'")
@@ -286,20 +253,17 @@ class JAS(SearchList):
         if 'fields' in self.skin_dict['Extras']['mqtt']:
             logerr("'[[[[[fields.unused]]]]]' is deprecated, use '[[[[[topics]]]]] [[[[[[[fields]]]]]]]'")
 
-        self._gen_all_data()
 
     def get_extension_list(self, timespan, db_lookup):
         # save these for use when the template variable/function is evaluated
         #self.db_lookup = db_lookup
         self.timespan = timespan
 
-        search_list_extension = {'aggregate_types': self.aggregate_types,
-                                 'current_observation': self.data_current,
+        search_list_extension = {
+                                 'aggregate_types': self.aggregate_types,
                                  'dateTimeFormats': self._get_date_time_formats,
                                  'data_binding': self.data_binding,
-                                 'forecasts': self.data_forecast,
                                  'genCharts': self._gen_charts,
-                                 'genDataLoad': self._gen_data_load,
                                  'genJs': self._gen_js,
                                  'genJasOptions': self._gen_jas_options,
                                  'getObsUnitLabel': self._get_obs_unit_label,
@@ -321,7 +285,6 @@ class JAS(SearchList):
                                  'utcOffset': self.utc_offset,
                                  'version': VERSION,
                                  'weewx_version': weewx.__version__,
-                                 'windCompass': self._get_wind_compass,
                                 }
 
         return [search_list_extension]
@@ -329,6 +292,92 @@ class JAS(SearchList):
     def _skin_debug(self, msg):
         if self.skin_debug:
             logdbg(msg)
+
+# Todo - this code is duplicated
+    def _get_observations_information(self):
+        observations = {}
+        aggregate_types = {}
+        # ToDo: isn't this done in the init method?
+        skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
+        charts = self.skin_dict.get('Extras', {}).get('chart_definitions', {})
+
+        pages = self.skin_dict.get('Extras', {}).get('pages', {})
+        for page in pages:
+            if not self.skin_dict['Extras']['pages'][page].get('enable', True):
+                continue
+            for chart in pages[page].sections:
+                if chart in charts:
+                    chart_data_binding = charts[chart].get('weewx', {}).get('data_binding', skin_data_binding)
+                    series = charts[chart].get('series', {})
+                    for obs in series:
+                        weewx_options = series[obs].get('weewx', {})
+                        observation = weewx_options.get('observation', obs)
+                        obs_data_binding = series[obs].get('weewx', {}).get('data_binding', chart_data_binding)
+                        if observation not in self.wind_observations:
+                            if observation not in observations:
+                                observations[observation] = {}
+                                observations[observation]['aggregate_types'] = {}
+
+                            aggregate_type = weewx_options.get('aggregate_type', 'avg')
+                            if aggregate_type not in observations[observation]['aggregate_types']:
+                                observations[observation]['aggregate_types'][aggregate_type] = {}
+
+                            if obs_data_binding not in observations[observation]['aggregate_types'][aggregate_type]:
+                                observations[observation]['aggregate_types'][aggregate_type][obs_data_binding] = {}
+
+                            unit = weewx_options.get('unit', 'default')
+                            observations[observation]['aggregate_types'][aggregate_type][obs_data_binding][unit] = {}
+                            aggregate_types[aggregate_type] = {}
+
+        minmax_observations = self.skin_dict.get('Extras', {}).get('minmax', {}).get('observations', {})
+        minmax_data_binding = self.skin_dict.get('Extras', {}).get('minmax', {}).get('data_binding', skin_data_binding)
+        if minmax_observations:
+            for observation in self.skin_dict['Extras']['minmax']['observations'].sections:
+                data_binding = minmax_observations[observation].get('data_binding', minmax_data_binding)
+                if observation not in self.wind_observations:
+                    unit = minmax_observations[observation].get('unit', 'default')
+                    if observation not in observations:
+                        observations[observation] = {}
+                        observations[observation]['aggregate_types'] = {}
+
+                    if 'min' not in observations[observation]['aggregate_types']:
+                        observations[observation]['aggregate_types']['min'] = {}
+                    if data_binding not in observations[observation]['aggregate_types']['min']:
+                        observations[observation]['aggregate_types']['min'][data_binding] = {}
+                    observations[observation]['aggregate_types']['min'][data_binding][unit] = {}
+                    aggregate_types['min'] = {}
+                    if 'max' not in observations[observation]['aggregate_types']:
+                        observations[observation]['aggregate_types']['max'] = {}
+                    if data_binding not in observations[observation]['aggregate_types']['max']:
+                        observations[observation]['aggregate_types']['max'][data_binding] = {}
+                    observations[observation]['aggregate_types']['max'][data_binding][unit] = {}
+                    aggregate_types['max'] = {}
+
+        if 'thisdate' in self.skin_dict['Extras']:
+            thisdate_observations = self.skin_dict.get('Extras', {}).get('thisdate', {}).get('observations', {})
+            thisdate_data_binding = self.skin_dict.get('Extras', {}).get('thisdate', {}).get('data_binding', skin_data_binding)
+            for observation in  self.skin_dict['Extras']['thisdate']['observations'].sections:
+                data_binding = thisdate_observations[observation].get('data_binding', thisdate_data_binding)
+                if observation not in self.wind_observations:
+                    unit = thisdate_observations[observation].get('unit', 'default')
+                    if observation not in observations:
+                        observations[observation] = {}
+                        observations[observation]['aggregate_types'] = {}
+
+                    if 'min' not in observations[observation]['aggregate_types']:
+                        observations[observation]['aggregate_types']['min'] = {}
+                    if data_binding not in observations[observation]['aggregate_types']['min']:
+                        observations[observation]['aggregate_types']['min'][data_binding] = {}
+                    observations[observation]['aggregate_types']['min'][data_binding][unit] = {}
+                    aggregate_types['min'] = {}
+                    if 'max' not in observations[observation]['aggregate_types']:
+                        observations[observation]['aggregate_types']['max'] = {}
+                    if data_binding not in observations[observation]['aggregate_types']['max']:
+                        observations[observation]['aggregate_types']['max'][data_binding] = {}
+                    observations[observation]['aggregate_types']['max'][data_binding][unit] = {}
+                    aggregate_types['max'] = {}
+
+        return observations, aggregate_types
 
     def _get_skin_dict(self, language):
         self.skin_dicts[language] = configobj.ConfigObj()
@@ -414,7 +463,6 @@ class JAS(SearchList):
 
         return last24hours
 
-
     def _get_last_7_days(self, data_binding=None):
         return  self._get_last_n_days(7, data_binding=data_binding)
 
@@ -438,105 +486,12 @@ class JAS(SearchList):
 
         return last_n_days
 
-
     def _get_obs_unit_label(self, observation):
         # For now, return label for first observations unit. ToDo: possibly change to return all?
         return get_label_string(self.generator.formatter, self.generator.converter, observation, plural=False)
 
     def _get_unit_label(self, unit):
         return self.generator.formatter.get_label_string(unit, plural=False)
-
-    def _get_wind_compass(self, data_binding=None, start_time=None, end_time=None):
-        db_manager = self.generator.db_binder.get_manager(data_binding=data_binding)
-        # default is the last 24 hrs
-        if not end_time:
-            end_ts = db_manager.lastGoodStamp()
-        else:
-            end_ts = end_time
-
-        if not start_time:
-            start_ts = end_ts - 86400
-        else:
-            start_ts = start_time
-
-        data_timespan = TimeSpan(start_ts, end_ts)
-
-        # current day calculation
-        #day_ts = int(timespan.stop - timespan.stop % age)
-
-
-        start_vec_t1, stop_vec_t1, wind_speed_data_raw = weewx.xtypes.get_series(  # pylint: disable=unused-variable
-            'windSpeed', data_timespan, db_manager)
-        start_vec_t2, stop_vec_t2, wind_dir_data = weewx.xtypes.get_series(  # pylint: disable=unused-variable
-            'windDir', data_timespan, db_manager)
-        start_vec_t3, stop_vec_t3, wind_gust_data_raw = weewx.xtypes.get_series(  # pylint: disable=unused-variable
-            'windGust', data_timespan, db_manager)
-
-        wind_data = {}
-        # the formatter has the names in a list in the correct order
-        # with an additional 'N/A' at the end
-        i = 0
-        while i < len(self.generator.formatter.ordinate_names) - 1:
-            ordinate_name = self.generator.formatter.ordinate_names[i]
-            wind_data[ordinate_name] = {}
-            wind_data[ordinate_name]['sum'] = 0
-            wind_data[ordinate_name]['count'] = 0
-            wind_data[ordinate_name]['max'] = 0
-            wind_data[ordinate_name]['speed_data'] = []
-            j = 0
-            while j < self.wind_ranges_count:
-                wind_data[ordinate_name]['speed_data'].append(0)
-                j += 1
-            i += 1
-
-        i = 0
-        wind_speed_data = self.generator.converter.convert(wind_speed_data_raw)
-        for wind_speed in wind_speed_data[0]:
-            if wind_speed and wind_speed > 0:
-                wind_unit = wind_speed_data[1]
-                ordinate_name = self.generator.formatter.to_ordinal_compass(
-                    (wind_dir_data[0][i], wind_dir_data[1], wind_dir_data[2]))
-                wind_data[ordinate_name]['sum'] += wind_speed
-                wind_data[ordinate_name]['count'] += 1
-                wind_gust_data = self.generator.converter.convert(wind_gust_data_raw)
-                if wind_gust_data[0][i] > wind_data[ordinate_name]['max']:
-                    wind_data[ordinate_name]['max'] = wind_gust_data[0][i]
-
-                j = 0
-                for wind_range in self.wind_ranges[wind_unit]:
-                    if wind_speed < wind_range:
-                        wind_data[ordinate_name]['speed_data'][j] += 1
-                        break
-                    j += 1
-
-            i += 1
-
-        for ordinate_name, _  in wind_data.items():
-            if wind_data[ordinate_name]['count'] > 0:
-                wind_data[ordinate_name]['average'] = \
-                    wind_data[ordinate_name]['sum'] / \
-                    wind_data[ordinate_name]['count']
-            else:
-                wind_data[ordinate_name]['average'] = 0.0
-
-        wind_compass_avg = []
-        wind_compass_max = []
-        wind_compass_speeds = []
-        j = 0
-        while j < self.wind_ranges_count:
-            wind_compass_speeds.append([])
-            j += 1
-
-        for wind_ordinal_data, _ in wind_data.items():
-            wind_compass_avg.append(wind_data[wind_ordinal_data]['average'])
-            wind_compass_max.append(wind_data[wind_ordinal_data]['max'])
-
-            i = 0
-            for wind_x in wind_data[wind_ordinal_data]['speed_data']:
-                wind_compass_speeds[i].append(wind_x)
-                i += 1
-
-        return wind_compass_avg, wind_compass_max, wind_compass_speeds
 
     def _get_wind_range_legend(self):
         wind_speed_unit = self.skin_dict["Units"]["Groups"]["group_speed"]
@@ -550,173 +505,6 @@ class JAS(SearchList):
 
         wind_range_legend += F"'>{high_range} {wind_speed_unit_label}']"
         return wind_range_legend
-
-    def _get_observation_text(self, coded_weather):
-        cloud_codes = ["CL", "FW", "SC", "BK", "OV",]
-
-        coverage_code = coded_weather.split(":")[0]
-        intensity_code = coded_weather.split(":")[1]
-        weather_code = coded_weather.split(":")[2]
-        observation_codes = []
-
-        if weather_code in cloud_codes:
-            cloud_code_key = 'cloud_code_' + weather_code
-            observation_codes.append(cloud_code_key)
-        else:
-            if coverage_code:
-                coverage_code_key = 'coverage_code_' + coverage_code
-                observation_codes.append(coverage_code_key)
-            if intensity_code:
-                intensity_code_key = 'intensity_code_' + intensity_code
-                observation_codes.append(intensity_code_key)
-
-            weather_code_key = 'weather_code_' + weather_code
-            observation_codes.append(weather_code_key)
-
-        return observation_codes
-
-    def _call_api(self, url):
-        request = Request(url)
-        response = None
-        try:
-            response = urlopen(request)
-            body = response.read()
-            response.close()
-        except HTTPError as exception:
-            body = exception.read()
-            exception.close()
-
-        data = json.loads(body)
-
-        if data['success']:
-            return data['response']
-        else:
-            logerr(F"An error occurred: {data['error']['description']}")
-            return {}
-
-    def _get_forecasts(self):
-        now = time.time()
-        current_hour = int(now - now % 3600)
-        if not os.path.isfile(self.forecast_filename):
-            forecast_data = self._retrieve_forecasts(current_hour)
-        else:
-            with open(self.forecast_filename, "r", encoding="utf-8") as forecast_fp:
-                forecast_data = json.load(forecast_fp)
-
-            if current_hour > forecast_data['generated']:
-                forecast_data = self._retrieve_forecasts(current_hour)
-
-        return forecast_data['forecasts']
-
-    def _retrieve_forecasts(self, current_hour):
-        forecast_observations = {
-            'US' : {
-                'temp_max': 'maxTempF',
-                'temp_min': 'minTempF',
-                'temp_unit': 'F',
-                'wind_conversion': 1,
-                'wind_max': 'windSpeedMaxMPH',
-                'wind_min': 'windSpeedMinMPH',
-                'wind_unit': 'mph',
-            },
-            'METRIC' : {
-                'temp_max': 'maxTempC',
-                'temp_min': 'minTempC',
-                'temp_unit': 'C',
-                'wind_conversion': 1,
-                'wind_max': 'windSpeedMaxKPH',
-                'wind_min': 'windSpeedMinKPH',
-                'wind_unit': 'km/h',
-            },
-            'METRICWX' : {
-                'temp_max': 'maxTempC',
-                'temp_min': 'minTempC',
-                'temp_unit': 'C',
-                'wind_conversion': 1000/3600,
-                'wind_max': 'windSpeedMaxKPH',
-                'wind_min': 'windSpeedMinKPH',
-                'wind_unit': 'm/s',
-            },
-
-        }
-
-        wind_decimals = to_int(self.skin_dict['Extras'].get('forecast_wind_decimals', 2))
-        data = self._call_api(self.forecast_url)
-        with open(self.raw_forecast_data_file, "w", encoding="utf-8") as raw_forecast_fp:
-            json.dump(data, raw_forecast_fp, indent=2)
-
-        forecast_data = {}
-        forecast_data['forecasts'] = []
-
-        if data:
-            forecast_data['generated'] = current_hour
-            forecasts = []
-            periods = data[0]['periods']
-
-            for period in periods:
-                forecast = {}
-                forecast['observation'] = self._get_observation_text(period['weatherPrimaryCoded'])
-                forecast['timestamp'] = period['timestamp']
-                day_of_week = (int(datetime.datetime.fromtimestamp(period['timestamp']).strftime("%w")) + 6) % 7
-                day_of_week_key = 'forecast_week_day' + str(day_of_week)
-                forecast['day'] = "'" + day_of_week_key + "'"
-                forecast['temp_min'] = period[forecast_observations[self.unit_system]['temp_min']]
-                forecast['temp_max'] = period[forecast_observations[self.unit_system]['temp_max']]
-                forecast['temp_unit'] = forecast_observations[self.unit_system]['temp_unit']
-                forecast['rain'] = period['pop']
-                forecast['wind_min'] = round(period[forecast_observations[self.unit_system]['wind_min']] \
-                                        * forecast_observations[self.unit_system]['wind_conversion'], wind_decimals)
-                forecast['wind_max'] = round(period[forecast_observations[self.unit_system]['wind_max']] \
-                                        * forecast_observations[self.unit_system]['wind_conversion'], wind_decimals)
-                forecast['wind_unit'] = forecast_observations[self.unit_system]['wind_unit']
-                forecasts.append(forecast)
-
-            forecast_data['forecasts'] = forecasts
-            with open(self.forecast_filename, "w", encoding="utf-8") as forecast_fp:
-                json.dump(forecast_data, forecast_fp, indent=2)
-        return forecast_data
-
-    def _get_current_obs(self):
-        now = time.time()
-        current_hour = int(now - now % 3600)
-        if not os.path.isfile(self.current_filename):
-            current_data = self._retrieve_current(current_hour)
-        else:
-            with open(self.current_filename, "r", encoding="utf-8") as current_fp:
-                current_data = json.load(current_fp)
-
-            if current_hour > current_data['generated']:
-                current_data = self._retrieve_current(current_hour)
-
-        return current_data['current']
-
-    def _retrieve_current(self, current_hour):
-        data = self._call_api(self.current_url)
-
-        current_data = {}
-        current_data['current'] = {}
-        current_data['current']['observation'] = ''
-
-        if data:
-            current_observation = data['ob']
-            current_data['generated'] = current_hour
-            current = {}
-
-            current['observation'] = self._get_observation_text(current_observation['weatherPrimaryCoded'])
-
-            current_data['current'] = current
-            with open(self.current_filename, "w", encoding="utf-8") as current_fp:
-                json.dump(current_data, current_fp, indent=2)
-
-        return current_data
-
-    def _check_forecast(self):
-        pages = self.skin_dict.get('Extras', {}).get('pages', {})
-        for page in pages:
-            if self.skin_dict['Extras']['pages'][page].get('enable', True) and 'forecast' in self.skin_dict['Extras']['pages'][page].sections:
-                return True
-
-        return False
 
     def _get_range(self, start, end, data_binding):
         dbm = self.generator.db_binder.get_manager(data_binding=data_binding)
@@ -738,91 +526,6 @@ class JAS(SearchList):
             end_year = int(end) + 1
 
         return (start_year, end_year)
-
-    def _get_observations_information(self):
-        observations = {}
-        aggregate_types = {}
-        # ToDo: isn't this done in the init method?
-        skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
-        charts = self.skin_dict.get('Extras', {}).get('chart_definitions', {})
-
-        pages = self.skin_dict.get('Extras', {}).get('pages', {})
-        for page in pages:
-            if not self.skin_dict['Extras']['pages'][page].get('enable', True):
-                continue
-            for chart in pages[page].sections:
-                if chart in charts:
-                    chart_data_binding = charts[chart].get('weewx', {}).get('data_binding', skin_data_binding)
-                    series = charts[chart].get('series', {})
-                    for obs in series:
-                        weewx_options = series[obs].get('weewx', {})
-                        observation = weewx_options.get('observation', obs)
-                        obs_data_binding = series[obs].get('weewx', {}).get('data_binding', chart_data_binding)
-                        if observation not in self.wind_observations:
-                            if observation not in observations:
-                                observations[observation] = {}
-                                observations[observation]['aggregate_types'] = {}
-
-                            aggregate_type = weewx_options.get('aggregate_type', 'avg')
-                            if aggregate_type not in observations[observation]['aggregate_types']:
-                                observations[observation]['aggregate_types'][aggregate_type] = {}
-
-                            if obs_data_binding not in observations[observation]['aggregate_types'][aggregate_type]:
-                                observations[observation]['aggregate_types'][aggregate_type][obs_data_binding] = {}
-
-                            unit = weewx_options.get('unit', 'default')
-                            observations[observation]['aggregate_types'][aggregate_type][obs_data_binding][unit] = {}
-                            aggregate_types[aggregate_type] = {}
-
-        minmax_observations = self.skin_dict.get('Extras', {}).get('minmax', {}).get('observations', {})
-        minmax_data_binding = self.skin_dict.get('Extras', {}).get('minmax', {}).get('data_binding', skin_data_binding)
-        if minmax_observations:
-            for observation in self.skin_dict['Extras']['minmax']['observations'].sections:
-                data_binding = minmax_observations[observation].get('data_binding', minmax_data_binding)
-                if observation not in self.wind_observations:
-                    unit = minmax_observations[observation].get('unit', 'default')
-                    if observation not in observations:
-                        observations[observation] = {}
-                        observations[observation]['aggregate_types'] = {}
-
-                    if 'min' not in observations[observation]['aggregate_types']:
-                        observations[observation]['aggregate_types']['min'] = {}
-                    if data_binding not in observations[observation]['aggregate_types']['min']:
-                        observations[observation]['aggregate_types']['min'][data_binding] = {}
-                    observations[observation]['aggregate_types']['min'][data_binding][unit] = {}
-                    aggregate_types['min'] = {}
-                    if 'max' not in observations[observation]['aggregate_types']:
-                        observations[observation]['aggregate_types']['max'] = {}
-                    if data_binding not in observations[observation]['aggregate_types']['max']:
-                        observations[observation]['aggregate_types']['max'][data_binding] = {}
-                    observations[observation]['aggregate_types']['max'][data_binding][unit] = {}
-                    aggregate_types['max'] = {}
-
-        if 'thisdate' in self.skin_dict['Extras']:
-            thisdate_observations = self.skin_dict.get('Extras', {}).get('thisdate', {}).get('observations', {})
-            thisdate_data_binding = self.skin_dict.get('Extras', {}).get('thisdate', {}).get('data_binding', skin_data_binding)
-            for observation in  self.skin_dict['Extras']['thisdate']['observations'].sections:
-                data_binding = thisdate_observations[observation].get('data_binding', thisdate_data_binding)
-                if observation not in self.wind_observations:
-                    unit = thisdate_observations[observation].get('unit', 'default')
-                    if observation not in observations:
-                        observations[observation] = {}
-                        observations[observation]['aggregate_types'] = {}
-
-                    if 'min' not in observations[observation]['aggregate_types']:
-                        observations[observation]['aggregate_types']['min'] = {}
-                    if data_binding not in observations[observation]['aggregate_types']['min']:
-                        observations[observation]['aggregate_types']['min'][data_binding] = {}
-                    observations[observation]['aggregate_types']['min'][data_binding][unit] = {}
-                    aggregate_types['min'] = {}
-                    if 'max' not in observations[observation]['aggregate_types']:
-                        observations[observation]['aggregate_types']['max'] = {}
-                    if data_binding not in observations[observation]['aggregate_types']['max']:
-                        observations[observation]['aggregate_types']['max'][data_binding] = {}
-                    observations[observation]['aggregate_types']['max'][data_binding][unit] = {}
-                    aggregate_types['max'] = {}
-
-        return observations, aggregate_types
 
     def _set_chart_defs(self):
         self.chart_defs = configobj.ConfigObj()
@@ -1137,333 +840,6 @@ class JAS(SearchList):
         if to_bool(self.skin_dict['Extras'].get('log_times', True)):
             logdbg(log_msg)
         return chart_final
-
-    def _gen_all_data(self):
-        print("start")
-        logdbg('start')
-        generator_dict = {'archive-day'  : weeutil.weeutil.genDaySpans,
-                    'archive-month': weeutil.weeutil.genMonthSpans,
-                    'archive-year' : weeutil.weeutil.genYearSpans}
-
-        default_binding = 'wx_binding' #todo
-        self.data_binding = default_binding
-
-        # Get start and stop times
-        default_archive = self.generator.db_binder.get_manager(default_binding)
-        start_ts = default_archive.firstGoodStamp()
-        if not start_ts:
-            log.info('Skipping, cannot find start time')
-            return
-
-        if self.generator.gen_ts:
-            record = default_archive.getRecord(self.generator.gen_ts)
-            if record:
-                stop_ts = record['dateTime']
-            else:
-                log.info('Skipping, generate time %s not in database', timestamp_to_string(self.generator.gen_ts))
-                return
-        else:
-            stop_ts = default_archive.lastGoodStamp()
-
-        destination_dir = os.path.join(self.generator.config_dict['WEEWX_ROOT'],
-                                       self.skin_dict['HTML_ROOT'],
-                                       'dataload')
-        logdbg(destination_dir)
-
-        try:
-            # Create the directory that is to receive the generated files.  If
-            # it already exists an exception will be thrown, so be prepared to
-            # catch it.
-            os.makedirs(destination_dir)
-        except OSError:
-            pass
-
-        for page_name in self.skin_dict['Extras']['pages'].sections:
-
-            logdbg(page_name)
-            if self.skin_dict['Extras']['pages'].get('enable', True) and \
-                page_name in self.skin_dict['Extras']['page_definition'] and \
-                self.skin_dict['Extras']['page_definition'][page_name].get('series_type', 'single') == 'single':
-
-                generate_interval = self.skin_dict['Extras']['page_definition'][page_name].get('generate_interval', None)
-                logdbg("process")
-                if page_name in generator_dict:
-                    _spangen = generator_dict[page_name]
-                else:
-                    _spangen = lambda start_ts, stop_ts: [weeutil.weeutil.TimeSpan(start_ts, stop_ts)]
-
-                for timespan in _spangen(start_ts, stop_ts):
-                    self.timespan = timespan # todo
-                    start_tt = time.localtime(timespan.start)
-                    stop_tt = time.localtime(timespan.stop)
-                    if page_name == 'archive-year':
-                        #filename =  "%4d.js" % start_tt[0]
-                        filename = os.path.join(destination_dir, "%4d.js") % start_tt[0]
-                        period_type = 'historical'
-                        time_period = 'year'
-                        interval_long_name = f"year{start_tt[0]:4d}_"
-                    elif page_name == 'archive-month':
-                        #filename = "%4d-%02d.js" % (start_tt[0], start_tt[1])
-                        filename = os.path.join(destination_dir, "%4d-%02d.js") % (start_tt[0], start_tt[1])
-                        period_type = 'historical'
-                        time_period = 'month'
-                        interval_long_name = f"month{start_tt[0]:4d}{start_tt[1]:02d}_"
-                    elif page_name == 'debug':
-                        filename = os.path.join(destination_dir, page_name + '.js')
-                        period_type = 'active'
-                        time_period = self.skin_dict['Extras']['pages']['debug'].get('simulate_page', 'last24hours')
-                        interval_long_name = self.skin_dict['Extras']['pages']['debug'].get('simulate_interval', 'last24hours') + '_'
-                    else:
-                        filename = os.path.join(destination_dir, page_name + '.js')
-                        period_type = 'active'
-                        time_period = page_name
-                        interval_long_name = page_name + '_'
-
-                    if self._skip_generation(timespan, generate_interval, period_type, filename, stop_ts):
-                        continue
-
-                    data = self._gen_data_load(filename, '', time_period, period_type, page_name, interval_long_name)
-                    byte_string = data.encode('utf8')
-
-                    try:
-                        # Write to a temporary file first
-                        tmpname = filename + '.tmp'
-                        # Open it in binary mode. We are writing a byte-string, not a string
-                        with open(tmpname, mode='wb') as temp_file:
-                            temp_file.write(byte_string)
-                        # Now move the temporary file into place
-                        os.rename(tmpname, filename)
-                    finally:
-                        try:
-                            os.unlink(tmpname)
-                        except OSError:
-                            pass
-
-    def _skip_generation(self, timespan, generate_interval, interval_type, filename, stop_ts):
-        # Skip summary files outside the timespan
-        if interval_type == 'historical' \
-                and os.path.exists(filename) \
-                and not timespan.includesArchiveTime(stop_ts):
-            return True
-
-        # Convert from possible string to an integer:
-        generate_interval_seconds = weeutil.weeutil.nominal_spans(generate_interval)
-
-        # Images without an aggregation interval have to be plotted every time. Also, the image
-        # definitely has to be generated if it doesn't exist.
-        if generate_interval_seconds is None or not os.path.exists(filename):
-            return False
-
-        # If its a very old image, then it has to be regenerated
-        if self.generator.gen_ts - os.stat(filename).st_mtime >= generate_interval_seconds:
-            return False
-
-        # If we're on an aggregation boundary, regenerate.
-        time_dt = datetime.datetime.fromtimestamp(self.generator.gen_ts)
-        tdiff = time_dt -  time_dt.replace(hour=0, minute=0, second=0, microsecond=0)
-        if abs(tdiff.seconds % generate_interval_seconds) < 1:
-            return False
-
-        return True
-
-
-    def _gen_data_load(self, filename, page, interval, interval_type, page_definition_name, interval_long_name):
-        start_time = time.time()
-
-        skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
-        page_data_binding = self.skin_dict['Extras']['pages'][page_definition_name].get('data_binding', skin_data_binding)
-        data = ''
-        data += '// the start\n'
-        data += "pageData = {};\n"
-        data += 'function ' + interval_long_name + 'dataLoad() {\n'
-        data += '  traceStart = Date.now();\n'
-        data += '        console.debug(Date.now().toString() + " dataLoad start");\n'
-        if self.data_current:
-            data += '  pageData.currentObservations = ["' + '", "'.join(self.data_current['observation']) + '"];\n'
-
-        data += '  pageData.forecasts = [];\n'
-        data += '\n'
-        if self.data_forecast:
-            for forecast in self.data_forecast:
-                data += '  forecast = {};\n'
-                data += '  forecast.timestamp = ' + str(forecast["timestamp"]) + ';\n'
-                data += '  forecast.observation_codes = ["' + '", "'.join(forecast["observation"]) + '"];\n'
-                data += '  forecast.day_code = ' + forecast["day"] + ';\n'
-                data += '  forecast.temp_min = ' + str(forecast["temp_min"]) + ';\n'
-                data += '  forecast.temp_max = ' + str(forecast["temp_max"]) + ';\n'
-                data += '  forecast.temp_unit = "' + forecast["temp_unit"] + '";\n'
-                data += '  forecast.rain = ' + str(forecast["rain"]) + ';\n'
-                data += '  forecast.wind_min = ' + str(forecast["wind_min"]) + ';\n'
-                data += '  forecast.wind_max = ' + str(forecast["wind_max"]) + ';\n'
-                data += '  forecast.wind_unit = "' + forecast["wind_unit"] + '";\n'
-                data += '  pageData.forecasts.push(forecast);\n'
-                data += '\n'
-
-        data += self._gen_data_load2(interval, interval_type, page_definition_name, skin_data_binding, page_data_binding)
-
-        data += self._gen_aggregate_objects(interval, page_definition_name, interval_long_name)
-
-        if self.skin_dict['Extras']['pages'][page_definition_name].get('current', None) is not None:
-            data += self._gen_data_load3(skin_data_binding, interval)
-
-        data += "\n"
-
-        data += "\n"
-        if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
-            data += self._gen_windrose(page_data_binding, interval, page_definition_name, interval_long_name)
-
-        data += '        console.debug(Date.now().toString() + " dataLoad end");\n'
-        data += "}\n"
-        data += "\n"
-
-        elapsed_time = time.time() - start_time
-        log_msg = "Generated " + self.html_root + "/" + filename + " in " + str(elapsed_time)
-        if to_bool(self.skin_dict['Extras'].get('log_times', True)):
-            logdbg(log_msg)
-        return data
-
-    # Create the data used to display current conditions.
-    # This data is only used when MQTT is not enabled.
-    # This data is stored in a javascript object named 'current'.
-    # 'current.header' is an object with the data for the header portion of this section.
-    # 'current.observations' is a map. The key is the observation name, like 'outTemp'. The value is the data to populate the section.
-    def _gen_data_load3(self, skin_data_binding, interval):
-        data = ''
-
-        current_data_binding = self.skin_dict['Extras']['current'].get('data_binding', skin_data_binding)
-        interval_current = self.skin_dict['Extras']['current'].get('interval', interval)
-
-        #data += 'var mqtt_enabled = false;\n'
-        data += '  pageData.updateDate = ' + str(self._get_current('dateTime', data_binding=current_data_binding, unit_name='default').raw * 1000) + ';\n'
-        if self.skin_dict['Extras']['current'].get('observation', False):
-            data_binding = self.skin_dict['Extras']['current'].get('header_data_binding', current_data_binding)
-            data += '  pageData.currentHeaderValue = "' + self._get_current(self.skin_dict['Extras']['current']['observation'], data_binding, 'default').format(add_label=False,localize=False) + '";\n'
-
-        data += '  var currentData = {};\n'
-        for observation in self.skin_dict['Extras']['current']['observations']:
-            data_binding = self.skin_dict['Extras']['current']['observations'][observation].get('data_binding', current_data_binding)
-            type_value =  self.skin_dict['Extras']['current']['observations'][observation].get('type', "")
-            unit_name = self.skin_dict['Extras']['current']['observations'][observation].get('unit', "default")
-
-            if type_value == 'rise':
-                 # todo this is a place holder and needs work
-                #set observation_value = '"' + str($getattr($almanac, $observation + 'rise')) + '";'
-                observation_value = 'bar'
-                #label = 'foo'
-            elif type_value == 'sum':
-                observation_value = self._get_aggregate(observation, data_binding, interval_current, type_value, unit_name, False)
-            else:
-                observation_value = self._get_current(observation, data_binding, unit_name).format(add_label=False,localize=False)
-
-            data += '  currentData.' + observation + ' = "' + observation_value + '";\n'
-
-        data += '  pageData.currentData = JSON.stringify(currentData);'
-        return data
-
-    def _gen_data_load2(self, interval, interval_type, page_definition_name, skin_data_binding, page_data_binding):
-        data = ""
-
-        skin_timespan_binder = self._get_timespan_binder(interval, skin_data_binding)
-        page_timespan_binder = self._get_timespan_binder(interval, page_data_binding)
-
-        if interval_type == 'active':
-            data += "  pageData.startDate = moment('" + getattr(page_timespan_binder, 'start').format("%Y-%m-%dT%H:%M:%S") + "').utcOffset(" + str(self.utc_offset) + ");\n"
-            data += "  pageData.endDate = moment('" + getattr(page_timespan_binder, 'end').format("%Y-%m-%dT%H:%M:%S") + "').utcOffset(" + str(self.utc_offset) + ");\n"
-            data += "  pageData.startTimestamp = " + str(getattr(page_timespan_binder, 'start').raw * 1000) + ";\n"
-            data += "  pageData.endTimestamp = " + str(getattr(page_timespan_binder, 'end').raw * 1000) + ";\n"
-        else:
-            # ToDo: document that skin data binding controls start/end of historical data
-            # ToDo: make start/end configurable
-            start_timestamp = weeutil.weeutil.startOfDay(getattr(getattr(skin_timespan_binder, 'usUnits'), 'firsttime').raw)
-            end_timestamp = weeutil.weeutil.startOfDay(getattr(getattr(skin_timespan_binder, 'usUnits'), 'lasttime').raw)
-            start_date = datetime.datetime.fromtimestamp(start_timestamp).strftime('%Y-%m-%dT%H:%M:%S')
-            end_date = datetime.datetime.fromtimestamp(end_timestamp).strftime('%Y-%m-%dT%H:%M:%S')
-
-            data += "pageData.startTimestamp =  " + str(start_timestamp * 1000) + ";\n"
-            data += "pageData.startDate = moment('" + start_date + "').utcOffset(" + str(self.utc_offset) + ");\n"
-            data += "pageData.endTimestamp =  " + str(end_timestamp * 1000) + ";\n"
-            data += "pageData.endDate = moment('" + end_date + "').utcOffset(" + str(self.utc_offset) + ");\n"
-
-        data += "\n"
-        data += self._gen_interval_end_timestamp(page_data_binding, interval, page_definition_name)
-
-        return data
-
-    # Create time stamps by aggregation time for the end of interval
-    # For example: endTimestamp_min, endTimestamp_max
-    def _gen_interval_end_timestamp(self, page_data_binding, interval_name, page_definition_name):
-        data = ''
-        for aggregate_type in self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval']:
-            aggregate_interval = self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval'][aggregate_type]
-            if aggregate_interval == 'day':
-                end_timestamp =(self._get_timespan_binder(interval_name, page_data_binding).end.raw // 86400 * 86400 - (self.utc_offset * 60)) * 1000
-            elif aggregate_interval == 'hour':
-                end_timestamp =(self._get_timespan_binder(interval_name, page_data_binding).end.raw // 3600 * 3600 - (self.utc_offset * 60)) * 1000
-            else:
-                end_timestamp =(self._get_timespan_binder(interval_name, page_data_binding).end.raw // 60 * 60 - (self.utc_offset * 60)) * 1000
-
-            data +=  "  pageData.endTimestamp_" + aggregate_type +  " = " +  str(end_timestamp) + ";\n"
-
-        return data
-
-    def _gen_aggregate_objects(self, interval, page_definition_name, interval_long_name):
-        data = ""
-
-        # Define the 'aggegate' objects to hold the data
-        # For example: last7days_min = {}, last7days_max = {}
-        for aggregate_type in self.aggregate_types:
-            data += "  pageData." + interval_long_name + aggregate_type + " = {};\n"
-
-        for observation, observation_items in self.observations.items():
-            for aggregate_type, aggregate_type_items in observation_items['aggregate_types'].items():
-                aggregate_interval = self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval'].get(aggregate_type, None)
-                interval_name = interval_long_name + aggregate_type
-                for data_binding, data_binding_items in aggregate_type_items.items():
-                    for unit_name in data_binding_items:
-                        name_prefix = interval_name + "." + observation + "_"  + data_binding
-                        name_prefix2 = interval_name + "_" + observation + "_"  + data_binding
-                        if unit_name == "default":
-                            pass
-                        else:
-                            name_prefix += "_" + unit_name
-                            name_prefix2 += "_" + unit_name
-
-                        array_name = name_prefix
-
-                        if aggregate_interval is not None:
-                            data += "  pageData." + array_name + " = " + self._get_series(observation, data_binding, interval, aggregate_type, aggregate_interval, 'start', 'unix_epoch_ms', unit_name, 2, True) + ";\n"
-                        else:
-                            # wind 'observation' is special see #87
-                            if observation == 'wind':
-                                if aggregate_type == 'max':
-                                    weewx_observation = 'windGust'
-                                else:
-                                    weewx_observation = 'windSpeed'
-                                #end if
-                            else:
-                                weewx_observation = observation
-                            #end if
-                            data += "  pageData." + array_name + " = " + self._get_series(weewx_observation, data_binding, interval, None, None, 'start', 'unix_epoch_ms', unit_name, 2, True) + ";\n"
-
-        data += "\n"
-        return data
-
-    # Proof of concept - wind rose
-    # Create data for wind rose chart
-    def _gen_windrose(self, page_data_binding, interval_name, page_definition_name, interval_long_name):
-        data = ''
-
-        interval_start_seconds_global = self._get_timespan_binder(interval_name, page_data_binding).start.raw
-        interval_end_seconds_global = self._get_timespan_binder(interval_name, page_data_binding).end.raw
-
-        if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
-            avg_value, max_value, wind_directions = self._get_wind_compass(data_binding=page_data_binding, start_time=interval_start_seconds_global, end_time=interval_end_seconds_global) # need to match function signature pylint: disable=unused-variable
-            i = 0
-            for wind in wind_directions:
-                data += "  pageData." + interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + " = JSON.stringify(" +  str(wind) +  ");\n"
-                i += 1
-
-        return data
 
     def _gen_js(self, filename, page, page_name, year, month, interval_long_name):
         start_time = time.time()
@@ -2411,16 +1787,184 @@ window.addEventListener("message",
             logdbg(log_msg)
         return data
 
-    def _get_timespan_binder(self, time_period, data_binding):
-        return TimespanBinder(self._get_timespan(time_period, self.timespan.stop),
-                                     self.generator.db_binder.bind_default(data_binding),
-                                     data_binding=data_binding,
-                                     context=time_period,
-                                     formatter=self.generator.formatter,
-                                     converter=self.generator.converter)
+class DataGenerator(weewx.reportengine.ReportGenerator):
+    """ Generate the data used by the JAS skin. """
+    def __init__(self, config_dict, skin_dict, *args, **kwargs):
+        """Initialize an instance of DataGenerator"""
+        weewx.reportengine.ReportGenerator.__init__(self, config_dict, skin_dict, *args, **kwargs)
+
+        self.formatter = weewx.units.Formatter.fromSkinDict(skin_dict)
+        self.converter = weewx.units.Converter.fromSkinDict(skin_dict)
+
+        report_dict = self.config_dict.get('StdReport', {})
+        self.unit_system = self.skin_dict.get('unit_system', 'us').upper()
+        self.data_binding = self.skin_dict['data_binding']
+
+        now = time.time()
+        self.utc_offset = (datetime.datetime.fromtimestamp(now) -
+                           datetime.datetime.utcfromtimestamp(now)).total_seconds()/60
+
+        self.wind_ranges = {}
+        self.wind_ranges['mile_per_hour'] = [1, 4, 8, 13, 19, 25, 32]
+        self.wind_ranges['mile_per_hour2'] = [1, 4, 8, 13, 19, 25, 32]
+        self.wind_ranges['km_per_hour'] = [.5, 6, 12, 20, 29, 39, 50]
+        self.wind_ranges['km_per_hour2'] = [.5, 6, 12, 20, 29, 39, 50]
+        self.wind_ranges['meter_per_second'] = [1, 1.6, 3.4, 5.5, 8, 10.8, 13.9]
+        self.wind_ranges['meter_per_second2'] = [1, 1.6, 3.4, 5.5, 8, 10.8, 13.9]
+        self.wind_ranges['knot'] = [1, 4, 7, 11, 17, 22, 28]
+        self.wind_ranges['knot2'] = [1, 4, 7, 11, 17, 22, 28]
+        self.wind_ranges_count = 7
+
+        self.wind_observations = ['windCompassAverage', 'windCompassMaximum',
+                                  'windCompassRange0', 'windCompassRange1', 'windCompassRange2',
+                                  'windCompassRange3', 'windCompassRange4', 'windCompassRange5', 'windCompassRange6']
+
+        html_root = self.skin_dict.get('HTML_ROOT',
+                                       report_dict.get('HTML_ROOT', 'public_html'))
+
+        latitude = self.config_dict['Station']['latitude']
+        longitude = self.config_dict['Station']['longitude']
+
+        html_root = os.path.join(self.config_dict['WEEWX_ROOT'], html_root)
+        self.html_root = html_root
+        self.mkdir_p(os.path.join(self.html_root, 'data'))
+
+        forecast_filename = 'forecast.json'
+
+        forecast_endpoint = 'https://api.aerisapi.com/forecasts/'
+
+        current_filename = 'current.json'
+        current_endpoint = 'https://api.aerisapi.com/observations/'
+
+        self.forecast_filename = os.path.join(self.html_root, 'data', forecast_filename)
+
+        self.current_filename = os.path.join(self.html_root, 'data', current_filename)
+
+        self.raw_forecast_data_file = os.path.join(
+            self.html_root, 'data', 'raw.forecast.json')
+
+        client_id = self.skin_dict['Extras'].get('client_id')
+        if client_id:
+            client_secret = self.skin_dict['Extras']['client_secret']
+            self.forecast_url = F"{forecast_endpoint}{latitude},{longitude}?"
+            self.forecast_url += F"format=json&filter=day&limit=7&client_id={client_id}&client_secret={client_secret}"
+
+            self.current_url = F"{current_endpoint}{latitude},{longitude}?"
+            self.current_url += F"&format=json&filter=allstations&limit=1&client_id={client_id}&client_secret={client_secret}"
+
+        self.observations, self.aggregate_types = self._get_observations_information()
+
+        self.data_current = None
+        if to_bool(self.skin_dict['Extras'].get('display_aeris_observation', False)):
+            self.data_current = self._get_current_obs()
+
+        self.data_forecast = None
+        if self._check_forecast():
+            self.data_forecast = self._get_forecasts()
+
+    def _call_api(self, url):
+        request = Request(url)
+        response = None
+        try:
+            response = urlopen(request)
+            body = response.read()
+            response.close()
+        except HTTPError as exception:
+            body = exception.read()
+            exception.close()
+
+        data = json.loads(body)
+
+        if data['success']:
+            return data['response']
+        else:
+            logerr(F"An error occurred: {data['error']['description']}")
+            return {}
+
+    def _get_forecasts(self):
+        now = time.time()
+        current_hour = int(now - now % 3600)
+        if not os.path.isfile(self.forecast_filename):
+            forecast_data = self._retrieve_forecasts(current_hour)
+        else:
+            with open(self.forecast_filename, "r", encoding="utf-8") as forecast_fp:
+                forecast_data = json.load(forecast_fp)
+
+            if current_hour > forecast_data['generated']:
+                forecast_data = self._retrieve_forecasts(current_hour)
+
+        return forecast_data['forecasts']
+
+    def _retrieve_forecasts(self, current_hour):
+        forecast_observations = {
+            'US' : {
+                'temp_max': 'maxTempF',
+                'temp_min': 'minTempF',
+                'temp_unit': 'F',
+                'wind_conversion': 1,
+                'wind_max': 'windSpeedMaxMPH',
+                'wind_min': 'windSpeedMinMPH',
+                'wind_unit': 'mph',
+            },
+            'METRIC' : {
+                'temp_max': 'maxTempC',
+                'temp_min': 'minTempC',
+                'temp_unit': 'C',
+                'wind_conversion': 1,
+                'wind_max': 'windSpeedMaxKPH',
+                'wind_min': 'windSpeedMinKPH',
+                'wind_unit': 'km/h',
+            },
+            'METRICWX' : {
+                'temp_max': 'maxTempC',
+                'temp_min': 'minTempC',
+                'temp_unit': 'C',
+                'wind_conversion': 1000/3600,
+                'wind_max': 'windSpeedMaxKPH',
+                'wind_min': 'windSpeedMinKPH',
+                'wind_unit': 'm/s',
+            },
+
+        }
+
+        wind_decimals = to_int(self.skin_dict['Extras'].get('forecast_wind_decimals', 2))
+        data = self._call_api(self.forecast_url)
+        with open(self.raw_forecast_data_file, "w", encoding="utf-8") as raw_forecast_fp:
+            json.dump(data, raw_forecast_fp, indent=2)
+
+        forecast_data = {}
+        forecast_data['forecasts'] = []
+
+        if data:
+            forecast_data['generated'] = current_hour
+            forecasts = []
+            periods = data[0]['periods']
+
+            for period in periods:
+                forecast = {}
+                forecast['observation'] = self._get_observation_text(period['weatherPrimaryCoded'])
+                forecast['timestamp'] = period['timestamp']
+                day_of_week = (int(datetime.datetime.fromtimestamp(period['timestamp']).strftime("%w")) + 6) % 7
+                day_of_week_key = 'forecast_week_day' + str(day_of_week)
+                forecast['day'] = "'" + day_of_week_key + "'"
+                forecast['temp_min'] = period[forecast_observations[self.unit_system]['temp_min']]
+                forecast['temp_max'] = period[forecast_observations[self.unit_system]['temp_max']]
+                forecast['temp_unit'] = forecast_observations[self.unit_system]['temp_unit']
+                forecast['rain'] = period['pop']
+                forecast['wind_min'] = round(period[forecast_observations[self.unit_system]['wind_min']] \
+                                        * forecast_observations[self.unit_system]['wind_conversion'], wind_decimals)
+                forecast['wind_max'] = round(period[forecast_observations[self.unit_system]['wind_max']] \
+                                        * forecast_observations[self.unit_system]['wind_conversion'], wind_decimals)
+                forecast['wind_unit'] = forecast_observations[self.unit_system]['wind_unit']
+                forecasts.append(forecast)
+
+            forecast_data['forecasts'] = forecasts
+            with open(self.forecast_filename, "w", encoding="utf-8") as forecast_fp:
+                json.dump(forecast_data, forecast_fp, indent=2)
+        return forecast_data
 
     def _get_current(self, obs_type, data_binding, unit_name=None):
-        db_manager = self.generator.db_binder.get_manager(data_binding=data_binding)
+        db_manager = self.db_binder.get_manager(data_binding=data_binding)
 
         # Start of code stolen from tags.py CurrentObj __getattr__
         # The WeeWx method was using the 'current' record to perform the XType calculation.
@@ -2444,7 +1988,7 @@ window.addEventListener("message",
                 value_tuple = weewx.units.UnknownType(obs_type)
 
         # Finally, return a ValueHelper
-        current_value =  weewx.units.ValueHelper(value_tuple, 'current', self.generator.formatter, self.generator.converter)
+        current_value =  weewx.units.ValueHelper(value_tuple, 'current', self.formatter, self.converter)
         # End of stolen code
 
         if unit_name != 'default':
@@ -2452,51 +1996,122 @@ window.addEventListener("message",
         else:
             return current_value
 
-    def _get_aggregate(self, observation, data_binding, time_period, aggregate_type, unit_name = None, rounding=2, add_label=False, localize=False):
-        obs_binder = weewx.tags.ObservationBinder(
-            observation,
-            self._get_timespan(time_period, self.timespan.stop),
-            self.generator.db_binder.bind_default(data_binding),
-            data_binding,
-            time_period,
-            self.generator.formatter,
-            self.generator.converter,
-        )
+    def _get_observations_information(self):
+        observations = {}
+        aggregate_types = {}
+        # ToDo: isn't this done in the init method?
+        skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
+        charts = self.skin_dict.get('Extras', {}).get('chart_definitions', {})
 
-        data_aggregate_binder = getattr(obs_binder, aggregate_type)
+        pages = self.skin_dict.get('Extras', {}).get('pages', {})
+        for page in pages:
+            if not self.skin_dict['Extras']['pages'][page].get('enable', True):
+                continue
+            for chart in pages[page].sections:
+                if chart in charts:
+                    chart_data_binding = charts[chart].get('weewx', {}).get('data_binding', skin_data_binding)
+                    series = charts[chart].get('series', {})
+                    for obs in series:
+                        weewx_options = series[obs].get('weewx', {})
+                        observation = weewx_options.get('observation', obs)
+                        obs_data_binding = series[obs].get('weewx', {}).get('data_binding', chart_data_binding)
+                        if observation not in self.wind_observations:
+                            if observation not in observations:
+                                observations[observation] = {}
+                                observations[observation]['aggregate_types'] = {}
 
-        if unit_name != 'default':
-            data = getattr(data_aggregate_binder, unit_name)
+                            aggregate_type = weewx_options.get('aggregate_type', 'avg')
+                            if aggregate_type not in observations[observation]['aggregate_types']:
+                                observations[observation]['aggregate_types'][aggregate_type] = {}
+
+                            if obs_data_binding not in observations[observation]['aggregate_types'][aggregate_type]:
+                                observations[observation]['aggregate_types'][aggregate_type][obs_data_binding] = {}
+
+                            unit = weewx_options.get('unit', 'default')
+                            observations[observation]['aggregate_types'][aggregate_type][obs_data_binding][unit] = {}
+                            aggregate_types[aggregate_type] = {}
+
+        minmax_observations = self.skin_dict.get('Extras', {}).get('minmax', {}).get('observations', {})
+        minmax_data_binding = self.skin_dict.get('Extras', {}).get('minmax', {}).get('data_binding', skin_data_binding)
+        if minmax_observations:
+            for observation in self.skin_dict['Extras']['minmax']['observations'].sections:
+                data_binding = minmax_observations[observation].get('data_binding', minmax_data_binding)
+                if observation not in self.wind_observations:
+                    unit = minmax_observations[observation].get('unit', 'default')
+                    if observation not in observations:
+                        observations[observation] = {}
+                        observations[observation]['aggregate_types'] = {}
+
+                    if 'min' not in observations[observation]['aggregate_types']:
+                        observations[observation]['aggregate_types']['min'] = {}
+                    if data_binding not in observations[observation]['aggregate_types']['min']:
+                        observations[observation]['aggregate_types']['min'][data_binding] = {}
+                    observations[observation]['aggregate_types']['min'][data_binding][unit] = {}
+                    aggregate_types['min'] = {}
+                    if 'max' not in observations[observation]['aggregate_types']:
+                        observations[observation]['aggregate_types']['max'] = {}
+                    if data_binding not in observations[observation]['aggregate_types']['max']:
+                        observations[observation]['aggregate_types']['max'][data_binding] = {}
+                    observations[observation]['aggregate_types']['max'][data_binding][unit] = {}
+                    aggregate_types['max'] = {}
+
+        if 'thisdate' in self.skin_dict['Extras']:
+            thisdate_observations = self.skin_dict.get('Extras', {}).get('thisdate', {}).get('observations', {})
+            thisdate_data_binding = self.skin_dict.get('Extras', {}).get('thisdate', {}).get('data_binding', skin_data_binding)
+            for observation in  self.skin_dict['Extras']['thisdate']['observations'].sections:
+                data_binding = thisdate_observations[observation].get('data_binding', thisdate_data_binding)
+                if observation not in self.wind_observations:
+                    unit = thisdate_observations[observation].get('unit', 'default')
+                    if observation not in observations:
+                        observations[observation] = {}
+                        observations[observation]['aggregate_types'] = {}
+
+                    if 'min' not in observations[observation]['aggregate_types']:
+                        observations[observation]['aggregate_types']['min'] = {}
+                    if data_binding not in observations[observation]['aggregate_types']['min']:
+                        observations[observation]['aggregate_types']['min'][data_binding] = {}
+                    observations[observation]['aggregate_types']['min'][data_binding][unit] = {}
+                    aggregate_types['min'] = {}
+                    if 'max' not in observations[observation]['aggregate_types']:
+                        observations[observation]['aggregate_types']['max'] = {}
+                    if data_binding not in observations[observation]['aggregate_types']['max']:
+                        observations[observation]['aggregate_types']['max'][data_binding] = {}
+                    observations[observation]['aggregate_types']['max'][data_binding][unit] = {}
+                    aggregate_types['max'] = {}
+
+        return observations, aggregate_types
+
+    def _check_forecast(self):
+        pages = self.skin_dict.get('Extras', {}).get('pages', {})
+        for page in pages:
+            if self.skin_dict['Extras']['pages'][page].get('enable', True) and 'forecast' in self.skin_dict['Extras']['pages'][page].sections:
+                return True
+
+        return False
+
+    def _get_observation_text(self, coded_weather):
+        cloud_codes = ["CL", "FW", "SC", "BK", "OV",]
+
+        coverage_code = coded_weather.split(":")[0]
+        intensity_code = coded_weather.split(":")[1]
+        weather_code = coded_weather.split(":")[2]
+        observation_codes = []
+
+        if weather_code in cloud_codes:
+            cloud_code_key = 'cloud_code_' + weather_code
+            observation_codes.append(cloud_code_key)
         else:
-            data = data_aggregate_binder
+            if coverage_code:
+                coverage_code_key = 'coverage_code_' + coverage_code
+                observation_codes.append(coverage_code_key)
+            if intensity_code:
+                intensity_code_key = 'intensity_code_' + intensity_code
+                observation_codes.append(intensity_code_key)
 
-        if rounding:
-            return data.round(rounding).format(add_label=add_label, localize=localize)
+            weather_code_key = 'weather_code_' + weather_code
+            observation_codes.append(weather_code_key)
 
-        return data.format(add_label=add_label, localize=localize)
-
-    def _get_series(self, observation, data_binding, time_period, aggregate_type=None, aggregate_interval=None, time_series='both', time_unit='unix_epoch', unit_name = None, rounding=2, jsonize=True):
-        obs_binder = weewx.tags.ObservationBinder(
-            observation,
-            self._get_timespan(time_period, self.timespan.stop),
-            self.generator.db_binder.bind_default(data_binding),
-            data_binding,
-            time_period,
-            self.generator.formatter,
-            self.generator.converter,
-        )
-
-        data_series_helper = obs_binder.series(aggregate_type=aggregate_type, aggregate_interval=aggregate_interval, time_series=time_series, time_unit=time_unit)
-        if unit_name != 'default':
-            data2 = getattr(data_series_helper, unit_name)
-        else:
-            data2 = data_series_helper
-
-        data3 = data2.round(rounding)
-        if jsonize:
-            return data3.json()
-
-        return data3
+        return observation_codes
 
     def _get_timespan(self, time_period, time_stamp):
 
@@ -2536,6 +2151,520 @@ window.addEventListener("message",
             return TimeSpan(start_timestamp, time_stamp)
 
         raise AttributeError(time_period)
+
+    # Create time stamps by aggregation time for the end of interval
+    # For example: endTimestamp_min, endTimestamp_max
+    def _gen_interval_end_timestamp(self, page_data_binding, interval_name, page_definition_name):
+        data = ''
+        for aggregate_type in self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval']:
+            aggregate_interval = self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval'][aggregate_type]
+            if aggregate_interval == 'day':
+                end_timestamp =(self._get_timespan_binder(interval_name, page_data_binding).end.raw // 86400 * 86400 - (self.utc_offset * 60)) * 1000
+            elif aggregate_interval == 'hour':
+                end_timestamp =(self._get_timespan_binder(interval_name, page_data_binding).end.raw // 3600 * 3600 - (self.utc_offset * 60)) * 1000
+            else:
+                end_timestamp =(self._get_timespan_binder(interval_name, page_data_binding).end.raw // 60 * 60 - (self.utc_offset * 60)) * 1000
+
+            data +=  "  pageData.endTimestamp_" + aggregate_type +  " = " +  str(end_timestamp) + ";\n"
+
+        return data
+
+    def _get_timespan_binder(self, time_period, data_binding):
+        return TimespanBinder(self._get_timespan(time_period, self.timespan.stop),
+                                     self.db_binder.bind_default(data_binding),
+                                     data_binding=data_binding,
+                                     context=time_period,
+                                     formatter=self.formatter,
+                                     converter=self.converter)
+
+    def _get_aggregate(self, observation, data_binding, time_period, aggregate_type, unit_name = None, rounding=2, add_label=False, localize=False):
+        obs_binder = weewx.tags.ObservationBinder(
+            observation,
+            self._get_timespan(time_period, self.timespan.stop),
+            self.db_binder.bind_default(data_binding),
+            data_binding,
+            time_period,
+            self.formatter,
+            self.converter,
+        )
+
+        data_aggregate_binder = getattr(obs_binder, aggregate_type)
+
+        if unit_name != 'default':
+            data = getattr(data_aggregate_binder, unit_name)
+        else:
+            data = data_aggregate_binder
+
+        if rounding:
+            return data.round(rounding).format(add_label=add_label, localize=localize)
+
+        return data.format(add_label=add_label, localize=localize)
+
+    def _get_wind_compass(self, data_binding=None, start_time=None, end_time=None):
+        db_manager = self.db_binder.get_manager(data_binding=data_binding)
+        # default is the last 24 hrs
+        if not end_time:
+            end_ts = db_manager.lastGoodStamp()
+        else:
+            end_ts = end_time
+
+        if not start_time:
+            start_ts = end_ts - 86400
+        else:
+            start_ts = start_time
+
+        data_timespan = TimeSpan(start_ts, end_ts)
+
+        # current day calculation
+        #day_ts = int(timespan.stop - timespan.stop % age)
+
+
+        start_vec_t1, stop_vec_t1, wind_speed_data_raw = weewx.xtypes.get_series(  # pylint: disable=unused-variable
+            'windSpeed', data_timespan, db_manager)
+        start_vec_t2, stop_vec_t2, wind_dir_data = weewx.xtypes.get_series(  # pylint: disable=unused-variable
+            'windDir', data_timespan, db_manager)
+        start_vec_t3, stop_vec_t3, wind_gust_data_raw = weewx.xtypes.get_series(  # pylint: disable=unused-variable
+            'windGust', data_timespan, db_manager)
+
+        wind_data = {}
+        # the formatter has the names in a list in the correct order
+        # with an additional 'N/A' at the end
+        i = 0
+        while i < len(self.formatter.ordinate_names) - 1:
+            ordinate_name = self.formatter.ordinate_names[i]
+            wind_data[ordinate_name] = {}
+            wind_data[ordinate_name]['sum'] = 0
+            wind_data[ordinate_name]['count'] = 0
+            wind_data[ordinate_name]['max'] = 0
+            wind_data[ordinate_name]['speed_data'] = []
+            j = 0
+            while j < self.wind_ranges_count:
+                wind_data[ordinate_name]['speed_data'].append(0)
+                j += 1
+            i += 1
+
+        i = 0
+        wind_speed_data = self.converter.convert(wind_speed_data_raw)
+        for wind_speed in wind_speed_data[0]:
+            if wind_speed and wind_speed > 0:
+                wind_unit = wind_speed_data[1]
+                ordinate_name = self.formatter.to_ordinal_compass(
+                    (wind_dir_data[0][i], wind_dir_data[1], wind_dir_data[2]))
+                wind_data[ordinate_name]['sum'] += wind_speed
+                wind_data[ordinate_name]['count'] += 1
+                wind_gust_data = self.converter.convert(wind_gust_data_raw)
+                if wind_gust_data[0][i] > wind_data[ordinate_name]['max']:
+                    wind_data[ordinate_name]['max'] = wind_gust_data[0][i]
+
+                j = 0
+                for wind_range in self.wind_ranges[wind_unit]:
+                    if wind_speed < wind_range:
+                        wind_data[ordinate_name]['speed_data'][j] += 1
+                        break
+                    j += 1
+
+            i += 1
+
+        for ordinate_name, _  in wind_data.items():
+            if wind_data[ordinate_name]['count'] > 0:
+                wind_data[ordinate_name]['average'] = \
+                    wind_data[ordinate_name]['sum'] / \
+                    wind_data[ordinate_name]['count']
+            else:
+                wind_data[ordinate_name]['average'] = 0.0
+
+        wind_compass_avg = []
+        wind_compass_max = []
+        wind_compass_speeds = []
+        j = 0
+        while j < self.wind_ranges_count:
+            wind_compass_speeds.append([])
+            j += 1
+
+        for wind_ordinal_data, _ in wind_data.items():
+            wind_compass_avg.append(wind_data[wind_ordinal_data]['average'])
+            wind_compass_max.append(wind_data[wind_ordinal_data]['max'])
+
+            i = 0
+            for wind_x in wind_data[wind_ordinal_data]['speed_data']:
+                wind_compass_speeds[i].append(wind_x)
+                i += 1
+
+        return wind_compass_avg, wind_compass_max, wind_compass_speeds
+
+    def _get_series(self, observation, data_binding, time_period, aggregate_type=None, aggregate_interval=None, time_series='both', time_unit='unix_epoch', unit_name = None, rounding=2, jsonize=True):
+        obs_binder = weewx.tags.ObservationBinder(
+            observation,
+            self._get_timespan(time_period, self.timespan.stop),
+            self.db_binder.bind_default(data_binding),
+            data_binding,
+            time_period,
+            self.formatter,
+            self.converter,
+        )
+
+        data_series_helper = obs_binder.series(aggregate_type=aggregate_type, aggregate_interval=aggregate_interval, time_series=time_series, time_unit=time_unit)
+        if unit_name != 'default':
+            data2 = getattr(data_series_helper, unit_name)
+        else:
+            data2 = data_series_helper
+
+        data3 = data2.round(rounding)
+        if jsonize:
+            return data3.json()
+
+        return data3
+
+    def _gen_aggregate_objects(self, interval, page_definition_name, interval_long_name):
+        data = ""
+
+        # Define the 'aggegate' objects to hold the data
+        # For example: last7days_min = {}, last7days_max = {}
+        for aggregate_type in self.aggregate_types:
+            data += "  pageData." + interval_long_name + aggregate_type + " = {};\n"
+
+        for observation, observation_items in self.observations.items():
+            for aggregate_type, aggregate_type_items in observation_items['aggregate_types'].items():
+                aggregate_interval = self.skin_dict['Extras']['page_definition'][page_definition_name]['aggregate_interval'].get(aggregate_type, None)
+                interval_name = interval_long_name + aggregate_type
+                for data_binding, data_binding_items in aggregate_type_items.items():
+                    for unit_name in data_binding_items:
+                        name_prefix = interval_name + "." + observation + "_"  + data_binding
+                        name_prefix2 = interval_name + "_" + observation + "_"  + data_binding
+                        if unit_name == "default":
+                            pass
+                        else:
+                            name_prefix += "_" + unit_name
+                            name_prefix2 += "_" + unit_name
+
+                        array_name = name_prefix
+
+                        if aggregate_interval is not None:
+                            data += "  pageData." + array_name + " = " + self._get_series(observation, data_binding, interval, aggregate_type, aggregate_interval, 'start', 'unix_epoch_ms', unit_name, 2, True) + ";\n"
+                        else:
+                            # wind 'observation' is special see #87
+                            if observation == 'wind':
+                                if aggregate_type == 'max':
+                                    weewx_observation = 'windGust'
+                                else:
+                                    weewx_observation = 'windSpeed'
+                                #end if
+                            else:
+                                weewx_observation = observation
+                            #end if
+                            data += "  pageData." + array_name + " = " + self._get_series(weewx_observation, data_binding, interval, None, None, 'start', 'unix_epoch_ms', unit_name, 2, True) + ";\n"
+
+        data += "\n"
+        return data
+
+    def _get_current_obs(self):
+        now = time.time()
+        current_hour = int(now - now % 3600)
+        if not os.path.isfile(self.current_filename):
+            current_data = self._retrieve_current(current_hour)
+        else:
+            with open(self.current_filename, "r", encoding="utf-8") as current_fp:
+                current_data = json.load(current_fp)
+
+            if current_hour > current_data['generated']:
+                current_data = self._retrieve_current(current_hour)
+
+        return current_data['current']
+
+    def _retrieve_current(self, current_hour):
+        data = self._call_api(self.current_url)
+
+        current_data = {}
+        current_data['current'] = {}
+        current_data['current']['observation'] = ''
+
+        if data:
+            current_observation = data['ob']
+            current_data['generated'] = current_hour
+            current = {}
+
+            current['observation'] = self._get_observation_text(current_observation['weatherPrimaryCoded'])
+
+            current_data['current'] = current
+            with open(self.current_filename, "w", encoding="utf-8") as current_fp:
+                json.dump(current_data, current_fp, indent=2)
+
+        return current_data
+
+    def _check_forecast(self):
+        pages = self.skin_dict.get('Extras', {}).get('pages', {})
+        for page in pages:
+            if self.skin_dict['Extras']['pages'][page].get('enable', True) and 'forecast' in self.skin_dict['Extras']['pages'][page].sections:
+                return True
+
+        return False
+
+    # Proof of concept - wind rose
+    # Create data for wind rose chart
+    def _gen_windrose(self, page_data_binding, interval_name, page_definition_name, interval_long_name):
+        data = ''
+
+        interval_start_seconds_global = self._get_timespan_binder(interval_name, page_data_binding).start.raw
+        interval_end_seconds_global = self._get_timespan_binder(interval_name, page_data_binding).end.raw
+
+        if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
+            avg_value, max_value, wind_directions = self._get_wind_compass(data_binding=page_data_binding, start_time=interval_start_seconds_global, end_time=interval_end_seconds_global) # need to match function signature pylint: disable=unused-variable
+            i = 0
+            for wind in wind_directions:
+                data += "  pageData." + interval_long_name + "avg.windCompassRange"  + str(i) + "_" + page_data_binding + " = JSON.stringify(" +  str(wind) +  ");\n"
+                i += 1
+
+        return data
+
+    def run(self):
+        print("start")
+        logdbg('start')
+        generator_dict = {'archive-day'  : weeutil.weeutil.genDaySpans,
+                    'archive-month': weeutil.weeutil.genMonthSpans,
+                    'archive-year' : weeutil.weeutil.genYearSpans}
+
+        default_binding = 'wx_binding' #todo
+        self.data_binding = default_binding
+
+        # Get start and stop times
+        default_archive = self.db_binder.get_manager(default_binding)
+        start_ts = default_archive.firstGoodStamp()
+        if not start_ts:
+            log.info('Skipping, cannot find start time')
+            return
+
+        if self.gen_ts:
+            record = default_archive.getRecord(self.gen_ts)
+            if record:
+                stop_ts = record['dateTime']
+            else:
+                log.info('Skipping, generate time %s not in database', timestamp_to_string(self.gen_ts))
+                return
+        else:
+            stop_ts = default_archive.lastGoodStamp()
+
+        destination_dir = os.path.join(self.config_dict['WEEWX_ROOT'],
+                                       self.skin_dict['HTML_ROOT'],
+                                       'dataload')
+        logdbg(destination_dir)
+
+        try:
+            # Create the directory that is to receive the generated files.  If
+            # it already exists an exception will be thrown, so be prepared to
+            # catch it.
+            os.makedirs(destination_dir)
+        except OSError:
+            pass
+
+        for page_name in self.skin_dict['Extras']['pages'].sections:
+
+            logdbg(page_name)
+            if self.skin_dict['Extras']['pages'].get('enable', True) and \
+                page_name in self.skin_dict['Extras']['page_definition'] and \
+                self.skin_dict['Extras']['page_definition'][page_name].get('series_type', 'single') == 'single':
+
+                generate_interval = self.skin_dict['Extras']['page_definition'][page_name].get('generate_interval', None)
+                logdbg("process")
+                if page_name in generator_dict:
+                    _spangen = generator_dict[page_name]
+                else:
+                    _spangen = lambda start_ts, stop_ts: [weeutil.weeutil.TimeSpan(start_ts, stop_ts)]
+
+                for timespan in _spangen(start_ts, stop_ts):
+                    self.timespan = timespan # todo
+                    start_tt = time.localtime(timespan.start)
+                    stop_tt = time.localtime(timespan.stop)
+                    if page_name == 'archive-year':
+                        #filename =  "%4d.js" % start_tt[0]
+                        filename = os.path.join(destination_dir, "%4d.js") % start_tt[0]
+                        period_type = 'historical'
+                        time_period = 'year'
+                        interval_long_name = f"year{start_tt[0]:4d}_"
+                    elif page_name == 'archive-month':
+                        #filename = "%4d-%02d.js" % (start_tt[0], start_tt[1])
+                        filename = os.path.join(destination_dir, "%4d-%02d.js") % (start_tt[0], start_tt[1])
+                        period_type = 'historical'
+                        time_period = 'month'
+                        interval_long_name = f"month{start_tt[0]:4d}{start_tt[1]:02d}_"
+                    elif page_name == 'debug':
+                        filename = os.path.join(destination_dir, page_name + '.js')
+                        period_type = 'active'
+                        time_period = self.skin_dict['Extras']['pages']['debug'].get('simulate_page', 'last24hours')
+                        interval_long_name = self.skin_dict['Extras']['pages']['debug'].get('simulate_interval', 'last24hours') + '_'
+                    else:
+                        filename = os.path.join(destination_dir, page_name + '.js')
+                        period_type = 'active'
+                        time_period = page_name
+                        interval_long_name = page_name + '_'
+
+                    if self._skip_generation(timespan, generate_interval, period_type, filename, stop_ts):
+                        continue
+
+                    data = self._gen_data_load(filename, '', time_period, period_type, page_name, interval_long_name)
+                    byte_string = data.encode('utf8')
+
+                    try:
+                        # Write to a temporary file first
+                        tmpname = filename + '.tmp'
+                        # Open it in binary mode. We are writing a byte-string, not a string
+                        with open(tmpname, mode='wb') as temp_file:
+                            temp_file.write(byte_string)
+                        # Now move the temporary file into place
+                        os.rename(tmpname, filename)
+                    finally:
+                        try:
+                            os.unlink(tmpname)
+                        except OSError:
+                            pass
+
+    def _skip_generation(self, timespan, generate_interval, interval_type, filename, stop_ts):
+        # Skip summary files outside the timespan
+        if interval_type == 'historical' \
+                and os.path.exists(filename) \
+                and not timespan.includesArchiveTime(stop_ts):
+            return True
+
+        # Convert from possible string to an integer:
+        generate_interval_seconds = weeutil.weeutil.nominal_spans(generate_interval)
+
+        # Images without an aggregation interval have to be plotted every time. Also, the image
+        # definitely has to be generated if it doesn't exist.
+        if generate_interval_seconds is None or not os.path.exists(filename):
+            return False
+
+        # If its a very old image, then it has to be regenerated
+        if stop_ts - os.stat(filename).st_mtime >= generate_interval_seconds:
+            return False
+
+        # If we're on an aggregation boundary, regenerate.
+        time_dt = datetime.datetime.fromtimestamp(stop_ts)
+        tdiff = time_dt -  time_dt.replace(hour=0, minute=0, second=0, microsecond=0)
+        if abs(tdiff.seconds % generate_interval_seconds) < 1:
+            return False
+
+        return True
+
+    def _gen_data_load(self, filename, page, interval, interval_type, page_definition_name, interval_long_name):
+        start_time = time.time()
+
+        skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
+        page_data_binding = self.skin_dict['Extras']['pages'][page_definition_name].get('data_binding', skin_data_binding)
+        data = ''
+        data += '// the start\n'
+        data += "pageData = {};\n"
+        data += 'function ' + interval_long_name + 'dataLoad() {\n'
+        data += '  traceStart = Date.now();\n'
+        data += '        console.debug(Date.now().toString() + " dataLoad start");\n'
+        if self.data_current:
+            data += '  pageData.currentObservations = ["' + '", "'.join(self.data_current['observation']) + '"];\n'
+
+        data += '  pageData.forecasts = [];\n'
+        data += '\n'
+        if self.data_forecast:
+            for forecast in self.data_forecast:
+                data += '  forecast = {};\n'
+                data += '  forecast.timestamp = ' + str(forecast["timestamp"]) + ';\n'
+                data += '  forecast.observation_codes = ["' + '", "'.join(forecast["observation"]) + '"];\n'
+                data += '  forecast.day_code = ' + forecast["day"] + ';\n'
+                data += '  forecast.temp_min = ' + str(forecast["temp_min"]) + ';\n'
+                data += '  forecast.temp_max = ' + str(forecast["temp_max"]) + ';\n'
+                data += '  forecast.temp_unit = "' + forecast["temp_unit"] + '";\n'
+                data += '  forecast.rain = ' + str(forecast["rain"]) + ';\n'
+                data += '  forecast.wind_min = ' + str(forecast["wind_min"]) + ';\n'
+                data += '  forecast.wind_max = ' + str(forecast["wind_max"]) + ';\n'
+                data += '  forecast.wind_unit = "' + forecast["wind_unit"] + '";\n'
+                data += '  pageData.forecasts.push(forecast);\n'
+                data += '\n'
+
+        data += self._gen_data_load2(interval, interval_type, page_definition_name, skin_data_binding, page_data_binding)
+
+        data += self._gen_aggregate_objects(interval, page_definition_name, interval_long_name)
+
+        if self.skin_dict['Extras']['pages'][page_definition_name].get('current', None) is not None:
+            data += self._gen_data_load3(skin_data_binding, interval)
+
+        data += "\n"
+
+        data += "\n"
+        if self.skin_dict['Extras']['pages'][page_definition_name].get('windRose', None) is not None:
+            data += self._gen_windrose(page_data_binding, interval, page_definition_name, interval_long_name)
+
+        data += '        console.debug(Date.now().toString() + " dataLoad end");\n'
+        data += "}\n"
+        data += "\n"
+
+        elapsed_time = time.time() - start_time
+        log_msg = "Generated " + self.html_root + "/" + filename + " in " + str(elapsed_time)
+        if to_bool(self.skin_dict['Extras'].get('log_times', True)):
+            logdbg(log_msg)
+        return data
+
+    # Create the data used to display current conditions.
+    # This data is only used when MQTT is not enabled.
+    # This data is stored in a javascript object named 'current'.
+    # 'current.header' is an object with the data for the header portion of this section.
+    # 'current.observations' is a map. The key is the observation name, like 'outTemp'. The value is the data to populate the section.
+    def _gen_data_load3(self, skin_data_binding, interval):
+        data = ''
+
+        current_data_binding = self.skin_dict['Extras']['current'].get('data_binding', skin_data_binding)
+        interval_current = self.skin_dict['Extras']['current'].get('interval', interval)
+
+        #data += 'var mqtt_enabled = false;\n'
+        data += '  pageData.updateDate = ' + str(self._get_current('dateTime', data_binding=current_data_binding, unit_name='default').raw * 1000) + ';\n'
+        if self.skin_dict['Extras']['current'].get('observation', False):
+            data_binding = self.skin_dict['Extras']['current'].get('header_data_binding', current_data_binding)
+            data += '  pageData.currentHeaderValue = "' + self._get_current(self.skin_dict['Extras']['current']['observation'], data_binding, 'default').format(add_label=False,localize=False) + '";\n'
+
+        data += '  var currentData = {};\n'
+        for observation in self.skin_dict['Extras']['current']['observations']:
+            data_binding = self.skin_dict['Extras']['current']['observations'][observation].get('data_binding', current_data_binding)
+            type_value =  self.skin_dict['Extras']['current']['observations'][observation].get('type', "")
+            unit_name = self.skin_dict['Extras']['current']['observations'][observation].get('unit', "default")
+
+            if type_value == 'rise':
+                 # todo this is a place holder and needs work
+                #set observation_value = '"' + str($getattr($almanac, $observation + 'rise')) + '";'
+                observation_value = 'bar'
+                #label = 'foo'
+            elif type_value == 'sum':
+                observation_value = self._get_aggregate(observation, data_binding, interval_current, type_value, unit_name, False)
+            else:
+                observation_value = self._get_current(observation, data_binding, unit_name).format(add_label=False,localize=False)
+
+            data += '  currentData.' + observation + ' = "' + observation_value + '";\n'
+
+        data += '  pageData.currentData = JSON.stringify(currentData);'
+        return data
+
+    def _gen_data_load2(self, interval, interval_type, page_definition_name, skin_data_binding, page_data_binding):
+        data = ""
+
+        skin_timespan_binder = self._get_timespan_binder(interval, skin_data_binding)
+        page_timespan_binder = self._get_timespan_binder(interval, page_data_binding)
+
+        if interval_type == 'active':
+            data += "  pageData.startDate = moment('" + getattr(page_timespan_binder, 'start').format("%Y-%m-%dT%H:%M:%S") + "').utcOffset(" + str(self.utc_offset) + ");\n"
+            data += "  pageData.endDate = moment('" + getattr(page_timespan_binder, 'end').format("%Y-%m-%dT%H:%M:%S") + "').utcOffset(" + str(self.utc_offset) + ");\n"
+            data += "  pageData.startTimestamp = " + str(getattr(page_timespan_binder, 'start').raw * 1000) + ";\n"
+            data += "  pageData.endTimestamp = " + str(getattr(page_timespan_binder, 'end').raw * 1000) + ";\n"
+        else:
+            # ToDo: document that skin data binding controls start/end of historical data
+            # ToDo: make start/end configurable
+            start_timestamp = weeutil.weeutil.startOfDay(getattr(getattr(skin_timespan_binder, 'usUnits'), 'firsttime').raw)
+            end_timestamp = weeutil.weeutil.startOfDay(getattr(getattr(skin_timespan_binder, 'usUnits'), 'lasttime').raw)
+            start_date = datetime.datetime.fromtimestamp(start_timestamp).strftime('%Y-%m-%dT%H:%M:%S')
+            end_date = datetime.datetime.fromtimestamp(end_timestamp).strftime('%Y-%m-%dT%H:%M:%S')
+
+            data += "pageData.startTimestamp =  " + str(start_timestamp * 1000) + ";\n"
+            data += "pageData.startDate = moment('" + start_date + "').utcOffset(" + str(self.utc_offset) + ");\n"
+            data += "pageData.endTimestamp =  " + str(end_timestamp * 1000) + ";\n"
+            data += "pageData.endDate = moment('" + end_date + "').utcOffset(" + str(self.utc_offset) + ");\n"
+
+        data += "\n"
+        data += self._gen_interval_end_timestamp(page_data_binding, interval, page_definition_name)
+
+        return data
 
     @staticmethod
     def mkdir_p(path):
