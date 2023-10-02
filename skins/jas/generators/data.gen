@@ -262,6 +262,8 @@ var updateDate;
     #end for
 #end if
 
+#echo "}\n"
+
 #set elapsed_time = time.time() - $start_time
 #set log_msg = "Generated " + $HTML_ROOT + "/" + $filename + " in " + str($elapsed_time)
 #if to_bool($getVar("$Extras.log_times", True))
