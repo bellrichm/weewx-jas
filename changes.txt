@@ -182,6 +182,7 @@ This is a complete rewrite of WeeWX-jas management and loading of WeeWX data, re
 - An option to add a query string to data requests has been added. 
   This allows WeeWX-jas to leverage the internet's cache infrastructure.
   See, https://github.com/bellrichm/weewx-jas/wiki/Pages#query_string_on for additional information.
+- The data generated from WeeWx is now only generated once per aggregate interval.
 
 Fixes:
 - 'Current' and 'Min/Max' sections are now optional.

@@ -3,9 +3,9 @@
 
 #from weeutil.weeutil import to_bool
 
-#set global interval_global = $getVar("$Extras.pages.debug.simulate_interval", 'day')
-#set global page_definition_name_global = $getVar("$Extras.pages.debug.simulate_page", 'last24hours')
-#set global interval_long_name_global = $getVar("$Extras.pages.debug.simulate_interval", 'day') +'_'
+#set global interval_global = $getVar("$Extras.pages.debug.simulate_interval", 'last24hours')
+#set global page_definition_name_global = 'debug'
+#set global interval_long_name_global = $getVar("$Extras.pages.debug.simulate_interval", 'last24hours') +'_'
 
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
     #include 'generators/data.gen'
