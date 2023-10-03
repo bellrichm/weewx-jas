@@ -800,8 +800,9 @@ class JAS(SearchList):
         data += '    console.debug(Date.now().toString() + " DOMContentLoaded start");\n'
         data += '    setupPage();\n'
         data += '    console.debug(Date.now().toString() + " setupPage done");\n'
-        data += '    setupCharts();\n'
-        data += '    console.debug(Date.now().toString() + " setupCharts done");\n'
+        if page != 'about':
+            data += '    setupCharts();\n'  
+            data += '    console.debug(Date.now().toString() + " setupCharts done");\n'
         data += '    DOMLoaded = true;\n'
         data += '    console.debug(Date.now().toString() + " DOMContentLoaded end");\n'
         data += '});\n'
