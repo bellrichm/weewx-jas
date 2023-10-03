@@ -247,7 +247,7 @@ class JAS(SearchList):
     def get_extension_list(self, timespan, db_lookup):
         # save these for use when the template variable/function is evaluated
         #self.db_lookup = db_lookup
-        self.timespan = timespan
+        #self.timespan = timespan
 
         search_list_extension = {
                                  'aggregate_types': self.aggregate_types,
@@ -1456,6 +1456,13 @@ class JASGenerator(weewx.reportengine.ReportGenerator):
         """Initialize an instance of ChartGenerator"""
         weewx.reportengine.ReportGenerator.__init__(self, config_dict, skin_dict, *args, **kwargs)
 
+        self.data_binding = self.skin_dict['data_binding']
+
+        self.generator_dict = {'archive-day'  : weeutil.weeutil.genDaySpans,
+                               'archive-month': weeutil.weeutil.genMonthSpans,
+                               'archive-year' : weeutil.weeutil.genYearSpans}        
+
+
     def _skip_generation(self, generator_dict, timespan, generate_interval, interval_type, filename, stop_ts):
 
         if generator_dict and to_bool(generator_dict.get('generate_once', False)) and not self.first_run:
@@ -1517,16 +1524,12 @@ class ChartGenerator(JASGenerator):
         self._set_chart_defs()
 
     def run(self):
-        #if not self.first_run
-        #to do duplivate code
-        generator_dict = {'archive-day'  : weeutil.weeutil.genDaySpans,
+        self.generator_dict = {'archive-day'  : weeutil.weeutil.genDaySpans,
                     'archive-month': weeutil.weeutil.genMonthSpans,
                     'archive-year' : weeutil.weeutil.genYearSpans}        
-        default_binding = 'wx_binding' #todo
-        self.data_binding = default_binding
 
         # Get start and stop times
-        default_archive = self.db_binder.get_manager(default_binding)
+        default_archive = self.db_binder.get_manager(self.data_binding)
         start_ts = default_archive.firstGoodStamp()
         if not start_ts:
             log.info('Skipping, cannot find start time')
@@ -1545,7 +1548,6 @@ class ChartGenerator(JASGenerator):
         destination_dir = os.path.join(self.config_dict['WEEWX_ROOT'],
                                     self.skin_dict['HTML_ROOT'],
                                     'charts')
-        logdbg(destination_dir)
 
         try:
             # Create the directory that is to receive the generated files.  If
@@ -1556,16 +1558,15 @@ class ChartGenerator(JASGenerator):
             pass
 
         for page_name in self.skin_dict['Extras']['pages'].sections:
-            logdbg(page_name)
             if self.skin_dict['Extras']['pages'].get('enable', True) and \
                 page_name in self.skin_dict['Extras']['page_definition']:
 
-                if page_name in generator_dict:
-                    _spangen = generator_dict[page_name]
+                if page_name in self.generator_dict:
+                    _spangen = self.generator_dict[page_name]
                 else:
                     _spangen = lambda start_ts, stop_ts: [weeutil.weeutil.TimeSpan(start_ts, stop_ts)]
                 for timespan in _spangen(start_ts, stop_ts):
-                    self.timespan = timespan # todo
+                    #self.timespan = timespan # todo
                     start_tt = time.localtime(timespan.start)
                     #stop_tt = time.localtime(timespan.stop)
                     if page_name == 'archive-year':
@@ -1987,7 +1988,6 @@ class DataGenerator(JASGenerator):
 
         report_dict = self.config_dict.get('StdReport', {})
         self.unit_system = self.skin_dict.get('unit_system', 'us').upper()
-        self.data_binding = self.skin_dict['data_binding']
 
         now = time.time()
         self.utc_offset = (datetime.datetime.fromtimestamp(now) -
@@ -2606,17 +2606,7 @@ class DataGenerator(JASGenerator):
         return data
 
     def run(self):
-        print("start")
-        logdbg('start')
-        generator_dict = {'archive-day'  : weeutil.weeutil.genDaySpans,
-                    'archive-month': weeutil.weeutil.genMonthSpans,
-                    'archive-year' : weeutil.weeutil.genYearSpans}
-
-        default_binding = 'wx_binding' #todo
-        self.data_binding = default_binding
-
-        # Get start and stop times
-        default_archive = self.db_binder.get_manager(default_binding)
+        default_archive = self.db_binder.get_manager(self.data_binding)
         start_ts = default_archive.firstGoodStamp()
         if not start_ts:
             log.info('Skipping, cannot find start time')
@@ -2635,7 +2625,6 @@ class DataGenerator(JASGenerator):
         destination_dir = os.path.join(self.config_dict['WEEWX_ROOT'],
                                        self.skin_dict['HTML_ROOT'],
                                        'dataload')
-        logdbg(destination_dir)
 
         try:
             # Create the directory that is to receive the generated files.  If
@@ -2646,31 +2635,26 @@ class DataGenerator(JASGenerator):
             pass
 
         for page_name in self.skin_dict['Extras']['pages'].sections:
-
-            logdbg(page_name)
             if self.skin_dict['Extras']['pages'].get('enable', True) and \
                 page_name in self.skin_dict['Extras']['page_definition'] and \
                 self.skin_dict['Extras']['page_definition'][page_name].get('series_type', 'single') == 'single':
 
                 generate_interval = self.skin_dict['Extras']['page_definition'][page_name].get('generate_interval', None)
-                logdbg("process")
-                if page_name in generator_dict:
-                    _spangen = generator_dict[page_name]
+                if page_name in self.generator_dict:
+                    _spangen = self.generator_dict[page_name]
                 else:
                     _spangen = lambda start_ts, stop_ts: [weeutil.weeutil.TimeSpan(start_ts, stop_ts)]
 
                 for timespan in _spangen(start_ts, stop_ts):
                     self.timespan = timespan # todo
                     start_tt = time.localtime(timespan.start)
-                    stop_tt = time.localtime(timespan.stop)
+                    #stop_tt = time.localtime(timespan.stop)
                     if page_name == 'archive-year':
-                        #filename =  "%4d.js" % start_tt[0]
                         filename = os.path.join(destination_dir, "%4d.js") % start_tt[0]
                         period_type = 'historical'
                         time_period = 'year'
                         interval_long_name = f"year{start_tt[0]:4d}_"
                     elif page_name == 'archive-month':
-                        #filename = "%4d-%02d.js" % (start_tt[0], start_tt[1])
                         filename = os.path.join(destination_dir, "%4d-%02d.js") % (start_tt[0], start_tt[1])
                         period_type = 'historical'
                         time_period = 'month'
@@ -2689,7 +2673,7 @@ class DataGenerator(JASGenerator):
                     if self._skip_generation(self.skin_dict.get('DataGenerator'), timespan, generate_interval, period_type, filename, stop_ts):
                         continue
 
-                    data = self._gen_data_load(filename, '', time_period, period_type, page_name, interval_long_name)
+                    data = self._gen_data_load(filename, time_period, period_type, page_name, interval_long_name)
                     byte_string = data.encode('utf8')
 
                     try:
@@ -2706,7 +2690,7 @@ class DataGenerator(JASGenerator):
                         except OSError:
                             pass
 
-    def _gen_data_load(self, filename, page, interval, interval_type, page_definition_name, interval_long_name):
+    def _gen_data_load(self, filename, interval, interval_type, page_definition_name, interval_long_name):
         start_time = time.time()
 
         skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
