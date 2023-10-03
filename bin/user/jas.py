@@ -801,7 +801,7 @@ class JAS(SearchList):
         data += '    setupPage();\n'
         data += '    console.debug(Date.now().toString() + " setupPage done");\n'
         if page != 'about':
-            data += '    setupCharts();\n'  
+            data += '    setupCharts();\n'
             data += '    console.debug(Date.now().toString() + " setupCharts done");\n'
         data += '    DOMLoaded = true;\n'
         data += '    console.debug(Date.now().toString() + " DOMContentLoaded end");\n'
@@ -2647,7 +2647,7 @@ class DataGenerator(JASGenerator):
                     _spangen = lambda start_ts, stop_ts: [weeutil.weeutil.TimeSpan(start_ts, stop_ts)]
 
                 for timespan in _spangen(start_ts, stop_ts):
-                    self.timespan = timespan # todo
+                    self.timespan = timespan
                     start_tt = time.localtime(timespan.start)
                     #stop_tt = time.localtime(timespan.stop)
                     if page_name == 'archive-year':
