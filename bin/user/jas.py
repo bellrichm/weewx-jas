@@ -1450,11 +1450,45 @@ window.addEventListener("message",
             logdbg(log_msg)
         return data
 
-class ChartGenerator(weewx.reportengine.ReportGenerator):
+class JASGenerator(weewx.reportengine.ReportGenerator):
     """ Generate the charts used by the JAS skin. """
     def __init__(self, config_dict, skin_dict, *args, **kwargs):
         """Initialize an instance of ChartGenerator"""
         weewx.reportengine.ReportGenerator.__init__(self, config_dict, skin_dict, *args, **kwargs)
+
+    def _skip_generation(self, timespan, generate_interval, interval_type, filename, stop_ts):
+        # Skip summary files outside the timespan
+        if interval_type == 'historical' \
+                and os.path.exists(filename) \
+                and not timespan.includesArchiveTime(stop_ts):
+            return True
+
+        
+        # Convert from possible string to an integer:
+        generate_interval_seconds = weeutil.weeutil.nominal_spans(generate_interval)
+
+        # Images without an aggregation interval have to be plotted every time. Also, the image
+        # definitely has to be generated if it doesn't exist.
+        if generate_interval_seconds is None or not os.path.exists(filename):
+            return False
+
+        # If its a very old image, then it has to be regenerated
+        if stop_ts - os.stat(filename).st_mtime >= generate_interval_seconds:
+            return False
+
+        # If we're on an aggregation boundary, regenerate.
+        time_dt = datetime.datetime.fromtimestamp(stop_ts)
+        tdiff = time_dt -  time_dt.replace(hour=0, minute=0, second=0, microsecond=0)
+        if abs(tdiff.seconds % generate_interval_seconds) < 1:
+            return False
+
+        return True
+
+class ChartGenerator(JASGenerator):
+    """ Generate the charts used by the JAS skin. """
+    def __init__(self, config_dict, skin_dict, *args, **kwargs):
+        """Initialize an instance of ChartGenerator"""
+        JASGenerator.__init__(self, config_dict, skin_dict, *args, **kwargs)
 
         self.formatter = weewx.units.Formatter.fromSkinDict(skin_dict)
         self.converter = weewx.units.Converter.fromSkinDict(skin_dict)
@@ -1535,31 +1569,40 @@ class ChartGenerator(weewx.reportengine.ReportGenerator):
                 for timespan in _spangen(start_ts, stop_ts):
                     self.timespan = timespan # todo
                     start_tt = time.localtime(timespan.start)
-                    stop_tt = time.localtime(timespan.stop)
+                    #stop_tt = time.localtime(timespan.stop)
                     if page_name == 'archive-year':
                         filename = os.path.join(destination_dir, "%4d.js") % start_tt[0]
+                        period_type = 'historical'
                         interval = f"year{start_tt[0]:4d}"
                         page = f"{start_tt[0]:4d}"
                     elif page_name == 'archive-month':
                         filename = os.path.join(destination_dir, "%4d-%02d.js") % (start_tt[0], start_tt[1])
+                        period_type = 'historical'
                         interval = f"month{start_tt[0]:4d}{start_tt[1]:02d}"
                         page = f"{start_tt[0]:4d}-{start_tt[1]:02d}"
                     elif page_name == 'multiyear':
                         filename = os.path.join(destination_dir, page_name + '.js')
+                        period_type = ''
                         interval = 'year'
                         page = page_name
                     elif page_name == 'multiyear':
                         filename = os.path.join(destination_dir, page_name + '.js')
+                        period_type = ''
                         interval = 'year'
                         page = page_name
                     elif page_name == 'debug':
                         filename = os.path.join(destination_dir, page_name + '.js')
+                        period_type = 'active'
                         interval = self.skin_dict['Extras']['pages']['debug'].get('simulate_interval', 'last24hours')
                         page = page_name
                     else:
                         filename = os.path.join(destination_dir, page_name + '.js')
+                        period_type = 'active'
                         interval = page_name
                         page = page_name
+
+                    if self._skip_generation(timespan, None, period_type, filename, stop_ts):
+                        continue
 
                     chart = self._gen_charts(filename, page_name, interval, page)
                     chart = '\n' + chart + '\n'
@@ -1935,11 +1978,11 @@ class ChartGenerator(weewx.reportengine.ReportGenerator):
 
         return (start_year, end_year)
 
-class DataGenerator(weewx.reportengine.ReportGenerator):
+class DataGenerator(JASGenerator):
     """ Generate the data used by the JAS skin. """
     def __init__(self, config_dict, skin_dict, *args, **kwargs):
         """Initialize an instance of DataGenerator"""
-        weewx.reportengine.ReportGenerator.__init__(self, config_dict, skin_dict, *args, **kwargs)
+        JASGenerator.__init__(self, config_dict, skin_dict, *args, **kwargs)
 
         self.formatter = weewx.units.Formatter.fromSkinDict(skin_dict)
         self.converter = weewx.units.Converter.fromSkinDict(skin_dict)
@@ -2664,33 +2707,6 @@ class DataGenerator(weewx.reportengine.ReportGenerator):
                             os.unlink(tmpname)
                         except OSError:
                             pass
-
-    def _skip_generation(self, timespan, generate_interval, interval_type, filename, stop_ts):
-        # Skip summary files outside the timespan
-        if interval_type == 'historical' \
-                and os.path.exists(filename) \
-                and not timespan.includesArchiveTime(stop_ts):
-            return True
-
-        # Convert from possible string to an integer:
-        generate_interval_seconds = weeutil.weeutil.nominal_spans(generate_interval)
-
-        # Images without an aggregation interval have to be plotted every time. Also, the image
-        # definitely has to be generated if it doesn't exist.
-        if generate_interval_seconds is None or not os.path.exists(filename):
-            return False
-
-        # If its a very old image, then it has to be regenerated
-        if stop_ts - os.stat(filename).st_mtime >= generate_interval_seconds:
-            return False
-
-        # If we're on an aggregation boundary, regenerate.
-        time_dt = datetime.datetime.fromtimestamp(stop_ts)
-        tdiff = time_dt -  time_dt.replace(hour=0, minute=0, second=0, microsecond=0)
-        if abs(tdiff.seconds % generate_interval_seconds) < 1:
-            return False
-
-        return True
 
     def _gen_data_load(self, filename, page, interval, interval_type, page_definition_name, interval_long_name):
         start_time = time.time()
