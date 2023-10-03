@@ -1456,23 +1456,21 @@ class JASGenerator(weewx.reportengine.ReportGenerator):
         """Initialize an instance of ChartGenerator"""
         weewx.reportengine.ReportGenerator.__init__(self, config_dict, skin_dict, *args, **kwargs)
 
-    def _skip_generation(self, timespan, generate_interval, interval_type, filename, stop_ts):
-        # Skip summary files outside the timespan
+    def _skip_generation(self, generator_dict, timespan, generate_interval, interval_type, filename, stop_ts):
+
+        if generator_dict and to_bool(generator_dict.get('generate_once', False)) and not self.first_run:
+            return True
+
         if interval_type == 'historical' \
                 and os.path.exists(filename) \
                 and not timespan.includesArchiveTime(stop_ts):
             return True
 
-        
-        # Convert from possible string to an integer:
         generate_interval_seconds = weeutil.weeutil.nominal_spans(generate_interval)
 
-        # Images without an aggregation interval have to be plotted every time. Also, the image
-        # definitely has to be generated if it doesn't exist.
         if generate_interval_seconds is None or not os.path.exists(filename):
             return False
 
-        # If its a very old image, then it has to be regenerated
         if stop_ts - os.stat(filename).st_mtime >= generate_interval_seconds:
             return False
 
@@ -1601,7 +1599,7 @@ class ChartGenerator(JASGenerator):
                         interval = page_name
                         page = page_name
 
-                    if self._skip_generation(timespan, None, period_type, filename, stop_ts):
+                    if self._skip_generation(self.skin_dict.get('ChartGenerator'), timespan, None, period_type, filename, stop_ts):
                         continue
 
                     chart = self._gen_charts(filename, page_name, interval, page)
@@ -2688,7 +2686,7 @@ class DataGenerator(JASGenerator):
                         time_period = page_name
                         interval_long_name = page_name + '_'
 
-                    if self._skip_generation(timespan, generate_interval, period_type, filename, stop_ts):
+                    if self._skip_generation(self.skin_dict.get('DataGenerator'), timespan, generate_interval, period_type, filename, stop_ts):
                         continue
 
                     data = self._gen_data_load(filename, '', time_period, period_type, page_name, interval_long_name)
