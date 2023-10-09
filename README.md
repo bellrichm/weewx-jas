@@ -48,7 +48,15 @@ Prior to making any updates/changes, always make a backup.
     wee_extension --install=$DOWNLOAD_ROOT/vX.Y.Z.tar.gz
     ```
 
-3. Restart WeeWX
+3. Optional - run [wee_reports](http://www.weewx.com/docs/utilities.htm#wee_reports_utility)
+
+     WeeWX-JAS extracts data from the WeeWX database to be visualized in either charts or tables.
+  Historical and aggregated data does not have to be extracted every archive period.
+  This means that on the first run of WeeWX-JAS all of this data must be extracted.
+  On a low powered machine, such as a Raspberry Pi, this could take longer than one archive period.
+  For this reason some may want to run [wee_reports](http://www.weewx.com/docs/utilities.htm#wee_reports_utility) to extract this data.
+
+4. Restart WeeWX
 
     ```
     sudo /etc/init.d/weewx restart
@@ -73,7 +81,7 @@ See, [manual installation](https://github.com/bellrichm/weewx-jas/wiki/Manual-in
 ## Updating/Upgrading
 
 WeeWX-JAS extracts data from the WeeWX database to be visualized in either charts or tables.
-Aggregated data does not have to be extracted every archive period.
+Historical and aggregated data does not have to be extracted every archive period.
 For performance reasons it is extracted on this [schedule](https://github.com/bellrichm/weewx-jas/wiki/Getting-Started#generating-weewx-jas-pages).
 This means a new release WeeWX-JAS might require the extracted data to be in a different format.
 For this reason it is recommended to delete all files that WeeWX-JAS creates prior to upgrading WeeWX-JAS.
