@@ -1,4 +1,4 @@
-# weewx-jas
+# WeeWX-JAS
 
 A WeeWX skin that uses [Apache ECharts](https://echarts.apache.org/en/index.html) to chart the data.
 The following javascript libraries are used in addition to Apache ECharts.
@@ -16,7 +16,7 @@ See [where to find things](http://weewx.com/docs/usersguide.htm#Where_to_find_th
 in the WeeWX [User's Guide](http://weewx.com/docs/usersguide.htm") for the definitive information.
 The following symbolic names are used to define the various locations:
 
-- *$DOWNLOAD_ROOT* - The directory containing the downloaded *weewx-jas* extension.
+- *$DOWNLOAD_ROOT* - The directory containing the downloaded *WeeWX-JAS* extension.
 - *$BIN_ROOT* - The directory where WeeWX executables are located.
 - *$CONFIG_ROOT* - The directory where the configuration (typically, weewx.conf) is located.
 - *$HTML_ROOT* - The directory where the Web pages and images are created.
@@ -34,7 +34,7 @@ Prior to making any updates/changes, always make a backup.
 
 ## Installation
 
-1. Download weewx-jas
+1. Download WeeWX-JAS
 
     ```
     wget -P $DOWNLOAD_ROOT https://github.com/bellrichm/weewx-jas/archive/vX.Y.Z.tar.gz
@@ -42,7 +42,7 @@ Prior to making any updates/changes, always make a backup.
 
     All of the releases can be found [here](https://github.com/bellrichm/weewx-jas/releases) and this is the [latest](https://github.com/bellrichm/weewx-jas/releases/latest).
 
-2. Install weewx-jas
+2. Install WeeWX-JAS
 
     ```
     wee_extension --install=$DOWNLOAD_ROOT/vX.Y.Z.tar.gz
