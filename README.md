@@ -19,6 +19,7 @@ The following symbolic names are used to define the various locations:
 - *$DOWNLOAD_ROOT* - The directory containing the downloaded *weewx-jas* extension.
 - *$BIN_ROOT* - The directory where WeeWX executables are located.
 - *$CONFIG_ROOT* - The directory where the configuration (typically, weewx.conf) is located.
+- *$HTML_ROOT* - The directory where the Web pages and images are created.
 
 The notation vX.Y.Z designates the version being installed.
 X.Y.Z is the release.
@@ -68,6 +69,17 @@ Prior to making any updates/changes, always make a backup.
 ## Manual Installation
 
 See, [manual installation](https://github.com/bellrichm/weewx-jas/wiki/Manual-installation).
+
+## Updating/Upgrading
+
+WeeWX-JAS extracts data from the WeeWX database to be visualized in either charts or tables.
+Aggregated data does not have to be extracted every archive period.
+For performance reasons it is extracted on this [schedule](https://github.com/bellrichm/weewx-jas/wiki/Getting-Started#generating-weewx-jas-pages).
+This means a new release WeeWX-JAS might require the extracted data to be in a different format.
+For this reason it is recommended to delete all files that WeeWX-JAS creates prior to upgrading WeeWX-JAS.
+The default location of these files is, $HTML_ROOT/jas.
+
+After deleting the generated files follow the [installation steps](https://github.com/bellrichm/weewx-jas#installation-notes).
 
 ## Customizing
 
