@@ -1,4 +1,4 @@
-# WeeWX-JAS
+# WeeWX-JAS (Just Another Skin)
 
 A WeeWX skin that uses [Apache ECharts](https://echarts.apache.org/en/index.html) to chart the data.
 The following javascript libraries are used in addition to Apache ECharts.
@@ -9,7 +9,7 @@ The following javascript libraries are used in addition to Apache ECharts.
 - [vanilla-datetimerange-picker](https://github.com/alumuko/vanilla-datetimerange-picker)
 - [pahoo-mqtt](https://www.eclipse.org/paho/index.php?page=clients/js/index.php)
 
-## Installation notes
+## Installation Notes
 
 Because there are [multiple methods to install WeeWX](http://weewx.com/docs/usersguide.htm#installation_methods), location of files can vary.
 See [where to find things](http://weewx.com/docs/usersguide.htm#Where_to_find_things)
@@ -76,7 +76,7 @@ Prior to making any updates/changes, always make a backup.
 
 ## Manual Installation
 
-See, [manual installation](https://github.com/bellrichm/weewx-jas/wiki/Manual-installation).
+Why? Just use [wee_extension](https://github.com/bellrichm/weewx-jas#installation). But if you must, [read on](https://github.com/bellrichm/weewx-jas/wiki/Manual-Installation).
 
 ## Updating/Upgrading
 
