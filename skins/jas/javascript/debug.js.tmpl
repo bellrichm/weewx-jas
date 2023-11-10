@@ -3,12 +3,14 @@
 #from weeutil.weeutil import to_bool
 
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
+    #set page_name = 'debug'
     $genJasOptions($filename, $page)
     $genJs($filename, 
-           $page, 
+           $page,
+           $page_name,
            None, 
            None, 
-           $getVar("$Extras.pages.debug.simulate_interval", 'day') + "_")
+           $getVar("$Extras.pages.debug.simulate_interval", 'last24hours') + "_")
 #end if        
 
 function copyLog() {

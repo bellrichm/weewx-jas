@@ -1,0 +1,13 @@
+##    Copyright (c) 2023 Rich Bell <bellrichm@gmail.com>
+##    See the file LICENSE.txt for your rights.
+
+#from weeutil.weeutil import to_bool
+#if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
+    #set $data_binding = $getVar('Extras.pages.' + $page + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
+    #set (year_start,year_end) = $getRange($getVar('$Extras.pages.' + $page + '.start', None), $getVar('$Extras.pages.' + $page + '.end', None), $data_binding)
+    #echo 'function getDataMultiyear(message) {\n'
+    #for $year in range($year_start, $year_end)
+        #echo '    getDatayear' + str($year) + '_(message);\n'
+    #end for
+    #echo '}\n'
+#end if

@@ -3,9 +3,11 @@
 #from weeutil.weeutil import to_bool
 
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
+    #set page_name = 'last24hours'
     $genJasOptions($filename, $page)
     $genJs($filename, 
-           $page, 
+           $page,
+           $page_name,
            None, 
            None, 
            "last24hours_")

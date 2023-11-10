@@ -32,7 +32,7 @@
                     #end for
                 </tbody>
             </table>
-            <div id="updateDate"></div>
+            <div id="updateDateDiv"></div>
         </div>
     </div>
 </div>

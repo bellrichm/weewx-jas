@@ -3,13 +3,15 @@
 
 #from weeutil.weeutil import to_bool
 
+#set $data_binding = $getVar('Extras.pages.' + $page + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
+#set global interval_global = 'year'
+#set global page_definition_name_global = 'archive-year'
+#set global interval_long_name_global = 'year' + $year($data_binding=$data_binding).start.format('%Y') + "_"
+
 #if $getVar("$Extras.pages." + $page, False) and to_bool($getVar("$Extras.pages." + $page + ".enable", True))
-    #set $data_binding = $getVar('Extras.pages.' + $page + '.data_binding', $getVar("$Extras.data_binding", $data_binding))
-    $genData($filename, 
-             $page,
-             'year',
-             'historical',
-             'archive-year',
-             'year' + $year($data_binding=$data_binding).start.format('%Y') + "_"
-            )
+    #include 'generators/data.gen'
 #end if    
+
+#set global interval_global = None
+#set global page_definition_name_global = None
+#set global interval_long_name_global = None

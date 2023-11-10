@@ -174,7 +174,17 @@ Internal:
 - Improved performance of generating charts by caching data across page generation (#107).
 - Removed unused 'suffix' code.
 
-V1.0.1
+V1.1.0
+
+This is a complete rewrite of WeeWX-JAS management and loading of WeeWX data, resulting in these improvements.
+- Refreshing data no longer requires a full page refresh/reload. 
+  This is true for both the refresh button and automated refreshes.
+- An option to add a query string to data requests has been added. 
+  This allows WeeWX-jas to leverage the internet's cache infrastructure.
+  See, https://github.com/bellrichm/weewx-jas/wiki/Pages#query_string_on for additional information.
+- The data generated from WeeWx is now only generated once per aggregate interval.
+- Page html is only generated once, on the first report cycle after WeeWX startup.
+- Data helper javascript functions are only generated once, on the first report cycle after WeeWX startup.
 
 Fixes:
 - 'Current' and 'Min/Max' sections are now optional.
@@ -182,6 +192,7 @@ Fixes:
 - Handle the case where the WeeWX default value for 'unit_system' is missing.
 - Raise an exception during generation if the WeeWX default value for 'lang' is missing.
 - Correct UTC offset used for min/max date time display.
+- Handle non-numeric, like N/A, current observation values.
 
-Enhancements:
+Additional Enhancements:
 - Additional debug logging.

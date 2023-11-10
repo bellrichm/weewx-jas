@@ -1,12 +1,12 @@
 ##    Copyright (c) 2022 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
-<button id="connectButton" class="btn btn-outline-success d-none" type="button" text_label="connect_button_label" onclick="MQTTConnect()"></button>
-<button id="disconnectButton" class="btn btn-outline-success d-none" type="button" text_label="disconnect_button_label" onclick="MQTTDisconnect()"></button>
+<button id="connectButton" class="btn d-none" type="button" text_label="connect_button_label" onclick="MQTTConnect()"></button>
+<button id="disconnectButton" class="btn d-none" type="button" text_label="disconnect_button_label" onclick="MQTTDisconnect()"></button>
 
 <div class="col-sm-10 mb-4">
-  <input TYPE="button" name="copyLog" value="Copy Log" onclick="copyLog()">
-  <input TYPE="button" name="clearLog" value="Clear Log" onclick="clearLog()">
+  <button type="button" class="btn" onclick="copyLog()">Copy Log</button>
+  <button type="button" class="btn" onclick="clearLog()">Clear Log</button>
 </div>
 
 <div class="col-sm-10 mb-4">
