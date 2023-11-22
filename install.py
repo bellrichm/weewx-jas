@@ -12,7 +12,7 @@ except ImportError:
 import configobj
 from weecfg.extension import ExtensionInstaller
 
-VERSION = "1.1.1-rc01"
+VERSION = "1.1.1-rc02"
 
 EXTENSION_CONFIG = """
 [StdReport]
@@ -298,23 +298,29 @@ class JASInstaller(ExtensionInstaller):
                                         'skins/jas/pages/%Y.html.tmpl',
                                         'skins/jas/pages/%Y-%m.html.tmpl'
                                         ]),
-                   ('skins/jas/data', ['skins/jas/data/index.js.tmpl',
-                                       'skins/jas/data/internationalization.js.tmpl',
+                   ('skins/jas/data', [
                                        'skins/jas/data/debug.js.tmpl',
                                        'skins/jas/data/day.js.tmpl',
+                                       'skins/jas/data/index.js.tmpl',
+                                       'skins/jas/data/internationalization.js.tmpl',
                                        'skins/jas/data/last7days.js.tmpl',
                                        'skins/jas/data/last24hours.js.tmpl',
                                        'skins/jas/data/last31days.js.tmpl',
                                        'skins/jas/data/last366days.js.tmpl',
                                        'skins/jas/data/month.js.tmpl',
+                                       'skins/jas/data/month%Y%m.js.tmpl',
+                                       'skins/jas/data/multiyear.js.tmpl',                                       
                                        'skins/jas/data/week.js.tmpl',
                                        'skins/jas/data/year.js.tmpl',
+                                       'skins/jas/data/yeartoyear.js.tmpl',
+                                       'skins/jas/data/year%Y.js.tmpl',                                       
                                        'skins/jas/data/yesterday.js.tmpl',
-                                       'skins/jas/data/year%Y.js.tmpl',
-                                       'skins/jas/data/month%Y%m.js.tmpl'
                                       ]),
-                   ('skins/jas/dataload', ['skins/jas/dataload/debug.html.tmpl',
+                   ('skins/jas/dataload', [
+                                           'skins/jas/dataload/debug.html.tmpl',
+                                           'skins/jas/dataload/dataload.inc',
                                            'skins/jas/dataload/day.html.tmpl',
+                                           'skins/jas/dataload/eventlistener.inc',
                                            'skins/jas/dataload/last7days.html.tmpl',
                                            'skins/jas/dataload/last24hours.html.tmpl',
                                            'skins/jas/dataload/last31days.html.tmpl',
@@ -328,8 +334,10 @@ class JASInstaller(ExtensionInstaller):
                                            'skins/jas/dataload/%Y.html.tmpl',
                                            'skins/jas/dataload/%Y-%m.html.tmpl',                                        
                                           ]),
-                   ('skins/jas/generators', ['skins/jas/generators/pages.gen',
-                                             'skins/jas/generators/body.inc'
+                   ('skins/jas/generators', [
+                                             'skins/jas/generators/body.inc',
+                                             'skins/jas/generators/data.gen',
+                                             'skins/jas/generators/pages.gen',
                                             ]),
                    ('skins/jas/javascript', [
                                              'skins/jas/javascript/about.js.tmpl',
