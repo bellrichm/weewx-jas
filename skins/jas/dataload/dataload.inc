@@ -20,6 +20,7 @@
 <!doctype html>
 <html>
   <head>
+     <meta name="generator" content="jas $version $genTime">
     #echo '    <script src="https://cdn.jsdelivr.net/npm/moment@' + $momentjs_version + '/moment' + $momentjs_minified + '.js"></script>\n'
     #if $page_name_global == 'yeartoyear' or $page_name_global == 'multiyear'
       #set $data_binding = $getVar('Extras.pages.' + $page + '.data_binding', $getVar("$Extras.data_binding", $data_binding))

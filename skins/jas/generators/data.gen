@@ -8,6 +8,8 @@
 #set $skin_data_binding = $getVar('$Extras.data_binding', $data_binding)
 #set $page_data_binding = $getVar('$Extras.pages.' + $page_definition_name_global + '.data_binding', $skin_data_binding)
 
+/* jas $version $genTime */
+
 ## Define the 'aggegate' objects to hold the data
 ## For example: last7days_min = {}, last7days_max = {}
 #for $aggregate_type in $aggregate_types

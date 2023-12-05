@@ -181,6 +181,7 @@ VERSION = "1.1.1-rc02"
 class JAS(SearchList):
     """ Implement tags used by templates in the skin. """
     def __init__(self, generator):
+        self.gen_time = int(time.time())
         SearchList.__init__(self, generator)
         self.skin_dict = generator.skin_dict
 
@@ -190,7 +191,7 @@ class JAS(SearchList):
         logdbg(F"Locale is '{locale.setlocale(locale.LC_ALL)}'")
         logdbg(F"jas version is {VERSION}")
         logdbg(F"First run: {self.generator.first_run}")
-        delta_time = time.time() - weewx.launchtime_ts if weewx.launchtime_ts else None
+        delta_time = self.gen_time - weewx.launchtime_ts if weewx.launchtime_ts else None
         logdbg(F"WeeWX uptime (seconds): {delta_time}")
         #logdbg(self.skin_dict)
 
@@ -199,9 +200,8 @@ class JAS(SearchList):
 
         self.unit = weewx.units.UnitInfoHelper(generator.formatter, generator.converter)
 
-        now = time.time()
-        self.utc_offset = (datetime.datetime.fromtimestamp(now) -
-                           datetime.datetime.utcfromtimestamp(now)).total_seconds()/60
+        self.utc_offset = (datetime.datetime.fromtimestamp(self.gen_time) -
+                           datetime.datetime.utcfromtimestamp(self.gen_time)).total_seconds()/60
 
         self.wind_observations = ['windCompassAverage', 'windCompassMaximum',
                                   'windCompassRange0', 'windCompassRange1', 'windCompassRange2',
@@ -255,6 +255,7 @@ class JAS(SearchList):
                                  'data_binding': self.data_binding,
                                  'genJs': self._gen_js,
                                  'genJasOptions': self._gen_jas_options,
+                                 'genTime': self.gen_time,
                                  'getObsUnitLabel': self._get_obs_unit_label,
                                  'getRange': self._get_range,
                                  'getUnitLabel': self._get_unit_label,
@@ -1406,6 +1407,8 @@ window.addEventListener("message",
         start_time = time.time()
         data = ''
 
+        data += '/* jas ' + VERSION + ' ' + str(self.gen_time) + ' */\n'
+
         data += "jasOptions = {};\n"
 
         data += "jasOptions.pageMQTT = " + self.skin_dict['Extras']['pages'][page].get('mqtt', 'true').lower() + ";\n"
@@ -1455,6 +1458,7 @@ class JASGenerator(weewx.reportengine.ReportGenerator):
     """ Generate the charts used by the JAS skin. """
     def __init__(self, config_dict, skin_dict, *args, **kwargs):
         """Initialize an instance of ChartGenerator"""
+        self.gen_time = int(time.time())
         weewx.reportengine.ReportGenerator.__init__(self, config_dict, skin_dict, *args, **kwargs)
 
         self.data_binding = self.skin_dict['data_binding']
@@ -1695,6 +1699,7 @@ class ChartGenerator(JASGenerator):
         page_series_type = self.skin_dict['Extras']['page_definition'][page].get('series_type', 'single')
 
         chart_final = '\n'
+        chart_final += '/* jas ' + VERSION + ' ' + str(self.gen_time) + ' */\n'
         chart_final += 'utc_offset = ' + str(self.utc_offset) + ';\n'
 
         chart_final += 'function simpleTooltipFormatter(args) {\n'
@@ -2698,6 +2703,7 @@ class DataGenerator(JASGenerator):
         page_data_binding = self.skin_dict['Extras']['pages'][page_definition_name].get('data_binding', skin_data_binding)
         data = ''
         data += '// the start\n'
+        data += '/* jas ' + VERSION + ' ' + str(self.gen_time) + ' */\n'
         data += "pageData = {};\n"
         data += 'function ' + interval_long_name + 'dataLoad() {\n'
         data += '  traceStart = Date.now();\n'

@@ -47,7 +47,7 @@ Ideally this would be a routine that takes a parameter, interval. But, with Chee
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1">
 
-      <meta name="generator" content="jas $version">
+      <meta name="generator" content="jas $version $genTime">
       
     #if 'zoomControl' in $getVar('$Extras.pages.' + $page) or 'thisdate' in $getVar('$Extras.pages.' + $page)
       #set date_picker_version = $getVar("$Extras.date_picker_version", "latest")
