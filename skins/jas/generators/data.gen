@@ -32,11 +32,13 @@ var updateDate;
 #echo "function getData" + $interval_long_name_global + "(pageDataString) {\n"
     pageData = JSON.parse(pageDataString);
 
-#if $getVar("$Extras.display_aeris_observation", False)
+#if $getVar("$Extras.display_aeris_observation", False) and 'current' in $getVar("Extras.pages." + $page_definition_name_global)
+    #echo "if (pageData.currentObservations) {\n"
     #echo "    current_observation = '';\n"
-    #echo "    pageData.currentObservations.forEach(function(observationCode) {\n"
-    #echo "        current_observation += getText(observationCode) + ' ';\n"
-    #echo "    });\n"
+    #echo "        pageData.currentObservations.forEach(function(observationCode) {\n"
+    #echo "            current_observation += getText(observationCode) + ' ';\n"
+    #echo "        });\n"
+    #echo "    }\n"
 #end if
 
 #echo "    forecasts = pageData.forecasts"
