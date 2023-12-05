@@ -196,3 +196,9 @@ Fixes:
 
 Additional Enhancements:
 - Additional debug logging.
+
+V1.1.1
+
+Fixes:
+- Missing files when installing (#132).
+- Handle missing currentObservations (#135).
