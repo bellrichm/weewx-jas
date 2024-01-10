@@ -202,3 +202,5 @@ V1.1.1
 Fixes:
 - Missing files when installing (#132).
 - Handle missing currentObservations (#135).
+- Missing latest month/year in dropdown (#136).
+- Improve handling of aeris errors.

@@ -128,9 +128,11 @@ import weecfg
 try:
     # Python 3
     from urllib.request import Request, urlopen, HTTPError # pyright: ignore reportMissingImports=false
+    from urllib.error import URLError
 except ImportError:
     # Python 2
     from urllib2 import Request, urlopen, HTTPError # pyright: ignore reportMissingImports=false
+    from urllib2 import URLError # pyright: ignore reportMissingImports=false
 
 from weewx.cheetahgenerator import SearchList
 from weewx.reportengine import merge_lang
@@ -2064,16 +2066,22 @@ class DataGenerator(JASGenerator):
             response = urlopen(request)
             body = response.read()
             response.close()
+        except URLError as exception:
+            logerr(exception)
+            body = "{}"
         except HTTPError as exception:
             body = exception.read()
             exception.close()
 
         data = json.loads(body)
 
-        if data['success']:
+        if 'success' in data and data['success']:
             return data['response']
         else:
-            logerr(F"An error occurred: {data['error']['description']}")
+            if 'error' in data:
+                logerr(F"An error occurred: {data['error']['description']}")
+            else:
+                logerr("Unknown error")
             return {}
 
     def _get_forecasts(self):
