@@ -2066,12 +2066,12 @@ class DataGenerator(JASGenerator):
             response = urlopen(request)
             body = response.read()
             response.close()
-        except URLError as exception:
-            logerr(exception)
-            body = "{}"
         except HTTPError as exception:
             body = exception.read()
             exception.close()
+        except URLError as exception:
+            logerr(exception)
+            body = "{}"
 
         data = json.loads(body)
 
