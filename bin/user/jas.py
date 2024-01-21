@@ -178,7 +178,7 @@ except ImportError:
         logmsg(syslog.LOG_ERR, msg)
 
 
-VERSION = "1.1.1-rc02"
+VERSION = "1.1.1-rc03"
 
 class JAS(SearchList):
     """ Implement tags used by templates in the skin. """
@@ -2597,7 +2597,9 @@ class DataGenerator(JASGenerator):
     def _check_forecast(self):
         pages = self.skin_dict.get('Extras', {}).get('pages', {})
         for page in pages:
-            if self.skin_dict['Extras']['pages'][page].get('enable', True) and 'forecast' in self.skin_dict['Extras']['pages'][page].sections:
+            if to_bool(self.skin_dict['Extras']['pages'][page].get('enable', True)) and \
+                'forecast' in self.skin_dict['Extras']['pages'][page].sections and \
+                to_bool(self.skin_dict['Extras']['pages'][page]['forecast'].get('enable', True)):
                 return True
 
         return False

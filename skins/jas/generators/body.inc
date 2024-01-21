@@ -1,7 +1,7 @@
 ##    Copyright (c) 2023 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
-#from weeutil.weeutil import to_list
+#from weeutil.weeutil import to_bool, to_list
 
 #set global current_modal_global = False
 #if $getVar('$Extras.current', False)
@@ -24,6 +24,9 @@
       #set include_name = $getVar('Extras.pages.' + $page + '.' + $section + '.filename', None)
       ## ToDo: cleanup to not use continue
       #if not isinstance($Extras.pages[$page][$section],dict)
+        #continue
+      #end if
+      #if not to_bool($getVar('Extras.pages.' + $page + '.' + $section + '.enable', True))
         #continue
       #end if
       #set layout = $getVar('Extras.pages.' + $page + '.' + $section + '.layout', 'grid')
