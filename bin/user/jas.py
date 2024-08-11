@@ -1496,6 +1496,28 @@ class JASGenerator(weewx.reportengine.ReportGenerator):
 
         return True
 
+    # ToDo: duplicate code
+    def _get_range(self, start, end, data_binding):
+        dbm = self.db_binder.get_manager(data_binding=data_binding)
+        first_year = int(datetime.datetime.fromtimestamp(dbm.firstGoodStamp()).strftime('%Y'))
+        last_year = int(datetime.datetime.fromtimestamp(dbm.lastGoodStamp()).strftime('%Y'))
+
+        if start is None:
+            start_year = first_year
+        elif start[:1] == "+":
+            start_year = first_year + int(start[1:])
+        elif start[:1] == "-":
+            start_year = last_year - int(start[1:])
+        else:
+            start_year = int(start)
+
+        if end is None:
+            end_year = last_year + 1
+        else:
+            end_year = int(end) + 1
+
+        return (start_year, end_year)
+
 class ChartGenerator(JASGenerator):
     """ Generate the charts used by the JAS skin. """
     def __init__(self, config_dict, skin_dict, *args, **kwargs):
@@ -1963,27 +1985,6 @@ class ChartGenerator(JASGenerator):
 
         wind_range_legend += F"'>{high_range} {wind_speed_unit_label}']"
         return wind_range_legend
-
-    def _get_range(self, start, end, data_binding):
-        dbm = self.db_binder.get_manager(data_binding=data_binding)
-        first_year = int(datetime.datetime.fromtimestamp(dbm.firstGoodStamp()).strftime('%Y'))
-        last_year = int(datetime.datetime.fromtimestamp(dbm.lastGoodStamp()).strftime('%Y'))
-
-        if start is None:
-            start_year = first_year
-        elif start[:1] == "+":
-            start_year = first_year + int(start[1:])
-        elif start[:1] == "-":
-            start_year = last_year - int(start[1:])
-        else:
-            start_year = int(start)
-
-        if end is None:
-            end_year = last_year + 1
-        else:
-            end_year = int(end) + 1
-
-        return (start_year, end_year)
 
 class DataGenerator(JASGenerator):
     """ Generate the data used by the JAS skin. """
@@ -2652,8 +2653,7 @@ class DataGenerator(JASGenerator):
 
         for page_name in self.skin_dict['Extras']['pages'].sections:
             if self.skin_dict['Extras']['pages'].get('enable', True) and \
-                page_name in self.skin_dict['Extras']['page_definition'] and \
-                self.skin_dict['Extras']['page_definition'][page_name].get('series_type', 'single') == 'single':
+                page_name in self.skin_dict['Extras']['page_definition']:
 
                 generate_interval = self.skin_dict['Extras']['page_definition'][page_name].get('generate_interval', None)
                 if page_name in self.generator_dict:
@@ -2666,27 +2666,56 @@ class DataGenerator(JASGenerator):
                     start_tt = time.localtime(timespan.start)
                     #stop_tt = time.localtime(timespan.stop)
                     if page_name == 'archive-year':
-                        filename = os.path.join(destination_dir, "%4d.js") % start_tt[0]
+                        data_load_file_name = f"{start_tt[0]:4d}.js"
+                        filename = os.path.join(destination_dir, data_load_file_name)
+                        dataload_file = os.path.join(destination_dir, "%4d.html") % start_tt[0]
                         period_type = 'historical'
                         time_period = 'year'
                         interval_long_name = f"year{start_tt[0]:4d}_"
                     elif page_name == 'archive-month':
-                        filename = os.path.join(destination_dir, "%4d-%02d.js") % (start_tt[0], start_tt[1])
+                        data_load_file_name = f"{start_tt[0]:4d}{start_tt[1]:02d}.js"
+                        filename = os.path.join(destination_dir, data_load_file_name)
+                        dataload_file = os.path.join(destination_dir, "%4d-%02d.html") % (start_tt[0], start_tt[1])
                         period_type = 'historical'
                         time_period = 'month'
                         interval_long_name = f"month{start_tt[0]:4d}{start_tt[1]:02d}_"
                     elif page_name == 'debug':
-                        filename = os.path.join(destination_dir, page_name + '.js')
+                        data_load_file_name = f'{page_name}.js'
+                        filename = os.path.join(destination_dir, data_load_file_name)
+                        dataload_file = os.path.join(destination_dir, page_name + '.html')
                         period_type = 'active'
                         time_period = self.skin_dict['Extras']['pages']['debug'].get('simulate_page', 'last24hours')
                         interval_long_name = self.skin_dict['Extras']['pages']['debug'].get('simulate_interval', 'last24hours') + '_'
                     else:
-                        filename = os.path.join(destination_dir, page_name + '.js')
+                        data_load_file_name = f'{page_name}.js'
+                        filename = os.path.join(destination_dir, data_load_file_name)
+                        dataload_file = os.path.join(destination_dir, page_name + '.html')
                         period_type = 'active'
                         time_period = page_name
                         interval_long_name = page_name + '_'
 
+                    #ToDO: research this
                     if self._skip_generation(self.skin_dict.get('DataGenerator'), timespan, generate_interval, period_type, filename, stop_ts):
+                        continue
+
+                    data = self._gen_it(dataload_file, page_name, interval_long_name, data_load_file_name)
+                    byte_string = data.encode('utf8')
+
+                    try:
+                        # Write to a temporary file first
+                        tmpname = dataload_file + '.tmp'
+                        # Open it in binary mode. We are writing a byte-string, not a string
+                        with open(tmpname, mode='wb') as temp_file:
+                            temp_file.write(byte_string)
+                        # Now move the temporary file into place
+                        os.rename(tmpname, dataload_file)
+                    finally:
+                        try:
+                            os.unlink(tmpname)
+                        except OSError:
+                            pass
+
+                    if self.skin_dict['Extras']['page_definition'][page_name].get('series_type', 'single') != 'single':
                         continue
 
                     data = self._gen_data_load(filename, time_period, period_type, page_name, interval_long_name)
@@ -2705,6 +2734,72 @@ class DataGenerator(JASGenerator):
                             os.unlink(tmpname)
                         except OSError:
                             pass
+
+    def _gen_it(self, filename, page_definition_name, interval_long_name, data_load_file_name):
+        start_time = time.time()
+        skin_data_binding = self.skin_dict['Extras'].get('data_binding', self.data_binding)
+        series_type = self.skin_dict['Extras']['page_definition'][page_definition_name].get('series_type', 'single')
+
+        momentjs_version = self.skin_dict['Extras'].get('momentjs_version', 'latest')
+        momentjs_minified = ''
+        if self.skin_dict['Extras'].get('momentjs_minified', True):
+            momentjs_minified = '.min'
+
+        query_string = ''
+        if 'data' in to_list(self.skin_dict['Extras']['pages'][page_definition_name].get('query_string_on',
+                                                                                         self.skin_dict['Extras']['pages'].get('query_string_on', []))):
+            query_string = f"?ts={str(self._get_current('dateTime', data_binding=skin_data_binding, unit_name='default').raw )}"
+
+        data = ''
+
+        data += '<!doctype html>\n'
+        data += '<html>\n'
+        data += '  <head>\n'
+        data += f'    <meta name="generator" content="jas {VERSION} {self.gen_time}">\n'
+        data += f'    <script src="https://cdn.jsdelivr.net/npm/moment@{momentjs_version}/moment{momentjs_minified}.js"></script>\n'
+
+        if page_definition_name in ['yeartoyear', 'multiyear']:
+            data_binding = self.skin_dict['Extras']['pages'][page_definition_name].get('data_binding',
+                                                                        self.skin_dict['Extras'].get('data_binding', self.data_binding))
+            (year_start, year_end) = self._get_range(self.skin_dict['Extras']['pages'][page_definition_name].get('start', None),
+                                                     self.skin_dict['Extras']['pages'][page_definition_name].get('end', None),
+                                                     data_binding)
+            for year in range(year_start, year_end):
+                data += f'    <script src="{str(year)}.js{query_string}"></script>\n'
+        else:
+            data += f'    <script src="{data_load_file_name}{query_string}"></script>\n'
+
+        data += '    <script>\n'
+        data += '      window.addEventListener("load", function (event) {\n'
+        data +=  '      console.debug(Date.now().toString() + " iframe start");\n'
+
+        if series_type == 'single':
+            data += f'        {interval_long_name}dataLoad();\n'
+        elif series_type in ['multiple', 'comparison']:
+            data_binding = self.skin_dict['Extras']['pages'][page_definition_name].get('data_binding',
+                                                                        self.skin_dict['Extras'].get('data_binding', self.data_binding))
+            (year_start, year_end) = self._get_range(self.skin_dict['Extras']['pages'][page_definition_name].get('start', None),
+                                                     self.skin_dict['Extras']['pages'][page_definition_name].get('end', None),
+                                                     data_binding)
+            for year in range(year_start, year_end):
+                data += f'        year{str(year)}_dataLoad();\n'
+
+        data += '        message = {};\n'
+        data += '        message.kind = "dataLoaded";\n'
+        data += '        message.message = JSON.stringify(pageData);\n'
+        data += '        window.parent.postMessage(message, "*");\n'
+        data += '        console.debug(Date.now().toString() + " iframe end");\n'
+        data += '      })\n'
+        data += '    </script>\n'
+        data += '  </head>\n'
+        data += '</html>\n'
+
+        elapsed_time = time.time() - start_time
+        log_msg = "Generated " + self.html_root + "/" + filename + " in " + str(elapsed_time)
+        if to_bool(self.skin_dict['Extras'].get('log_times', True)):
+            logdbg(log_msg)
+
+        return data
 
     def _gen_data_load(self, filename, interval, interval_type, page_definition_name, interval_long_name):
         start_time = time.time()
