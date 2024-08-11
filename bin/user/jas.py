@@ -2651,6 +2651,7 @@ class DataGenerator(JASGenerator):
         except OSError:
             pass
 
+        year_month = {}
         for page_name in self.skin_dict['Extras']['pages'].sections:
             if self.skin_dict['Extras']['pages'].get('enable', True) and \
                 page_name in self.skin_dict['Extras']['page_definition']:
@@ -2666,19 +2667,26 @@ class DataGenerator(JASGenerator):
                     start_tt = time.localtime(timespan.start)
                     #stop_tt = time.localtime(timespan.stop)
                     if page_name == 'archive-year':
-                        data_load_file_name = f"{start_tt[0]:4d}.js"
+                        year = f"{start_tt[0]:4d}"
+                        if year not in year_month:
+                            year_month[year] = {}
+                        data_load_file_name = f"{year}.js"
                         filename = os.path.join(destination_dir, data_load_file_name)
-                        dataload_file = os.path.join(destination_dir, "%4d.html") % start_tt[0]
+                        dataload_file = os.path.join(destination_dir, f"{year}.html")
                         period_type = 'historical'
                         time_period = 'year'
-                        interval_long_name = f"year{start_tt[0]:4d}_"
+                        interval_long_name = f"year{year}_"
                     elif page_name == 'archive-month':
-                        data_load_file_name = f"{start_tt[0]:4d}{start_tt[1]:02d}.js"
+                        year = f"{start_tt[0]:4d}"
+                        month = f"{start_tt[1]:02d}"
+                        if month not in year_month[year]:
+                            year_month[year][f"{year}-{month}"] = {}
+                        data_load_file_name = f"{year}{month}.js"
                         filename = os.path.join(destination_dir, data_load_file_name)
-                        dataload_file = os.path.join(destination_dir, "%4d-%02d.html") % (start_tt[0], start_tt[1])
+                        dataload_file = os.path.join(destination_dir, f"{year}-{month}.html")
                         period_type = 'historical'
                         time_period = 'month'
-                        interval_long_name = f"month{start_tt[0]:4d}{start_tt[1]:02d}_"
+                        interval_long_name = f"month{year}{month}_"
                     elif page_name == 'debug':
                         data_load_file_name = f'{page_name}.js'
                         filename = os.path.join(destination_dir, data_load_file_name)
@@ -2734,6 +2742,32 @@ class DataGenerator(JASGenerator):
                             os.unlink(tmpname)
                         except OSError:
                             pass
+
+        if year_month:
+            self._gen_index_data(year_month, os.path.join(destination_dir, 'index.js'))
+
+    def _gen_index_data(self, year_month, filename):
+        data = ''
+        data += 'var yearMonth = {};\n'
+        for year in year_month:
+            data += f'    yearMonth["{year}"] = [];\n'
+            for month in year_month[year]:
+                data += f'    yearMonth["{year}"].push("{month}");\n'
+
+        byte_string = data.encode('utf8')
+        try:
+            # Write to a temporary file first
+            tmpname = filename + '.tmp'
+            # Open it in binary mode. We are writing a byte-string, not a string
+            with open(tmpname, mode='wb') as temp_file:
+                temp_file.write(byte_string)
+            # Now move the temporary file into place
+            os.rename(tmpname, filename)
+        finally:
+            try:
+                os.unlink(tmpname)
+            except OSError:
+                pass
 
     def _gen_it(self, filename, page_definition_name, interval_long_name, data_load_file_name):
         start_time = time.time()

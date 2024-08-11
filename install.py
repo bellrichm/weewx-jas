@@ -301,7 +301,6 @@ class JASInstaller(ExtensionInstaller):
                    ('skins/jas/data', [
                                        'skins/jas/data/debug.js.tmpl',
                                        'skins/jas/data/day.js.tmpl',
-                                       'skins/jas/data/index.js.tmpl',
                                        'skins/jas/data/internationalization.js.tmpl',
                                        'skins/jas/data/last7days.js.tmpl',
                                        'skins/jas/data/last24hours.js.tmpl',
