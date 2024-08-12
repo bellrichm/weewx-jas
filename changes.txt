@@ -199,8 +199,16 @@ Additional Enhancements:
 
 V1.1.1
 
+Enhancements:
+ - The forecast section now has an option to enable/disable.
+ - Aggregations of 'min' and 'max' are now supported in the 'current' section.
+   Useful for things like closest lightning strike (min distance).
+
 Fixes:
 - Missing files when installing (#132).
 - Handle missing currentObservations (#135).
 - Missing latest month/year in dropdown (#136).
 - Improve handling of aeris errors.
+- Memory leaks
+  Moved much of the generation from Cheetah to Python. '
+  This works around the Cheetah cache growing forever when including files that change.
