@@ -12,7 +12,7 @@ except ImportError:
 import configobj
 from weecfg.extension import ExtensionInstaller
 
-VERSION = "1.1.1
+VERSION = "1.2.0-rc01"
 
 EXTENSION_CONFIG = """
 [StdReport]
