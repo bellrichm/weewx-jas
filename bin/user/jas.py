@@ -2921,7 +2921,7 @@ class DataGenerator(JASGenerator):
                 #set observation_value = '"' + str($getattr($almanac, $observation + 'rise')) + '";'
                 observation_value = 'bar'
                 #label = 'foo'
-            elif type_value in ['min', 'max', 'sum']:
+            elif type_value in ['first', 'last', 'min', 'max', 'sum']:
                 observation_value = self._get_aggregate(observation, data_binding, interval_current, type_value, unit_name, False)
             else:
                 observation_value = self._get_current(observation, data_binding, unit_name).format(add_label=False,localize=False)
