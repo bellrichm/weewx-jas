@@ -2678,6 +2678,8 @@ class DataGenerator(JASGenerator):
                         interval_long_name = f"year{year}_"
                     elif page_name == 'archive-month':
                         year = f"{start_tt[0]:4d}"
+                        if year not in year_month:
+                            year_month[year] = {}
                         month = f"{start_tt[1]:02d}"
                         if month not in year_month[year]:
                             year_month[year][f"{year}-{month}"] = {}
