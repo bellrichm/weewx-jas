@@ -1732,7 +1732,7 @@ class ChartGenerator(JASGenerator):
         chart_final += '\n'
         chart_final += '  args.forEach(({ color, seriesName, value }) => {\n'
         chart_final += '    value = value[1] ? Number(value[1]).toLocaleString(lang) : value[1];\n'
-        chart_final += '    tooltip += `<div style="color: ${color};">${seriesName} ${value}</div>`;\n'
+        chart_final += '    if (value != null) {tooltip += `<div style="color: ${color};">${seriesName} ${value}</div>`};\n'
         chart_final += '  });\n'
         chart_final += '  return tooltip;\n'
         chart_final += '}\n'
