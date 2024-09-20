@@ -2544,7 +2544,7 @@ class DataGenerator(JASGenerator):
                         array_name = name_prefix
 
                         if aggregate_interval is not None:
-                            data += "  pageData." + array_name + " = " + self._get_series(observation, data_binding, interval, aggregate_type, aggregate_interval, 'start', 'unix_epoch_ms', unit_name, 2, True) + ";\n"
+                            data += "  pageData." + array_name + " = " + self._get_series(observation, data_binding, interval, aggregate_type, aggregate_interval, 'stop', 'unix_epoch_ms', unit_name, 2, True) + ";\n"
                         else:
                             # wind 'observation' is special see #87
                             if observation == 'wind':
@@ -2556,7 +2556,7 @@ class DataGenerator(JASGenerator):
                             else:
                                 weewx_observation = observation
                             #end if
-                            data += "  pageData." + array_name + " = " + self._get_series(weewx_observation, data_binding, interval, None, None, 'start', 'unix_epoch_ms', unit_name, 2, True) + ";\n"
+                            data += "  pageData." + array_name + " = " + self._get_series(weewx_observation, data_binding, interval, None, None, 'stop', 'unix_epoch_ms', unit_name, 2, True) + ";\n"
 
         data += "\n"
         return data
