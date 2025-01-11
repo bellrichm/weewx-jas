@@ -2831,7 +2831,7 @@ class DataGenerator(JASGenerator):
         data += '</html>\n'
 
         elapsed_time = time.time() - start_time
-        log_msg = "Generated " + self.html_root + "/" + filename + " in " + str(elapsed_time)
+        log_msg = "Generated " + filename + " in " + str(elapsed_time)
         if to_bool(self.skin_dict['Extras'].get('log_times', True)):
             logdbg(log_msg)
 
@@ -2888,7 +2888,7 @@ class DataGenerator(JASGenerator):
         data += "\n"
 
         elapsed_time = time.time() - start_time
-        log_msg = "Generated " + self.html_root + "/" + filename + " in " + str(elapsed_time)
+        log_msg = "Generated " + filename + " in " + str(elapsed_time)
         if to_bool(self.skin_dict['Extras'].get('log_times', True)):
             logdbg(log_msg)
         return data
