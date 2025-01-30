@@ -1242,7 +1242,12 @@ function handleMQTT(message) {
     
     jasLogDebug("test_obj: ", test_obj);
     jasLogDebug("sessionStorage: ", sessionStorage);
-    jasLogDebug("topics: ", Object.fromEntries(topics));
+    // ToDo - there seems to be a timing issue and somtimes topics is not set before this call
+    if (typeof topics === 'undefined') 
+    {
+        return;
+    }    
+    //jasLogDebug("topics: ", Object.fromEntries(topics));
     // ToDo - only exists on pages with "current" section
     //jasLogDebug("current.observations: ", Object.fromEntries(current.observations));
 
