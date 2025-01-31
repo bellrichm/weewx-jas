@@ -1290,7 +1290,11 @@ function getObservation(timeStamp, observations) {
         return array_result[0][1];
     }
 
-    return observations[0][1];
+    if (observations[0]) {
+        return observations[0][1];
+    }
+
+    return null;
 }
 
 // Update the "on this date" observations with observations at timeStamp
@@ -1298,9 +1302,11 @@ function updateThisDate(timeStamp) {
     thisDateObsList.forEach(function(thisDateObs) {
         thisDateObs.forEach(function(thisDateObsDetail) {
             obs = getObservation(timeStamp, thisDateObsDetail.dataArray);
-            if (thisDateObsDetail.maxDecimals) {
+            if (obs && thisDateObsDetail.maxDecimals) {
                 obs = obs.toFixed(thisDateObsDetail.maxDecimals);
             }
+
+            // ToDo: Note, the value 'null, returns '0'. Not sure if this is desired, of some other value should be displayed
             obsValue = Number(obs).toLocaleString(lang);
             observation=document.getElementById(thisDateObsDetail.id);
             observation.innerHTML = obsValue + thisDateObsDetail.label;                    
