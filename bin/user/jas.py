@@ -2048,11 +2048,16 @@ class DataGenerator(JASGenerator):
         aqi_filename = 'aqi.json'
         aqi_endpoint = 'https://api.aerisapi.com/airquality/'
 
+        alert_filename = 'alert.json'
+        alert_endpoint = 'https://api.aerisapi.com/alerts/'
+
         self.forecast_filename = os.path.join(self.html_root, 'data', forecast_filename)
 
         self.current_filename = os.path.join(self.html_root, 'data', current_filename)
 
         self.aqi_filename = os.path.join(self.html_root, 'data', aqi_filename)
+
+        self.alert_filename = os.path.join(self.html_root, 'data', alert_filename)
 
         self.raw_forecast_data_file = os.path.join(
             self.html_root, 'data', 'raw.forecast.json')
@@ -2069,7 +2074,14 @@ class DataGenerator(JASGenerator):
             self.aqi_url = F"{aqi_endpoint}closest?p={latitude},{longitude}"
             self.aqi_url += F"&format=json&limit=1&client_id={client_id}&client_secret={client_secret}"
 
+            self.alert_url = F"{alert_endpoint}{latitude},{longitude}"
+            self.alert_url += F"?format=json&client_id={client_id}&client_secret={client_secret}"
+
         self.observations, self.aggregate_types = self._get_observations_information()
+
+        self.data_alert = None
+        if to_bool(self.skin_dict['Extras'].get('display_aeris_alert', False)):
+            self.data_lert = self._get_alert_data()
 
         self.data_aqi = None
         if to_bool(self.skin_dict['Extras'].get('display_aeris_aqi', False)):
@@ -2583,6 +2595,29 @@ class DataGenerator(JASGenerator):
 
         data += "\n"
         return data
+
+    def _get_alert_data(self):
+        now = time.time()
+        current_hour = int(now - now % 3600)
+        if not os.path.isfile(self.alert_filename):
+            alert_data = self._retrieve_alert(current_hour)
+        else:
+            with open(self.alert_filename, "r", encoding="utf-8") as alert_fp:
+                alert_data = json.load(alert_fp)
+
+        return alert_data
+
+    def _retrieve_alert(self, current_hour):
+        data = self._call_api(self.alert_url)
+
+        alert_data = {}
+        alert_data['generated'] = current_hour
+        alert_data['alert'] = data
+
+        with open(self.alert_filename, "w", encoding="utf-8") as alert_fp:
+            json.dump(alert_data, alert_fp, indent=2)
+
+        return alert_data
 
     def _get_aqi_data(self):
         now = time.time()
