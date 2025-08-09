@@ -2045,9 +2045,14 @@ class DataGenerator(JASGenerator):
         current_filename = 'current.json'
         current_endpoint = 'https://api.aerisapi.com/observations/'
 
+        aqi_filename = 'aqi.json'
+        aqi_endpoint = 'https://api.aerisapi.com/airquality/'
+
         self.forecast_filename = os.path.join(self.html_root, 'data', forecast_filename)
 
         self.current_filename = os.path.join(self.html_root, 'data', current_filename)
+
+        self.aqi_filename = os.path.join(self.html_root, 'data', aqi_filename)
 
         self.raw_forecast_data_file = os.path.join(
             self.html_root, 'data', 'raw.forecast.json')
@@ -2061,7 +2066,14 @@ class DataGenerator(JASGenerator):
             self.current_url = F"{current_endpoint}{latitude},{longitude}?"
             self.current_url += F"&format=json&filter=allstations&limit=1&client_id={client_id}&client_secret={client_secret}"
 
+            self.aqi_url = F"{aqi_endpoint}closest?p={latitude},{longitude}"
+            self.aqi_url += F"&format=json&limit=1&client_id={client_id}&client_secret={client_secret}"
+
         self.observations, self.aggregate_types = self._get_observations_information()
+
+        self.data_aqi = None
+        if to_bool(self.skin_dict['Extras'].get('display_aeris_aqi', False)):
+            self.data_aqi = self._get_aqi_data()
 
         self.data_current = None
         if to_bool(self.skin_dict['Extras'].get('display_aeris_observation', False)):
@@ -2571,6 +2583,29 @@ class DataGenerator(JASGenerator):
 
         data += "\n"
         return data
+
+    def _get_aqi_data(self):
+        now = time.time()
+        current_hour = int(now - now % 3600)
+        if not os.path.isfile(self.aqi_filename):
+            aqi_data = self._retrieve_aqi(current_hour)
+        else:
+            with open(self.aqi_filename, "r", encoding="utf-8") as aqi_fp:
+                aqi_data = json.load(aqi_fp)
+
+        return aqi_data
+
+    def _retrieve_aqi(self, current_hour):
+        data = self._call_api(self.aqi_url)
+
+        aqi_data = {}
+        aqi_data['generated'] = current_hour
+        aqi_data['aqi'] = data
+
+        with open(self.aqi_filename, "w", encoding="utf-8") as aqi_fp:
+            json.dump(aqi_data, aqi_fp, indent=2)
+
+        return aqi_data
 
     def _get_current_obs(self):
         now = time.time()
