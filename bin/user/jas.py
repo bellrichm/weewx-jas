@@ -2071,8 +2071,11 @@ class DataGenerator(JASGenerator):
             self.current_url = F"{current_endpoint}{latitude},{longitude}?"
             self.current_url += F"&format=json&filter=allstations&limit=1&client_id={client_id}&client_secret={client_secret}"
 
+            # Even though 'closest' still uses xWeather's own algorithm and is 'older', it seems more accurate
             self.aqi_url = F"{aqi_endpoint}closest?p={latitude},{longitude}"
             self.aqi_url += F"&format=json&limit=1&client_id={client_id}&client_secret={client_secret}"
+            #self.aqi_url = F"{aqi_endpoint}{latitude},{longitude}"
+            #self.aqi_url += F"?format=json&limit=1&client_id={client_id}&client_secret={client_secret}"
 
             self.alert_url = F"{alert_endpoint}{latitude},{longitude}"
             self.alert_url += F"?format=json&client_id={client_id}&client_secret={client_secret}"
@@ -2081,7 +2084,7 @@ class DataGenerator(JASGenerator):
 
         self.data_alert = None
         if to_bool(self.skin_dict['Extras'].get('display_aeris_alert', False)):
-            self.data_lert = self._get_alert_data()
+            self.data_alert = self._get_alert_data()
 
         self.data_aqi = None
         if to_bool(self.skin_dict['Extras'].get('display_aeris_aqi', False)):
@@ -2605,6 +2608,9 @@ class DataGenerator(JASGenerator):
             with open(self.alert_filename, "r", encoding="utf-8") as alert_fp:
                 alert_data = json.load(alert_fp)
 
+            if current_hour > alert_data['generated']:
+                alert_data = self._retrieve_alert(current_hour)
+
         return alert_data
 
     def _retrieve_alert(self, current_hour):
@@ -2627,6 +2633,10 @@ class DataGenerator(JASGenerator):
         else:
             with open(self.aqi_filename, "r", encoding="utf-8") as aqi_fp:
                 aqi_data = json.load(aqi_fp)
+
+            # ToDo: Improve to check timestamp returned from API to determine if 'stale'?
+            if current_hour > aqi_data['generated']:
+                aqi_data = self._retrieve_aqi(current_hour)
 
         return aqi_data
 
