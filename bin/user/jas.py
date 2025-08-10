@@ -730,6 +730,10 @@ class JAS(SearchList):
         data +='        document.getElementById("currentObservation").innerHTML = current_observation;\n'
         data += '    }\n'
         data += '\n'
+        data += '    if (jasOptions.displayAerisAQI) {\n'
+        data +='        document.getElementById("currentAQI").innerHTML = current_aqi;\n'
+        data += '    }\n'
+        data += '\n'        
         data += '    // ToDo: cleanup, perhaps put observation data into an array and store that\n'
         data += '    // ToDo: do a bit more in cheetah?\n'
         data += '    observations = [];\n'
@@ -907,6 +911,9 @@ class JAS(SearchList):
 
         data += '        if (jasOptions.displayAerisObservation) {\n'
         data +='           document.getElementById("currentObservationModal").innerHTML = current_observation;\n'
+        data += '        }\n'
+        data += '        if (jasOptions.displayAerisAQI) {\n'
+        data +='           document.getElementById("currentAQIModal").innerHTML = current_aqi;\n'
         data += '        }\n'
         data +='         // Process each observation in the "current" section.\n'
         data +='         observations = [];\n'
@@ -1426,6 +1433,7 @@ window.addEventListener("message",
 
         data += "jasOptions.pageMQTT = " + self.skin_dict['Extras']['pages'][page].get('mqtt', 'true').lower() + ";\n"
         data += "jasOptions.displayAerisObservation = -" + self.skin_dict['Extras'].get('display_aeris_observation', 'false').lower() + ";\n"
+        data += "jasOptions.displayAerisAQI = -" + self.skin_dict['Extras'].get('display_aeris_aqi', 'false').lower() + ";\n"
         data += "jasOptions.refresh = " + self.skin_dict['Extras']['pages'][page].get('reload', 'false').lower() + ";\n"
         data += "jasOptions.zoomcontrol = " + self.skin_dict['Extras']['pages'][page].get('zoomControl', 'false').lower() + ";\n"
 
@@ -2638,7 +2646,14 @@ class DataGenerator(JASGenerator):
             if current_hour > aqi_data['generated']:
                 aqi_data = self._retrieve_aqi(current_hour)
 
-        return aqi_data
+        aqi_info = {}
+        aqi_info['value'] = aqi_data['aqi'][0]['periods'][0]['aqi']
+        aqi_info['timestamp'] = aqi_data['aqi'][0]['periods'][0]['timestamp']
+        aqi_info['category'] = aqi_data['aqi'][0]['periods'][0]['category']
+        aqi_info['color'] = aqi_data['aqi'][0]['periods'][0]['color']
+        aqi_info['method'] = aqi_data['aqi'][0]['periods'][0]['method']
+        aqi_info['dominant'] = aqi_data['aqi'][0]['periods'][0]['dominant']
+        return aqi_info
 
     def _retrieve_aqi(self, current_hour):
         data = self._call_api(self.aqi_url)
@@ -2939,9 +2954,18 @@ class DataGenerator(JASGenerator):
         data += "pageData = {};\n"
         data += 'function ' + interval_long_name + 'dataLoad() {\n'
         data += '  traceStart = Date.now();\n'
-        data += '        console.debug(Date.now().toString() + " dataLoad start");\n'
+        data += '  console.debug(Date.now().toString() + " dataLoad start");\n'
         if self.data_current:
             data += '  pageData.currentObservations = ["' + '", "'.join(self.data_current['observation']) + '"];\n'
+
+        data += '  pageData.aqi = {};\n'
+        if self.data_aqi:
+            data += '  pageData.aqi.value = ' + str(self.data_aqi["value"]) + ';\n'
+            data += '  pageData.aqi.timestamp = ' + str(self.data_aqi["timestamp"]) + ';\n'
+            data += '  pageData.aqi.category = "' + self.data_aqi["category"] + '";\n'
+            data += '  pageData.aqi.color = "' + self.data_aqi["color"] + '";\n'
+            data += '  pageData.aqi.method = "' + self.data_aqi["method"] + '";\n'
+            data += '  pageData.aqi.dominant = "' + self.data_aqi["dominant"] + '";\n'
 
         data += '  pageData.forecasts = [];\n'
         data += '\n'

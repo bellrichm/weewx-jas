@@ -15,8 +15,12 @@
                 <h5 class="text-center w-100" id="currentModalTitle"></h5>
                 #end if
                 #if $getVar("$Extras.display_aeris_observation", False)
-                <p id='currentObservationModal' class="text-center">
-                </p>
+                <div id='currentObservationModal' class="text-center">
+                </div>
+                #end if
+                #if $getVar("$Extras.display_aeris_aqi", False)
+                <div id='currentAQIModal' class="text-center">
+                </div>
                 #end if
                 #set i = 0
                 <table class="table">

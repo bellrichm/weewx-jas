@@ -20,6 +20,7 @@ minMaxObs = [];
 thisDateObsList = [];
 var current = {};
 var current_observation = null;
+var current_aqi = null;
 var forecasts = [];
 
 #echo "var " + $interval_long_name_global + "startDate;\n"
@@ -38,6 +39,12 @@ var updateDate;
     #echo "        pageData.currentObservations.forEach(function(observationCode) {\n"
     #echo "            current_observation += getText(observationCode) + ' ';\n"
     #echo "        });\n"
+    #echo "    }\n"
+#end if
+
+#if $getVar("$Extras.display_aeris_aqi", False) and 'current' in $getVar("Extras.pages." + $page_definition_name_global)
+    #echo "if (pageData.aqi) {\n"
+    #echo "    current_aqi = pageData.aqi.value + ' (' + getText(pageData.aqi.category) + ')';\n" ## ToDo: handle translation better?
     #echo "    }\n"
 #end if
 
