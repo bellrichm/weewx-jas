@@ -2619,7 +2619,11 @@ class DataGenerator(JASGenerator):
             if current_hour > alert_data['generated']:
                 alert_data = self._retrieve_alert(current_hour)
 
-        return alert_data
+        alert_info = []
+        for alert in alert_data['alert']:
+            alert_info.append(alert['details'])
+
+        return alert_info
 
     def _retrieve_alert(self, current_hour):
         data = self._call_api(self.alert_url)
