@@ -2971,6 +2971,23 @@ class DataGenerator(JASGenerator):
             data += '  pageData.aqi.method = "' + self.data_aqi["method"] + '";\n'
             data += '  pageData.aqi.dominant = "' + self.data_aqi["dominant"] + '";\n'
 
+        data += '\n'
+        data += '  pageData.alerts = [];\n'
+        if self.data_alert:
+            for alert in self.data_alert:
+                data += '  alert = {};\n'
+                data += '  alert.type = "' + alert["type"] + '";\n'
+                data += '  alert.name = "' + alert["name"] + '";\n'
+                data += '  alert.loc = "' + alert["loc"] + '";\n'
+                data += '  alert.emergency = ' + str(alert["emergency"]).lower() + ';\n'
+                data += '  alert.priority = ' + str(alert["priority"]) + ';\n'
+                data += '  alert.color = "' + alert["color"] + '";\n'
+                data += '  alert.cat = "' + alert["cat"] + '";\n'
+                data += '  alert.body = "' + alert["body"].replace("\n", "<br>") + '";\n'
+                data += '  alert.bodyFull = "' + alert["bodyFull"].replace("\n", "<br>") + '";\n'
+                data += '  pageData.alerts.push(alert);\n'
+                data += '\n'
+
         data += '  pageData.forecasts = [];\n'
         data += '\n'
         if self.data_forecast:
