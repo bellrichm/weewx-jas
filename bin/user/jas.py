@@ -733,7 +733,7 @@ class JAS(SearchList):
         data += '    if (jasOptions.displayAerisAQI) {\n'
         data +='        document.getElementById("currentAQI").innerHTML = current_aqi;\n'
         data += '    }\n'
-        data += '\n'        
+        data += '\n'
         data += '    // ToDo: cleanup, perhaps put observation data into an array and store that\n'
         data += '    // ToDo: do a bit more in cheetah?\n'
         data += '    observations = [];\n'
