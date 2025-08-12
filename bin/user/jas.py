@@ -2984,7 +2984,7 @@ class DataGenerator(JASGenerator):
         if self.data_alert:
             for alert in self.data_alert:
                 data += '  alert = {};\n'
-                data += '  alert.type = "' + alert["type"] + '";\n'
+                data += '  alert.type = "alert_type_' + alert["type"].replace(".", "_") + '";\n'
                 data += '  alert.name = "' + alert["name"] + '";\n'
                 data += '  alert.loc = "' + alert["loc"] + '";\n'
                 data += '  alert.emergency = ' + str(alert["emergency"]).lower() + ';\n'
