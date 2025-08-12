@@ -734,6 +734,10 @@ class JAS(SearchList):
         data +='        document.getElementById("currentAQI").innerHTML = current_aqi;\n'
         data += '    }\n'
         data += '\n'
+        data += '    if (jasOptions.displayAerisAlert) {\n'
+        data +='        document.getElementById("currentAlert").innerHTML = current_alert;\n'
+        data += '    }\n'
+        data += '\n'
         data += '    // ToDo: cleanup, perhaps put observation data into an array and store that\n'
         data += '    // ToDo: do a bit more in cheetah?\n'
         data += '    observations = [];\n'
@@ -914,6 +918,9 @@ class JAS(SearchList):
         data += '        }\n'
         data += '        if (jasOptions.displayAerisAQI) {\n'
         data +='           document.getElementById("currentAQIModal").innerHTML = current_aqi;\n'
+        data += '        }\n'
+        data += '        if (jasOptions.displayAerisAlert) {\n'
+        data +='           document.getElementById("currentAlertModal").innerHTML = current_alert;\n'
         data += '        }\n'
         data +='         // Process each observation in the "current" section.\n'
         data +='         observations = [];\n'
@@ -1434,6 +1441,7 @@ window.addEventListener("message",
         data += "jasOptions.pageMQTT = " + self.skin_dict['Extras']['pages'][page].get('mqtt', 'true').lower() + ";\n"
         data += "jasOptions.displayAerisObservation = -" + self.skin_dict['Extras'].get('display_aeris_observation', 'false').lower() + ";\n"
         data += "jasOptions.displayAerisAQI = -" + self.skin_dict['Extras'].get('display_aeris_aqi', 'false').lower() + ";\n"
+        data += "jasOptions.displayAerisAlert = -" + self.skin_dict['Extras'].get('display_aeris_alert', 'false').lower() + ";\n"
         data += "jasOptions.refresh = " + self.skin_dict['Extras']['pages'][page].get('reload', 'false').lower() + ";\n"
         data += "jasOptions.zoomcontrol = " + self.skin_dict['Extras']['pages'][page].get('zoomControl', 'false').lower() + ";\n"
 

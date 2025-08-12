@@ -22,6 +22,10 @@
                 <div id='currentAQIModal' class="text-center">
                 </div>
                 #end if
+                #if $getVar("$Extras.display_aeris_alert", False)
+                <div id='currentAlertModal' class="text-center">
+                </div>
+                #end if                
                 #set i = 0
                 <table class="table">
                     <tbody>
