@@ -946,19 +946,16 @@ class JAS(SearchList):
         data += '        bootstrap.Modal.getInstance(document.getElementById("currentModal")).dispose();\n'
         data += '      })\n'
 
-        data += '      console.log("a");\n'
         data += '      var alertModal = document.getElementById("alertModal");\n'
         data += '      alertModal.addEventListener("shown.bs.modal", function (event) {\n'
-        data += '           document.getElementById("alertDetailModal").innerHTML = current_alert;\n'
-        data += '          console.log("show");\n'
+        data += '           document.getElementById("alertDetailModal").innerHTML = current_alert_detail;\n'
         data += '      })\n'
-        data += '      console.log("b");\n'
+
         data += '      alertModal.addEventListener("hidden.bs.modal", function (event) {\n'
         data += '          bootstrap.Modal.getInstance(document.getElementById("alertModal")).dispose();\n'
-        data += '          console.log("hide");\n'
         data += '      })\n'
-        data += '      console.log("c");\n'
         data += '    }\n'
+
         data += '    // Todo: create functions for code in the if statements\n'
         data += '    // Tell the parent page the iframe size\n'
         data += '    message = {};\n'

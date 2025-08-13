@@ -52,6 +52,7 @@ var updateDate;
 #if $getVar("$Extras.display_aeris_alert", False) and 'current' in $getVar("Extras.pages." + $page_definition_name_global)
     #echo "if (pageData.alerts) {\n"
     #echo "    current_alert = getText(pageData.alerts[0].type);\n" ## ToDo: finish
+    #echo "    current_alert_detail = getText(pageData.alerts[0].bodyFull);\n" ## ToDo: finish
     #echo "    }\n"
 #end if
 
