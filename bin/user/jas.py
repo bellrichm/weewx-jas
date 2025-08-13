@@ -2636,6 +2636,7 @@ class DataGenerator(JASGenerator):
             with open(self.alert_filename, "r", encoding="utf-8") as alert_fp:
                 alert_data = json.load(alert_fp)
 
+            # Todo: need some way to debug when no alerts are being returned
             if current_hour > alert_data['generated']:
                 alert_data = self._retrieve_alert(current_hour)
 
@@ -2992,8 +2993,8 @@ class DataGenerator(JASGenerator):
             data += '  pageData.aqi.dominant = "' + self.data_aqi["dominant"] + '";\n'
 
         data += '\n'
-        data += '  pageData.alerts = [];\n'
         if self.data_alert:
+            data += '  pageData.alerts = [];\n'
             for alert in self.data_alert:
                 data += '  alert = {};\n'
                 data += '  alert.type = "alert_type_' + alert["type"].replace(".", "_") + '";\n'
@@ -3007,6 +3008,8 @@ class DataGenerator(JASGenerator):
                 data += '  alert.bodyFull = "' + alert["bodyFull"].replace("\n", "<br>") + '";\n'
                 data += '  pageData.alerts.push(alert);\n'
                 data += '\n'
+        else:
+            data += '  pageData.alerts = null;\n'
 
         data += '  pageData.forecasts = [];\n'
         data += '\n'
