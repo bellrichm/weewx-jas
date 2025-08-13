@@ -2633,7 +2633,7 @@ class DataGenerator(JASGenerator):
             with open(self.alert_filename, "r", encoding="utf-8") as alert_fp:
                 alert_data = json.load(alert_fp)
 
-            # Todo: need some way to debug when no alerts are being returned
+            # To debug, just set the generated attribute in the file to a very large value
             if current_hour > alert_data['generated']:
                 alert_data = self._retrieve_alert(current_hour)
 
