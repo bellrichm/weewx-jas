@@ -23,7 +23,7 @@
                 <div class="card-text" id="currentAQI"></div>
             #end if
             #if $getVar("$Extras.display_aeris_alert", False)
-                <div class="card-text" id="currentAlert"></div>
+                <div class="card-text" id="currentAlert" data-bs-toggle="modal" data-bs-target="#alertModal"></div>
             #end if            
             #set i = 0
                 <table class="table">

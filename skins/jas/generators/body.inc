@@ -1,4 +1,4 @@
-##    Copyright (c) 2023 Rich Bell <bellrichm@gmail.com>
+##    Copyright (c) 2023-2025 Rich Bell <bellrichm@gmail.com>
 ##    See the file LICENSE.txt for your rights.
 
 #from weeutil.weeutil import to_bool, to_list
@@ -84,4 +84,8 @@
 
 #if $current_modal_global
     #include 'sections/current_modal.inc'
+#end if
+
+#if $current_modal_global and $getVar("$Extras.display_aeris_alert", False)
+    #include 'sections/alert_modal.inc'
 #end if
