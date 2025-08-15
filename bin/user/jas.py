@@ -946,14 +946,16 @@ class JAS(SearchList):
         data += '        bootstrap.Modal.getInstance(document.getElementById("currentModal")).dispose();\n'
         data += '      })\n'
 
-        data += '      var alertModal = document.getElementById("alertModal");\n'
-        data += '      alertModal.addEventListener("shown.bs.modal", function (event) {\n'
+        data += '      if (jasOptions.displayAerisAlert) {\n'
+        data += '        var alertModal = document.getElementById("alertModal");\n'
+        data += '        alertModal.addEventListener("shown.bs.modal", function (event) {\n'
         data += '           document.getElementById("alertDetailModal").innerHTML = current_alert_detail;\n'
-        data += '      })\n'
+        data += '        })\n'
 
-        data += '      alertModal.addEventListener("hidden.bs.modal", function (event) {\n'
+        data += '        alertModal.addEventListener("hidden.bs.modal", function (event) {\n'
         data += '          bootstrap.Modal.getInstance(document.getElementById("alertModal")).dispose();\n'
-        data += '      })\n'
+        data += '        })\n'
+        data += '      }\n'
         data += '    }\n'
 
         data += '    // Todo: create functions for code in the if statements\n'
