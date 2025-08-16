@@ -3,7 +3,7 @@
 
 #set modal_classes = ''
 #if $current_modal_global
-    #set modal_classes = 'data-bs-toggle="modal" data-bs-target="#currentModal"'
+    #set modal_classes = 'data-bs-toggle="modal" data-bs-target="#currentModal" role="button"'
 #end if
 
 #set grid_cols = $getVar('$Extras.pages.' + $page + '.' + $section_global + '.grid_cols', 
@@ -23,7 +23,7 @@
                 <div class="card-text" id="currentAQI"></div>
             #end if
             #if $getVar("$Extras.display_aeris_alert", False)
-                <div class="card-text" id="currentAlert" data-bs-toggle="modal" data-bs-target="#alertModal"></div>
+                <div class="card-text" id="currentAlert" data-bs-toggle="modal" data-bs-target="#alertModal" role="button"></div>
             #end if            
             #set i = 0
                 <table class="table">
