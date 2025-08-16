@@ -113,7 +113,7 @@
                            #if $getVar("$Extras.pages.archive-month", None) and to_bool($getVar("$Extras.pages.archive-month.enable", True))
                               <li class="nav-item dropdown">
                               <div class="dropdown">
-                                 <a class="nav-link dropdown-toggle" href="#" role="button" id="dropdownYearMonth" data-bs-toggle="dropdown" aria-expanded="false" text_label="yearMonth_dropdown_label">
+                                 <a class="nav-link dropdown-toggle" href="#" role="button" id="dropdownYearMonth" role="button" data-bs-toggle="dropdown" aria-expanded="false" text_label="yearMonth_dropdown_label">
                                  </a>
                                  <ul class="dropdown-menu pre-scrollable" aria-labelledby="dropdownYearMonth" id="dropdownYearMonthMenu">
                                  </ul>
@@ -128,7 +128,7 @@
                              #end if
                              #set processing_secondary = False
                              <li class="nav-item">
-                                #set navItem = '<a id= "pages/' + $page_data + '.html" class="nav-link text-nowrap" onclick="setIframeSrc(\'child-iframe\', \'' + 'pages/' + $page_data + '.html\', ' + $add_query_string + ')" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" text_label="' + $page_data + '_navbarText' + '"></a>'
+                                #set navItem = '<a id= "pages/' + $page_data + '.html" class="nav-link text-nowrap" role="button" onclick="setIframeSrc(\'child-iframe\', \'' + 'pages/' + $page_data + '.html\', ' + $add_query_string + ')" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" text_label="' + $page_data + '_navbarText' + '"></a>'
                                 $navItem
                              </li>
                           #else if $nav_location == 'secondary'
@@ -139,7 +139,7 @@
                                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                              #end if
                              #set processing_secondary = True
-                             #set navItem = '<a id= "pages/' + $page_data + '.html" class="dropdown-item nav-link text-nowrap" onclick="setIframeSrc(\'child-iframe\', \'' + 'pages/' + $page_data + '.html\', ' + $add_query_string + ')" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" text_label="' + $page_data + '_navbarText' + '"></a>'
+                             #set navItem = '<a id= "pages/' + $page_data + '.html" class="dropdown-item nav-link text-nowrap" role="button" onclick="setIframeSrc(\'child-iframe\', \'' + 'pages/' + $page_data + '.html\', ' + $add_query_string + ')" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" text_label="' + $page_data + '_navbarText' + '"></a>'
                              $navItem
                           #end if
                         #end if
@@ -157,7 +157,7 @@
                           <div class="dropdown-menu" aria-labelledby="dropdownLanguage" id="dropdownLanguageMenu">
                            #for $language in $languages
                               #set $texts = $textLabels($language)
-                              #echo '                            <a class="dropdown-item" id="' + $language + '" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" onclick="updateLang(\'' + $language + '\')">' + $texts["Language"] + ' (' + $language +')</a>\n'
+                              #echo '                            <a class="dropdown-item" id="' + $language + '" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" role="button" onclick="updateLang(\'' + $language + '\')">' + $texts["Language"] + ' (' + $language +')</a>\n'
                            #end for
                            </div>
                         </li>

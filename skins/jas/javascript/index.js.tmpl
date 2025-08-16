@@ -308,6 +308,7 @@ function setYear(year) {
       link.onclick = makeonClickHandler(url);
       link.setAttribute("data-bs-toggle", "collapse")
       link.setAttribute("data-bs-target", ".navbar-collapse.show")
+      link.setAttribute("role", "button")
 
       var text = document.createTextNode(year);
       link.appendChild(text);
@@ -331,6 +332,7 @@ function setYear(year) {
 
       link.setAttribute("data-bs-toggle", "collapse")
       link.setAttribute("data-bs-target", ".navbar-collapse.show")
+      link.setAttribute("role", "button")
 
       var currentPage = sessionStorage.getItem('currentPage');
       if (currentPage && currentPage == url) {
