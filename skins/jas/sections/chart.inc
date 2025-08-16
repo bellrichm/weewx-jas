@@ -17,7 +17,7 @@
                               $getVar('$Extras.chart_modal', True))))
                               
     #if $series_type != 'mqtt'
-        #set modal_classes = 'data-bs-toggle="modal" data-bs-target="#chartModal"'
+        #set modal_classes = 'data-bs-toggle="modal" data-bs-target="#chartModal" role="button"'
     #else
         #set logmsg = 'MQTT chart ' + $section_global + ' on page ' + $page + ' cannot be modal.'
         $logerr($logmsg)
