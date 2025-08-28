@@ -2036,6 +2036,9 @@ class DataGenerator(JASGenerator):
         report_dict = self.config_dict.get('StdReport', {})
         self.unit_system = self.skin_dict.get('unit_system', 'us').upper()
 
+        self.time_display = self.skin_dict['Extras'].get('time_display', 'stop').lower()
+        self.aggregate_time_display = self.skin_dict['Extras'].get('aggregate_time_display', 'stop').lower()
+
         now = time.time()
         self.utc_offset = (datetime.datetime.fromtimestamp(now) -
                            datetime.datetime.utcfromtimestamp(now)).total_seconds()/60
@@ -2609,7 +2612,7 @@ class DataGenerator(JASGenerator):
                         array_name = name_prefix
 
                         if aggregate_interval is not None:
-                            data += "  pageData." + array_name + " = " + self._get_series(observation, data_binding, interval, aggregate_type, aggregate_interval, 'stop', 'unix_epoch_ms', unit_name, 2, True) + ";\n"
+                            data += "  pageData." + array_name + " = " + self._get_series(observation, data_binding, interval, aggregate_type, aggregate_interval, self.aggregate_time_display, 'unix_epoch_ms', unit_name, 2, True) + ";\n"
                         else:
                             # wind 'observation' is special see #87
                             if observation == 'wind':
@@ -2621,7 +2624,7 @@ class DataGenerator(JASGenerator):
                             else:
                                 weewx_observation = observation
                             #end if
-                            data += "  pageData." + array_name + " = " + self._get_series(weewx_observation, data_binding, interval, None, None, 'stop', 'unix_epoch_ms', unit_name, 2, True) + ";\n"
+                            data += "  pageData." + array_name + " = " + self._get_series(weewx_observation, data_binding, interval, None, None, self.time_display, 'unix_epoch_ms', unit_name, 2, True) + ";\n"
 
         data += "\n"
         return data
