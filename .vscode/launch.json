@@ -6,7 +6,7 @@
     "configurations": [
             {
             "name": "weectl report",
-            "type": "debugpy",
+            "type": "python",
             "request": "launch",
             "justMyCode": false,
             "program": "~/weewx/src/weectl.py",
