@@ -2,3 +2,4 @@ weewx.conf
 __pycache__/
 skins/jas/lang/de*.conf
 skins/jas/lang/bad-encoding/*
+.coverage
