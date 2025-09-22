@@ -1,5 +1,7 @@
 # WeeWX-JAS (Just Another Skin)
 
+This repository has a new home at, https://github.com/weewx-extensions/jas
+
 A WeeWX skin that uses [Apache ECharts](https://echarts.apache.org/en/index.html) to chart the data.
 The following javascript libraries are used in addition to Apache ECharts.
 
